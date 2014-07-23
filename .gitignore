@@ -18,3 +18,7 @@ build/
 
 # gedit backups
 *~
+
+# IDE
+*.iml
+.idea/
