@@ -1,20 +1,28 @@
 package za.redbridge.simulator.portrayal;
 
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
 
 import sim.display.GUIState;
+import sim.display.Manipulating2D;
 import sim.portrayal.DrawInfo2D;
 import sim.portrayal.Inspector;
 import sim.portrayal.LocationWrapper;
-import sim.portrayal.Portrayal2D;
 import sim.portrayal.SimpleInspector;
+import sim.portrayal.SimplePortrayal2D;
 
 /**
+ * Base class for all our portrayal objects.
+ *
+ * NOTE: Does implement more specific versions of {@link SimplePortrayal2D#hitObject(Object,
+ * DrawInfo2D)} or {@link SimplePortrayal2D#handleMouseEvent(GUIState, Manipulating2D,
+ * LocationWrapper, MouseEvent, DrawInfo2D, int)}.
+ *
  * Created by jamie on 2014/07/23.
  */
-public abstract class ShapePortrayal2D implements Portrayal2D {
+public abstract class ShapePortrayal2D extends SimplePortrayal2D {
 
     protected boolean filled;
     protected Paint paint;

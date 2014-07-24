@@ -5,6 +5,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 /**
+ * Provides a simple oval portrayal of an object.
+ *
  * Created by jamie on 2014/07/23.
  */
 public class OvalPortrayal2D extends ShapePortrayal2D {

@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 /**
+ * Provides a simple portrayal of a rectangular object.
+ *
  * Created by jamie on 2014/07/23.
  */
 public class RectanglePortrayal2D extends ShapePortrayal2D {
