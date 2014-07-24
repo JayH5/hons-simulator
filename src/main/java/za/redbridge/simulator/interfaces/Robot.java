@@ -16,14 +16,12 @@ public interface Robot {
     Double2D move(Double2D controllerOutput);
 
     /**
-     * Dummy implementation that outputs a zero vector. Just for testing.
+     * Dummy implementation that outputs the controller output. Just for testing.
      */
     public static final Robot DUMMY_ROBOT = new Robot() {
-        private final Double2D zero = new Double2D(.0, .0);
-
         @Override
         public Double2D move(Double2D controllerOutput) {
-            return zero;
+            return controllerOutput;
         }
     };
 }

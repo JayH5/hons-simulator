@@ -19,8 +19,7 @@ public class Simulation extends SimState {
 
     // number of robot agents
     private static final int NUM_ROBOTS = 20;
-    private static final double AGENT_WIDTH = 5.0;
-    private static final double AGENT_HEIGHT = 5.0;
+    private static final double AGENT_RADIUS = 2.0;
 
     //number of large objects TODO
     private static final int NUM_LARGE_OBJECTS = 10;
@@ -29,6 +28,8 @@ public class Simulation extends SimState {
     private static final int NUM_SMALL_OBJECTS = 10;
 
     private static final int PLACEMENT_DISTANCE = 10;
+
+    public static final double MAX_OBJECT_RADIUS = 4.0;
 
     public Simulation(long seed) {
         super(seed);
@@ -49,8 +50,8 @@ public class Simulation extends SimState {
                         environment.getHeight() * random.nextDouble());
             } while (!environment.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
 
-            AgentObject agent = new AgentObject(pos, AGENT_WIDTH, AGENT_HEIGHT,
-                    Controller.DUMMY_CONTROLLER, Robot.DUMMY_ROBOT);
+            AgentObject agent = new AgentObject(pos, AGENT_RADIUS, Controller.DUMMY_CONTROLLER,
+                    Robot.DUMMY_ROBOT);
 
             agent.placeInEnvironment(environment);
             agent.scheduleRepeating(schedule);

@@ -1,6 +1,5 @@
 package za.redbridge.simulator.interfaces;
 
-import ec.util.MersenneTwisterFast;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
@@ -19,14 +18,14 @@ public interface Controller {
     Double2D process(Continuous2D environment);
 
     /**
-     * Controller that outputs a zero vector. For testing.
+     * Controller that outputs a one vector. For testing.
      */
     public static final Controller DUMMY_CONTROLLER = new Controller() {
-        private final Double2D zero = new Double2D(0.0, 0.0);
+        private final Double2D one = new Double2D(1.0, 1.0);
 
         @Override
         public Double2D process(Continuous2D environment) {
-            return zero;
+            return one;
         }
     };
 }

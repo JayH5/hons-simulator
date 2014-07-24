@@ -1,12 +1,15 @@
 package za.redbridge.simulator.object;
 
 import java.awt.Color;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
 import sim.field.continuous.Continuous2D;
+import sim.util.Bag;
 import sim.util.Double2D;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.interfaces.Controller;
@@ -17,6 +20,8 @@ import za.redbridge.simulator.portrayal.OvalPortrayal2D;
  * Object that represents the agents in the environment. After creating an instance, call
  * {@link #placeInEnvironment(Continuous2D)} to have the object appear in the environment and call
  * {@link #scheduleRepeating(Schedule)} to have the object be updated each step of the simulation.
+ *
+ * All AgentObjects are round with a fixed radius.
  *
  * Created by jamie on 2014/07/23.
  */
@@ -37,13 +42,21 @@ public class AgentObject {
     };
     private Stoppable stoppable;
 
-    public AgentObject(Double2D initialPosition, double width, double height, Controller controller,
+    private final Ellipse2D.Double collisionEllipse = new Ellipse2D.Double();
+    private final double radius;
+
+    public AgentObject(Double2D initialPosition, double radius, Controller controller,
             Robot robot) {
         position = initialPosition;
-        portrayal = new OvalPortrayal2D(width, height);
+        this.radius = radius;
+        portrayal = new OvalPortrayal2D(radius * 2, radius * 2);
         portrayal.setPaint(Color.BLUE);
         this.controller = controller;
         this.robot = robot;
+    }
+
+    public double getRadius() {
+        return radius;
     }
 
     /**
@@ -110,14 +123,93 @@ public class AgentObject {
                 new Double2D(velocity.x + acceleration.x, velocity.y + acceleration.y);
         Double2D newPosition = new Double2D(position.x + newVelocity.x, position.y + newVelocity.y);
 
-        // Check if agent has actually moved before updating
-        if (position.x != newPosition.x || position.y != newPosition.y) {
-            environment.setObjectLocation(portrayal, position);
+        // Check if we have collided with something
+        if (!isColliding(environment, newPosition)) {
+            // Check if agent has actually moved before updating
+            if (position.x != newPosition.x || position.y != newPosition.y) {
+                environment.setObjectLocation(portrayal, position);
+            }
+
+            velocity = newVelocity;
+            position = newPosition;
+        } else {
+            velocity = new Double2D(); // ZERO
+        }
+    }
+
+    private boolean isColliding(Continuous2D environment, Double2D atPosition) {
+        if (isCollidingWithWall(environment, atPosition)) {
+            return true;
         }
 
-        // TODO: collision detection
-        velocity = newVelocity;
-        position = newPosition;
+        double distance = radius + Simulation.MAX_OBJECT_RADIUS;
+        Bag neighbours = environment.getNeighborsWithinDistance(atPosition, distance);
+        if (neighbours != null && !neighbours.isEmpty()) {
+            for (Object obj : neighbours) {
+                if (obj instanceof ResourceObject &&
+                        isCollidingWith((ResourceObject) obj, atPosition)) {
+                    return true;
+                } else if (obj instanceof AgentObject &&
+                        isCollidingWith((AgentObject) obj, atPosition)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isCollidingWithWall(Continuous2D environment, Double2D atPosition) {
+        double width = environment.getWidth();
+        double height = environment.getHeight();
+
+        return atPosition.x - radius <= 0.0 || atPosition.x + radius >= width
+                || atPosition.y - radius <= 0.0 || atPosition.y + radius >= height;
+    }
+
+    private boolean isCollidingWith(ResourceObject object, Double2D atPosition) {
+        final Ellipse2D.Double boundingEllipse = getBoundingEllipseAtPosition(atPosition);
+        final Rectangle2D.Double boundingRectangle = object.getBoundingRectangle();
+
+        // First check the bounds of the ellipse against the rectangle
+        if (boundingEllipse.getBounds2D().intersects(boundingRectangle)) {
+            // Now do more accurate intersects
+            if (boundingEllipse.intersects(boundingRectangle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Collision detection with another agent is easy - just check distance between agents.
+    private boolean isCollidingWith(AgentObject object, Double2D myPosition) {
+        final Double2D theirPosition = object.getPosition();
+
+        double distX = theirPosition.x - myPosition.x;
+        double distY = theirPosition.y - myPosition.y;
+        double distSquared = distX * distX + distY * distY;
+
+        double minDist = radius + object.radius;
+        return distSquared <= minDist * minDist;
+    }
+
+    public Ellipse2D.Double getBoundingEllipse() {
+        double x = position.x - radius;
+        double y = position.y - radius;
+
+        collisionEllipse.setFrame(x, y, portrayal.getWidth(), portrayal.getHeight());
+
+        return collisionEllipse;
+    }
+
+    private Ellipse2D.Double getBoundingEllipseAtPosition(Double2D position) {
+        double x = position.x - radius;
+        double y = position.y - radius;
+
+        collisionEllipse.setFrame(x, y, portrayal.getWidth(), portrayal.getHeight());
+
+        return collisionEllipse;
     }
 
 }
