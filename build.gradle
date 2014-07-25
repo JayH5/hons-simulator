@@ -2,10 +2,11 @@ apply plugin: 'java'
 
 repositories {
   mavenCentral()
+  mavenLocal()
 }
 
 dependencies {
-  compile project('mason')
+  compile 'cmu:mason:18-SNAPSHOT'
 }
 
 apply plugin:'application'
