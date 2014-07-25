@@ -6,7 +6,7 @@ repositories {
 }
 
 dependencies {
-  compile 'cmu:mason:18-SNAPSHOT'
+  compile 'edu.gmu.mason:mason:18-SNAPSHOT'
 }
 
 apply plugin:'application'
