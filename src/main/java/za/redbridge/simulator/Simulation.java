@@ -1,9 +1,14 @@
 package za.redbridge.simulator;
 
+import java.awt.Color;
+
 import ec.util.MersenneTwisterFast;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
+import sim.util.Double2D;
+import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.object.RobotObject;
 
 /**
  * The main simulation state.
@@ -13,10 +18,12 @@ import sim.field.continuous.Continuous2D;
 public class Simulation extends SimState {
 
     private final Continuous2D environment = new Continuous2D(1.0, 100, 100);
+    private final PhysicsEngine physicsEngine = new PhysicsEngine();
 
     // number of robot agents
     private static final int NUM_ROBOTS = 20;
-    private static final double AGENT_RADIUS = 2.0;
+    private static final double ROBOT_RADIUS = 2.0;
+    private static final double ROBOT_MASS = 1.0;
 
     //number of large objects TODO
     private static final int NUM_LARGE_OBJECTS = 10;
@@ -34,8 +41,6 @@ public class Simulation extends SimState {
 
     private static final int PLACEMENT_DISTANCE = 10;
 
-    public static final double MAX_OBJECT_RADIUS = 4.0;
-
     public Simulation(long seed) {
         super(seed);
     }
@@ -49,7 +54,7 @@ public class Simulation extends SimState {
         final MersenneTwisterFast random = this.random;
 
         // Create the agents
-        /*for (int i = 0; i < NUM_ROBOTS; i++) {
+        for (int i = 0; i < NUM_ROBOTS; i++) {
             // Find a random position within the environment that is away from other objects
             Double2D pos;
             do {
@@ -57,11 +62,10 @@ public class Simulation extends SimState {
                         environment.getHeight() * random.nextDouble());
             } while (!environment.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
 
-            AgentObject agent = new AgentObject(pos, AGENT_RADIUS, Controller.DUMMY_CONTROLLER,
-                    Robot.DUMMY_ROBOT);
-
-
-            agent.scheduleRepeating(schedule);
+            RobotObject robot = new RobotObject(ROBOT_MASS, ROBOT_RADIUS, pos);
+            robot.getPortrayal().setPaint(Color.BLUE);
+            environment.setObjectLocation(robot.getPortrayal(), robot.getPosition());
+            physicsEngine.addObject(robot);
         }
 
         // Create some small objects
@@ -72,12 +76,14 @@ public class Simulation extends SimState {
                         environment.getHeight() * random.nextDouble());
             } while (!environment.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
 
-            ResourceObject agent = new ResourceObject(pos, SMALL_OBJECT_MASS, SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT,
-                    SMALL_OBJECT_VALUE, );
+            ResourceObject resource = new ResourceObject(SMALL_OBJECT_MASS, SMALL_OBJECT_WIDTH,
+                    SMALL_OBJECT_HEIGHT, pos, SMALL_OBJECT_VALUE);
+            resource.getPortrayal().setPaint(Color.RED);
+            environment.setObjectLocation(resource.getPortrayal(), resource.getPosition());
+            physicsEngine.addObject(resource);
+        }
 
-            agent.placeInEnvironment(environment);
-            agent.scheduleRepeating(schedule);
-        }*/
+        schedule.scheduleRepeating(physicsEngine);
     }
 
     /**
@@ -89,6 +95,10 @@ public class Simulation extends SimState {
 
     public Schedule getSchedule() {
         return schedule;
+    }
+
+    public PhysicsEngine getPhysicsEngine() {
+        return physicsEngine;
     }
 
     /* Example */

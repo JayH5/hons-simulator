@@ -11,11 +11,9 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public class ResourceObject extends PhysicalObject<RectanglePortrayal2D> {
+public class ResourceObject extends PhysicalObject {
 
     private final double value;
-
-    private final Rectangle2D.Double collisionRectangle = new Rectangle2D.Double();
 
     public ResourceObject(double mass, double width, double height, Double2D position,
             double value) {
@@ -27,18 +25,10 @@ public class ResourceObject extends PhysicalObject<RectanglePortrayal2D> {
         return value;
     }
 
-    public Rectangle2D.Double getBoundingRectangle() {
-        double x = position.x - portrayal.getWidth() / 2;
-        double y = position.y - portrayal.getHeight() / 2;
-
-        collisionRectangle.setFrame(x, y, portrayal.getWidth(), portrayal.getHeight());
-
-        return collisionRectangle;
-    }
-
     @Override
     protected RectangularShape createCollisionShape() {
-        return new Rectangle2D.Double(position.x, position.y, portrayal.getWidth(),
+        RectanglePortrayal2D portrayal = (RectanglePortrayal2D) getPortrayal();
+        return new Rectangle2D.Double(0.0, 0.0, portrayal.getWidth(),
                 portrayal.getHeight());
     }
 }

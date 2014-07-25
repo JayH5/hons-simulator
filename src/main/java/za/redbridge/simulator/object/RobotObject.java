@@ -5,6 +5,7 @@ import java.awt.geom.RectangularShape;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.portrayal.OvalPortrayal2D;
+import za.redbridge.simulator.portrayal.ShapePortrayal2D;
 
 /**
  * Object that represents the agents in the environment.
@@ -13,7 +14,7 @@ import za.redbridge.simulator.portrayal.OvalPortrayal2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public class RobotObject extends PhysicalObject<OvalPortrayal2D> {
+public class RobotObject extends PhysicalObject {
 
     private final double radius;
 
@@ -28,7 +29,6 @@ public class RobotObject extends PhysicalObject<OvalPortrayal2D> {
 
     @Override
     protected RectangularShape createCollisionShape() {
-        return new Ellipse2D.Double(position.x, position.y, portrayal.getWidth(),
-                portrayal.getHeight());
+        return new Ellipse2D.Double(0.0, 0.0, radius * 2, radius * 2);
     }
 }
