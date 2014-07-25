@@ -10,4 +10,4 @@ dependencies {
 }
 
 apply plugin:'application'
-mainClassName = "za.redbridge.simulator.HelloWorld"
+mainClassName = "za.redbridge.simulator.SimulationGUI"
