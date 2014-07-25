@@ -1,9 +1,8 @@
 package za.redbridge.simulator.object;
 
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
 
-import sim.engine.SimState;
-import sim.engine.Steppable;
 import sim.util.Double2D;
 import za.redbridge.simulator.portrayal.RectanglePortrayal2D;
 
@@ -12,40 +11,20 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public class ResourceObject implements Steppable {
-
-    private final RectanglePortrayal2D portrayal;
+public class ResourceObject extends PhysicalObject<RectanglePortrayal2D> {
 
     private final double value;
-    private final double weight;
 
     private final Rectangle2D.Double collisionRectangle = new Rectangle2D.Double();
 
-    private Double2D position;
-
-    public ResourceObject(Double2D initialPosition, double width, double height, double value,
-            double weight) {
-        position = initialPosition;
-        portrayal = new RectanglePortrayal2D(width, height);
+    public ResourceObject(double mass, double width, double height, Double2D position,
+            double value) {
+        super(mass, new RectanglePortrayal2D(width, height), position);
         this.value = value;
-        this.weight = weight;
     }
 
     public double getValue() {
         return value;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-    public RectanglePortrayal2D getPortrayal() {
-        return portrayal;
-    }
-
-    @Override
-    public void step(SimState state) {
-        // TODO: Do something?
     }
 
     public Rectangle2D.Double getBoundingRectangle() {
@@ -55,5 +34,11 @@ public class ResourceObject implements Steppable {
         collisionRectangle.setFrame(x, y, portrayal.getWidth(), portrayal.getHeight());
 
         return collisionRectangle;
+    }
+
+    @Override
+    protected RectangularShape createCollisionShape() {
+        return new Rectangle2D.Double(position.x, position.y, portrayal.getWidth(),
+                portrayal.getHeight());
     }
 }
