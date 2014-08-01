@@ -1,11 +1,10 @@
 package za.redbridge.simulator.object;
 
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.RectangularShape;
+import java.awt.Paint;
 
+import sim.physics2D.shape.Circle;
+import sim.physics2D.util.Angle;
 import sim.util.Double2D;
-import za.redbridge.simulator.portrayal.OvalPortrayal2D;
-import za.redbridge.simulator.portrayal.ShapePortrayal2D;
 
 /**
  * Object that represents the agents in the environment.
@@ -16,19 +15,12 @@ import za.redbridge.simulator.portrayal.ShapePortrayal2D;
  */
 public class RobotObject extends PhysicalObject {
 
-    private final double radius;
+    public RobotObject(Double2D position, double mass, double radius, Paint paint) {
+        setPose(position, new Angle(0));
+        setShape(new Circle(radius, paint), mass);
 
-    public RobotObject(double mass, double radius, Double2D position) {
-        super(mass, new OvalPortrayal2D(radius * 2, radius * 2), position);
-        this.radius = radius;
+        setCoefficientOfFriction(0);
+        setCoefficientOfRestitution(1);
     }
 
-    public double getRadius() {
-        return radius;
-    }
-
-    @Override
-    protected RectangularShape createCollisionShape() {
-        return new Ellipse2D.Double(0.0, 0.0, radius * 2, radius * 2);
-    }
 }

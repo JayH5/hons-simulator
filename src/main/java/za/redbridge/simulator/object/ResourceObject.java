@@ -1,10 +1,10 @@
 package za.redbridge.simulator.object;
 
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.RectangularShape;
+import java.awt.Paint;
 
+import sim.physics2D.shape.Rectangle;
+import sim.physics2D.util.Angle;
 import sim.util.Double2D;
-import za.redbridge.simulator.portrayal.RectanglePortrayal2D;
 
 /**
  * Object to represent the resources in the environment. Has a value and a weight.
@@ -15,9 +15,10 @@ public class ResourceObject extends PhysicalObject {
 
     private final double value;
 
-    public ResourceObject(double mass, double width, double height, Double2D position,
+    public ResourceObject(Double2D position, double mass, double width, double height, Paint paint,
             double value) {
-        super(mass, new RectanglePortrayal2D(width, height), position);
+        setPose(position, new Angle(0));
+        setShape(new Rectangle(width, height, paint), mass);
         this.value = value;
     }
 
@@ -25,10 +26,4 @@ public class ResourceObject extends PhysicalObject {
         return value;
     }
 
-    @Override
-    protected RectangularShape createCollisionShape() {
-        RectanglePortrayal2D portrayal = (RectanglePortrayal2D) getPortrayal();
-        return new Rectangle2D.Double(0.0, 0.0, portrayal.getWidth(),
-                portrayal.getHeight());
-    }
 }
