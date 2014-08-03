@@ -1,8 +1,8 @@
 package za.redbridge.simulator.interfaces;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.engine.Sensor;
-import za.redbridge.simulator.engine.SensorReading;
+import za.redbridge.simulator.sensor.Sensor;
+import za.redbridge.simulator.sensor.SensorReading;
 
 import java.util.ArrayList;
 import java.util.List;

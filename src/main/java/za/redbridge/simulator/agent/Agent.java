@@ -1,7 +1,7 @@
 package za.redbridge.simulator.agent;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.engine.SensorReading;
+import za.redbridge.simulator.sensor.SensorReading;
 import za.redbridge.simulator.interfaces.Phenotype;
 import za.redbridge.simulator.object.RobotObject;
 
