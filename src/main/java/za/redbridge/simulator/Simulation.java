@@ -1,6 +1,8 @@
 package za.redbridge.simulator;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import sim.engine.Schedule;
 import sim.engine.SimState;
@@ -25,10 +27,6 @@ public class Simulation extends SimState {
     private static final int HEIGHT = 102;
     private static final int WALL_THICKNESS = 1;
 
-    private final Continuous2D environment = new Continuous2D(1.0, WIDTH, HEIGHT);
-    //private final PhysicsEngine physicsEngine = new PhysicsEngine();
-    private final PhysicsEngine2D physicsEngine = new PhysicsEngine2D();
-
     // number of robot agents
     private static final int NUM_ROBOTS = 20;
     private static final double ROBOT_RADIUS = 2.0;
@@ -49,6 +47,11 @@ public class Simulation extends SimState {
     private static final double SMALL_OBJECT_MASS = 5.0;
 
     private static final int PLACEMENT_DISTANCE = 10;
+
+    private final Continuous2D environment = new Continuous2D(1.0, WIDTH, HEIGHT);
+    private final PhysicsEngine2D physicsEngine = new PhysicsEngine2D();
+
+    private final List<RobotObject> robots = new ArrayList<>(NUM_ROBOTS);
 
     public Simulation(long seed) {
         super(seed);
@@ -122,6 +125,7 @@ public class Simulation extends SimState {
             RobotObject robot = new RobotObject(pos, ROBOT_MASS, ROBOT_RADIUS, color);
             environment.setObjectLocation(robot, pos);
             physicsEngine.register(robot);
+            robots.add(robot);
 
             Double2D velocity = new Double2D(random.nextDouble() * 1.5, random.nextDouble() * 1.5);
             robot.setVelocity(velocity);

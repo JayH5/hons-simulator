@@ -1,7 +1,19 @@
 package za.redbridge.simulator.sensor;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
- * Abstract superclass of Sensor Readings of the different sensor types
+ * A sensor reading is a list of values of the output of a single sensor
  */
-public abstract class SensorReading {
+public final class SensorReading {
+    private final List<Double> values;
+
+    public SensorReading(List<Double> values) {
+        this.values = Collections.unmodifiableList(values);
+    }
+
+    public List<Double> getValues() {
+        return values;
+    }
 }
