@@ -13,7 +13,7 @@ import sim.util.Double2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public class RobotObject extends PhysicalObject {
+public class RobotObject extends MobileObject {
 
     public RobotObject(Double2D position, double mass, double radius, Paint paint) {
         setPose(position, new Angle(0));
