@@ -7,6 +7,7 @@ import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.physics2D.PhysicsEngine2D;
 import sim.util.Double2D;
+import za.redbridge.simulator.interfaces.Phenotype;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
@@ -119,7 +120,7 @@ public class Simulation extends SimState {
 
         for (int i = 0; i < NUM_ROBOTS; i++) {
             Double2D pos = findPositionForObject(ROBOT_RADIUS, ROBOT_RADIUS);
-            RobotObject robot = new RobotObject(pos, ROBOT_MASS, ROBOT_RADIUS, color);
+            RobotObject robot = new RobotObject(Phenotype.DUMMY_PHENOTYPE, pos, ROBOT_MASS, ROBOT_RADIUS, color);
             environment.setObjectLocation(robot, pos);
             physicsEngine.register(robot);
 

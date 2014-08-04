@@ -1,31 +1,31 @@
 package za.redbridge.simulator.config;
 
-import sim.util.Double2D;
-import za.redbridge.simulator.agent.Agent;
-import za.redbridge.simulator.interfaces.Phenotype;
-import za.redbridge.simulator.object.RobotObject;
+import sim.util.Int2D;
 
 public class SimConfig {
     protected long seed;
-    protected Double2D envSize;
-    protected RobotFactory robotFactory;
+    protected Int2D envSize;
 
-    public SimConfig(long seed, Double2D envSize, RobotFactory robotFactory) {
+    public SimConfig() {
+        this.seed = System.currentTimeMillis();
+        this.envSize = new Int2D(102,102);
+        //this.robotFactory = new HomogeneousRobotFactory(Phenotype.DUMMY_PHENOTYPE, 1.0, 2.0, new Color(0, 0, 255), envSize.getX(), envSize.getY());
+    }
+
+    public SimConfig(String filename) {
+        throw new RuntimeException("TODO: Implement config reading from file");
+    }
+
+    public SimConfig(long seed, Int2D envSize) {
         this.seed = seed;
         this.envSize = envSize;
-        this.robotFactory = robotFactory;
     }
 
     public long getSeed() {
         return seed;
     }
 
-    public Double2D getEnvSize() {
+    public Int2D getEnvSize() {
         return envSize;
-    }
-
-    public Agent createAgent(Phenotype p) {
-        RobotObject r = robotFactory.createInstance();
-        return new Agent(p, r);
     }
 }
