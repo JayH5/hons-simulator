@@ -1,11 +1,16 @@
 package za.redbridge.simulator.object;
 
+import java.awt.Color;
 import java.awt.Paint;
 
+import sim.engine.SimState;
 import sim.physics2D.shape.Circle;
 import sim.physics2D.util.Angle;
 import sim.util.Double2D;
+import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.phenotype.Phenotype;
+import za.redbridge.simulator.sensor.Sensor;
+import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Object that represents a finished agent in the environment, including controller and all physical attributes.
@@ -26,4 +31,12 @@ public class RobotObject extends MobileObject {
         setCoefficientOfRestitution(1);
     }
 
+    @Override
+    public void step(SimState sim) {
+        super.step(sim);
+        Sensor s = phenotype.getSensors().get(0);
+        SensorReading r = s.sense(((Simulation)sim).getEnvironment(), this);
+        double dist = r.getValues().get(0);
+        this.getShape().setPaint(new Color((int)(dist*255),0,0));
+    }
 }
