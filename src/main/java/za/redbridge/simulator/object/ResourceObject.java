@@ -19,6 +19,10 @@ public class ResourceObject extends PhysicalObject {
             double value) {
         setPose(position, new Angle(0));
         setShape(new Rectangle(width, height, paint), mass);
+        setCoefficientOfFriction(0.7);
+        setCoefficientOfStaticFriction(0.9);
+        setVelocity(new Double2D(0,0));
+        setAngularVelocity(0.0);
         this.value = value;
     }
 

@@ -1,6 +1,8 @@
 package za.redbridge.simulator;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -10,6 +12,10 @@ import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
+import za.redbridge.simulator.config.HomogeneousRobotFactory;
+import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.interfaces.Phenotype;
+import za.redbridge.simulator.object.RobotObject;
 
 /**
  * Created by jamie on 2014/07/24.
@@ -23,10 +29,6 @@ public class SimulationGUI extends GUIState {
 
     public SimulationGUI(SimState state) {
         super(state);
-    }
-
-    public SimulationGUI() {
-        super (new Simulation(System.currentTimeMillis()));
     }
 
     @Override
@@ -74,7 +76,9 @@ public class SimulationGUI extends GUIState {
     }
 
     public static void main (String[] args) {
-        SimulationGUI video = new SimulationGUI();
+        SimConfig config = new SimConfig();
+        HomogeneousRobotFactory rf = new HomogeneousRobotFactory(Phenotype.DUMMY_PHENOTYPE, 1.0, 2.0, new Color(106,128,200), config.getEnvSize(), config.getSeed());
+        SimulationGUI video = new SimulationGUI(new Simulation(rf, new SimConfig()));
 
         //new console which displays this simulation
         Console console = new Console(video);

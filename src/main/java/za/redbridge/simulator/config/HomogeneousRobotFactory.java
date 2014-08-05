@@ -1,30 +1,60 @@
 package za.redbridge.simulator.config;
 
 import java.awt.Paint;
+import java.util.ArrayList;
+import java.util.List;
 
+import ec.util.MersenneTwisterFast;
+import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
+import sim.util.Int2D;
 import za.redbridge.simulator.interfaces.Phenotype;
 import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.RobotObject;
+
+import static za.redbridge.simulator.Utils.randomRange;
 
 public class HomogeneousRobotFactory implements RobotFactory {
     protected double mass;
     protected double radius;
     protected Paint paint;
-    protected int width;
-    protected int height;
+    private final Int2D envSize;
     protected Phenotype phenotype;
+    private static final int PLACEMENT_DISTANCE = 10;
+    private long seed;
 
-    public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint, int width, int height) {
+    public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint, Int2D envSize, long seed) {
+        this.phenotype = phenotype;
         this.mass = mass;
         this.radius = radius;
         this.paint = paint;
-        this.width = width;
-        this.height = height;
+        this.envSize = envSize;
+        this.seed = seed;
     }
 
-    public RobotObject createInstance() {
-        Double2D position = new Double2D((int)(Math.random()*width), (int)(Math.random()*height));
-        return new RobotObject(phenotype, position, mass, radius, paint);
+    public List<RobotObject> createInstances(int number) {
+        List<RobotObject> result = new ArrayList<RobotObject>(number);
+        Continuous2D placementEnv = new Continuous2D(1.0, envSize.x, envSize.y);
+        MersenneTwisterFast random = new MersenneTwisterFast(seed);
+
+        for(int i=0; i < number; i++) {
+            final int maxTries = 1000;
+            int tries = 0;
+            Double2D pos;
+            do {
+                if (tries++ >= maxTries) {
+                    throw new RuntimeException("Unable to find space for object");
+                }
+                pos = new Double2D(randomRange(random, radius, envSize.x - radius), randomRange(random, radius, envSize.y - radius));
+            } while (!placementEnv.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
+            RobotObject r = new RobotObject(phenotype, pos, mass, radius, paint);
+
+            //set random velocity
+            Double2D velocity = new Double2D(random.nextDouble() * 1.5, random.nextDouble() * 1.5);
+            r.setVelocity(velocity);
+            placementEnv.setObjectLocation(r, pos);
+            result.add(r);
+        }
+        return result;
     }
 }
