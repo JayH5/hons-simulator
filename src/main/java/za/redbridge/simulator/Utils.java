@@ -10,6 +10,9 @@ public final class Utils {
 
     private static final double EPSILON = 0.0001;
 
+    public static final double HALF_PI = Math.PI / 2;
+    public static final double TWO_PI = Math.PI * 2;
+
     private Utils() {
     }
 
@@ -33,16 +36,29 @@ public final class Utils {
     }
 
     /**
+     * Normalises an angle to the range [-PI, PI]. Probably not a good idea to put very large
+     * numbers into this method.
+     * @param radians input angle
+     * @return normalised angle
+     */
+    public static double normaliseAngle(double radians) {
+        while (radians < -Math.PI) {
+            radians += TWO_PI;
+        }
+        while (radians > Math.PI) {
+            radians -= TWO_PI;
+        }
+
+        return radians;
+    }
+
+    /**
      * Returns the angle between two points.
      * @param p1 the first point
      * @param p2 the second point
-     * @return angle between the points [0, 2 * PI]
+     * @return angle between the points [-PI, PI]
      */
     public static double angleBetweenPoints(Double2D p1, Double2D p2) {
-        double angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-        if (angle < 0.0) {
-            angle += Math.PI * 2;
-        }
-        return angle;
+        return Math.atan2(p2.y - p1.y, p2.x - p1.x);
     }
 }

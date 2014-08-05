@@ -1,11 +1,11 @@
 package za.redbridge.simulator.interfaces;
 
-import sim.util.Double2D;
-import za.redbridge.simulator.sensor.SensorDescription;
-import za.redbridge.simulator.sensor.SensorReading;
-
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import sim.util.Double2D;
+import za.redbridge.simulator.sensor.Sensor;
+import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Interface to the agent.
@@ -16,7 +16,7 @@ public interface Phenotype {
      * Returns the list of sensors this bot has on it
      * @return a List of Sensor objects
      */
-    List<SensorDescription> getSensors();
+    List<Sensor> getSensors();
 
     /**
      * Process the sensor inputs and provide actuator outputs
@@ -37,8 +37,8 @@ public interface Phenotype {
         }
 
         @Override
-        public List<SensorDescription> getSensors() {
-            return new ArrayList<SensorDescription>();
+        public List<Sensor> getSensors() {
+            return Collections.emptyList();
         }
     };
 }
