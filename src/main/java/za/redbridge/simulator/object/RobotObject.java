@@ -14,7 +14,7 @@ import za.redbridge.simulator.interfaces.Phenotype;
  *
  * Created by jamie on 2014/07/23.
  */
-public class RobotObject extends PhysicalObject {
+public class RobotObject extends MobileObject {
     Phenotype phenotype;
 
     public RobotObject(Phenotype phenotype, Double2D position, double mass, double radius, Paint paint) {

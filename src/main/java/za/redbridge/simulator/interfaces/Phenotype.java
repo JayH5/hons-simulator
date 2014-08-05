@@ -1,11 +1,11 @@
 package za.redbridge.simulator.interfaces;
 
+import java.util.Collections;
+import java.util.List;
+
 import sim.util.Double2D;
 import za.redbridge.simulator.sensor.Sensor;
 import za.redbridge.simulator.sensor.SensorReading;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Interface to the agent.
@@ -36,8 +36,9 @@ public interface Phenotype {
             return one;
         }
 
-        public @Override List<Sensor> getSensors() {
-            return new ArrayList<Sensor>();
+        @Override
+        public List<Sensor> getSensors() {
+            return Collections.emptyList();
         }
     };
 }

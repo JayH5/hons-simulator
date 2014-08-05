@@ -11,7 +11,7 @@ import sim.util.Double2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public class ResourceObject extends PhysicalObject {
+public class ResourceObject extends MobileObject {
 
     private final double value;
 
