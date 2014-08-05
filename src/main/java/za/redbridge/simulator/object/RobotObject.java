@@ -5,7 +5,7 @@ import java.awt.Paint;
 import sim.physics2D.shape.Circle;
 import sim.physics2D.util.Angle;
 import sim.util.Double2D;
-import za.redbridge.simulator.interfaces.Phenotype;
+import za.redbridge.simulator.phenotype.Phenotype;
 
 /**
  * Object that represents a finished agent in the environment, including controller and all physical attributes.

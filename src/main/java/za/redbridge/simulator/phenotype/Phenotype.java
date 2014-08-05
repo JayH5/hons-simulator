@@ -1,4 +1,4 @@
-package za.redbridge.simulator.interfaces;
+package za.redbridge.simulator.phenotype;
 
 import java.util.Collections;
 import java.util.List;

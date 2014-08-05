@@ -8,7 +8,7 @@ import ec.util.MersenneTwisterFast;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import sim.util.Int2D;
-import za.redbridge.simulator.interfaces.Phenotype;
+import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.RobotObject;
 

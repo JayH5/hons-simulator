@@ -22,10 +22,10 @@ import static za.redbridge.simulator.Utils.normaliseAngle;
  */
 public abstract class Sensor {
 
-    private final double bearing;
-    private final double orientation;
-    private final double range;
-    private final double fieldOfView;
+    protected final double bearing;
+    protected final double orientation;
+    protected final double range;
+    protected final double fieldOfView;
 
     private final double fovGradient;
 
