@@ -29,7 +29,8 @@ public class RobotObject extends MobileObject {
         setPose(position, new Angle(0));
         setShape(new RobotShape(radius, paint, phenotype), mass);
 
-        setCoefficientOfFriction(0);
+        //setCoefficientOfFriction(0.1);
+        setCoefficientOfStaticFriction(0.4);
         setCoefficientOfRestitution(1);
     }
 
@@ -40,6 +41,8 @@ public class RobotObject extends MobileObject {
         SensorReading r = s.sense(((Simulation)sim).getEnvironment(), this);
         double dist = r.getValues().get(0);
         this.getShape().setPaint(new Color((int)(dist*255),0,0));
+        setAngularVelocity(getAngularVelocity() * 0.9);
+        setVelocity(new Double2D(getVelocity().x * 1.005, getVelocity().y * 1.005));
     }
 
     private static class RobotShape extends Rectangle {
