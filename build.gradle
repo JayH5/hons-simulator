@@ -8,6 +8,7 @@ repositories {
 dependencies {
   compile 'edu.gmu.mason:mason:18-SNAPSHOT'
   compile 'edu.gmu.mason-contrib:physics2d:4'
+  compile 'org.encog:encog-core:3.2.0'
 }
 
 apply plugin:'application'
