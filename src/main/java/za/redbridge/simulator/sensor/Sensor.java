@@ -1,5 +1,8 @@
 package za.redbridge.simulator.sensor;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,10 +10,14 @@ import java.util.List;
 import sim.field.continuous.Continuous2D;
 import sim.physics2D.physicalObject.PhysicalObject2D;
 import sim.physics2D.shape.Circle;
+import sim.physics2D.shape.Polygon;
 import sim.physics2D.shape.Rectangle;
 import sim.physics2D.shape.Shape;
+import sim.physics2D.util.Angle;
+import sim.portrayal.DrawInfo2D;
 import sim.util.Bag;
 import sim.util.Double2D;
+import sim.util.matrix.DenseMatrix;
 import za.redbridge.simulator.object.RobotObject;
 
 
@@ -21,6 +28,9 @@ import static za.redbridge.simulator.Utils.normaliseAngle;
  * Describes a sensor implementation. The actual sensor is implemented in the simulator.
  */
 public abstract class Sensor {
+
+    private static final Paint PAINT = new Color(100, 100, 100, 100);
+    private static final boolean DRAW_SHAPE = true;
 
     protected final double bearing;
     protected final double orientation;
@@ -35,6 +45,8 @@ public abstract class Sensor {
     private Double2D cachedLocalPosition;
     private double cachedRobotRadius;
 
+    private Cone shape;
+
     public Sensor(double bearing, double orientation, double range, double fieldOfView) {
         this.bearing = bearing;
         this.orientation = orientation;
@@ -42,6 +54,17 @@ public abstract class Sensor {
         this.fieldOfView = fieldOfView;
 
         fovGradient = Math.tan(HALF_PI - fieldOfView / 2);
+    }
+
+    private void initShape() {
+        shape = new Cone(cachedLocalPosition, range, fieldOfView / 2);
+    }
+
+    public void draw(Object object, Graphics2D graphics, DrawInfo2D info, Angle orientation) {
+        if (shape != null) {
+            shape.setOrientation(orientation);
+            shape.draw(object, graphics, info);
+        }
     }
 
     public double getBearing() {
@@ -60,11 +83,15 @@ public abstract class Sensor {
         return fieldOfView;
     }
 
+    public Cone getShape() {
+        return shape;
+    }
+
     public final SensorReading sense(Continuous2D environment, RobotObject robot) {
         // Get all information about the robot once, since most of these calls are not free
         Double2D robotPosition = robot.getPosition();
         double robotOrientation = robot.getOrientation().radians;
-        double robotRadius = ((Circle) robot.getShape()).getRadius();
+        double robotRadius = robot.getShape().getMaxXDistanceFromCenter();//((Circle) robot.getShape()).getRadius();
 
         // Calculate the sensor's effective position and orientation in the scene
         Double2D globalPosition = calculatePosition(robotPosition, robotOrientation, robotRadius);
@@ -85,6 +112,10 @@ public abstract class Sensor {
             double y = robotRadius * Math.sin(bearing);
             cachedLocalPosition = new Double2D(x, y);
             cachedRobotRadius = robotRadius;
+
+            if (DRAW_SHAPE) {
+                initShape();
+            }
         }
 
         return cachedLocalPosition.rotate(robotOrientation).add(robotPosition);
@@ -166,7 +197,9 @@ public abstract class Sensor {
             //double width = rectangle.getWidth();
             //double height = rectangle.getHeight();
             // TODO: Maths is hard but this is doable
-            return null;
+            double width = object.getShape().getMaxXDistanceFromCenter();
+            objectX0 = objectRelativePosition.x - width;
+            objectX1 = objectRelativePosition.x + width;
         } else {
             return null; // Don't know about this shape
         }
@@ -231,6 +264,128 @@ public abstract class Sensor {
         @Override
         public int compareTo(SensedObject o) {
             return Double.compare(distance, o.distance);
+        }
+    }
+
+    private static class Cone extends Polygon {
+
+        final Double2D position;
+        final double length;
+        final double theta;
+
+        Angle orientation;
+
+        private Cone(Double2D position, double length, double theta) {
+            this.position = position;
+            this.length = length;
+            this.theta = theta;
+
+            this.paint = PAINT;
+
+            // Cool class design, bro.
+            initVertices();
+            initEdges();
+            initNormals();
+        }
+
+        @Override
+        public void initVertices() {
+            double x0 = position.x;
+            double y0 = position.y;
+
+            double xDiff = length * Math.cos(theta);
+            double yDiff = length * Math.sin(theta);
+
+            double x1 = x0 + xDiff;
+            double y1 = y0 + yDiff;
+            double x2 = x0 + xDiff;
+            double y2 = y0 - yDiff;
+
+            double[][] vertices = {
+                    { x0, x1, x2 },
+                    { y0, y1, y2 },
+                    { 1, 1, 1 }
+            };
+            this.vertices = new DenseMatrix(vertices);
+        }
+
+        @Override
+        public void initEdges() {
+            final double[][] vertices = this.vertices.vals;
+
+            double[][] edges = new double[3][3];
+            for (int i = 0; i < 3; i++) {
+                edges[i] = new double[3];
+            }
+
+            Double2D edge = new Double2D(vertices[0][1], vertices[1][1])
+                    .subtract(new Double2D(vertices[0][0], vertices[1][0]))
+                    .normalize();
+
+            edges[0][0] = edge.x;
+            edges[1][0] = edge.y;
+            edges[2][0] = 1;
+
+            edge = new Double2D(vertices[0][2], vertices[1][2])
+                    .subtract(new Double2D(vertices[0][1], vertices[1][1]))
+                    .normalize();
+
+            edges[0][1] = edge.x;
+            edges[1][1] = edge.y;
+            edges[2][1] = 1;
+
+            edge = new Double2D(vertices[0][0], vertices[1][0])
+                    .subtract(new Double2D(vertices[0][2], vertices[1][2]))
+                    .normalize();
+
+            edges[0][2] = edge.x;
+            edges[1][2] = edge.y;
+            edges[2][2] = 1;
+
+            this.edges = new DenseMatrix(edges);
+        }
+
+        @Override
+        public void initNormals() {
+            final double[][] edges = this.edges.vals;
+
+            double[][] normals = new double[3][3];
+            for (int i = 0; i < 3; i++) {
+                normals[i] = new double[3];
+            }
+
+            normals[0][0] = -edges[1][0];
+            normals[1][0] = edges[0][0];
+            normals[2][0] = 1;
+
+            normals[0][1] = -edges[1][1];
+            normals[1][1] = edges[0][1];
+            normals[2][1] = 1;
+
+            normals[0][2] = -edges[1][2];
+            normals[1][2] = edges[0][2];
+            normals[2][2] = 1;
+
+            this.normals = new DenseMatrix(normals);
+        }
+
+        void setOrientation(Angle orientation) {
+            this.orientation = orientation;
+        }
+
+        @Override
+        protected Angle getOrientation() {
+           return orientation;
+        }
+
+        @Override
+        public double getMassMomentOfInertia(double v) {
+            return 0;
+        }
+
+        @Override
+        public void calcMaxDistances(boolean b) {
+            // NO-OP
         }
     }
 
