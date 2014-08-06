@@ -11,7 +11,7 @@ public class ProximitySensor extends Sensor {
     private final List<Double> readings = new ArrayList<>(1);
 
     public ProximitySensor(double bearing) {
-        super(bearing, 0.0, 10.0, 0.1);
+        super(bearing, 0.0, 30.0, 0.1);
     }
 
     public ProximitySensor(double bearing, double orientation, double range, double fieldOfView) {
@@ -21,9 +21,8 @@ public class ProximitySensor extends Sensor {
     @Override
     protected SensorReading provideReading(List<SensedObject> objects) {
         double reading = 0.0;
-        for (SensedObject object: objects) {
-            double distance = object.getDistance() / range;
-            reading += readingCurve(1 - distance);
+        if (!objects.isEmpty()) {
+            reading = 1 - Math.min(objects.get(0).getDistance() / range, 1.0);
         }
 
         readings.clear();
