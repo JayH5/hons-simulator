@@ -1,24 +1,11 @@
 package za.redbridge.simulator.sensor;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import sim.field.continuous.Continuous2D;
-import sim.physics2D.physicalObject.PhysicalObject2D;
-import sim.physics2D.shape.Circle;
-import sim.physics2D.shape.Polygon;
-import sim.physics2D.shape.Rectangle;
-import sim.physics2D.shape.Shape;
-import sim.physics2D.util.Angle;
-import sim.portrayal.DrawInfo2D;
-import sim.util.Bag;
 import sim.util.Double2D;
-import sim.util.matrix.DenseMatrix;
-import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.object.PhysicalObject;
 
 
 import static za.redbridge.simulator.Utils.HALF_PI;
@@ -45,7 +32,7 @@ public abstract class Sensor {
     private Double2D cachedLocalPosition;
     private double cachedRobotRadius;
 
-    private Cone shape;
+    //private Cone shape;
 
     public Sensor(double bearing, double orientation, double range, double fieldOfView) {
         this.bearing = bearing;
@@ -56,7 +43,7 @@ public abstract class Sensor {
         fovGradient = Math.tan(HALF_PI - fieldOfView / 2);
     }
 
-    private void initShape() {
+    /*private void initShape() {
         shape = new Cone(cachedLocalPosition, range, fieldOfView / 2);
     }
 
@@ -105,7 +92,7 @@ public abstract class Sensor {
     }
 
     /** Calculates the global position of the sensor in the scene. */
-    private Double2D calculatePosition(Double2D robotPosition, double robotOrientation,
+    /*private Double2D calculatePosition(Double2D robotPosition, double robotOrientation,
             double robotRadius) {
         if (cachedLocalPosition == null || cachedRobotRadius != robotRadius) {
             double x = robotRadius * Math.cos(bearing);
@@ -119,7 +106,7 @@ public abstract class Sensor {
         }
 
         return cachedLocalPosition.rotate(robotOrientation).add(robotPosition);
-    }
+    }*/
 
     /** Calculates the global orientation of the sensor in the scene. */
     private double calculateOrientation(double robotOrientation) {
@@ -127,7 +114,7 @@ public abstract class Sensor {
     }
 
     /** Find objects within range and return those within the FoV. */
-    private List<SensedObject> findObjectsWithinField(Double2D globalPosition,
+    /*private List<SensedObject> findObjectsWithinField(Double2D globalPosition,
             double globalOrientation, RobotObject robot, Continuous2D environment) {
         List<SensedObject> objects = new ArrayList<>();
 
@@ -149,7 +136,7 @@ public abstract class Sensor {
         Collections.sort(objects);
 
         return objects;
-    }
+    }*/
 
     /**
      * Determines whether an object lies within the field of the sensor and if so where in the field
@@ -159,7 +146,7 @@ public abstract class Sensor {
      * @param sensorOrientation the global orientation of the sensor in the scene
      * @return a {@link SensedObject} reading if the object is in the field, else null
      */
-    private SensedObject senseObject(PhysicalObject2D object, Double2D sensorPosition,
+    /*private SensedObject senseObject(PhysicalObject2D object, Double2D sensorPosition,
             double sensorOrientation) {
         Double2D objectPosition = object.getPosition();
 
@@ -214,7 +201,7 @@ public abstract class Sensor {
         double spanEnd = objectX1 < x1 ? objectX1 : x1;
 
         return new SensedObject(object, objectDistance, spanStart, spanEnd);
-    }
+    }*/
 
     /**
      * Converts a list of objects that have been determined to fall within the sensor's range into
@@ -229,12 +216,12 @@ public abstract class Sensor {
      * information about its location.
      */
     protected static class SensedObject implements Comparable<SensedObject> {
-        private final PhysicalObject2D object;
+        private final PhysicalObject object;
         private final double spanStart;
         private final double spanEnd;
         private final double distance;
 
-        public SensedObject(PhysicalObject2D object, double dist, double spanStart, double spanEnd) {
+        public SensedObject(PhysicalObject object, double dist, double spanStart, double spanEnd) {
             this.object = object;
             this.distance = dist;
             this.spanStart = spanStart;
@@ -242,7 +229,7 @@ public abstract class Sensor {
         }
 
         /** Get the object that has been sensed */
-        public PhysicalObject2D getObject() {
+        public PhysicalObject getObject() {
             return object;
         }
 
@@ -267,7 +254,7 @@ public abstract class Sensor {
         }
     }
 
-    private static class Cone extends Polygon {
+    /*private static class Cone extends Polygon {
 
         final Double2D position;
         final double length;
@@ -387,6 +374,6 @@ public abstract class Sensor {
         public void calcMaxDistances(boolean b) {
             // NO-OP
         }
-    }
+    }*/
 
 }

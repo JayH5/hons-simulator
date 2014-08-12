@@ -1,5 +1,7 @@
 package za.redbridge.simulator;
 
+import org.jbox2d.common.Vec2;
+
 import ec.util.MersenneTwisterFast;
 import sim.util.Double2D;
 
@@ -60,5 +62,13 @@ public final class Utils {
      */
     public static double angleBetweenPoints(Double2D p1, Double2D p2) {
         return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    }
+
+    public static Vec2 toVec2(Double2D double2D) {
+        return new Vec2((float) double2D.x, (float) double2D.y);
+    }
+
+    public static Double2D toDouble2D(Vec2 vec2) {
+        return new Double2D(vec2.x, vec2.y);
     }
 }

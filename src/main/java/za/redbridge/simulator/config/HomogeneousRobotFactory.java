@@ -1,5 +1,7 @@
 package za.redbridge.simulator.config;
 
+import org.jbox2d.dynamics.World;
+
 import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +34,8 @@ public class HomogeneousRobotFactory implements RobotFactory {
         this.seed = seed;
     }
 
-    public List<RobotObject> createInstances(int number) {
+    @Override
+    public List<RobotObject> createInstances(World world, int number) {
         List<RobotObject> result = new ArrayList<RobotObject>(number);
         Continuous2D placementEnv = new Continuous2D(1.0, envSize.x, envSize.y);
         MersenneTwisterFast random = new MersenneTwisterFast(seed);
@@ -47,13 +50,10 @@ public class HomogeneousRobotFactory implements RobotFactory {
                 }
                 pos = new Double2D(randomRange(random, radius, envSize.x - radius), randomRange(random, radius, envSize.y - radius));
             } while (!placementEnv.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
-            RobotObject r = new RobotObject(phenotype, pos, mass, radius, paint);
-
-            //set random velocity
-            Double2D velocity = new Double2D(random.nextDouble() * 1.5, random.nextDouble() * 1.5);
-            r.setVelocity(velocity);
-            placementEnv.setObjectLocation(r, pos);
+            RobotObject r = new RobotObject(world, pos, radius, mass, paint, phenotype);
             result.add(r);
+
+            placementEnv.setObjectLocation(r, pos);
         }
         return result;
     }

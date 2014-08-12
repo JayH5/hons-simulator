@@ -1,19 +1,36 @@
 package za.redbridge.simulator.object;
 
-import java.awt.Color;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.World;
 
-import sim.physics2D.shape.Rectangle;
-import sim.physics2D.util.Angle;
 import sim.util.Double2D;
+import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.portrayal.RectanglePortrayal;
+
+
+import static za.redbridge.simulator.Utils.toVec2;
 
 /**
  * Created by jamie on 2014/08/01.
  */
-public class WallObject extends StationaryObject {
+public class WallObject extends PhysicalObject {
 
-    public WallObject(Double2D pos, int width, int height) {
-        setCoefficientOfRestitution(1);
-        setPose(pos, new Angle(0));
-        setShape(new Rectangle(width, height, Color.BLACK, true));
+    public WallObject(World world, Double2D pos, int width, int height) {
+        super(createPortrayal(width, height), createBody(world, pos, width, height));
+    }
+
+    protected static Portrayal createPortrayal(int width, int height) {
+        return new RectanglePortrayal(width, height);
+    }
+
+    protected static Body createBody(World world, Double2D position, int width, int height) {
+        BodyBuilder bb = new BodyBuilder();
+        return bb.setBodyType(BodyType.STATIC)
+                .setPosition(toVec2(position))
+                .setRectangular(width, height)
+                .setFriction(0.0f)
+                .setRestitution(1.0f)
+                .build(world);
     }
 }
