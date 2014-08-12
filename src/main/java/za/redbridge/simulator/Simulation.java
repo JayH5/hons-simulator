@@ -32,31 +32,33 @@ import static za.redbridge.simulator.Utils.toDouble2D;
  */
 public class Simulation extends SimState {
 
-    private static final float VELOCITY_THRESHOLD = 0.0001f;
+    private static final float VELOCITY_THRESHOLD = 0.000001f;
 
     private final Continuous2D environment;
 
     private final World physicsWorld;
+
     private static final float TIME_STEP = 16.0f; // 16ms = 60fps
     private static final int VELOCITY_ITERATIONS = 2;
     private static final int POSITION_ITERATIONS = 1;
 
     //number of large objects
     private static final int NUM_LARGE_OBJECTS = 5;
-    private static final double LARGE_OBJECT_WIDTH = 3.0;
-    private static final double LARGE_OBJECT_HEIGHT = 3.0;
+    private static final double LARGE_OBJECT_WIDTH = 5.0;
+    private static final double LARGE_OBJECT_HEIGHT = 5.0;
     private static final double LARGE_OBJECT_VALUE = 100.0;
-    private static final double LARGE_OBJECT_MASS = 1.0;
+    private static final double LARGE_OBJECT_MASS = 100.0;
 
     //number of small objects
     private static final int NUM_SMALL_OBJECTS = 10;
-    private static final double SMALL_OBJECT_WIDTH = 1.5;
-    private static final double SMALL_OBJECT_HEIGHT = 1.5;
+    private static final double SMALL_OBJECT_WIDTH = 3;
+    private static final double SMALL_OBJECT_HEIGHT = 3;
     private static final double SMALL_OBJECT_VALUE = 50.0;
-    private static final double SMALL_OBJECT_MASS = .5;
+    private static final double SMALL_OBJECT_MASS = 40.0;
     private static final int PLACEMENT_DISTANCE = 10;
     private static final Color AGENT_COLOUR = new Color(106, 128, 200);
     private static final Color RESOURCE_COLOUR = new Color(255, 235, 82);
+
 
     private RobotFactory rf;
     private final SimConfig config;
@@ -80,9 +82,6 @@ public class Simulation extends SimState {
         for(RobotObject robot : robots){
             Double2D position = toDouble2D(robot.getBody().getPosition());
             environment.setObjectLocation(robot.getPortrayal(), position);
-            robot.getBody().applyForceToCenter(
-                    new Vec2((float) randomRange(random, -10, 10),
-                            (float) randomRange(random, -10, 10)));
             schedule.scheduleRepeating(robot);
         }
         createWalls();
