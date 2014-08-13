@@ -103,6 +103,13 @@ public class Simulation extends SimState {
         });
     }
 
+    //end behaviour
+    @Override
+    public void finish() {
+        kill();
+        System.out.println("Total Fitness: " + getFitness());
+    }
+
     private void createWalls() {
         // Left
         Double2D pos = new Double2D(-1, config.getEnvSize().y / 2.0);
@@ -274,6 +281,9 @@ public class Simulation extends SimState {
     public Schedule getSchedule() {
         return schedule;
     }
+
+    //get overall fitness
+    public double getFitness() { return targetArea.getTotalFitness(); }
 
     public void runForNIterations(int n) {
         for (int i = 0; i < n; i++) {
