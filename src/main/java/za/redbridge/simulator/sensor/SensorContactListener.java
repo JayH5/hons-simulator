@@ -39,23 +39,25 @@ public class SensorContactListener implements ContactListener {
             objectFixture = fixtureA;
         }
 
-        Object userData = sensorFixture.getUserData();
-        Object objectData = objectFixture.getUserData();
+        Object sensorData = sensorFixture.getUserData();
 
-        if (userData == null)
-            return;
+        if (sensorData != null) {
+            if (sensorData instanceof Sensor) {
+                Sensor sensor = (Sensor) sensorData;
+                sensor.addFixtureInField(objectFixture);
+            }
+        } else {
+            sensorData = sensorFixture.getBody().getUserData();
+            if (sensorData != null && sensorData instanceof TargetAreaObject) {
+                System.out.println("Target area!");
+                TargetAreaObject targetArea = (TargetAreaObject) sensorData;
 
-        if (userData instanceof Sensor) {
-            Sensor sensor = (Sensor) userData;
-            sensor.addFixtureInField(objectFixture);
-        }
-        else if (userData instanceof TargetAreaObject) {
-            TargetAreaObject targetArea = (TargetAreaObject) userData;
-
-            //update value of total objects collected
-            if (objectData instanceof ResourceObject){
-                ResourceObject resourceObject = (ResourceObject) objectData;
-                targetArea.addResource(resourceObject);
+                Object objectData = objectFixture.getBody().getUserData();
+                //update value of total objects collected
+                if (objectData != null && objectData instanceof ResourceObject) {
+                    ResourceObject resourceObject = (ResourceObject) objectData;
+                    targetArea.addResource(resourceObject);
+                }
             }
         }
 

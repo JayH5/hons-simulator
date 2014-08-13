@@ -33,7 +33,7 @@ public class TargetAreaObject extends PhysicalObject {
         private double totalFitness;
 
         //hash set so that object values only get added to forage area once
-        private HashSet<ResourceObject> containedObjects;
+        private final HashSet<ResourceObject> containedObjects = new HashSet<>();
 
         //keeps track of what has been pushed into this place
 
