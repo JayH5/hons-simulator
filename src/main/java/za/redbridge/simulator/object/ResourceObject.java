@@ -40,7 +40,7 @@ public class ResourceObject extends PhysicalObject {
                 .setPosition(toVec2(position))
                 .setRectangular((float) width, (float) height)
                 .setDensity((float) (mass / (width * height)))
-                .setFriction(0f)
+                .setFriction(0.9f)
                 .setRestitution(1.0f)
                 .build(world);
     }

@@ -28,7 +28,7 @@ public class SimplePhenotype implements Phenotype {
 
     @Override
     public Double2D step(List<SensorReading> list) {
-        return new Double2D();
+        return new Double2D((float)Math.random()*0.03f - 0.015f, (float)Math.random()*0.03f - 0.015f);
     }
 
     @Override

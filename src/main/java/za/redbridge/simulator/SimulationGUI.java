@@ -75,7 +75,7 @@ public class SimulationGUI extends GUIState {
 
     public static void main (String[] args) {
         SimConfig config = new SimConfig();
-        HomogeneousRobotFactory rf = new HomogeneousRobotFactory(new SimplePhenotype(), 5.0, 2.0, new Color(106,128,200), config.getEnvSize(), config.getSeed());
+        HomogeneousRobotFactory rf = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0, new Color(106,128,200), config.getEnvSize(), config.getSeed());
         SimulationGUI video = new SimulationGUI(new Simulation(rf, new SimConfig()));
 
         //new console which displays this simulation
