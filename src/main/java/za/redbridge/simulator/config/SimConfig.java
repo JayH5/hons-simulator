@@ -1,6 +1,8 @@
 package za.redbridge.simulator.config;
 
 import sim.util.Int2D;
+import za.redbridge.simulator.ea.DefaultFitnessFunction;
+import za.redbridge.simulator.ea.FitnessFunction;
 
 public class SimConfig {
 
@@ -16,22 +18,34 @@ public class SimConfig {
     protected Direction targetAreaPlacement;
     protected int targetAreaThickness;
 
+    protected FitnessFunction fitnessFunction;
+
+    protected boolean getValueFromArea;
+
+    //default config
     public SimConfig() {
         this.seed = System.currentTimeMillis();
         this.envSize = new Int2D(102,102);
         this.numRobots = 20;
+        this.targetAreaPlacement = Direction.SOUTH;
+        this.targetAreaThickness = 20;
+        this.fitnessFunction = new DefaultFitnessFunction();
+        this.getValueFromArea = true;
     }
 
     public SimConfig(String filename) {
         throw new RuntimeException("TODO: Implement config reading from file");
     }
 
-    public SimConfig(long seed, Int2D envSize, int numRobots, Direction targetAreaPlacement, int targetAreaThickness) {
+    public SimConfig(long seed, Int2D envSize, int numRobots, Direction targetAreaPlacement,
+                     int targetAreaThickness, FitnessFunction fitness, boolean getValueFromArea) {
         this.seed = seed;
         this.envSize = envSize;
         this.numRobots = numRobots;
         this.targetAreaPlacement = targetAreaPlacement;
         this.targetAreaThickness = targetAreaThickness;
+        this.fitnessFunction = fitness;
+        this.getValueFromArea = getValueFromArea;
     }
 
     public long getSeed() {
@@ -49,5 +63,9 @@ public class SimConfig {
     public Direction getTargetAreaPlacement() { return targetAreaPlacement; }
 
     public int getTargetAreaThickness() { return targetAreaThickness; }
+
+    public FitnessFunction getFitnessFunction() { return fitnessFunction; }
+
+    public boolean getValueFromArea() { return getValueFromArea; }
 
 }

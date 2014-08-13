@@ -13,6 +13,7 @@ import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.DefaultFitnessFunction;
 import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
@@ -58,6 +59,9 @@ public class Simulation extends SimState {
     private static final Color AGENT_COLOUR = new Color(106, 128, 200);
     private static final Color RESOURCE_COLOUR = new Color(255, 235, 82);
 
+    //derive the value of this resource from its area
+    private boolean getValueFromArea = true;
+    private TargetAreaObject targetArea;
 
     private RobotFactory rf;
     private final SimConfig config;
@@ -69,6 +73,7 @@ public class Simulation extends SimState {
         this.environment = new Continuous2D(1.0, config.getEnvSize().x, config.getEnvSize().y);
         this.physicsWorld = new World(new Vec2(0f, 0f));
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
+        this.getValueFromArea = config.getValueFromArea();
     }
 
     @Override
@@ -84,6 +89,7 @@ public class Simulation extends SimState {
             schedule.scheduleRepeating(robot);
         }
         createWalls();
+        createTargetArea();
         createResources();
 
         physicsWorld.setContactListener(new SensorContactListener());
@@ -128,31 +134,76 @@ public class Simulation extends SimState {
         if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
             width = config.getEnvSize().x;
             height = config.getTargetAreaThickness();
-            pos = new Double2D(0,0);
+            pos = new Double2D(width/2,height/2);
         }
         else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
             width = config.getEnvSize().x;
             height = config.getTargetAreaThickness();
-            pos = new Double2D(0,config.getEnvSize().y-height);
+            pos = new Double2D(config.getEnvSize().x - width/2, config.getEnvSize().y - height/2);
         }
         else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
             width = config.getTargetAreaThickness();
             height = config.getEnvSize().y;
-            pos = new Double2D(config.getEnvSize().x-width, 0);
+            pos = new Double2D(config.getEnvSize().x - width/2, height/2);
         }
         else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
             width = config.getTargetAreaThickness();
             height = config.getEnvSize().y;
-            pos = new Double2D(0,0);
+            pos = new Double2D(width/2,height/2);
         }
 
-        TargetAreaObject targetArea = new TargetAreaObject(physicsWorld, pos, width, height);
+        //for now just give it the default fitness function
+        targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
+                                                            new DefaultFitnessFunction());
+
         environment.setObjectLocation(targetArea.getPortrayal(), pos);
-
-
     }
 
-    // Find a random position within the environment that is away from other objects
+    //sorry im mad at bath, these caluclate min/max coord values of the effective forage area. prob better way lay this out
+    //and calculate things
+    private Double2D calculateForageAreaXRange() {
+
+        double min = 0, max = 0;
+
+        if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH ||
+                config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
+            min = 0;
+            max = config.getEnvSize().x;
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
+            min = 0;
+            max = config.getEnvSize().x-targetArea.getWidth();
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
+            min = targetArea.getWidth();
+            max = config.getEnvSize().x;
+        }
+
+        return new Double2D(min,max);
+    }
+
+    private Double2D calculateForageAreaYRange() {
+
+        double min = 0, max = 0;
+
+        if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
+            min = targetArea.getHeight();
+            max = config.getEnvSize().y;
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
+            min = 0;
+            max = config.getEnvSize().y - targetArea.getHeight();
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST ||
+                config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
+            min = 0;
+            max = config.getEnvSize().y;
+        }
+
+        return new Double2D(min,max);
+    }
+
+    // Find a random position within the environment that is away from other objects and forage area
     private Double2D findPositionForObject(double width, double height) {
         final int maxTries = 1000;
         int tries = 1;
@@ -162,7 +213,17 @@ public class Simulation extends SimState {
             if (tries++ >= maxTries) {
                 throw new RuntimeException("Unable to find space for object");
             }
-            pos = new Double2D(randomRange(random, width, config.getEnvSize().x - width), randomRange(random, height, config.getEnvSize().y - height));
+
+            double minX, maxX, minY, maxY;
+            minX = calculateForageAreaXRange().x;
+            maxX = calculateForageAreaXRange().y;
+
+            minY = calculateForageAreaYRange().x;
+            maxY = calculateForageAreaYRange().y;
+
+            pos = new Double2D(randomRange(random, minX, maxX),
+                    randomRange(random, minY, maxY));
+
         } while (!environment.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
         return pos;
     }
@@ -170,16 +231,34 @@ public class Simulation extends SimState {
     private void createResources() {
         for (int i = 0; i < NUM_SMALL_OBJECTS; i++) {
             Double2D pos = findPositionForObject(SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT);
-            ResourceObject resource = new ResourceObject(physicsWorld, pos, SMALL_OBJECT_WIDTH,
-                    SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, RESOURCE_COLOUR, SMALL_OBJECT_VALUE);
+            ResourceObject resource;
+
+            if (getValueFromArea) {
+                resource = new ResourceObject(physicsWorld, pos, SMALL_OBJECT_WIDTH,
+                        SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, RESOURCE_COLOUR, SMALL_OBJECT_WIDTH*SMALL_OBJECT_HEIGHT);
+            }
+            else {
+                resource = new ResourceObject(physicsWorld, pos, SMALL_OBJECT_WIDTH,
+                        SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, RESOURCE_COLOUR, SMALL_OBJECT_VALUE);
+            }
+
             environment.setObjectLocation(resource.getPortrayal(), pos);
             schedule.scheduleRepeating(resource);
         }
 
         for (int i = 0; i < NUM_LARGE_OBJECTS; i++) {
             Double2D pos = findPositionForObject(LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT);
-            ResourceObject resource = new ResourceObject(physicsWorld, pos, LARGE_OBJECT_WIDTH,
-                    LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, RESOURCE_COLOUR, LARGE_OBJECT_VALUE);
+            ResourceObject resource;
+
+            if (getValueFromArea) {
+                resource = new ResourceObject(physicsWorld, pos, LARGE_OBJECT_WIDTH,
+                        LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, RESOURCE_COLOUR, LARGE_OBJECT_WIDTH*LARGE_OBJECT_HEIGHT);
+            }
+            else {
+                resource = new ResourceObject(physicsWorld, pos, LARGE_OBJECT_WIDTH,
+                        LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, RESOURCE_COLOUR, LARGE_OBJECT_VALUE);
+            }
+
             environment.setObjectLocation(resource.getPortrayal(), pos);
             schedule.scheduleRepeating(resource);
         }
@@ -202,10 +281,8 @@ public class Simulation extends SimState {
         }
     }
 
-    //return the score for this simulation
-    public double returnScore() {
-        return 0;
-    }
+    //return the score at this point in the simulation
+    public double returnScore() { return targetArea.getTotalFitness(); }
 
     /**
      * Launching the application from this main method will run the simulation in headless mode.
