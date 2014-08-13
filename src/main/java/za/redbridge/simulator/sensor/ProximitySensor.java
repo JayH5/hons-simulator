@@ -10,11 +10,11 @@ public class ProximitySensor extends Sensor {
 
     private final List<Double> readings = new ArrayList<>(1);
 
-    public ProximitySensor(double bearing) {
-        super(bearing, 0.0, 30.0, 0.1);
+    public ProximitySensor(float bearing) {
+        super(bearing, 0.0f, 30.0f, 0.1f);
     }
 
-    public ProximitySensor(double bearing, double orientation, double range, double fieldOfView) {
+    public ProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
         super(bearing, orientation, range, fieldOfView);
     }
 

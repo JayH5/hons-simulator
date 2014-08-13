@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Polygon;
 
+import sim.portrayal.DrawInfo2D;
+
 /**
  * Created by jamie on 2014/08/07.
  */
@@ -19,6 +21,13 @@ public class SensorPortrayal extends Portrayal {
         int dy = (int) (range * Math.sin(theta));
 
         triangle = new Polygon(new int[]{ 0, dx, dx }, new int[]{ 0, dy, -dy }, 3);
+    }
+
+    @Override
+    public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+        // Don't scale, rotate or translate since we are drawn relative to robot
+        graphics.setPaint(paint);
+        drawImprecise(graphics);
     }
 
     @Override

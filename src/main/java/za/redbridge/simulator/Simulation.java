@@ -1,9 +1,6 @@
 package za.redbridge.simulator;
 
-import org.jbox2d.callbacks.DebugDraw;
-import org.jbox2d.common.Color3f;
 import org.jbox2d.common.Settings;
-import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
@@ -20,6 +17,7 @@ import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.sensor.SensorContactListener;
 
 
 import static za.redbridge.simulator.Utils.randomRange;
@@ -87,6 +85,8 @@ public class Simulation extends SimState {
         }
         createWalls();
         createResources();
+
+        physicsWorld.setContactListener(new SensorContactListener());
 
         schedule.scheduleRepeating(new Steppable() {
             @Override
