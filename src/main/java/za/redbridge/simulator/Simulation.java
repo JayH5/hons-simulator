@@ -19,6 +19,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
 
 
@@ -118,6 +119,39 @@ public class Simulation extends SimState {
         environment.setObjectLocation(wall.getPortrayal(), pos);
     }
 
+    //create target area
+    private void createTargetArea() {
+
+        int width = 0, height = 0;
+        Double2D pos = new Double2D ();
+
+        if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
+            width = config.getEnvSize().x;
+            height = config.getTargetAreaThickness();
+            pos = new Double2D(0,0);
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
+            width = config.getEnvSize().x;
+            height = config.getTargetAreaThickness();
+            pos = new Double2D(0,config.getEnvSize().y-height);
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
+            width = config.getTargetAreaThickness();
+            height = config.getEnvSize().y;
+            pos = new Double2D(config.getEnvSize().x-width, 0);
+        }
+        else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
+            width = config.getTargetAreaThickness();
+            height = config.getEnvSize().y;
+            pos = new Double2D(0,0);
+        }
+
+        TargetAreaObject targetArea = new TargetAreaObject(physicsWorld, pos, width, height);
+        environment.setObjectLocation(targetArea.getPortrayal(), pos);
+
+
+    }
+
     // Find a random position within the environment that is away from other objects
     private Double2D findPositionForObject(double width, double height) {
         final int maxTries = 1000;
@@ -166,6 +200,11 @@ public class Simulation extends SimState {
         for (int i = 0; i < n; i++) {
             schedule.step(this);
         }
+    }
+
+    //return the score for this simulation
+    public double returnScore() {
+        return 0;
     }
 
     /**
