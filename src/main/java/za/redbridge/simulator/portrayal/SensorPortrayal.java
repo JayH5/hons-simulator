@@ -13,21 +13,42 @@ public class SensorPortrayal extends Portrayal {
 
     private final Polygon triangle;
 
-    public SensorPortrayal(double range, double fieldOfView, double orientation, Paint paint) {
+    private final double bearing;
+    private final double orientation;
+
+    private double offsetX;
+    private double offsetY;
+
+    public SensorPortrayal(double bearing, double orientation, double range, double fieldOfView,
+            Paint paint) {
         super(paint, true);
 
-        double theta = fieldOfView / 2.0;
-        int dx = (int) (range * Math.cos(theta));
-        int dy = (int) (range * Math.sin(theta));
+        this.bearing = bearing;
+        this.orientation = orientation;
 
-        triangle = new Polygon(new int[]{ 0, dx, dx }, new int[]{ 0, dy, -dy }, 3);
+        int dx = (int) (range * Math.cos(fieldOfView / 2));
+        int dy = (int) (range * Math.sin(fieldOfView / 2));
+
+        triangle = new Polygon(new int[] { 0, dx, dx }, new int[] { 0, dy, -dy }, 3);
+    }
+
+    public void setRobotRadius(double robotRadius) {
+        offsetX = robotRadius * Math.cos(bearing);
+        offsetY = robotRadius * Math.sin(bearing);
     }
 
     @Override
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
-        // Don't scale, rotate or translate since we are drawn relative to robot
-        graphics.setPaint(paint);
-        drawImprecise(graphics);
+        // Don't call super, have our own rotation, translation scheme
+        Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
+
+        g.translate(offsetX, offsetY);
+        g.rotate(bearing + orientation);
+
+        g.setPaint(paint);
+        drawImprecise(g);
+
+        g.dispose();
     }
 
     @Override
