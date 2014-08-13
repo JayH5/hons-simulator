@@ -50,6 +50,8 @@ public class HomogeneousRobotFactory implements RobotFactory {
                 }
                 pos = new Double2D(randomRange(random, radius, envSize.x - radius), randomRange(random, radius, envSize.y - radius));
             } while (!placementEnv.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
+
+            Phenotype phenotype = this.phenotype.clone();
             RobotObject r = new RobotObject(world, pos, radius, mass, paint, phenotype);
             result.add(r);
 

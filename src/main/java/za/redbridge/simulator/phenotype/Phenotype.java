@@ -10,7 +10,7 @@ import za.redbridge.simulator.sensor.SensorReading;
 /**
  * Interface to the agent.
  */
-public interface Phenotype {
+public interface Phenotype extends Cloneable {
 
     /**
      * Returns the list of sensors this bot has on it
@@ -25,6 +25,8 @@ public interface Phenotype {
      */
     Double2D step(List<SensorReading> list);
 
+    Phenotype clone();
+
     /**
      * Represents a controller that outputs a one vector. For testing.
      */
@@ -34,6 +36,11 @@ public interface Phenotype {
         @Override
         public Double2D step(List<SensorReading> l) {
             return one;
+        }
+
+        @Override
+        public Phenotype clone() {
+            return this;
         }
 
         @Override

@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 
 import sim.display.GUIState;
 import sim.display.Manipulating2D;
@@ -29,7 +27,7 @@ public abstract class Portrayal extends SimplePortrayal2D {
     protected boolean filled;
     protected Paint paint;
 
-    private double orientation;
+    protected double orientation;
 
     public Portrayal() {
         this(Color.BLACK, true);
@@ -76,12 +74,23 @@ public abstract class Portrayal extends SimplePortrayal2D {
             drawImprecise(g);
         }
 
+        drawExtra(object, g, info);
+
         g.dispose(); // glPopMatrix()
     }
 
     protected abstract void drawPrecise(Graphics2D graphics);
 
     protected abstract void drawImprecise(Graphics2D graphics);
+
+    /**
+     * Subclasses that wish to draw extra parts of the shape can override this method to draw the
+     * parts relative to their position/rotation/scale.
+     * @param graphics the scaled, rotated and translated graphics context
+     */
+    protected void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
+        // NO-OP
+    }
 
     @Override
     public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
