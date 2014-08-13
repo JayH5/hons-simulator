@@ -94,6 +94,11 @@ public class BodyBuilder {
         return this;
     }
 
+    public BodyBuilder setSensor(boolean isSensor) {
+        fd.isSensor = isSensor;
+        return this;
+    }
+
     public Body build(World world) {
         Body body = world.createBody(bd);
         body.createFixture(fd);
