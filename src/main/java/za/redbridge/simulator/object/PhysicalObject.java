@@ -13,7 +13,7 @@ import za.redbridge.simulator.portrayal.Portrayal;
 /**
  * Created by jamie on 2014/07/25.
  */
-public class PhysicalObject implements Steppable, Taggable {
+public class PhysicalObject implements Steppable {
 
     private String tag;
 
@@ -54,15 +54,5 @@ public class PhysicalObject implements Steppable, Taggable {
 
     public Portrayal getPortrayal() {
         return portrayal;
-    }
-
-    @Override
-    public String getTag() {
-        return tag;
-    }
-
-    @Override
-    public void setTag(String tag) {
-        this.tag = tag;
     }
 }
