@@ -88,8 +88,8 @@ public class RobotObject extends PhysicalObject {
 
         double radius = ((CirclePortrayal)getPortrayal()).getRadius();
         Vec2 position = getBody().getPosition();
-        Vec2 wheel1Offset = rotM.mul(new Vec2((float)(0.99*radius),0));
-        Vec2 wheel2Offset = rotM.mul(new Vec2((float)(-0.99*radius),0));
+        Vec2 wheel1Offset = rotM.mul(new Vec2((float)(0.75*radius),0));
+        Vec2 wheel2Offset = rotM.mul(new Vec2((float)(-0.75*radius),0));
 
         Vec2 wheel1Position = position.add(wheel1Offset);
         Vec2 wheel2Position = position.add(wheel2Offset);
