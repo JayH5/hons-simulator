@@ -26,7 +26,7 @@ public class SensorContactListener implements ContactListener {
         boolean aIsSensor = fixtureA.isSensor();
         boolean bIsSensor = fixtureB.isSensor();
 
-        if (aIsSensor && bIsSensor) {
+        if ((aIsSensor && bIsSensor) || (!aIsSensor && !bIsSensor)) {
             return;
         }
 
@@ -37,6 +37,10 @@ public class SensorContactListener implements ContactListener {
         } else {
             sensorFixture = fixtureB;
             objectFixture = fixtureA;
+        }
+
+        if(sensorFixture.getBody() == objectFixture.getBody()){
+            return;
         }
 
         Object sensorData = sensorFixture.getUserData();

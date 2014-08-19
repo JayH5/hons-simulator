@@ -2,6 +2,7 @@ package za.redbridge.simulator;
 
 import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 
 import java.awt.Color;
@@ -34,9 +35,9 @@ public class Simulation extends SimState {
 
     private static final float VELOCITY_THRESHOLD = 0.000001f;
 
-    private final Continuous2D environment;
+    private Continuous2D environment;
 
-    private final World physicsWorld;
+    private World physicsWorld;
 
     private static final float TIME_STEP = 16.0f; // 16ms = 60fps
     private static final int VELOCITY_ITERATIONS = 2;
@@ -70,8 +71,6 @@ public class Simulation extends SimState {
         super(config.getSeed());
         this.rf = rf;
         this.config = config;
-        this.environment = new Continuous2D(1.0, config.getEnvSize().x, config.getEnvSize().y);
-        this.physicsWorld = new World(new Vec2(0f, 0f));
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
         this.getValueFromArea = config.getValueFromArea();
     }
@@ -80,7 +79,10 @@ public class Simulation extends SimState {
     public void start() {
         super.start();
 
-        environment.clear();
+        environment = new Continuous2D(1.0, config.getEnvSize().x, config.getEnvSize().y);
+        physicsWorld = new World(new Vec2(0f, 0f));
+        schedule.reset();
+        System.gc();
 
         List<RobotObject> robots = rf.createInstances(physicsWorld, config.getNumRobots());
         for(RobotObject robot : robots){
