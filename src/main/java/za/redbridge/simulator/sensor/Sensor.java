@@ -1,6 +1,6 @@
 package za.redbridge.simulator.sensor;
 
-import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.collision.shapes.ShapeType;
@@ -158,17 +158,15 @@ public abstract class Sensor {
      * @return a {@link SensedObject} reading if the object is in the field, else null
      */
     private SensedObject senseFixture(Fixture fixture, Transform sensorTransform) {
-        Vec2 objectPosition = fixture.getBody().getPosition();
-        Vec2 objectRelativePosition = Transform.mulTrans(sensorTransform, objectPosition);
+        Transform objectTransform = fixture.getBody().getTransform();
+        Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
+
+        final Vec2 objectRelativePosition = objectRelativeTransform.p;
 
         // Use an approximation of the distance from the sensor - just the x distance in the sensor
         // space.
-        float objectDistance = objectRelativePosition.x;
-
-        // If the object is behind us, then it can't be sensed
-        if (objectDistance < 0.0f) {
-            return null;
-        }
+        // TODO: Account for objects with negative positions
+        float objectDistance = Math.abs(objectRelativePosition.x);
 
         // Boundaries of field of view obey equation y = mx + c
         // Where: m = (+/-) fovGradient, c = 0
@@ -180,13 +178,15 @@ public abstract class Sensor {
         Shape shape = fixture.getShape();
         double objectY0, objectY1;
         if (shape.getType() == ShapeType.CIRCLE) {
-            CircleShape circle = (CircleShape) shape;
-            objectY0 = objectRelativePosition.y - circle.getRadius();
-            objectY1 = objectRelativePosition.y + circle.getRadius();
+            float radius = shape.getRadius();
+            objectY0 = objectRelativePosition.y - radius;
+            objectY1 = objectRelativePosition.y + radius;
         } else if (shape.getType() == ShapeType.POLYGON) {
-            PolygonShape polygon = (PolygonShape) shape;
-            // TODO!
-            return null;
+            // TODO: Cached AABB, testing
+            AABB aabb = new AABB();
+            shape.computeAABB(aabb, objectRelativeTransform, 0);
+            objectY0 = aabb.lowerBound.y;
+            objectY1 = aabb.upperBound.y;
         } else {
             return null; // Don't know about this shape
         }
