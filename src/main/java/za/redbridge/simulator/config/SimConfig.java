@@ -14,6 +14,7 @@ public class SimConfig {
     protected long seed;
     protected Int2D envSize;
     protected int numRobots;
+    protected long maxIterations;
 
     protected Direction targetAreaPlacement;
     protected int targetAreaThickness;
@@ -21,6 +22,7 @@ public class SimConfig {
     protected FitnessFunction fitnessFunction;
 
     protected boolean getValueFromArea;
+
 
     //default config
     public SimConfig() {
@@ -31,6 +33,7 @@ public class SimConfig {
         this.targetAreaThickness = 20;
         this.fitnessFunction = new DefaultFitnessFunction();
         this.getValueFromArea = true;
+        this.maxIterations = 10000;
     }
 
     public SimConfig(String filename) {
@@ -38,7 +41,7 @@ public class SimConfig {
     }
 
     public SimConfig(long seed, Int2D envSize, int numRobots, Direction targetAreaPlacement,
-                     int targetAreaThickness, FitnessFunction fitness, boolean getValueFromArea) {
+                     int targetAreaThickness, FitnessFunction fitness, boolean getValueFromArea, long maxIterations) {
         this.seed = seed;
         this.envSize = envSize;
         this.numRobots = numRobots;
@@ -46,6 +49,7 @@ public class SimConfig {
         this.targetAreaThickness = targetAreaThickness;
         this.fitnessFunction = fitness;
         this.getValueFromArea = getValueFromArea;
+        this.maxIterations = maxIterations;
     }
 
     public long getSeed() {

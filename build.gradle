@@ -9,6 +9,8 @@ dependencies {
   compile 'edu.gmu.mason:mason:18-SNAPSHOT'
   compile 'org.jbox2d:jbox2d-library:2.3.0-BETA'
   compile 'org.encog:encog-core:3.2.0'
+  compile 'args4j:args4j:2.0.29'
+  compile 'junit:junit:4.12-beta-1'
 }
 
 apply plugin:'application'
