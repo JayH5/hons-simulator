@@ -273,6 +273,12 @@ public class Simulation extends SimState {
         }
     }
 
+    @Override
+    public void setSeed(long seed) {
+        super.setSeed(seed);
+        config.setSeed(seed);
+    }
+
     /**
      * Get the environment (forage area) for this simulation.
      */

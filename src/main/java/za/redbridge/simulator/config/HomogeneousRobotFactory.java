@@ -23,7 +23,7 @@ public class HomogeneousRobotFactory implements RobotFactory {
     private final Int2D envSize;
     protected Phenotype phenotype;
     private static final int PLACEMENT_DISTANCE = 10;
-    private long seed;
+    private MersenneTwisterFast random;
 
     public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint, Int2D envSize, long seed) {
         this.phenotype = phenotype;
@@ -31,14 +31,13 @@ public class HomogeneousRobotFactory implements RobotFactory {
         this.radius = radius;
         this.paint = paint;
         this.envSize = envSize;
-        this.seed = seed;
+        this.random = new MersenneTwisterFast(seed);
     }
 
     @Override
     public List<RobotObject> createInstances(World world, int number) {
         List<RobotObject> result = new ArrayList<RobotObject>(number);
         Continuous2D placementEnv = new Continuous2D(1.0, envSize.x, envSize.y);
-        MersenneTwisterFast random = new MersenneTwisterFast(seed);
 
         for(int i=0; i < number; i++) {
             final int maxTries = 1000;

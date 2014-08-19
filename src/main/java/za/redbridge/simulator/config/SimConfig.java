@@ -52,9 +52,9 @@ public class SimConfig {
         this.maxIterations = maxIterations;
     }
 
-    public long getSeed() {
-        return seed;
-    }
+    public long getSeed() { return seed; }
+
+    public void setSeed(long seed) { this.seed = seed; }
 
     public Int2D getEnvSize() {
         return envSize;
