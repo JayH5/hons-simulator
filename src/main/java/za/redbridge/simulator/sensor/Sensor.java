@@ -1,9 +1,11 @@
 package za.redbridge.simulator.sensor;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.collision.RayCastInput;
+import org.jbox2d.collision.RayCastOutput;
+import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
-import org.jbox2d.collision.shapes.ShapeType;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
@@ -161,12 +163,40 @@ public abstract class Sensor {
         Transform objectTransform = fixture.getBody().getTransform();
         Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
 
-        final Vec2 objectRelativePosition = objectRelativeTransform.p;
+        Shape shape = fixture.getShape();
+        final float objectY0, objectY1, objectDistance;
+        if (shape instanceof CircleShape) {
+            objectY0 = objectRelativeTransform.p.y - shape.getRadius();
+            objectY1 = objectRelativeTransform.p.y + shape.getRadius();
+            objectDistance = objectRelativeTransform.p.x;
+        } else if (shape instanceof PolygonShape) {
+            RayCastInput rin = new RayCastInput();
+            rin.maxFraction = 1f;
+            rin.p2.x = range;
+            RayCastOutput rout = new RayCastOutput();
+            shape.raycast(rout, rin, objectRelativeTransform, 0);
 
-        // Use an approximation of the distance from the sensor - just the x distance in the sensor
-        // space.
-        // TODO: Account for objects with negative positions
-        float objectDistance = Math.abs(objectRelativePosition.x);
+            // If raycast down the middle unsuccessful, try the edges of the field of view
+            if (rout.fraction == 0f) {
+                rin.p2.y = fovGradient * range;
+                shape.raycast(rout, rin, objectRelativeTransform, 0);
+            }
+
+            if (rout.fraction == 0f) {
+                rin.p2.y = -rin.p2.y;
+                shape.raycast(rout, rin, objectRelativeTransform, 0);
+            }
+
+            objectDistance = rout.fraction * range;
+
+            AABB aabb = new AABB();
+            shape.computeAABB(aabb, objectRelativeTransform, 0);
+            objectY0 = aabb.lowerBound.y;
+            objectY1 = aabb.upperBound.y;
+        } else {
+            // Don't know this shape
+            return null;
+        }
 
         // Boundaries of field of view obey equation y = mx + c
         // Where: m = (+/-) fovGradient, c = 0
@@ -174,22 +204,6 @@ public abstract class Sensor {
         // a distance x from the sensor.
         double y1 = objectDistance / fovGradient;
         double y0 = -y1;
-
-        Shape shape = fixture.getShape();
-        double objectY0, objectY1;
-        if (shape.getType() == ShapeType.CIRCLE) {
-            float radius = shape.getRadius();
-            objectY0 = objectRelativePosition.y - radius;
-            objectY1 = objectRelativePosition.y + radius;
-        } else if (shape.getType() == ShapeType.POLYGON) {
-            // TODO: Cached AABB, testing
-            AABB aabb = new AABB();
-            shape.computeAABB(aabb, objectRelativeTransform, 0);
-            objectY0 = aabb.lowerBound.y;
-            objectY1 = aabb.upperBound.y;
-        } else {
-            return null; // Don't know about this shape
-        }
 
         // Check if object within field at all
         if (objectY1 < y0 || objectY0 > y1) {
