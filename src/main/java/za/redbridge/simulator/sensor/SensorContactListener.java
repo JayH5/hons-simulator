@@ -5,6 +5,7 @@ import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
+
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 
@@ -19,83 +20,85 @@ public class SensorContactListener implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        //System.out.println("Begin contact");
-        Fixture fixtureA = contact.getFixtureA();
-        Fixture fixtureB = contact.getFixtureB();
-
-        boolean aIsSensor = fixtureA.isSensor();
-        boolean bIsSensor = fixtureB.isSensor();
-
-        if ((aIsSensor && bIsSensor) || (!aIsSensor && !bIsSensor)) {
-            return;
-        }
-
-        final Fixture sensorFixture, objectFixture;
-        if (aIsSensor) {
-            sensorFixture = fixtureA;
-            objectFixture = fixtureB;
-        } else {
-            sensorFixture = fixtureB;
-            objectFixture = fixtureA;
-        }
-
-        if(sensorFixture.getBody() == objectFixture.getBody()){
-            return;
-        }
-
-        Object sensorData = sensorFixture.getUserData();
-
-        if (sensorData != null) {
-            if (sensorData instanceof Sensor) {
-                Sensor sensor = (Sensor) sensorData;
-                sensor.addFixtureInField(objectFixture);
-            }
-        } else {
-            sensorData = sensorFixture.getBody().getUserData();
-            if (sensorData != null && sensorData instanceof TargetAreaObject) {
-                //System.out.println("Target area!");
-                TargetAreaObject targetArea = (TargetAreaObject) sensorData;
-
-                Object objectData = objectFixture.getBody().getUserData();
-                //update value of total objects collected
-                if (objectData != null && objectData instanceof ResourceObject) {
-                    ResourceObject resourceObject = (ResourceObject) objectData;
-                    targetArea.addResource(resourceObject);
-                }
-            }
-        }
-
+        handleContact(contact, true);
     }
 
     @Override
     public void endContact(Contact contact) {
-        //System.out.println("End contact");
+        handleContact(contact, false);
+    }
+
+    /**
+     * Handle the beginning or end of a contact.
+     * @param contact the contact
+     * @param begin true if the contact has begun, false if it has ended
+     */
+    private void handleContact(Contact contact, boolean begin) {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
+
+        if (fixtureA.getBody() == fixtureB.getBody()) {
+            return; // Shouldn't happen
+        }
 
         boolean aIsSensor = fixtureA.isSensor();
         boolean bIsSensor = fixtureB.isSensor();
 
-        if (aIsSensor && bIsSensor) {
-            return;
-        }
-
+        // Both are sensor fixtures, check if one is not a robot sensor while one is
         final Fixture sensorFixture, objectFixture;
         if (aIsSensor) {
-            sensorFixture = fixtureA;
-            objectFixture = fixtureB;
-        } else {
+            if (bIsSensor) { // Both sensors of some kind
+                if (fixtureA.getUserData() instanceof Sensor) {
+                    if (!(fixtureB.getUserData() instanceof Sensor)) {
+                        // fixtureA is agent sensor, fixtureB is some other sensor
+                        sensorFixture = fixtureA;
+                        objectFixture = fixtureB;
+                    } else {
+                        return; // Both sensors are agent sensors
+                    }
+                } else if (fixtureB.getUserData() instanceof Sensor) {
+                    // fixtureB is agent sensor, fixtureA is some other sensor
+                    sensorFixture = fixtureB;
+                    objectFixture = fixtureA;
+                } else {
+                    return; // Both sensors are not agent sensors
+                }
+            } else {
+                sensorFixture = fixtureA;
+                objectFixture = fixtureB;
+            }
+        } else if (bIsSensor) {
             sensorFixture = fixtureB;
             objectFixture = fixtureA;
+        } else {
+            return; // Neither are sensors, nothing to sense
         }
 
-        Object userData = sensorFixture.getUserData();
-        if (userData == null || !(userData instanceof Sensor)) {
-            return;
-        }
+        final Object sensorData = sensorFixture.getUserData();
+        if (sensorData != null && sensorData instanceof Sensor) {
+            Sensor sensor = (Sensor) sensorData;
+            if (begin) {
+                sensor.addFixtureInField(objectFixture);
+            } else {
+                sensor.removeFixtureInField(objectFixture);
+            }
+        } else {
+            Object sensorBodyData = sensorFixture.getBody().getUserData();
+            if (sensorBodyData != null && sensorBodyData instanceof TargetAreaObject) {
+                TargetAreaObject targetArea = (TargetAreaObject) sensorBodyData;
 
-        Sensor sensor = (Sensor) userData;
-        sensor.removeFixtureInField(objectFixture);
+                Object objectBodyData = objectFixture.getBody().getUserData();
+                //update value of total objects collected
+                if (objectBodyData != null && objectBodyData instanceof ResourceObject) {
+                    ResourceObject resourceObject = (ResourceObject) objectBodyData;
+                    if (begin) {
+                        targetArea.addResource(resourceObject);
+                    } else {
+                        targetArea.removeResource(resourceObject);
+                    }
+                }
+            }
+        }
     }
 
     @Override

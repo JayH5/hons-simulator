@@ -3,9 +3,9 @@ package za.redbridge.simulator.sensor;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.RayCastInput;
 import org.jbox2d.collision.RayCastOutput;
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.collision.shapes.ShapeType;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
@@ -170,11 +170,11 @@ public abstract class Sensor {
 
         Shape shape = fixture.getShape();
         final float objectY0, objectY1, objectDistance;
-        if (shape instanceof CircleShape) {
+        if (shape.getType() == ShapeType.CIRCLE) {
             objectY0 = objectRelativeTransform.p.y - shape.getRadius();
             objectY1 = objectRelativeTransform.p.y + shape.getRadius();
             objectDistance = objectRelativeTransform.p.x;
-        } else if (shape instanceof PolygonShape) {
+        } else if (shape.getType() == ShapeType.POLYGON) {
             RayCastInput rin = new RayCastInput();
             rin.maxFraction = 1f;
             rin.p2.x = range;
@@ -193,7 +193,11 @@ public abstract class Sensor {
             }
 
             if (rout.fraction == 0f) {
-                return null; // Not much we can do
+                // Check if sensor is inside or in contact with other object
+                // If not, raycasting hit nothing
+                if (!fixture.testPoint(sensorTransform.p)) {
+                   return null;
+                }
             }
 
             objectDistance = rout.fraction * range;
