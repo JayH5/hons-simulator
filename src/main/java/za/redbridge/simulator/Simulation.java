@@ -36,8 +36,9 @@ public class Simulation extends SimState {
     private static final float VELOCITY_THRESHOLD = 0.000001f;
 
     private Continuous2D environment;
-
     private World physicsWorld;
+
+    private final SensorContactListener contactListener = new SensorContactListener();
 
     private static final float TIME_STEP = 16.0f; // 16ms = 60fps
     private static final int VELOCITY_ITERATIONS = 2;
@@ -84,17 +85,19 @@ public class Simulation extends SimState {
         schedule.reset();
         System.gc();
 
+        physicsWorld.setContactListener(contactListener);
+
+        createWalls();
+        createTargetArea();
+
         List<RobotObject> robots = rf.createInstances(physicsWorld, config.getNumRobots());
         for(RobotObject robot : robots){
             Double2D position = toDouble2D(robot.getBody().getPosition());
             environment.setObjectLocation(robot.getPortrayal(), position);
             schedule.scheduleRepeating(robot);
         }
-        createWalls();
-        createTargetArea();
-        createResources();
 
-        physicsWorld.setContactListener(new SensorContactListener());
+        createResources();
 
         schedule.scheduleRepeating(new Steppable() {
             @Override

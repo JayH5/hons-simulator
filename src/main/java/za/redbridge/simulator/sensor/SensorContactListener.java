@@ -53,7 +53,7 @@ public class SensorContactListener implements ContactListener {
         } else {
             sensorData = sensorFixture.getBody().getUserData();
             if (sensorData != null && sensorData instanceof TargetAreaObject) {
-                System.out.println("Target area!");
+                //System.out.println("Target area!");
                 TargetAreaObject targetArea = (TargetAreaObject) sensorData;
 
                 Object objectData = objectFixture.getBody().getUserData();

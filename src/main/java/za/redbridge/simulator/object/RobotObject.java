@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import sim.engine.SimState;
@@ -84,7 +85,8 @@ public class RobotObject extends PhysicalObject {
         Sensor sensor = phenotype.getSensors().get(0);
         SensorReading reading = sensor.sense();
         List<Double> values = reading.getValues();
-        double dist = !values.isEmpty() ? reading.getValues().get(0) : 0;
+        Double value = Collections.max(values);
+        double dist = value != null ? value : 0;
         getPortrayal().setPaint(new Color((int) (dist * 255), 0, 0));
 
         //Double2D wheelForces = phenotype.step(readings);

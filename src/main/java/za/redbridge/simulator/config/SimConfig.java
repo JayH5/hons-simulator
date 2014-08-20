@@ -28,7 +28,7 @@ public class SimConfig {
     public SimConfig() {
         this.seed = System.currentTimeMillis();
         this.envSize = new Int2D(102,102);
-        this.numRobots = 20;
+        this.numRobots = 15;
         this.targetAreaPlacement = Direction.SOUTH;
         this.targetAreaThickness = 20;
         this.fitnessFunction = new DefaultFitnessFunction();

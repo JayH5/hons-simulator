@@ -125,8 +125,13 @@ public abstract class Sensor {
 
     public void draw(Graphics2D graphics) {
         if (DRAW_SHAPE) {
+            portrayal.setPaint(getPaint());
             portrayal.draw(null, graphics, null);
         }
+    }
+
+    protected Paint getPaint() {
+        return PAINT;
     }
 
     public double getBearing() {

@@ -4,6 +4,8 @@ import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
 
+import java.awt.Color;
+import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,9 @@ public class ColourProximitySensor extends Sensor {
 
     public ColourProximitySensor(float bearing) {
         super(bearing, 0.0f, 30.0f, 0.1f);
+        readings.add(0.0);
+        readings.add(0.0);
+        readings.add(0.0);
     }
 
     public ColourProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
@@ -21,23 +26,28 @@ public class ColourProximitySensor extends Sensor {
 
     @Override
     protected SensorReading provideReading(List<SensedObject> objects) {
-        readings.clear();
         if (!objects.isEmpty()) {
             SensedObject closest = objects.get(0);
             double reading = 1 - Math.min(closest.getDistance() / range, 1.0);
-            if(closest.getObject() instanceof RobotObject) readings.add(reading);
-            else readings.add(0.0);
-            if(closest.getObject() instanceof ResourceObject) readings.add(reading);
-            else readings.add(0.0);
-            if(closest.getObject() instanceof WallObject) readings.add(reading);
-            else readings.add(0.0);
+            if(closest.getObject() instanceof RobotObject) readings.set(0, reading);
+            else readings.set(0, 0.0);
+            if(closest.getObject() instanceof ResourceObject) readings.set(1, reading);
+            else readings.set(1, 0.0);
+            if(closest.getObject() instanceof WallObject) readings.set(2, reading);
+            else readings.set(2, 0.0);
         } else {
-            readings.add(0.0);
-            readings.add(0.0);
-            readings.add(0.0);
+            readings.set(0, 0.0);
+            readings.set(1, 0.0);
+            readings.set(2, 0.0);
         }
 
         return new SensorReading(readings);
+    }
+
+    @Override
+    protected Paint getPaint() {
+        return new Color(readings.get(0).floatValue(), readings.get(1).floatValue(),
+                readings.get(2).floatValue(), 0.5f);
     }
 
     protected double readingCurve(double fraction) {
