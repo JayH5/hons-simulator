@@ -187,6 +187,10 @@ public abstract class Sensor {
                 shape.raycast(rout, rin, objectRelativeTransform, 0);
             }
 
+            if (rout.fraction == 0f) {
+                return null; // Not much we can do
+            }
+
             objectDistance = rout.fraction * range;
 
             AABB aabb = new AABB();
