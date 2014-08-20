@@ -273,6 +273,12 @@ public class Simulation extends SimState {
         }
     }
 
+    @Override
+    public void setSeed(long seed) {
+        super.setSeed(seed);
+        config.setSeed(seed);
+    }
+
     /**
      * Get the environment (forage area) for this simulation.
      */
@@ -284,9 +290,6 @@ public class Simulation extends SimState {
         return schedule;
     }
 
-    //get overall fitness
-    public double getFitness() { return targetArea.getTotalFitness(); }
-
     public void runForNIterations(int n) {
         for (int i = 0; i < n; i++) {
             schedule.step(this);
@@ -294,7 +297,7 @@ public class Simulation extends SimState {
     }
 
     //return the score at this point in the simulation
-    public double returnScore() { return targetArea.getTotalFitness(); }
+    public double getFitness() { return targetArea.getTotalFitness(); }
 
     /**
      * Launching the application from this main method will run the simulation in headless mode.
