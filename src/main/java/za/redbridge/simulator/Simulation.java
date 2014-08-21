@@ -1,11 +1,12 @@
 package za.redbridge.simulator;
 
+import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import sim.engine.Schedule;
@@ -16,6 +17,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.DefaultFitnessFunction;
 import za.redbridge.simulator.interfaces.RobotFactory;
+import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
@@ -23,7 +25,9 @@ import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.sensor.SensorContactListener;
 
 
+import static za.redbridge.simulator.Utils.moveAABB;
 import static za.redbridge.simulator.Utils.randomRange;
+import static za.redbridge.simulator.Utils.resizeAABB;
 import static za.redbridge.simulator.Utils.toDouble2D;
 
 /**
@@ -39,6 +43,7 @@ public class Simulation extends SimState {
     private World physicsWorld;
 
     private final SensorContactListener contactListener = new SensorContactListener();
+    private final List<PhysicalObject> objects = new ArrayList<>();
 
     private static final float TIME_STEP = 16.0f; // 16ms = 60fps
     private static final int VELOCITY_ITERATIONS = 2;
@@ -57,7 +62,6 @@ public class Simulation extends SimState {
     private static final double SMALL_OBJECT_HEIGHT = 3;
     private static final double SMALL_OBJECT_VALUE = 50.0;
     private static final double SMALL_OBJECT_MASS = 40.0;
-    private static final int PLACEMENT_DISTANCE = 10;
     private static final Color AGENT_COLOUR = new Color(106, 128, 200);
     private static final Color RESOURCE_COLOUR = new Color(255, 235, 82);
 
@@ -83,6 +87,7 @@ public class Simulation extends SimState {
         environment = new Continuous2D(1.0, config.getEnvSize().x, config.getEnvSize().y);
         physicsWorld = new World(new Vec2(0f, 0f));
         schedule.reset();
+        objects.clear();
         System.gc();
 
         physicsWorld.setContactListener(contactListener);
@@ -92,9 +97,7 @@ public class Simulation extends SimState {
 
         List<RobotObject> robots = rf.createInstances(physicsWorld, config.getNumRobots());
         for(RobotObject robot : robots){
-            Double2D position = toDouble2D(robot.getBody().getPosition());
-            environment.setObjectLocation(robot.getPortrayal(), position);
-            schedule.scheduleRepeating(robot);
+            addObject(robot, toDouble2D(robot.getBody().getPosition()));
         }
 
         createResources();
@@ -115,26 +118,32 @@ public class Simulation extends SimState {
         System.out.println("Total Fitness: " + getFitness());
     }
 
+    private void addObject(PhysicalObject object, Double2D position) {
+        environment.setObjectLocation(object.getPortrayal(), position);
+        objects.add(object);
+        schedule.scheduleRepeating(object);
+    }
+
     private void createWalls() {
         // Left
         Double2D pos = new Double2D(-1, config.getEnvSize().y / 2.0);
         WallObject wall = new WallObject(physicsWorld, pos, 1, config.getEnvSize().y + 2);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        addObject(wall, pos);
 
         // Right
         pos = new Double2D(config.getEnvSize().x + 1, config.getEnvSize().y / 2.0);
         wall = new WallObject(physicsWorld, pos, 1, config.getEnvSize().y + 2);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        addObject(wall, pos);
 
         // Top
         pos = new Double2D(config.getEnvSize().x / 2.0, -1);
         wall = new WallObject(physicsWorld, pos, config.getEnvSize().x + 2, 1);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        addObject(wall, pos);
 
         // Bottom
         pos = new Double2D(config.getEnvSize().x / 2.0, config.getEnvSize().y + 1);
         wall = new WallObject(physicsWorld, pos, config.getEnvSize().x + 2, 1);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        addObject(wall, pos);
     }
 
     //create target area
@@ -167,52 +176,7 @@ public class Simulation extends SimState {
         targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
                                                             new DefaultFitnessFunction());
 
-        environment.setObjectLocation(targetArea.getPortrayal(), pos);
-        schedule.scheduleRepeating(targetArea);
-    }
-
-    //sorry im mad at bath, these caluclate min/max coord values of the effective forage area. prob better way lay this out
-    //and calculate things
-    private Double2D calculateForageAreaXRange() {
-
-        double min = 0, max = 0;
-
-        if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH ||
-                config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
-            min = 0;
-            max = config.getEnvSize().x;
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
-            min = 0;
-            max = config.getEnvSize().x-targetArea.getWidth();
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
-            min = targetArea.getWidth();
-            max = config.getEnvSize().x;
-        }
-
-        return new Double2D(min,max);
-    }
-
-    private Double2D calculateForageAreaYRange() {
-
-        double min = 0, max = 0;
-
-        if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
-            min = targetArea.getHeight();
-            max = config.getEnvSize().y;
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
-            min = 0;
-            max = config.getEnvSize().y - targetArea.getHeight();
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST ||
-                config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
-            min = 0;
-            max = config.getEnvSize().y;
-        }
-
-        return new Double2D(min,max);
+        addObject(targetArea, pos);
     }
 
     // Find a random position within the environment that is away from other objects and forage area
@@ -220,24 +184,35 @@ public class Simulation extends SimState {
         final int maxTries = 1000;
         int tries = 1;
 
+        double minX = 0 + width / 2;
+        double maxX = environment.getWidth() - width / 2;
+        double minY = 0 + height / 2;
+        double maxY = environment.getHeight() - height / 2;
+
+        AABB aabb = new AABB();
+        resizeAABB(aabb, (float) width, (float) height);
         Double2D pos;
         do {
             if (tries++ >= maxTries) {
                 throw new RuntimeException("Unable to find space for object");
             }
 
-            double minX, maxX, minY, maxY;
-            minX = calculateForageAreaXRange().x;
-            maxX = calculateForageAreaXRange().y;
+            pos = new Double2D(randomRange(random, minX, maxX), randomRange(random, minY, maxY));
+            moveAABB(aabb, (float) pos.x, (float) pos.y);
 
-            minY = calculateForageAreaYRange().x;
-            maxY = calculateForageAreaYRange().y;
+        } while (overlappingWithOtherObject(aabb));
 
-            pos = new Double2D(randomRange(random, minX, maxX),
-                    randomRange(random, minY, maxY));
-
-        } while (!environment.getNeighborsWithinDistance(pos, PLACEMENT_DISTANCE).isEmpty());
         return pos;
+    }
+
+    private boolean overlappingWithOtherObject(AABB aabb) {
+        for (PhysicalObject object : objects) {
+            AABB otherAABB = object.getBody().getFixtureList().getAABB(0);
+            if (AABB.testOverlap(aabb, otherAABB)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void createResources() {
@@ -254,8 +229,7 @@ public class Simulation extends SimState {
                         SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, RESOURCE_COLOUR, SMALL_OBJECT_VALUE);
             }
 
-            environment.setObjectLocation(resource.getPortrayal(), pos);
-            schedule.scheduleRepeating(resource);
+            addObject(resource, pos);
         }
 
         for (int i = 0; i < NUM_LARGE_OBJECTS; i++) {
@@ -271,8 +245,7 @@ public class Simulation extends SimState {
                         LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, RESOURCE_COLOUR, LARGE_OBJECT_VALUE);
             }
 
-            environment.setObjectLocation(resource.getPortrayal(), pos);
-            schedule.scheduleRepeating(resource);
+            addObject(resource, pos);
         }
     }
 

@@ -1,5 +1,6 @@
 package za.redbridge.simulator;
 
+import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 
 import ec.util.MersenneTwisterFast;
@@ -70,5 +71,31 @@ public final class Utils {
 
     public static Double2D toDouble2D(Vec2 vec2) {
         return new Double2D(vec2.x, vec2.y);
+    }
+
+    /** Move an AABB, keeping the same size. */
+    public static void moveAABB(AABB aabb, float x, float y) {
+        // Upper bound is top right vertex
+        // Lower bound is bottom left vertex
+        float halfWidth = (aabb.upperBound.x - aabb.lowerBound.x) / 2;
+        float halfHeight = (aabb.upperBound.y - aabb.lowerBound.y) / 2;
+
+        aabb.upperBound.set(x + halfWidth, y + halfHeight);
+        aabb.lowerBound.set(x - halfWidth, y - halfHeight);
+    }
+
+    /** Resize an AABB, keeping the same center position. */
+    public static void resizeAABB(AABB aabb, float width, float height) {
+        float halfWidth = (aabb.upperBound.x - aabb.lowerBound.x) / 2;
+        float halfHeight = (aabb.upperBound.y - aabb.lowerBound.y) / 2;
+
+        float x = aabb.lowerBound.x + halfWidth;
+        float y = aabb.lowerBound.y + halfHeight;
+
+        halfWidth = width / 2;
+        halfHeight = height / 2;
+
+        aabb.upperBound.set(x + halfWidth, y + halfHeight);
+        aabb.lowerBound.set(x - halfWidth, y - halfHeight);
     }
 }
