@@ -4,6 +4,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
+import java.awt.Color;
 import java.awt.Paint;
 
 import sim.util.Double2D;
@@ -20,17 +21,19 @@ import static za.redbridge.simulator.Utils.toVec2;
  */
 public class ResourceObject extends PhysicalObject {
 
+    private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
+
     private final double value;
 
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
-                          Paint paint, double value) {
-        super(createPortrayal(width, height, paint),
+                          double value) {
+        super(createPortrayal(width, height),
                 createBody(world, position, width, height, mass));
         this.value = value;
     }
 
-    protected static Portrayal createPortrayal(double width, double height, Paint paint) {
-        return new RectanglePortrayal(width, height, paint, true);
+    protected static Portrayal createPortrayal(double width, double height) {
+        return new RectanglePortrayal(width, height, DEFAULT_COLOUR, true);
     }
 
     protected static Body createBody(World world, Double2D position, double width, double height,

@@ -5,11 +5,9 @@ import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
@@ -62,8 +60,6 @@ public class Simulation extends SimState {
     private static final double SMALL_OBJECT_HEIGHT = 3;
     private static final double SMALL_OBJECT_VALUE = 50.0;
     private static final double SMALL_OBJECT_MASS = 40.0;
-    private static final Color AGENT_COLOUR = new Color(106, 128, 200);
-    private static final Color RESOURCE_COLOUR = new Color(255, 235, 82);
 
     //derive the value of this resource from its area
     private boolean getValueFromArea = true;
@@ -118,6 +114,7 @@ public class Simulation extends SimState {
         System.out.println("Total Fitness: " + getFitness());
     }
 
+    /** Add an object to the world in the given position. */
     private void addObject(PhysicalObject object, Double2D position) {
         environment.setObjectLocation(object.getPortrayal(), position);
         objects.add(object);
@@ -148,28 +145,27 @@ public class Simulation extends SimState {
 
     //create target area
     private void createTargetArea() {
-        int width = 0, height = 0;
-        Double2D pos = new Double2D ();
+        final int width, height;
+        final Double2D pos;
 
         if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
             width = config.getEnvSize().x;
             height = config.getTargetAreaThickness();
             pos = new Double2D(width/2,height/2);
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
+        } else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
             width = config.getEnvSize().x;
             height = config.getTargetAreaThickness();
             pos = new Double2D(config.getEnvSize().x - width/2, config.getEnvSize().y - height/2);
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
+        } else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
             width = config.getTargetAreaThickness();
             height = config.getEnvSize().y;
             pos = new Double2D(config.getEnvSize().x - width/2, height/2);
-        }
-        else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
+        } else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
             width = config.getTargetAreaThickness();
             height = config.getEnvSize().y;
             pos = new Double2D(width/2,height/2);
+        } else {
+            return; // Don't know where to place this target area
         }
 
         //for now just give it the default fitness function
@@ -179,7 +175,7 @@ public class Simulation extends SimState {
         addObject(targetArea, pos);
     }
 
-    // Find a random position within the environment that is away from other objects and forage area
+    // Find a random position within the environment that is away from other objects
     private Double2D findPositionForObject(double width, double height) {
         final int maxTries = 1000;
         int tries = 1;
@@ -205,6 +201,7 @@ public class Simulation extends SimState {
         return pos;
     }
 
+    /** Returns true if the given AABB intersects with any other object's. */
     private boolean overlappingWithOtherObject(AABB aabb) {
         for (PhysicalObject object : objects) {
             AABB otherAABB = object.getBody().getFixtureList().getAABB(0);
@@ -216,34 +213,22 @@ public class Simulation extends SimState {
     }
 
     private void createResources() {
+        double value = getValueFromArea ?
+                SMALL_OBJECT_WIDTH * SMALL_OBJECT_HEIGHT : SMALL_OBJECT_VALUE;
         for (int i = 0; i < NUM_SMALL_OBJECTS; i++) {
             Double2D pos = findPositionForObject(SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT);
-            ResourceObject resource;
-
-            if (getValueFromArea) {
-                resource = new ResourceObject(physicsWorld, pos, SMALL_OBJECT_WIDTH,
-                        SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, RESOURCE_COLOUR, SMALL_OBJECT_WIDTH*SMALL_OBJECT_HEIGHT);
-            }
-            else {
-                resource = new ResourceObject(physicsWorld, pos, SMALL_OBJECT_WIDTH,
-                        SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, RESOURCE_COLOUR, SMALL_OBJECT_VALUE);
-            }
+            ResourceObject resource = new ResourceObject(physicsWorld, pos, SMALL_OBJECT_WIDTH,
+                    SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, value);
 
             addObject(resource, pos);
         }
 
+        value = getValueFromArea ?
+                LARGE_OBJECT_WIDTH * LARGE_OBJECT_HEIGHT : LARGE_OBJECT_VALUE;
         for (int i = 0; i < NUM_LARGE_OBJECTS; i++) {
             Double2D pos = findPositionForObject(LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT);
-            ResourceObject resource;
-
-            if (getValueFromArea) {
-                resource = new ResourceObject(physicsWorld, pos, LARGE_OBJECT_WIDTH,
-                        LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, RESOURCE_COLOUR, LARGE_OBJECT_WIDTH*LARGE_OBJECT_HEIGHT);
-            }
-            else {
-                resource = new ResourceObject(physicsWorld, pos, LARGE_OBJECT_WIDTH,
-                        LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, RESOURCE_COLOUR, LARGE_OBJECT_VALUE);
-            }
+            ResourceObject resource = new ResourceObject(physicsWorld, pos, LARGE_OBJECT_WIDTH,
+                    LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, value);
 
             addObject(resource, pos);
         }
@@ -255,15 +240,9 @@ public class Simulation extends SimState {
         config.setSeed(seed);
     }
 
-    /**
-     * Get the environment (forage area) for this simulation.
-     */
+    /** Get the environment (forage area) for this simulation. */
     public Continuous2D getEnvironment() {
         return environment;
-    }
-
-    public Schedule getSchedule() {
-        return schedule;
     }
 
     public void runForNIterations(int n) {
