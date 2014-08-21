@@ -139,7 +139,6 @@ public class Simulation extends SimState {
 
     //create target area
     private void createTargetArea() {
-
         int width = 0, height = 0;
         Double2D pos = new Double2D ();
 
@@ -169,6 +168,7 @@ public class Simulation extends SimState {
                                                             new DefaultFitnessFunction());
 
         environment.setObjectLocation(targetArea.getPortrayal(), pos);
+        schedule.scheduleRepeating(targetArea);
     }
 
     //sorry im mad at bath, these caluclate min/max coord values of the effective forage area. prob better way lay this out

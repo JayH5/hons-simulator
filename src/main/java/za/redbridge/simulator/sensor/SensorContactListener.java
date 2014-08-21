@@ -6,7 +6,6 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
 
-import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 
 /**
@@ -86,16 +85,10 @@ public class SensorContactListener implements ContactListener {
             Object sensorBodyData = sensorFixture.getBody().getUserData();
             if (sensorBodyData != null && sensorBodyData instanceof TargetAreaObject) {
                 TargetAreaObject targetArea = (TargetAreaObject) sensorBodyData;
-
-                Object objectBodyData = objectFixture.getBody().getUserData();
-                //update value of total objects collected
-                if (objectBodyData != null && objectBodyData instanceof ResourceObject) {
-                    ResourceObject resourceObject = (ResourceObject) objectBodyData;
-                    if (begin) {
-                        targetArea.addResource(resourceObject);
-                    } else {
-                        targetArea.removeResource(resourceObject);
-                    }
+                if (begin) {
+                    targetArea.enterObject(objectFixture);
+                } else {
+                    targetArea.exitObject(objectFixture);
                 }
             }
         }
