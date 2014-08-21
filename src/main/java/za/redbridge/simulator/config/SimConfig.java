@@ -14,6 +14,7 @@ public class SimConfig {
     protected long seed;
     protected Int2D envSize;
     protected int numRobots;
+    protected int numResources;
     protected long maxIterations;
 
     protected Direction targetAreaPlacement;
@@ -21,18 +22,16 @@ public class SimConfig {
 
     protected FitnessFunction fitnessFunction;
 
-    protected boolean getValueFromArea;
-
 
     //default config
     public SimConfig() {
         this.seed = System.currentTimeMillis();
         this.envSize = new Int2D(102,102);
         this.numRobots = 15;
+        this.numResources = 10;
         this.targetAreaPlacement = Direction.SOUTH;
         this.targetAreaThickness = 20;
         this.fitnessFunction = new DefaultFitnessFunction();
-        this.getValueFromArea = true;
         this.maxIterations = 10000;
     }
 
@@ -40,15 +39,16 @@ public class SimConfig {
         throw new RuntimeException("TODO: Implement config reading from file");
     }
 
-    public SimConfig(long seed, Int2D envSize, int numRobots, Direction targetAreaPlacement,
-                     int targetAreaThickness, FitnessFunction fitness, boolean getValueFromArea, long maxIterations) {
+    public SimConfig(long seed, Int2D envSize, int numRobots, int numResources,
+            Direction targetAreaPlacement, int targetAreaThickness, FitnessFunction fitness,
+            long maxIterations) {
         this.seed = seed;
         this.envSize = envSize;
         this.numRobots = numRobots;
+        this.numResources = numResources;
         this.targetAreaPlacement = targetAreaPlacement;
         this.targetAreaThickness = targetAreaThickness;
         this.fitnessFunction = fitness;
-        this.getValueFromArea = getValueFromArea;
         this.maxIterations = maxIterations;
     }
 
@@ -64,12 +64,14 @@ public class SimConfig {
         return numRobots;
     }
 
+    public int getNumResources() {
+        return numResources;
+    }
+
     public Direction getTargetAreaPlacement() { return targetAreaPlacement; }
 
     public int getTargetAreaThickness() { return targetAreaThickness; }
 
     public FitnessFunction getFitnessFunction() { return fitnessFunction; }
-
-    public boolean getValueFromArea() { return getValueFromArea; }
 
 }

@@ -15,8 +15,6 @@ import za.redbridge.simulator.portrayal.Portrayal;
  */
 public class PhysicalObject implements Steppable {
 
-    private String tag;
-
     private final Portrayal portrayal;
     private final Body body;
 

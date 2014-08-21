@@ -10,9 +10,11 @@ import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
-import za.redbridge.simulator.config.HomogeneousRobotFactory;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.phenotype.Phenotype;
+import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
+import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.interfaces.ResourceFactory;
+import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.phenotype.SimplePhenotype;
 
 /**
@@ -77,8 +79,12 @@ public class SimulationGUI extends GUIState {
     public static void main (String[] args) {
 
         SimConfig config = new SimConfig();
-        HomogeneousRobotFactory rf = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0, new Color(106,128,200), config.getEnvSize(), config.getSeed());
-        SimulationGUI video = new SimulationGUI(new Simulation(rf, new SimConfig()));
+        ResourceFactory resourceFactory = new HalfBigHalfSmallResourceFactory();
+        RobotFactory robotFactory = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0,
+                new Color(106,128,200));
+
+        SimulationGUI video =
+                new SimulationGUI(new Simulation(robotFactory, resourceFactory, config));
 
         //new console which displays this simulation
         Console console = new Console(video);

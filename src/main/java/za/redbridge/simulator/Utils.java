@@ -28,6 +28,15 @@ public final class Utils {
         return rand.nextDouble() * range + from;
     }
 
+    public static float randomRange(MersenneTwisterFast rand, float from, float to) {
+        if (from >= to) {
+            throw new IllegalArgumentException("`from` must be less than `to`");
+        }
+
+        float range = to - from;
+        return rand.nextFloat() * range + from;
+    }
+
     /** Check if two doubles are roughly equal */
     public static boolean equal(double lhs, double rhs) {
         return Math.abs(lhs - rhs) <= EPSILON;
@@ -35,6 +44,11 @@ public final class Utils {
 
     /** Check if two Double2Ds are roughly equal */
     public static boolean equal(Double2D lhs, Double2D rhs) {
+        return equal(lhs.x, rhs.x) && equal(lhs.y, rhs.y);
+    }
+
+    /** Check if a Double2D is roughly equal to a Vec2 */
+    public static boolean equal(Double2D lhs, Vec2 rhs) {
         return equal(lhs.x, rhs.x) && equal(lhs.y, rhs.y);
     }
 
@@ -86,16 +100,22 @@ public final class Utils {
 
     /** Resize an AABB, keeping the same center position. */
     public static void resizeAABB(AABB aabb, float width, float height) {
-        float halfWidth = (aabb.upperBound.x - aabb.lowerBound.x) / 2;
-        float halfHeight = (aabb.upperBound.y - aabb.lowerBound.y) / 2;
+        Vec2 center = aabb.getCenter();
 
-        float x = aabb.lowerBound.x + halfWidth;
-        float y = aabb.lowerBound.y + halfHeight;
+        float halfWidth = width / 2;
+        float halfHeight = height / 2;
 
-        halfWidth = width / 2;
-        halfHeight = height / 2;
+        aabb.upperBound.set(center.x + halfWidth, center.y + halfHeight);
+        aabb.lowerBound.set(center.x - halfWidth, center.y - halfHeight);
+    }
 
-        aabb.upperBound.set(x + halfWidth, y + halfHeight);
-        aabb.lowerBound.set(x - halfWidth, y - halfHeight);
+    public static AABB createAABB(float x, float y, float width, float height) {
+        float halfWidth = width / 2;
+        float halfHeight = height / 2;
+
+        Vec2 lowerBound = new Vec2(x - halfWidth, y - halfHeight);
+        Vec2 upperBound = new Vec2(x + halfWidth, y + halfHeight);
+
+        return new AABB(lowerBound, upperBound);
     }
 }

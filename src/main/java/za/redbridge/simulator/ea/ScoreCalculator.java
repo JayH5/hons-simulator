@@ -2,42 +2,35 @@ package za.redbridge.simulator.ea;
 
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
+
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.SimulationGUI;
-import za.redbridge.simulator.config.HomogeneousRobotFactory;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.interfaces.ResourceFactory;
 import za.redbridge.simulator.interfaces.RobotFactory;
-import za.redbridge.simulator.phenotype.SimplePhenotype;
-
-import java.awt.*;
 
 /**
  * Created by shsu on 2014/08/13.
  */
 public class ScoreCalculator implements CalculateScore {
 
-    private RobotFactory factory;
+    private RobotFactory robotFactory;
+    private ResourceFactory resourceFactory;
     private SimConfig config;
 
-    public ScoreCalculator(RobotFactory factory, SimConfig config) {
-
-        this.factory = factory;
+    public ScoreCalculator(RobotFactory robotFactory, ResourceFactory resourceFactory,
+            SimConfig config) {
+        this.robotFactory = robotFactory;
+        this.resourceFactory = resourceFactory;
         this.config = config;
-
     }
 
     @Override
     public double calculateScore(MLMethod method) {
-
-        SimConfig config = new SimConfig();
-        HomogeneousRobotFactory rf = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0, new Color(106,128,200), config.getEnvSize(), config.getSeed());
-
-        Simulation currentSimulation = new Simulation(factory, config);
+        Simulation currentSimulation = new Simulation(robotFactory, resourceFactory, config);
         SimulationGUI video = new SimulationGUI(currentSimulation);
 
-        double fitness = currentSimulation.getFitness();
-
-        return fitness;
+        return currentSimulation.getFitness();
     }
 
     @Override
