@@ -1,6 +1,9 @@
 package za.redbridge.simulator;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.Fixture;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +15,6 @@ import za.redbridge.simulator.object.PhysicalObject;
 
 
 import static za.redbridge.simulator.Utils.createAABB;
-import static za.redbridge.simulator.Utils.equal;
 import static za.redbridge.simulator.Utils.moveAABB;
 import static za.redbridge.simulator.Utils.randomRange;
 import static za.redbridge.simulator.Utils.resizeAABB;
@@ -26,6 +28,9 @@ import static za.redbridge.simulator.Utils.toDouble2D;
  * Created by jamie on 2014/08/21.
  */
 public class PlacementArea {
+
+    // The physics engine adds a small margin to objects placed in the world
+    private static final float PADDING = 0.03f;
 
     private final double width;
     private final double height;
@@ -53,6 +58,9 @@ public class PlacementArea {
     }
 
     Space getRandomSpace(double width, double height) {
+        width += PADDING;
+        height += PADDING;
+
         final int maxTries = 1000;
         int tries = 1;
 
@@ -83,6 +91,9 @@ public class PlacementArea {
     }
 
     Space getSpaceAtPosition(double width, double height, Double2D position) {
+        width += PADDING;
+        height += PADDING;
+
         AABB aabb =
                 createAABB((float) position.x, (float) position.y, (float) width, (float) height);
         if (overlappingWithOtherObject(aabb)) {
@@ -121,13 +132,33 @@ public class PlacementArea {
             throw new IllegalArgumentException("Placement space is not available");
         }
 
-        if (!equal(space.getPosition(), object.getBody().getPosition())) {
-            throw new IllegalArgumentException(
-                    "Object body position does not match placement space");
+        if (!space.aabb.contains(getObjectAABB(object))) {
+            throw new IllegalArgumentException("Object space does not match placement space");
         }
 
         placements.put(object, space);
         space.markUsed();
+    }
+
+    /**
+     * Get the AABB for the given object. Iterates through the fixture list to create the AABB for
+     * all the fixtures in the object.
+     * @param object the PhysicalObject
+     * @return the overall AABB for the object
+     */
+    private static AABB getObjectAABB(PhysicalObject object) {
+        Body body = object.getBody();
+        Vec2 position = body.getPosition();
+        AABB aabb = new AABB(position, position);
+
+        // Iterate through the fixtures, adding the AABBs for the ones that aren't sensors
+        for (Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
+            if (!f.isSensor()) {
+                aabb.combine(f.getAABB(0));
+            }
+        }
+
+        return aabb;
     }
 
     Set<PhysicalObject> getPlacedObjects() {
@@ -214,7 +245,7 @@ public class PlacementArea {
         }
 
         /**
-         * Get a random placement space of the given size
+         * Get a random placement space of the given size.
          * @param width width of the object to be placed
          * @param height height of the object to be placed
          * @return a free random space
@@ -224,7 +255,7 @@ public class PlacementArea {
         }
 
         /**
-         * Get a random placement space of the given size
+         * Get a random placement space of the given size.
          * @param radius radius of the object to be placed
          * @return a free random space
          */
@@ -246,8 +277,9 @@ public class PlacementArea {
 
         /**
          * Register the object a placed in the given space.
-         * Will throw exception if space already taken or object position does not match space
-         * position.
+         * Will throw exception if space already taken or space is not large enough to contain
+         * object. Note that it is possible to ask for more space than is needed for the object to
+         * be placed.
          * @param space the space to place the object
          * @param object the object to be placed
          */

@@ -11,11 +11,6 @@ import sim.util.Double2D;
  */
 public final class Utils {
 
-    private static final double EPSILON = 0.0001;
-
-    public static final double HALF_PI = Math.PI / 2;
-    public static final double TWO_PI = Math.PI * 2;
-
     private Utils() {
     }
 
@@ -35,48 +30,6 @@ public final class Utils {
 
         float range = to - from;
         return rand.nextFloat() * range + from;
-    }
-
-    /** Check if two doubles are roughly equal */
-    public static boolean equal(double lhs, double rhs) {
-        return Math.abs(lhs - rhs) <= EPSILON;
-    }
-
-    /** Check if two Double2Ds are roughly equal */
-    public static boolean equal(Double2D lhs, Double2D rhs) {
-        return equal(lhs.x, rhs.x) && equal(lhs.y, rhs.y);
-    }
-
-    /** Check if a Double2D is roughly equal to a Vec2 */
-    public static boolean equal(Double2D lhs, Vec2 rhs) {
-        return equal(lhs.x, rhs.x) && equal(lhs.y, rhs.y);
-    }
-
-    /**
-     * Normalises an angle to the range [-PI, PI]. Probably not a good idea to put very large
-     * numbers into this method.
-     * @param radians input angle
-     * @return normalised angle
-     */
-    public static double normaliseAngle(double radians) {
-        while (radians < -Math.PI) {
-            radians += TWO_PI;
-        }
-        while (radians > Math.PI) {
-            radians -= TWO_PI;
-        }
-
-        return radians;
-    }
-
-    /**
-     * Returns the angle between two points.
-     * @param p1 the first point
-     * @param p2 the second point
-     * @return angle between the points [-PI, PI]
-     */
-    public static double angleBetweenPoints(Double2D p1, Double2D p2) {
-        return Math.atan2(p2.y - p1.y, p2.x - p1.x);
     }
 
     public static Vec2 toVec2(Double2D double2D) {
@@ -109,6 +62,7 @@ public final class Utils {
         aabb.lowerBound.set(center.x - halfWidth, center.y - halfHeight);
     }
 
+    /** Create an AABB at the given position with the given size. */
     public static AABB createAABB(float x, float y, float width, float height) {
         float halfWidth = width / 2;
         float halfHeight = height / 2;
@@ -118,4 +72,5 @@ public final class Utils {
 
         return new AABB(lowerBound, upperBound);
     }
+
 }
