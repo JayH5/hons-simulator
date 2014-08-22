@@ -1,14 +1,15 @@
 package za.redbridge.simulator.object;
 
-import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.util.Double2D;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.portrayal.Portrayal;
+
+
+import static za.redbridge.simulator.Utils.toDouble2D;
 
 /**
  * Created by jamie on 2014/07/25.
@@ -38,12 +39,7 @@ public class PhysicalObject implements Steppable {
         }
 
         Simulation simulation = (Simulation) simState;
-        Vec2 pos = body.getPosition();
-        if (pos.x < 0 || pos.x > 102 || pos.y < 0 || pos.y > 102) {
-            System.out.println("Position outside of bounds: " + pos);
-        }
-
-        simulation.getEnvironment().setObjectLocation(portrayal, new Double2D(pos.x, pos.y));
+        simulation.getEnvironment().setObjectLocation(portrayal, toDouble2D(body.getPosition()));
 
         float orientation = body.getAngle();
         portrayal.setOrientation(orientation);

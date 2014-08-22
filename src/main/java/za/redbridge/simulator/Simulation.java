@@ -47,7 +47,7 @@ public class Simulation extends SimState {
 
     public Simulation(RobotFactory robotFactory, ResourceFactory resourceFactory,
             SimConfig config) {
-        super(config.getSeed());
+        super(config.getSimulationSeed());
         this.robotFactory = robotFactory;
         this.resourceFactory = resourceFactory;
         this.config = config;
@@ -58,10 +58,11 @@ public class Simulation extends SimState {
     public void start() {
         super.start();
 
-        environment = new Continuous2D(1.0, config.getEnvSize().x, config.getEnvSize().y);
+        environment =
+                new Continuous2D(1.0, config.getEnvironmentWidth(), config.getEnvironmentHeight());
         physicsWorld = new World(new Vec2(0f, 0f));
-        placementArea = new PlacementArea(config.getEnvSize().x, config.getEnvSize().y);
-        placementArea.setSeed(config.getSeed());
+        placementArea = new PlacementArea(environment.getWidth(), environment.getHeight());
+        placementArea.setSeed(config.getSimulationSeed());
         schedule.reset();
         System.gc();
 
@@ -71,9 +72,9 @@ public class Simulation extends SimState {
         createWalls();
         createTargetArea();
         robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getNumRobots());
+                .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots());
         resourceFactory.placeInstances(placementArea.new ForType<>(), physicsWorld,
-                config.getNumResources());
+                config.getObjectsResources());
 
 
         // Now actually add the objects that have been placed to the world and schedule
@@ -100,47 +101,53 @@ public class Simulation extends SimState {
 
     // Walls are simply added to environment since they do not need updating
     private void createWalls() {
+        int environmentWidth = config.getEnvironmentWidth();
+        int environmentHeight = config.getEnvironmentHeight();
+
         // Left
-        Double2D pos = new Double2D(-1, config.getEnvSize().y / 2.0);
-        WallObject wall = new WallObject(physicsWorld, pos, 1, config.getEnvSize().y + 2);
+        Double2D pos = new Double2D(-1, environmentHeight / 2.0);
+        WallObject wall = new WallObject(physicsWorld, pos, 1, environmentHeight + 2);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Right
-        pos = new Double2D(config.getEnvSize().x + 1, config.getEnvSize().y / 2.0);
-        wall = new WallObject(physicsWorld, pos, 1, config.getEnvSize().y + 2);
+        pos = new Double2D(environmentWidth + 1, environmentHeight / 2.0);
+        wall = new WallObject(physicsWorld, pos, 1, environmentHeight + 2);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Top
-        pos = new Double2D(config.getEnvSize().x / 2.0, -1);
-        wall = new WallObject(physicsWorld, pos, config.getEnvSize().x + 2, 1);
+        pos = new Double2D(environmentWidth / 2.0, -1);
+        wall = new WallObject(physicsWorld, pos, environmentWidth + 2, 1);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Bottom
-        pos = new Double2D(config.getEnvSize().x / 2.0, config.getEnvSize().y + 1);
-        wall = new WallObject(physicsWorld, pos, config.getEnvSize().x + 2, 1);
+        pos = new Double2D(environmentWidth / 2.0, environmentHeight + 1);
+        wall = new WallObject(physicsWorld, pos, environmentWidth + 2, 1);
         environment.setObjectLocation(wall.getPortrayal(), pos);
     }
 
     //create target area
     private void createTargetArea() {
+        int environmentWidth = config.getEnvironmentWidth();
+        int environmentHeight = config.getEnvironmentHeight();
+
         final int width, height;
         final Double2D pos;
 
         if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
-            width = config.getEnvSize().x;
+            width = environmentWidth;
             height = config.getTargetAreaThickness();
             pos = new Double2D(width/2,height/2);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
-            width = config.getEnvSize().x;
+            width = environmentWidth;
             height = config.getTargetAreaThickness();
-            pos = new Double2D(config.getEnvSize().x - width/2, config.getEnvSize().y - height/2);
+            pos = new Double2D(environmentWidth - width/2, environmentHeight - height/2);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
             width = config.getTargetAreaThickness();
-            height = config.getEnvSize().y;
-            pos = new Double2D(config.getEnvSize().x - width/2, height/2);
+            height = environmentHeight;
+            pos = new Double2D(environmentWidth - width/2, height/2);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
             width = config.getTargetAreaThickness();
-            height = config.getEnvSize().y;
+            height = environmentHeight;
             pos = new Double2D(width/2,height/2);
         } else {
             return; // Don't know where to place this target area
@@ -159,7 +166,7 @@ public class Simulation extends SimState {
     @Override
     public void setSeed(long seed) {
         super.setSeed(seed);
-        config.setSeed(seed);
+        config.setSimulationSeed(seed);
     }
 
     /** Get the environment (forage area) for this simulation. */

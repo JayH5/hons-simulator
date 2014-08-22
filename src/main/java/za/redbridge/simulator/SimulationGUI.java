@@ -36,7 +36,7 @@ public class SimulationGUI extends GUIState {
     public void init (Controller controller) {
         super.init(controller);
 
-        display = new Display2D(600,600,this);
+        display = new Display2D(600, 600, this);
 
         display.setClipping(false);
 
@@ -77,8 +77,13 @@ public class SimulationGUI extends GUIState {
     }
 
     public static void main (String[] args) {
+        SimConfig config;
+        if (args.length > 0) {
+            config = SimConfig.loadFromFile(args[0]);
+        } else {
+            config = new SimConfig(); // Default
+        }
 
-        SimConfig config = new SimConfig();
         ResourceFactory resourceFactory = new HalfBigHalfSmallResourceFactory();
         RobotFactory robotFactory = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0,
                 new Color(106,128,200));

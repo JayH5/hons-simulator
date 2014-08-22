@@ -11,6 +11,7 @@ dependencies {
   compile 'org.encog:encog-core:3.2.0'
   compile 'args4j:args4j:2.0.29'
   compile 'junit:junit:4.12-beta-1'
+  compile 'org.yaml:snakeyaml:1.13'
 }
 
 apply plugin:'application'

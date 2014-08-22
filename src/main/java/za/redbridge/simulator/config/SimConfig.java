@@ -1,77 +1,186 @@
 package za.redbridge.simulator.config;
 
-import sim.util.Int2D;
-import za.redbridge.simulator.ea.DefaultFitnessFunction;
-import za.redbridge.simulator.ea.FitnessFunction;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Map;
 
 public class SimConfig {
 
-    public enum Direction {
+    private static final long DEFAULT_SIMULATION_SEED = System.currentTimeMillis();
+    private static final int DEFAULT_SIMULATION_ITERATIONS = 10000;
+    private static final int DEFAULT_ENVIRONMENT_WIDTH = 100;
+    private static final int DEFAULT_ENVIRONMENT_HEIGHT = 100;
+    private static final int DEFAULT_TARGET_AREA_THICKNESS = 20;
+    private static final Direction DEFAULT_TARGET_AREA_PLACEMENT = Direction.SOUTH;
+    private static final int DEFAULT_OBJECTS_ROBOTS = 15;
+    private static final int DEFAULT_OBJECTS_RESOURCES = 10;
 
-        NORTH, SOUTH, EAST, WEST;
+    public enum Direction {
+        NORTH, SOUTH, EAST, WEST
     }
 
-    protected long seed;
-    protected Int2D envSize;
-    protected int numRobots;
-    protected int numResources;
-    protected long maxIterations;
+    private long simulationSeed;
+    private final int simulationIterations;
 
-    protected Direction targetAreaPlacement;
-    protected int targetAreaThickness;
+    private final int environmentWidth;
+    private final int environmentHeight;
 
-    protected FitnessFunction fitnessFunction;
+
+    private final int objectsRobots;
+    private final int objectsResources;
+
+
+    private final Direction targetAreaPlacement;
+    private final int targetAreaThickness;
 
 
     //default config
     public SimConfig() {
-        this.seed = System.currentTimeMillis();
-        this.envSize = new Int2D(102,102);
-        this.numRobots = 15;
-        this.numResources = 10;
-        this.targetAreaPlacement = Direction.SOUTH;
-        this.targetAreaThickness = 20;
-        this.fitnessFunction = new DefaultFitnessFunction();
-        this.maxIterations = 10000;
+        this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
+                DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
+                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_OBJECTS_RESOURCES);
     }
 
-    public SimConfig(String filename) {
-        throw new RuntimeException("TODO: Implement config reading from file");
-    }
+    public SimConfig(long simulationSeed, int simulationIterations,
+                     int environmentWidth, int environmentHeight,
+                     Direction targetAreaPlacement, int targetAreaThickness,
+                     int objectsRobots, int objectsResources) {
+        this.simulationSeed = simulationSeed;
+        this.simulationIterations = simulationIterations;
 
-    public SimConfig(long seed, Int2D envSize, int numRobots, int numResources,
-            Direction targetAreaPlacement, int targetAreaThickness, FitnessFunction fitness,
-            long maxIterations) {
-        this.seed = seed;
-        this.envSize = envSize;
-        this.numRobots = numRobots;
-        this.numResources = numResources;
+        this.environmentWidth = environmentWidth;
+        this.environmentHeight = environmentHeight;
+
         this.targetAreaPlacement = targetAreaPlacement;
         this.targetAreaThickness = targetAreaThickness;
-        this.fitnessFunction = fitness;
-        this.maxIterations = maxIterations;
+
+        this.objectsRobots = objectsRobots;
+        this.objectsResources = objectsResources;
     }
 
-    public long getSeed() { return seed; }
+    @SuppressWarnings("unchecked")
+    public static SimConfig loadFromFile(String filepath) {
+        Yaml yaml = new Yaml();
+        Map<String, Object> config;
+        try (Reader reader = Files.newBufferedReader(Paths.get(filepath))) {
+            config = (Map<String, Object>) yaml.load(reader);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
 
-    public void setSeed(long seed) { this.seed = seed; }
+        // This is fairly horrible
+        long seed = DEFAULT_SIMULATION_SEED;
+        int iterations = DEFAULT_SIMULATION_ITERATIONS;
+        int width = DEFAULT_ENVIRONMENT_WIDTH;
+        int height = DEFAULT_ENVIRONMENT_HEIGHT;
+        Direction placement = DEFAULT_TARGET_AREA_PLACEMENT;
+        int thickness = DEFAULT_TARGET_AREA_THICKNESS;
+        int robots = DEFAULT_OBJECTS_ROBOTS;
+        int resources = DEFAULT_OBJECTS_RESOURCES;
 
-    public Int2D getEnvSize() {
-        return envSize;
+        // Load simulation
+        Map simulation = (Map) config.get("simulation");
+        if (checkFieldPresent(simulation, "simulation")) {
+            Number seedField = (Number) simulation.get("seed");
+            if (checkFieldPresent(seedField, "simulation:seed")) {
+                seed = seedField.longValue();
+            }
+            Integer iterationsField = (Integer) simulation.get("iterations");
+            if (checkFieldPresent(iterationsField, "simulation:iterations")) {
+                iterations = iterationsField;
+            }
+        }
+
+        // Environment
+        Map environment = (Map) config.get("environment");
+        if (checkFieldPresent(environment, "environment")) {
+            Integer widthField = (Integer) environment.get("width");
+            if (checkFieldPresent(widthField, "environment:width")) {
+                width = widthField;
+            }
+            Integer heightField = (Integer) environment.get("height");
+            if (checkFieldPresent(heightField, "environment:height")) {
+                height = heightField;
+            }
+        }
+
+        // Target area
+        Map targetArea = (Map) config.get("targetArea");
+        if (checkFieldPresent(targetArea, "targetArea")) {
+            String placementField = (String) targetArea.get("placement");
+            if (checkFieldPresent(placementField, "targetArea:placement")) {
+                placement = Direction.valueOf(placementField.toUpperCase());
+            }
+            Integer thicknessField = (Integer) targetArea.get("thickness");
+            if (checkFieldPresent(thicknessField, "targetArea:thickness")) {
+                thickness = thicknessField;
+            }
+        }
+
+        // Objects
+        Map objects = (Map) config.get("objects");
+        if (checkFieldPresent(objects, "objects")) {
+            Integer robotsField = (Integer) objects.get("robots");
+            if (checkFieldPresent(robotsField, "objects:robots")) {
+                robots = robotsField;
+            }
+            Integer resourcesField = (Integer) objects.get("resources");
+            if (checkFieldPresent(resourcesField, "objects:resources")) {
+                resources = resourcesField;
+            }
+        }
+
+        return new SimConfig(seed, iterations, width, height, placement, thickness, robots,
+                resources);
     }
 
-    public int getNumRobots() {
-        return numRobots;
+    private static boolean checkFieldPresent(Object field, String name) {
+        if (field != null) {
+            return true;
+        }
+        System.out.println("Field '" + name + "' not present, using default");
+        return false;
     }
 
-    public int getNumResources() {
-        return numResources;
+    public long getSimulationSeed() {
+        return simulationSeed;
     }
 
-    public Direction getTargetAreaPlacement() { return targetAreaPlacement; }
+    public void setSimulationSeed(long seed) {
+        this.simulationSeed = seed;
+    }
 
-    public int getTargetAreaThickness() { return targetAreaThickness; }
+    public int getSimulationIterations() {
+        return simulationIterations;
+    }
 
-    public FitnessFunction getFitnessFunction() { return fitnessFunction; }
+    public int getEnvironmentWidth() {
+        return environmentWidth;
+    }
+
+    public int getEnvironmentHeight() {
+        return environmentHeight;
+    }
+
+    public Direction getTargetAreaPlacement() {
+        return targetAreaPlacement;
+    }
+
+    public int getTargetAreaThickness() {
+        return targetAreaThickness;
+    }
+
+    public int getObjectsRobots() {
+        return objectsRobots;
+    }
+
+    public int getObjectsResources() {
+        return objectsResources;
+    }
 
 }
