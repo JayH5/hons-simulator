@@ -111,35 +111,39 @@ public class RobotObject extends PhysicalObject {
 
         List<Double> colReadings = collisionSensor.sense().getValues();
         if(!colReadings.isEmpty()) {
-            double xColVal = colReadings.get(0);
-            double yColVal = colReadings.get(1);
-            //double angle = Math.tan(yColVal / xColVal);
+            //we negate the collision values to obtain a target coordinate
+            double xColVal = -colReadings.get(0);
+            double yColVal = -colReadings.get(1);
+            double p2 = Math.PI / 2;
             double angle;
-            double ratio = yColVal / xColVal;
-            if (ratio < 0) {
-                angle = -Math.atan(ratio);
-            } else {
-                angle = Math.atan(ratio);
+            //handle division by 0
+            if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal >= 0) {
+                angle = p2;
+            }else if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal < 0){
+                angle = p2;
+            }else{
+                angle = Math.atan(yColVal / xColVal);
             }
-            double x, y;
-            if (angle < Math.PI / 2) {
-                //scales 1 to 0
-                x = 1 - (angle / (Math.PI / 2));
-                y = 1;
-            } else if (angle < Math.PI) {
-                //scales 0 to -1
-                x = -((angle - (Math.PI / 2)) / (Math.PI / 2));
-                y = -1;
-            } else if (angle < 3 * Math.PI / 2) {
-                x = -1;
-                //scales -1 to 0
-                y = -(1 - ((angle - Math.PI) / (Math.PI / 2)));
-            } else {
-                x = 1;
-                //scales 0 to 1
-                y = ((angle - 3 * Math.PI / 2) / (Math.PI / 2));
+            double a = -1000000, b = -1000000;
+            //4 quadrants
+            if(xColVal >= 0 && yColVal > 0){
+                //first
+                a = (p2 - angle) / p2;
+                b = 1;
+            }else if(xColVal < 0 && yColVal >= 0){
+                //second
+                a = -((p2 + angle) / p2);
+                b = -1;
+            }else if(xColVal <= 0 && yColVal < 0){
+                //third
+                a = -1;
+                b = -((p2 - angle) / p2);
+            }else if(xColVal > 0 && yColVal <= 0){
+                //fourth
+                a = 1;
+                b = (p2 + angle) / p2;
             }
-            wheelDrives = new Double2D(x, y);
+            wheelDrives = new Double2D(a, b);
         }
         if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);

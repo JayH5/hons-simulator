@@ -2,6 +2,7 @@ package za.redbridge.simulator.sensor;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
@@ -17,7 +18,7 @@ import java.util.Optional;
 public class CollisionSensor extends Sensor {
 
     private final List<Double> readings = new ArrayList<>(1);
-    protected static final float RANGE = 30.0f; //make sure this is > robot radius
+    protected static final float RANGE = 10.0f; //make sure this is > robot radius
 
     public CollisionSensor() {
         this(RANGE);
@@ -45,9 +46,11 @@ public class CollisionSensor extends Sensor {
         Transform objectTransform = fixture.getBody().getTransform();
         Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
         fixture.getBody().getPosition();
-        Vec2 them = objectRelativeTransform.p;
-        double dist = sensorFixture.computeDistance(them, 0, distNormal);
+        double dist = fixture.computeDistance(sensorFixture.getBody().getPosition(), 0, distNormal);
         if(dist > RANGE) return null;
+        Vec2 them = distNormal.mul((float)-dist); //negated because the normal is given from the fixture to the sensor
+        Rot r = objectRelativeTransform.q;
+        Rot.mulToOut(r,them,them);
         PhysicalObject object = (PhysicalObject) fixture.getBody().getUserData();
         return new GeneralSensedObject(object, dist, them);
     }
