@@ -15,7 +15,7 @@ import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.sensor.SensorContactListener;
+import za.redbridge.simulator.physics.SimulationContactListener;
 
 
 import static za.redbridge.simulator.Utils.toDouble2D;
@@ -33,7 +33,7 @@ public class Simulation extends SimState {
     private World physicsWorld;
     private PlacementArea placementArea;
 
-    private final SensorContactListener contactListener = new SensorContactListener();
+    private final SimulationContactListener contactListener = new SimulationContactListener();
 
     private static final float TIME_STEP = 1f / 60f * 1000f; // 60fps
     private static final int VELOCITY_ITERATIONS = 6;

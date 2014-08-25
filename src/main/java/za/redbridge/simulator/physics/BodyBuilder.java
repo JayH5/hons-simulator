@@ -1,4 +1,4 @@
-package za.redbridge.simulator.object;
+package za.redbridge.simulator.physics;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;

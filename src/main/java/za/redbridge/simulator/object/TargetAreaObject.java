@@ -5,6 +5,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -16,13 +17,15 @@ import java.util.Set;
 import sim.engine.SimState;
 import sim.util.Double2D;
 import za.redbridge.simulator.ea.FitnessFunction;
+import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
 /**
  * Created by shsu on 2014/08/13.
  */
-public class TargetAreaObject extends PhysicalObject {
+public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static final boolean ALLOW_REMOVAL = true;
 
@@ -113,37 +116,6 @@ public class TargetAreaObject extends PhysicalObject {
         return totalFitness;
     }
 
-    public void enterObject(Fixture fixture) {
-        Object fixtureBodyData = fixture.getBody().getUserData();
-        if (!(fixtureBodyData instanceof ResourceObject)) {
-            return;
-        }
-
-        // Add to the watch list
-        if (!watchedFixtures.contains(fixture)) {
-            watchedFixtures.add(fixture);
-        }
-    }
-
-    public void exitObject(Fixture fixture) {
-        // Check if the fixture is a resource
-        Object fixtureBodyData = fixture.getBody().getUserData();
-        if (!(fixtureBodyData instanceof ResourceObject)) {
-            return;
-        }
-
-        // Remove from watch list
-        watchedFixtures.remove(fixture);
-
-        // Remove from the score
-        if (ALLOW_REMOVAL) {
-            ResourceObject resource = (ResourceObject) fixtureBodyData;
-            if (containedObjects.remove(resource)) {
-                decrementTotalObjectValue(resource.getValue());
-            }
-        }
-    }
-
     public AABB getAabb() {
         return aabb;
     }
@@ -154,6 +126,32 @@ public class TargetAreaObject extends PhysicalObject {
 
     public int getHeight() {
         return height;
+    }
+
+    @Override
+    public void handleBeginContact(Contact contact, Fixture otherFixture) {
+        if (!watchedFixtures.contains(otherFixture)) {
+            watchedFixtures.add(otherFixture);
+        }
+    }
+
+    @Override
+    public void handleEndContact(Contact contact, Fixture otherFixture) {
+        // Remove from watch list
+        watchedFixtures.remove(otherFixture);
+
+        // Remove from the score
+        if (ALLOW_REMOVAL) {
+            ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
+            if (containedObjects.remove(resource)) {
+                decrementTotalObjectValue(resource.getValue());
+            }
+        }
+    }
+
+    @Override
+    public boolean isRelevantObject(Fixture otherFixture) {
+        return otherFixture.getBody().getUserData() instanceof ResourceObject;
     }
 
 }

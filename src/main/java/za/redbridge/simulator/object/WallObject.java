@@ -5,11 +5,9 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
 import sim.util.Double2D;
+import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
-
-
-import static za.redbridge.simulator.Utils.toVec2;
 
 /**
  * Created by jamie on 2014/08/01.

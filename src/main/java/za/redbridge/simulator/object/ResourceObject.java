@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Paint;
 
 import sim.util.Double2D;
+import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 

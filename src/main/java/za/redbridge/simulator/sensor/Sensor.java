@@ -5,17 +5,20 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
-import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.portrayal.ConicSensorPortrayal;
+import org.jbox2d.dynamics.contacts.Contact;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.physics.Collideable;
+import za.redbridge.simulator.portrayal.ConicSensorPortrayal;
+
 /**
  * Created by xenos on 8/22/14.
  */
-public abstract class Sensor {
+public abstract class Sensor implements Collideable {
     protected final boolean drawShape;
 
     protected final float bearing;
@@ -28,7 +31,7 @@ public abstract class Sensor {
     protected final Transform robotRelativeTransform = new Transform();
     protected final Transform cachedGlobalTransform = new Transform();
 
-    protected final List<Fixture> sensedFixtures = new ArrayList<Fixture>();
+    protected final List<Fixture> sensedFixtures = new ArrayList<>();
 
     public Sensor(float bearing, float orientation, float range, boolean drawShape) {
         this.bearing = bearing;
@@ -47,14 +50,6 @@ public abstract class Sensor {
 
     public double getRange() {
         return range;
-    }
-
-    void addFixtureInField(Fixture fixture) {
-        sensedFixtures.add(fixture);
-    }
-
-    void removeFixtureInField(Fixture fixture) {
-        sensedFixtures.remove(fixture);
     }
 
     public SensorReading sense() {
@@ -118,6 +113,23 @@ public abstract class Sensor {
     protected abstract SensorReading provideReading(List<SensedObject> objects);
 
     protected abstract Shape createShape(Vec2 pos);
+
+    @Override
+    public void handleBeginContact(Contact contact, Fixture otherFixture) {
+        if (!sensedFixtures.contains(otherFixture)) {
+            sensedFixtures.add(otherFixture);
+        }
+    }
+
+    @Override
+    public void handleEndContact(Contact contact, Fixture otherFixture) {
+        sensedFixtures.remove(otherFixture);
+    }
+
+    @Override
+    public boolean isRelevantObject(Fixture fixture) {
+        return !(fixture.getUserData() instanceof Sensor);
+    }
 
     /**
      * Container class for intermediary sensor readings - contains the object to be sensed and
