@@ -1,6 +1,7 @@
 package za.redbridge.simulator.object;
 
-import org.jbox2d.common.Mat22;
+import org.jbox2d.common.Rot;
+import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
@@ -31,14 +32,29 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class RobotObject extends PhysicalObject {
 
-    private static final double WHEEL_POWER = 0.005; //how much force a wheel exerts when driven at full power
+    //how much force a wheel exerts when driven at full power
+    private static final double WHEEL_POWER = 0.001;
+    // The fraction of the robot's radius the wheels are away from the center
+    private static final double WHEEL_DISTANCE = 0.75;
+
     private final Phenotype phenotype;
+
+    private final Vec2 leftWheelPosition;
+    private final Vec2 rightWheelPosition;
+
+    // Cached Vec2's for calculating wheel force and position of force
+    private final Vec2 wheelForce = new Vec2();
+    private final Vec2 wheelForcePosition = new Vec2();
 
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
                        Phenotype phenotype) {
         super(createPortrayal(radius, paint, phenotype), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
         attachSensors();
+
+        float wheelDistance = (float) (radius * WHEEL_DISTANCE);
+        leftWheelPosition = new Vec2(0f, wheelDistance);
+        rightWheelPosition = new Vec2(0f, -wheelDistance);
     }
 
     private void attachSensors() {
@@ -85,27 +101,29 @@ public class RobotObject extends PhysicalObject {
         double dist = value != null ? value : 0;
         getPortrayal().setPaint(new Color((int) (dist * 255), 0, 0));
 
-        //Double2D wheelForces = phenotype.step(readings);
-        Double2D wheelForces = new Double2D(1.0, 0.2);
-        if(Math.abs(wheelForces.x) > 1.0 || Math.abs(wheelForces.y) > 1.0) {
-            throw new RuntimeException("Invalid force applied: " + wheelForces);
+        //Double2D wheelDrives = phenotype.step(readings);
+        Double2D wheelDrives = new Double2D(1.0, 0.2);
+        if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
+            throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
-        //rotation matrix
-        Mat22 rotM = Mat22.createRotationalTransform(getBody().getAngle());
 
-        Vec2 wheel1Force = rotM.mul(new Vec2(0, (float)(wheelForces.x * WHEEL_POWER)));
-        Vec2 wheel2Force = rotM.mul(new Vec2(0, (float)(wheelForces.y * WHEEL_POWER)));
+        applyWheelForce(wheelDrives.x, leftWheelPosition);
+        applyWheelForce(wheelDrives.y, rightWheelPosition);
+    }
 
-        double radius = ((CirclePortrayal)getPortrayal()).getRadius();
-        Vec2 position = getBody().getPosition();
-        Vec2 wheel1Offset = rotM.mul(new Vec2((float)(0.75*radius),0));
-        Vec2 wheel2Offset = rotM.mul(new Vec2((float)(-0.75*radius),0));
+    private void applyWheelForce(double wheelDrive, Vec2 wheelPosition) {
+        final Transform bodyTransform = getBody().getTransform();
 
-        Vec2 wheel1Position = position.add(wheel1Offset);
-        Vec2 wheel2Position = position.add(wheel2Offset);
+        // Calculate the force due to the wheel
+        float magnitude = (float) (wheelDrive * WHEEL_POWER);
+        wheelForce.set(magnitude, 0f);
+        Rot.mulToOut(bodyTransform.q, wheelForce, wheelForce);
 
-        getBody().applyForce(wheel1Force, wheel1Position);
-        getBody().applyForce(wheel2Force, wheel2Position);
+        // Calculate position of force
+        Transform.mulToOut(bodyTransform, wheelPosition, wheelForcePosition);
+
+        // Apply force
+        getBody().applyForce(wheelForce, wheelForcePosition);
     }
 
     private static class RobotPortrayal extends CirclePortrayal {
