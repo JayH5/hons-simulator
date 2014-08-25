@@ -6,16 +6,16 @@ import java.util.List;
 /**
  * Created by jamie on 2014/08/05.
  */
-public class ProximitySensor extends Sensor {
+public class ProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(1);
 
-    public ProximitySensor(float bearing) {
-        super(bearing, 0.0f, 30.0f, 0.1f);
+    public ProximityAgentSensor(float bearing) {
+        super(bearing, 0.0f, 30.0f, true, 0.1f);
     }
 
-    public ProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
-        super(bearing, orientation, range, fieldOfView);
+    public ProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        super(bearing, orientation, range, true, fieldOfView);
     }
 
     @Override

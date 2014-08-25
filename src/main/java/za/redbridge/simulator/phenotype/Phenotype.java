@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.sensor.Sensor;
+import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
 /**
@@ -14,9 +14,9 @@ public interface Phenotype extends Cloneable {
 
     /**
      * Returns the list of sensors this bot has on it
-     * @return a List of Sensor objects
+     * @return a List of AgentSensor objects
      */
-    List<Sensor> getSensors();
+    List<AgentSensor> getSensors();
 
     /**
      * Process the sensor inputs and provide actuator outputs
@@ -44,7 +44,7 @@ public interface Phenotype extends Cloneable {
         }
 
         @Override
-        public List<Sensor> getSensors() {
+        public List<AgentSensor> getSensors() {
             return Collections.emptyList();
         }
     };

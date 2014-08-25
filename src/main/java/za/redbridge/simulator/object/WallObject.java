@@ -29,8 +29,8 @@ public class WallObject extends PhysicalObject {
         return bb.setBodyType(BodyType.STATIC)
                 .setPosition(position)
                 .setRectangular(width, height)
-                .setFriction(0.0f)
-                .setRestitution(1.0f)
+                .setFriction(0.8f)
+                .setRestitution(1f)
                 .build(world);
     }
 }

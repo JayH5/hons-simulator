@@ -3,13 +3,9 @@ package za.redbridge.simulator.object;
 import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.*;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Paint;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +16,8 @@ import sim.util.Double2D;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.sensor.AgentSensor;
+import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.Sensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
@@ -38,6 +36,7 @@ public class RobotObject extends PhysicalObject {
     private static final double WHEEL_DISTANCE = 0.75;
 
     private final Phenotype phenotype;
+    private final CollisionSensor collisionSensor;
 
     private final Vec2 leftWheelPosition;
     private final Vec2 rightWheelPosition;
@@ -55,11 +54,14 @@ public class RobotObject extends PhysicalObject {
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
         leftWheelPosition = new Vec2(0f, wheelDistance);
         rightWheelPosition = new Vec2(0f, -wheelDistance);
+
+        collisionSensor = new CollisionSensor();
+        collisionSensor.attach(this, 0.0f);
     }
 
     private void attachSensors() {
-        for (Sensor sensor : phenotype.getSensors()) {
-            sensor.attach(this);
+        for (AgentSensor sensor : phenotype.getSensors()) {
+            sensor.attach(this, this.getRadius());
         }
     }
 
@@ -85,11 +87,9 @@ public class RobotObject extends PhysicalObject {
     public void step(SimState sim) {
         super.step(sim);
 
-        //setVelocity(new Double2D(getVelocity().x * 1.005, getVelocity().y * 1.005));
-
-        List<Sensor> sensors = phenotype.getSensors();
+        List<AgentSensor> sensors = phenotype.getSensors();
         List<SensorReading> readings = new ArrayList<SensorReading>(sensors.size());
-        for(Sensor sensor : sensors) {
+        for(AgentSensor sensor : sensors) {
             readings.add(sensor.sense());
         }
 
@@ -103,6 +103,39 @@ public class RobotObject extends PhysicalObject {
 
         //Double2D wheelDrives = phenotype.step(readings);
         Double2D wheelDrives = new Double2D(1.0, 0.2);
+
+        List<Double> colReadings = collisionSensor.sense().getValues();
+        if(!colReadings.isEmpty()) {
+            double xColVal = colReadings.get(0);
+            double yColVal = colReadings.get(1);
+            //double angle = Math.tan(yColVal / xColVal);
+            double angle;
+            double ratio = yColVal / xColVal;
+            if (ratio < 0) {
+                angle = -Math.atan(ratio);
+            } else {
+                angle = Math.atan(ratio);
+            }
+            double x, y;
+            if (angle < Math.PI / 2) {
+                //scales 1 to 0
+                x = 1 - (angle / (Math.PI / 2));
+                y = 1;
+            } else if (angle < Math.PI) {
+                //scales 0 to -1
+                x = -((angle - (Math.PI / 2)) / (Math.PI / 2));
+                y = -1;
+            } else if (angle < 3 * Math.PI / 2) {
+                x = -1;
+                //scales -1 to 0
+                y = -(1 - ((angle - Math.PI) / (Math.PI / 2)));
+            } else {
+                x = 1;
+                //scales 0 to 1
+                y = ((angle - 3 * Math.PI / 2) / (Math.PI / 2));
+            }
+            wheelDrives = new Double2D(x, y);
+        }
         if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
@@ -138,7 +171,7 @@ public class RobotObject extends PhysicalObject {
         @Override
         protected void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
             // Draw all the sensors
-            for (Sensor sensor : phenotype.getSensors()) {
+            for (AgentSensor sensor : phenotype.getSensors()) {
                 sensor.draw(graphics);
             }
         }

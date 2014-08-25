@@ -9,19 +9,19 @@ import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColourProximitySensor extends Sensor {
+public class ColourProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(3);
 
-    public ColourProximitySensor(float bearing) {
-        super(bearing, 0.0f, 30.0f, 0.1f);
+    public ColourProximityAgentSensor(float bearing) {
+        super(bearing, 0.0f, 30.0f, true, 0.1f);
         readings.add(0.0);
         readings.add(0.0);
         readings.add(0.0);
     }
 
-    public ColourProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
-        super(bearing, orientation, range, fieldOfView);
+    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        super(bearing, orientation, range, true, fieldOfView);
     }
 
     @Override

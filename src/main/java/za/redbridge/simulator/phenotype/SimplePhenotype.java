@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.sensor.ColourProximitySensor;
-import za.redbridge.simulator.sensor.ProximitySensor;
-import za.redbridge.simulator.sensor.Sensor;
+import za.redbridge.simulator.sensor.ProximityAgentSensor;
+import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
 /**
@@ -14,22 +13,22 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class SimplePhenotype implements Phenotype {
 
-    private final List<Sensor> sensors;
+    private final List<AgentSensor> sensors;
 
     public SimplePhenotype() {
-        Sensor sensor1 = new ProximitySensor(0.0f);
+        AgentSensor sensor1 = new ProximityAgentSensor(0.0f);
         sensors = new ArrayList<>();
         sensors.add(sensor1);
     }
 
     @Override
-    public List<Sensor> getSensors() {
+    public List<AgentSensor> getSensors() {
         return sensors;
     }
 
     @Override
     public Double2D step(List<SensorReading> list) {
-        return new Double2D((float)Math.random()*0.03f - 0.015f, (float)Math.random()*0.03f - 0.015f);
+        return new Double2D((float)Math.random()*1f - 0.5f, (float)Math.random()*1f - 0.5f);
     }
 
     @Override

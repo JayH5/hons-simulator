@@ -9,7 +9,7 @@ import sim.portrayal.DrawInfo2D;
 /**
  * Created by jamie on 2014/08/07.
  */
-public class SensorPortrayal extends Portrayal {
+public class ConicSensorPortrayal extends Portrayal {
 
     private final Polygon triangle;
 
@@ -19,8 +19,8 @@ public class SensorPortrayal extends Portrayal {
     private double offsetX;
     private double offsetY;
 
-    public SensorPortrayal(double bearing, double orientation, double range, double fieldOfView,
-            Paint paint) {
+    public ConicSensorPortrayal(double bearing, double orientation, double range, double fieldOfView,
+                                Paint paint) {
         super(paint, true);
 
         this.bearing = bearing;
