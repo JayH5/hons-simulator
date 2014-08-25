@@ -22,9 +22,6 @@ import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.Sensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
-
-import static za.redbridge.simulator.Utils.toVec2;
-
 /**
  * Object that represents a finished agent in the environment, including controller and all physical attributes.
  *
@@ -57,9 +54,8 @@ public class RobotObject extends PhysicalObject {
     protected static Body createBody(World world, Double2D position, double radius, double mass) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.DYNAMIC)
-                .setPosition(toVec2(position))
-                .setCircular((float) radius)
-                .setDensity((float) (mass / (Math.PI * radius * radius)))
+                .setPosition(position)
+                .setCircular(radius, mass)
                 .setFriction(0.7f)
                 .setRestitution(1.0f)
                 .build(world);

@@ -19,9 +19,6 @@ import za.redbridge.simulator.ea.FitnessFunction;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
-
-import static za.redbridge.simulator.Utils.toVec2;
-
 /**
  * Created by shsu on 2014/08/13.
  */
@@ -67,7 +64,7 @@ public class TargetAreaObject extends PhysicalObject {
     protected static Body createBody(World world, Double2D position, int width, int height) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.STATIC)
-                .setPosition(toVec2(position))
+                .setPosition(position)
                 .setRectangular(width, height)
                 .setSensor(true)
                 .build(world);

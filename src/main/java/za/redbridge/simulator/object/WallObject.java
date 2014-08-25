@@ -27,7 +27,7 @@ public class WallObject extends PhysicalObject {
     protected static Body createBody(World world, Double2D position, int width, int height) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.STATIC)
-                .setPosition(toVec2(position))
+                .setPosition(position)
                 .setRectangular(width, height)
                 .setFriction(0.0f)
                 .setRestitution(1.0f)

@@ -11,9 +11,6 @@ import sim.util.Double2D;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
-
-import static za.redbridge.simulator.Utils.toVec2;
-
 /**
  * Object to represent the resources in the environment. Has a value and a weight.
  *
@@ -40,9 +37,8 @@ public class ResourceObject extends PhysicalObject {
                                      double mass) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.DYNAMIC)
-                .setPosition(toVec2(position))
-                .setRectangular((float) width, (float) height)
-                .setDensity((float) (mass / (width * height)))
+                .setPosition(position)
+                .setRectangular(width, height, mass)
                 .setFriction(0.9f)
                 .setRestitution(1.0f)
                 .build(world);

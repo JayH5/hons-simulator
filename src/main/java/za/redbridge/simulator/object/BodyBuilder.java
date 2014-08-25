@@ -10,6 +10,11 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
+import sim.util.Double2D;
+
+
+import static za.redbridge.simulator.Utils.toVec2;
+
 /**
  * Builder API for creating Body objects with a single fixture.
  * Created by jamie on 2014/08/06.
@@ -30,6 +35,10 @@ public class BodyBuilder {
     public BodyBuilder setPosition(Vec2 position) {
         bd.position = position;
         return this;
+    }
+
+    public BodyBuilder setPosition(Double2D position) {
+        return setPosition(toVec2(position));
     }
 
     public BodyBuilder setPosition(float x, float y) {
@@ -70,13 +79,47 @@ public class BodyBuilder {
     public BodyBuilder setCircular(float radius) {
         CircleShape shape = new CircleShape();
         shape.setRadius(radius);
-        return setShape(shape);
+        fd.shape = shape;
+        return this;
+    }
+
+    public BodyBuilder setCircular(double radius) {
+        return setCircular((float) radius);
+    }
+
+    public BodyBuilder setCircular(float radius, float mass) {
+        CircleShape shape = new CircleShape();
+        shape.setRadius(radius);
+        fd.shape = shape;
+        fd.density = (float) Math.PI * radius * radius / mass;
+        return this;
+    }
+
+    public BodyBuilder setCircular(double radius, double mass) {
+        return setCircular((float) radius, (float) mass);
     }
 
     public BodyBuilder setRectangular(float width, float height) {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(width / 2, height / 2);
-        return setShape(shape);
+        fd.shape = shape;
+        return this;
+    }
+
+    public BodyBuilder setRectangular(double width, double height) {
+        return setRectangular((float) width, (float) height);
+    }
+
+    public BodyBuilder setRectangular(float width, float height, float mass) {
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(width / 2, height / 2);
+        fd.shape = shape;
+        fd.density = height * width / mass;
+        return this;
+    }
+
+    public BodyBuilder setRectangular(double width, double height, double mass) {
+        return setRectangular((float) width, (float) height, (float) mass);
     }
 
     public BodyBuilder setDensity(float density) {
