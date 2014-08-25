@@ -1,4 +1,6 @@
-package za.redbridge.simulator.experiment;
+package za.redbridge.simulator.config;
+
+import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 
 /**
  * Created by shsu on 2014/08/19.
@@ -7,27 +9,32 @@ package za.redbridge.simulator.experiment;
 //parameters for experiment configuration
 public class ExperimentConfig {
 
-    public enum EvolutionaryAlgorithm {
+    public enum EA {
         NEAT, EVOLUTIONARY_STRATEGY, GENETIC_PROGRAMMING;
     }
 
+    private static final EA DEFAULT_EA = EA.NEAT;
+    private static final long DEFAULT_MAX_EPOCHS = 100;
+    private static final boolean DEFAULT_HEAD = false;
+
+
     protected long maxEpochs;
-    protected EvolutionaryAlgorithm algorithm;
+    protected EA algorithm;
 
     public ExperimentConfig() {
         this.maxEpochs = 100;
-        this.algorithm = EvolutionaryAlgorithm.NEAT;
+        this.algorithm = EA.NEAT;
     }
 
     public ExperimentConfig(String filename) { throw new RuntimeException("TODO: Read configs from file."); }
 
-    public ExperimentConfig(EvolutionaryAlgorithm algorithm, long maxEpochs) {
+    public ExperimentConfig(EA algorithm, long maxEpochs) {
         this.algorithm = algorithm;
         this.maxEpochs = maxEpochs;
     }
 
     public long getMaxEpochs() { return maxEpochs; }
-    public EvolutionaryAlgorithm getEvolutionaryAlgorithm() { return algorithm; }
+    public EA getEvolutionaryAlgorithm() { return algorithm; }
 
 
 

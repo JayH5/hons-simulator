@@ -3,7 +3,9 @@ package za.redbridge.simulator.config;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;

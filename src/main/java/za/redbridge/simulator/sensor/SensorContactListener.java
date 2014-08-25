@@ -9,7 +9,7 @@ import org.jbox2d.dynamics.contacts.Contact;
 import za.redbridge.simulator.object.TargetAreaObject;
 
 /**
- * The contact listener for sensor intersections
+ * The contact listener for sensor intersections & other collision events
  * Created by jamie on 2014/08/13.
  */
 public class SensorContactListener implements ContactListener {
@@ -92,6 +92,8 @@ public class SensorContactListener implements ContactListener {
                 }
             }
         }
+
+
     }
 
     @Override

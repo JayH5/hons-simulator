@@ -14,14 +14,14 @@ public class ColourProximitySensor extends Sensor {
     private final List<Double> readings = new ArrayList<>(3);
 
     public ColourProximitySensor(float bearing) {
-        super(bearing, 0.0f, 30.0f, 0.1f);
-        readings.add(0.0);
-        readings.add(0.0);
-        readings.add(0.0);
+        this(bearing, 0.0f, 30.0f, 0.1f);
     }
 
     public ColourProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
         super(bearing, orientation, range, fieldOfView);
+        readings.add(0.0);
+        readings.add(0.0);
+        readings.add(0.0);
     }
 
     @Override
