@@ -20,11 +20,16 @@ import static za.redbridge.simulator.Utils.toVec2;
  * Created by jamie on 2014/08/06.
  */
 public class BodyBuilder {
+
+    private static final float DEFAULT_ANGULAR_DAMPING = .1f;
+    private static final float DEFAULT_LINEAR_DAMPING = .1f;
+
     private BodyDef bd = new BodyDef();
     private FixtureDef fd = new FixtureDef();
 
     public BodyBuilder() {
-
+        bd.setAngularDamping(DEFAULT_ANGULAR_DAMPING);
+        bd.setLinearDamping(DEFAULT_LINEAR_DAMPING);
     }
 
     public BodyBuilder setBodyType(BodyType type) {
