@@ -6,7 +6,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.junit.Assert;
 
-//entry point into simulator
+//example entry point into simulator
 /**
  * Created by shsu on 2014/08/19.
  */

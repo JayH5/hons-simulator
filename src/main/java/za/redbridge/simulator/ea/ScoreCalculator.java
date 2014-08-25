@@ -12,6 +12,7 @@ import za.redbridge.simulator.interfaces.RobotFactory;
 /**
  * Created by shsu on 2014/08/13.
  */
+
 public class ScoreCalculator implements CalculateScore {
 
     private RobotFactory robotFactory;
