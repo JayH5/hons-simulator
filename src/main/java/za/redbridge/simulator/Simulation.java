@@ -35,9 +35,9 @@ public class Simulation extends SimState {
 
     private final SensorContactListener contactListener = new SensorContactListener();
 
-    private static final float TIME_STEP = 16.0f; // 16ms = 60fps
-    private static final int VELOCITY_ITERATIONS = 2;
-    private static final int POSITION_ITERATIONS = 1;
+    private static final float TIME_STEP = 1f / 60f * 1000f; // 60fps
+    private static final int VELOCITY_ITERATIONS = 6;
+    private static final int POSITION_ITERATIONS = 3;
 
     private TargetAreaObject targetArea;
 
@@ -60,7 +60,7 @@ public class Simulation extends SimState {
 
         environment =
                 new Continuous2D(1.0, config.getEnvironmentWidth(), config.getEnvironmentHeight());
-        physicsWorld = new World(new Vec2(0f, 0f));
+        physicsWorld = new World(new Vec2());
         placementArea = new PlacementArea(environment.getWidth(), environment.getHeight());
         placementArea.setSeed(config.getSimulationSeed());
         schedule.reset();
