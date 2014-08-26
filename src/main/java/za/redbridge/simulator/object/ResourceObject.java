@@ -106,7 +106,7 @@ public class ResourceObject extends PhysicalObject implements Collideable {
 
         if (!isValidAttachment(resourceBody, collisionPoint)) {
             return;
-        }*/
+        }
 
         WeldJointDef wjd = new WeldJointDef();
         wjd.initialize(resourceBody, robotBody, collisionPoint);
