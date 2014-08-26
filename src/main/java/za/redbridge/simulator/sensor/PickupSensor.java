@@ -15,6 +15,7 @@ import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
 /**
+ * Sensor to detect when object hit a certain position on the agent
  * Created by jamie on 2014/08/26.
  */
 public class PickupSensor extends Sensor<ResourceObject> {
@@ -27,6 +28,7 @@ public class PickupSensor extends Sensor<ResourceObject> {
         this.width = width;
         this.height = height;
         this.bearing = bearing;
+        setDrawEnabled(true);
     }
 
     @Override

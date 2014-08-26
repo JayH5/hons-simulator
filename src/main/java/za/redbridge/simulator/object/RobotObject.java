@@ -11,6 +11,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
@@ -22,6 +23,7 @@ import za.redbridge.simulator.portrayal.DrawExtra;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
+import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.Sensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
@@ -41,6 +43,7 @@ public class RobotObject extends PhysicalObject {
 
     private final Phenotype phenotype;
     private final CollisionSensor collisionSensor;
+    private final PickupSensor pickupSensor;
 
     private final Vec2 leftWheelPosition;
     private final Vec2 rightWheelPosition;
@@ -57,6 +60,8 @@ public class RobotObject extends PhysicalObject {
         this.phenotype = phenotype;
 
         collisionSensor = new CollisionSensor();
+        // TODO: Make configurable or decide on good defaults
+        pickupSensor = new PickupSensor(1f, 2f, 0f);
         initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
@@ -70,6 +75,7 @@ public class RobotObject extends PhysicalObject {
         }
 
         collisionSensor.attach(this);
+        pickupSensor.attach(this);
 
         getPortrayal().setDrawExtra(new DrawExtra() {
             @Override
@@ -78,6 +84,7 @@ public class RobotObject extends PhysicalObject {
                     sensor.draw(object, graphics, info);
                 }
                 collisionSensor.draw(object, graphics, info);
+                pickupSensor.draw(object, graphics, info);
             }
         });
     }
@@ -105,24 +112,28 @@ public class RobotObject extends PhysicalObject {
         super.step(sim);
 
         List<AgentSensor> sensors = phenotype.getSensors();
-        List<SensorReading> readings = new ArrayList<SensorReading>(sensors.size());
+        List<SensorReading> readings = new ArrayList<>(sensors.size());
         for(AgentSensor sensor : sensors) {
             readings.add(sensor.sense());
         }
 
-        Double2D wheelDrives = phenotype.step(readings);
+        Optional<Vec2> collision = collisionSensor.sense();
+        Double2D wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
+                .orElse(phenotype.step(readings));
 
-        List<Double> colReadings = collisionSensor.sense().getValues();
-        if(!colReadings.isEmpty()) {
-            //we negate the collision values to obtain a target coordinate
-            wheelDrives = wheelDriveFromTargetPosition(new Double2D(-colReadings.get(0), -colReadings.get(1)));
-        }
-        if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
+        if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
         applyWheelForce(wheelDrives.x, leftWheelPosition);
         applyWheelForce(wheelDrives.y, rightWheelPosition);
+
+        if (!isBoundToResource) {
+            ResourceObject resourceObject = pickupSensor.sense();
+            if (resourceObject != null) {
+                resourceObject.tryPickup(this);
+            }
+        }
     }
 
     private void applyWheelForce(double wheelDrive, Vec2 wheelPosition) {
@@ -148,12 +159,12 @@ public class RobotObject extends PhysicalObject {
         this.isBoundToResource = isBoundToResource;
     }
 
-    protected Double2D wheelDriveFromTargetPosition(Double2D targetPos){
+    protected Double2D wheelDriveFromTargetPosition(Vec2 targetPos){
         double p2 = Math.PI / 2;
-        double angle;
+
         //handle division by 0
-        if(targetPos.x == 0.0) angle = p2;
-        else angle = Math.atan(targetPos.y / targetPos.x);
+        double angle = targetPos.x != 0.0 ? Math.atan(targetPos.y / targetPos.x) : p2;
+
         double a, b;
         //4 quadrants
         if(targetPos.x >= 0 && targetPos.y > 0){

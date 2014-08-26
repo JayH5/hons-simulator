@@ -7,25 +7,22 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
-import za.redbridge.simulator.object.ResourceObject;
-import za.redbridge.simulator.object.TargetAreaObject;
 
 
 /**
  * Created by jamie on 2014/08/05.
  */
-public class CollisionSensor extends Sensor<SensorReading> {
+public class CollisionSensor extends Sensor<Optional<Vec2>> {
 
-    private final List<Double> readings = new ArrayList<>(1);
     private static final float DEFAULT_RANGE = 10.0f; //make sure this is > robot radius
 
     private final float range;
@@ -56,31 +53,30 @@ public class CollisionSensor extends Sensor<SensorReading> {
         return new CirclePortrayal(range, DEFAULT_PAINT, true);
     }
 
-    protected SensedObject senseFixture(Fixture fixture) {
+    protected SensedCollision senseFixture(Fixture fixture) {
         Transform objectRelativeTransform = getFixtureRelativeTransform(fixture);
 
         Vec2 distNormal = new Vec2();
         double dist = fixture.computeDistance(getBody().getPosition(), 0, distNormal);
 
-        if(dist > range) return null;
+        if(dist > range) {
+            return null;
+        }
+
         Vec2 them = distNormal.mul((float)-dist); //negated because the normal is given from the fixture to the sensor
         Rot r = objectRelativeTransform.q;
-        Rot.mulToOut(r,them,them);
-        PhysicalObject object = (PhysicalObject) fixture.getBody().getUserData();
-        return new SensedObject(object, dist, them);
+        Rot.mulToOut(r, them, them);
+        return new SensedCollision(dist, them);
     }
 
     @Override
-    protected SensorReading provideReading(List<Fixture> fixtures) {
-        Optional<SensedObject> closest = fixtures.stream()
+    protected Optional<Vec2> provideReading(List<Fixture> fixtures) {
+        Optional<SensedCollision> closest = fixtures.stream()
                 .map(this::senseFixture)
                 .filter(o -> o != null)
-                .min((a, b) -> new Double(a.getDistance()).compareTo(b.getDistance()));
+                .min(Comparator.<SensedCollision>naturalOrder());
 
-        readings.clear();
-        closest.ifPresent(o -> readings.add((double)o.getPosition().x));
-        closest.ifPresent(o -> readings.add((double)o.getPosition().y));
-        return new SensorReading(readings);
+        return closest.map(SensedCollision::getPosition);
     }
 
     @Override
@@ -91,20 +87,14 @@ public class CollisionSensor extends Sensor<SensorReading> {
 
     }
 
-    protected static class SensedObject {
+    protected static class SensedCollision implements Comparable<SensedCollision> {
 
-        private final PhysicalObject object;
         private final double distance;
         private final Vec2 position;
 
-        public SensedObject(PhysicalObject object, double distance, Vec2 position) {
-            this.object = object;
+        public SensedCollision(double distance, Vec2 position) {
             this.distance = distance;
             this.position = position;
-        }
-
-        public PhysicalObject getObject() {
-            return object;
         }
 
         public double getDistance() {
@@ -113,6 +103,11 @@ public class CollisionSensor extends Sensor<SensorReading> {
 
         public Vec2 getPosition() {
             return position;
+        }
+
+        @Override
+        public int compareTo(SensedCollision o) {
+            return Double.compare(distance, o.distance);
         }
     }
 }

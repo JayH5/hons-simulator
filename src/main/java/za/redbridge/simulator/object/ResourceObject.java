@@ -1,17 +1,14 @@
 package za.redbridge.simulator.object;
 
-import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.JointDef;
-import org.jbox2d.dynamics.joints.WeldJointDef;
+import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -19,12 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import org.jfree.util.Rotation;
 import sim.engine.SimState;
 import sim.util.Double2D;
-import za.redbridge.simulator.interfaces.Robot;
 import za.redbridge.simulator.physics.BodyBuilder;
-import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
@@ -33,7 +27,7 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
  *
  * Created by jamie on 2014/07/23.
  */
-public class ResourceObject extends PhysicalObject implements Collideable {
+public class ResourceObject extends PhysicalObject {
 
     private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
 
@@ -90,45 +84,52 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         }
     }
 
-    @Override
-    public void handleBeginContact(Contact contact, Fixture otherFixture) {
+    public void tryPickup(RobotObject robot) {
         if (isCollected) {
             return;
         }
 
-        // Get the robot and make sure it's not already bound to a resource
-        RobotObject robot = (RobotObject) otherFixture.getBody().getUserData();
-
         if (jointList.get(robot) != null && pendingRobots.contains(robot)) {
-            return;
-        }
-
-        if (robot.isBoundToResource()) {
-            return;
-        }
-
-        // Bind to the robot by creating a weld
-        // Cheat by making the bind point the
-        if (contact.getManifold().pointCount < 1) {
             return;
         }
 
         Body resourceBody = getBody();
         Body robotBody = robot.getBody();
 
-        WorldManifold manifold = new WorldManifold();
-        contact.getWorldManifold(manifold);
-        Vec2 collisionPoint = manifold.points[0];
+        Transform resourceTransform = resourceBody.getTransform();
+        Transform robotTransform = robotBody.getTransform();
 
-        /*if (!isValidAttachment(resourceBody, collisionPoint)) {
-            return;
-        }*/
+        Transform robotRelativeTransform = Transform.mulTrans(resourceTransform, robotTransform);
 
-        WeldJointDef wjd = new WeldJointDef();
-        wjd.initialize(resourceBody, robotBody, collisionPoint);
-        wjd.collideConnected = true;
-        //wjd.referenceAngle = robotBody.getAngle() - resourceBody.getAngle();
-        pendingJoints.push(wjd);
+        Vec2 anchorA;
+        float referenceAngle;
+        if (Math.abs(robotRelativeTransform.p.x) > Math.abs(robotRelativeTransform.p.y)) {
+            if (robotRelativeTransform.p.x > 0) { // Right side
+                anchorA = new Vec2((float) width / 2, 0);
+                referenceAngle = (float) Math.PI;
+            } else { // Left side
+                anchorA = new Vec2((float) -width / 2, 0);
+                referenceAngle = 0f;
+            }
+        } else {
+            if (robotRelativeTransform.p.y > 0) { // Top side
+                anchorA = new Vec2(0, (float) height / 2);
+                referenceAngle = (float) -Math.PI / 2;
+            } else { // Bottom side
+                anchorA = new Vec2(0, (float) -height / 2);
+                referenceAngle = (float) Math.PI / 2;
+            }
+        }
+
+        RevoluteJointDef rjd = new RevoluteJointDef();
+        rjd.bodyA = resourceBody;
+        rjd.bodyB = robotBody;
+        rjd.referenceAngle = referenceAngle;
+        rjd.localAnchorA = anchorA;
+        rjd.localAnchorB.set(robot.getRadius() + 0.01f, 0f); // Attach to front of robot
+        rjd.collideConnected = true;
+
+        pendingJoints.push(rjd);
         pendingRobots.push(robot);
 
         // Mark the robot as bound
@@ -142,26 +143,14 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         resourceBody.getLocalPointToOut(anchor, anchorOnResource);
 
         //get normalised angle
-        float orientation = (float) (getBody().getAngle());
+        float orientation = getBody().getAngle();
 
         Rot rot = new Rot(orientation);
         Transform boxTransform = new Transform(getBody().getLocalCenter(), rot);
 
-        Vec2 rotatedAnchor = boxTransform.mul(boxTransform, anchorOnResource);
+        Vec2 rotatedAnchor = Transform.mul(boxTransform, anchorOnResource);
 
         return rotatedAnchor.y <= 0 && rotatedAnchor.y >= -height/2;
-    }
-
-    @Override
-    public void handleEndContact(Contact contact, Fixture otherFixture) {
-        // Nothing to do
-    }
-
-    @Override
-    public boolean isRelevantObject(Fixture otherFixture) {
-        // Only care about collisions with agents
-        return otherFixture.getBody().getUserData() instanceof RobotObject
-                && otherFixture.getUserData() == null;
     }
 
     /**
@@ -187,7 +176,6 @@ public class ResourceObject extends PhysicalObject implements Collideable {
             RobotObject robot = (RobotObject) robotJoint.getBodyB().getUserData();
             robot.setBoundToResource(false);
             getBody().getWorld().destroyJoint(robotJoint);
-            robotJoint = null;
         }
 
     }
