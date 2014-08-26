@@ -1,14 +1,24 @@
 package za.redbridge.simulator.object;
 
+import org.jbox2d.collision.WorldManifold;
+import org.jbox2d.common.Transform;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.Contact;
+import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.JointDef;
+import org.jbox2d.dynamics.joints.WeldJointDef;
 
 import java.awt.Color;
 import java.awt.Paint;
 
+import sim.engine.SimState;
 import sim.util.Double2D;
 import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
@@ -17,11 +27,16 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
  *
  * Created by jamie on 2014/07/23.
  */
-public class ResourceObject extends PhysicalObject {
+public class ResourceObject extends PhysicalObject implements Collideable {
 
     private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
 
     private final double value;
+
+    private JointDef pendingJoint = null;
+    private Joint robotJoint = null;
+
+    private boolean isCollected = false;
 
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
                           double value) {
@@ -49,4 +64,84 @@ public class ResourceObject extends PhysicalObject {
         return value;
     }
 
+    @Override
+    public void step(SimState simState) {
+        super.step(simState);
+        if (pendingJoint != null) {
+            robotJoint = getBody().getWorld().createJoint(pendingJoint);
+            pendingJoint = null;
+        }
+    }
+
+    @Override
+    public void handleBeginContact(Contact contact, Fixture otherFixture) {
+        if (pendingJoint != null || robotJoint != null || isCollected) {
+            return;
+        }
+
+        // Get the robot and make sure it's not already bound to a resource
+        RobotObject robot = (RobotObject) otherFixture.getBody().getUserData();
+        if (robot.isBoundToResource()) {
+            return;
+        }
+
+        // Bind to the robot by creating a weld
+        // Cheat by making the bind point the
+        if (contact.getManifold().pointCount < 1) {
+            return;
+        }
+
+        Body resourceBody = getBody();
+        Body robotBody = robot.getBody();
+
+        WorldManifold manifold = new WorldManifold();
+        contact.getWorldManifold(manifold);
+        Vec2 collisionPoint = manifold.points[0];
+
+        WeldJointDef wjd = new WeldJointDef();
+        wjd.initialize(resourceBody, robotBody, collisionPoint);
+        wjd.collideConnected = true;
+        //wjd.referenceAngle = robotBody.getAngle() - resourceBody.getAngle();
+        pendingJoint = wjd;
+
+        // Mark the robot as bound
+        robot.setBoundToResource(true);
+    }
+
+    @Override
+    public void handleEndContact(Contact contact, Fixture otherFixture) {
+        // Nothing to do
+    }
+
+    @Override
+    public boolean isRelevantObject(Fixture otherFixture) {
+        // Only care about collisions with agents
+        return otherFixture.getBody().getUserData() instanceof RobotObject
+                && otherFixture.getUserData() == null;
+    }
+
+    /**
+     * Check whether this object has been collected
+     * @return true if the object is in the target area
+     */
+    public boolean isCollected() {
+        return isCollected;
+    }
+
+    /**
+     * Mark this object as collected. i.e. mark it as being in the target area
+     */
+    public void markCollected() {
+        this.isCollected = true;
+        breakRobotWeldJoint();
+    }
+
+    private void breakRobotWeldJoint() {
+        if (robotJoint != null) {
+            RobotObject robot = (RobotObject) robotJoint.getBodyB().getUserData();
+            robot.setBoundToResource(false);
+            getBody().getWorld().destroyJoint(robotJoint);
+            robotJoint = null;
+        }
+    }
 }

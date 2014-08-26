@@ -83,6 +83,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
+                    resource.markCollected();
                     resource.getPortrayal().setPaint(Color.CYAN);
                     incrementTotalObjectValue(resource.getValue());
                 }

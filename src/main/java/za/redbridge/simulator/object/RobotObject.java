@@ -50,6 +50,8 @@ public class RobotObject extends PhysicalObject {
     private final Vec2 wheelForce = new Vec2();
     private final Vec2 wheelForcePosition = new Vec2();
 
+    private boolean isBoundToResource = false;
+
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
                        Phenotype phenotype) {
         super(createPortrayal(radius, paint, phenotype), createBody(world, position, radius, mass));
@@ -166,6 +168,14 @@ public class RobotObject extends PhysicalObject {
 
         // Apply force
         getBody().applyForce(wheelForce, wheelForcePosition);
+    }
+
+    public boolean isBoundToResource() {
+        return isBoundToResource;
+    }
+
+    public void setBoundToResource(boolean isBoundToResource) {
+        this.isBoundToResource = isBoundToResource;
     }
 
     private static class RobotPortrayal extends CirclePortrayal {
