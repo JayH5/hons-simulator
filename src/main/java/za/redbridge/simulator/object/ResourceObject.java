@@ -104,7 +104,7 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         contact.getWorldManifold(manifold);
         Vec2 collisionPoint = manifold.points[0];
 
-        /*if (!isValidAttachment(resourceBody, collisionPoint)) {
+        if (!isValidAttachment(resourceBody, collisionPoint)) {
             return;
         }*/
 

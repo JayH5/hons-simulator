@@ -142,6 +142,13 @@ public class RobotObject extends PhysicalObject {
         getBody().applyForce(wheelForce, wheelForcePosition);
     }
 
+    public boolean isBoundToResource() {
+        return isBoundToResource;
+    }
+
+    public void setBoundToResource(boolean isBoundToResource) {
+        this.isBoundToResource = isBoundToResource;
+    }
 
     protected Double2D wheelDriveFromTargetPosition(Double2D targetPos){
         double xColVal = targetPos.x;
