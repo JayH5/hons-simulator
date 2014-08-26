@@ -149,36 +149,31 @@ public class RobotObject extends PhysicalObject {
     }
 
     protected Double2D wheelDriveFromTargetPosition(Double2D targetPos){
-        double xColVal = targetPos.x;
-        double yColVal = targetPos.y;
         double p2 = Math.PI / 2;
         double angle;
         //handle division by 0
-        if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal >= 0) {
-            angle = p2;
-        }else if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal < 0){
-            angle = p2;
-        }else{
-            angle = Math.atan(yColVal / xColVal);
-        }
-        double a = -1000000, b = -1000000;
+        if(targetPos.x == 0.0) angle = p2;
+        else angle = Math.atan(targetPos.y / targetPos.x);
+        double a, b;
         //4 quadrants
-        if(xColVal >= 0 && yColVal > 0){
+        if(targetPos.x >= 0 && targetPos.y > 0){
             //first
             a = (p2 - angle) / p2;
             b = 1;
-        }else if(xColVal < 0 && yColVal >= 0){
+        }else if(targetPos.x < 0 && targetPos.y >= 0){
             //second
             a = -((p2 + angle) / p2);
             b = -1;
-        }else if(xColVal <= 0 && yColVal < 0){
+        }else if(targetPos.x <= 0 && targetPos.y < 0){
             //third
             a = -1;
             b = -((p2 - angle) / p2);
-        }else if(xColVal > 0 && yColVal <= 0){
+        }else if(targetPos.x > 0 && targetPos.y <= 0){
             //fourth
             a = 1;
             b = (p2 + angle) / p2;
+        }else{
+            throw new RuntimeException("wheelDriveFromTargetPosition quadrant check failed!");
         }
         return new Double2D(a, b);
     }
