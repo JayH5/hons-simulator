@@ -15,10 +15,14 @@ import org.jbox2d.dynamics.joints.WeldJointDef;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 import org.jfree.util.Rotation;
 import sim.engine.SimState;
 import sim.util.Double2D;
+import za.redbridge.simulator.interfaces.Robot;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
@@ -35,12 +39,15 @@ public class ResourceObject extends PhysicalObject implements Collideable {
 
     private final double value;
 
-    private JointDef pendingJoint = null;
-    private Joint robotJoint = null;
-
     private double width, height;
-
     private boolean isCollected = false;
+
+    //keep track of all the bots attached to this ResourceObject
+    private Map<RobotObject, Joint> jointList;
+
+    //keep track of all the pending joints that need to be made and their corresponding bots
+    private Stack<JointDef> pendingJoints;
+    private Stack<RobotObject> pendingRobots;
 
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
                           double value) {
@@ -49,6 +56,10 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         this.value = value;
         this.width = width;
         this.height = height;
+
+        jointList = new HashMap<>();
+        pendingJoints = new Stack<>();
+        pendingRobots = new Stack<>();
     }
 
     protected static Portrayal createPortrayal(double width, double height) {
@@ -73,20 +84,25 @@ public class ResourceObject extends PhysicalObject implements Collideable {
     @Override
     public void step(SimState simState) {
         super.step(simState);
-        if (pendingJoint != null) {
-            robotJoint = getBody().getWorld().createJoint(pendingJoint);
-            pendingJoint = null;
+        if (!pendingJoints.empty() && !pendingRobots.empty()) {
+            Joint joint = getBody().getWorld().createJoint(pendingJoints.pop());
+            jointList.put(pendingRobots.pop(), joint);
         }
     }
 
     @Override
     public void handleBeginContact(Contact contact, Fixture otherFixture) {
-        if (pendingJoint != null || robotJoint != null || isCollected) {
+        if (isCollected) {
             return;
         }
 
         // Get the robot and make sure it's not already bound to a resource
         RobotObject robot = (RobotObject) otherFixture.getBody().getUserData();
+
+        if (jointList.get(robot) != null && pendingRobots.contains(robot)) {
+            return;
+        }
+
         if (robot.isBoundToResource()) {
             return;
         }
@@ -104,15 +120,16 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         contact.getWorldManifold(manifold);
         Vec2 collisionPoint = manifold.points[0];
 
-        if (!isValidAttachment(resourceBody, collisionPoint)) {
+        /*if (!isValidAttachment(resourceBody, collisionPoint)) {
             return;
-        }
+        }*/
 
         WeldJointDef wjd = new WeldJointDef();
         wjd.initialize(resourceBody, robotBody, collisionPoint);
         wjd.collideConnected = true;
         //wjd.referenceAngle = robotBody.getAngle() - resourceBody.getAngle();
-        pendingJoint = wjd;
+        pendingJoints.push(wjd);
+        pendingRobots.push(robot);
 
         // Mark the robot as bound
         robot.setBoundToResource(true);
@@ -125,7 +142,7 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         resourceBody.getLocalPointToOut(anchor, anchorOnResource);
 
         //get normalised angle
-        float orientation = (float) (getBody().getAngle()% (2*Math.PI));
+        float orientation = (float) (getBody().getAngle());
 
         Rot rot = new Rot(orientation);
         Transform boxTransform = new Transform(getBody().getLocalCenter(), rot);
@@ -164,11 +181,14 @@ public class ResourceObject extends PhysicalObject implements Collideable {
     }
 
     private void breakRobotWeldJoint() {
-        if (robotJoint != null) {
+
+        for (RobotObject r: jointList.keySet()) {
+            Joint robotJoint = jointList.get(r);
             RobotObject robot = (RobotObject) robotJoint.getBodyB().getUserData();
             robot.setBoundToResource(false);
             getBody().getWorld().destroyJoint(robotJoint);
             robotJoint = null;
         }
+
     }
 }
