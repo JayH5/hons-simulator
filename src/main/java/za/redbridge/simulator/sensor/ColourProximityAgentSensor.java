@@ -25,7 +25,7 @@ public class ColourProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    protected SensorReading provideReading(List<SensedObject> objects) {
+    protected SensorReading provideObjectReading(List<SensedObject> objects) {
         if (!objects.isEmpty()) {
             SensedObject closest = objects.get(0);
             double reading = 1 - Math.min(closest.getDistance() / range, 1.0);

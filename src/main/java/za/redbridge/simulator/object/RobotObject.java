@@ -111,7 +111,7 @@ public class RobotObject extends PhysicalObject {
         }
 
         // DEBUG
-        Sensor sensor = phenotype.getSensors().get(0);
+        AgentSensor sensor = phenotype.getSensors().get(0);
         SensorReading reading = sensor.sense();
         List<Double> values = reading.getValues();
         Double value = Collections.max(values);

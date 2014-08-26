@@ -12,6 +12,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
@@ -21,7 +22,7 @@ import za.redbridge.simulator.portrayal.Portrayal;
 /**
  * Describes a sensor implementation. The actual sensor is implemented in the simulator.
  */
-public abstract class AgentSensor extends Sensor {
+public abstract class AgentSensor extends Sensor<SensorReading> {
 
     protected final float bearing;
     protected final float orientation;
@@ -76,15 +77,22 @@ public abstract class AgentSensor extends Sensor {
         return new ConePortrayal(range, fieldOfView, DEFAULT_PAINT);
     }
 
+    @Override
+    protected SensorReading provideReading(List<Fixture> fixtures) {
+        return provideObjectReading(fixtures.stream()
+                .map(this::senseFixture)
+                .filter(o -> o != null)
+                .collect(Collectors.toList()));
+    }
+
     /**
      * Determines whether an object lies within the field of the sensor and if so where in the field
      * the object exists.
      * @param fixture the fixture to check
-     * @return a {@link SensedObject} reading if the object is in the field, else null
+     * @return a {@link za.redbridge.simulator.sensor.AgentSensor.SensedObject} reading if the object is in the field, else null
      */
-    protected SensedObject senseFixture(Fixture fixture, Transform sensorTransform) {
-        Transform objectTransform = fixture.getBody().getTransform();
-        Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
+    protected SensedObject senseFixture(Fixture fixture) {
+        Transform objectRelativeTransform = getFixtureRelativeTransform(fixture);
 
         Shape shape = fixture.getShape();
         final float objectY0, objectY1, objectDistance;
@@ -113,7 +121,7 @@ public abstract class AgentSensor extends Sensor {
             if (rout.fraction == 0f) {
                 // Check if sensor is inside or in contact with other object
                 // If not, raycasting hit nothing
-                if (!fixture.testPoint(sensorTransform.p)) {
+                if (!fixture.testPoint(getSensorTransform().p)) {
                    return null;
                 }
             }
@@ -155,6 +163,49 @@ public abstract class AgentSensor extends Sensor {
      * @param objects the objects in the sensor's field, sorted by distance
      * @return the reading of the objects produced by the sensor
      */
-    protected abstract SensorReading provideReading(List<SensedObject> objects);
+    protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
+
+    /**
+     * Container class for intermediary sensor readings - contains the object to be sensed and
+     * information about its location.
+     */
+    protected static class SensedObject implements Comparable<SensedObject> {
+        private final PhysicalObject object;
+        private final double spanStart;
+        private final double spanEnd;
+        private final double distance;
+
+        public SensedObject(PhysicalObject object, double dist, double spanStart, double spanEnd) {
+            this.object = object;
+            this.distance = dist;
+            this.spanStart = spanStart;
+            this.spanEnd = spanEnd;
+        }
+
+        /** Get the detected object. */
+        public PhysicalObject getObject() {
+            return object;
+        }
+
+        /** Get the estimated distance to the object. */
+        public double getDistance() {
+            return distance;
+        }
+
+        /** Get the start of the object's coverage of the field of view */
+        public double getSpanStart() {
+            return spanStart;
+        }
+
+        /** Get the end of the object's coverage of the field of view */
+        public double getSpanEnd() {
+            return spanEnd;
+        }
+
+        @Override
+        public int compareTo(SensedObject o) {
+            return Double.compare(distance, o.distance);
+        }
+    }
 
 }

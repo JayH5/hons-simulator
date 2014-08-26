@@ -1,6 +1,9 @@
 package za.redbridge.simulator.sensor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class FilteredProximityAgentSensor extends AgentSensor {
 
@@ -21,7 +24,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    protected SensorReading provideReading(List<SensedObject> objects) {
+    protected SensorReading provideObjectReading(List<SensedObject> objects) {
         for(SensedObject o : objects){
             if(!whitelist.contains(o.getObject().getClass())){
                 objects.remove(o);

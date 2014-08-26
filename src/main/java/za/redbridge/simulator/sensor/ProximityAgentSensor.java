@@ -19,7 +19,7 @@ public class ProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    protected SensorReading provideReading(List<SensedObject> objects) {
+    protected SensorReading provideObjectReading(List<SensedObject> objects) {
         double reading = 0.0;
         if (!objects.isEmpty()) {
             reading = 1 - Math.min(objects.get(0).getDistance() / range, 1.0);

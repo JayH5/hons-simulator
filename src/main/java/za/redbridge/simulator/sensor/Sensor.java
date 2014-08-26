@@ -16,15 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sim.portrayal.DrawInfo2D;
-import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
 
 /**
+ * The base class for all sensors that attach to a RobotObject.
+ *
  * Created by xenos on 8/22/14.
+ * @param <T> the type that this Sensor returns from the {@link #sense()} method
  */
-public abstract class Sensor implements Collideable {
+public abstract class Sensor<T> implements Collideable {
     protected static final Paint DEFAULT_PAINT = new Color(100, 100, 100, 100);
 
     private boolean drawEnabled = false;
@@ -33,30 +35,54 @@ public abstract class Sensor implements Collideable {
     private Fixture sensorFixture;
 
     private Transform robotRelativeTransform;
-    private final Transform cachedGlobalTransform = new Transform();
+
+    private boolean cachedSensorTransformValid;
+    private final Transform cachedSensorTransform = new Transform();
+    private final Transform cachedObjectRelativeTransform = new Transform();
 
     private final List<Fixture> sensedFixtures = new ArrayList<>();
 
     public Sensor() {
     }
 
-    public SensorReading sense() {
+    public final T sense() {
         if (sensorFixture == null) {
             throw new IllegalStateException("Sensor not attached, cannot sense");
         }
 
-        Transform robotTransform = sensorFixture.getBody().getTransform();
-        Transform.mulToOut(robotTransform, robotRelativeTransform, cachedGlobalTransform);
+        // Invalidate the cached transform
+        cachedSensorTransformValid = false;
 
-        List<SensedObject> sensedObjects = new ArrayList<>();
-        for (Fixture f : sensedFixtures) {
-            SensedObject obj = senseFixture(f, cachedGlobalTransform);
-            if (obj != null) {
-                sensedObjects.add(obj);
-            }
+        List<Fixture> fixtures = new ArrayList<>(sensedFixtures);
+        return provideReading(fixtures);
+    }
+
+    /**
+     * Get this sensor's global transform. NOTE: this transform is cached. If you change the value
+     * of the returned Transform object very bad things will happen.
+     * @return this sensor's global transform
+     */
+    protected final Transform getSensorTransform() {
+        if (!cachedSensorTransformValid) {
+            Transform robotTransform = sensorFixture.getBody().getTransform();
+            Transform.mulToOut(robotTransform, robotRelativeTransform, cachedSensorTransform);
+            cachedSensorTransformValid = true;
         }
+        return cachedSensorTransform;
+    }
 
-        return provideReading(sensedObjects);
+    /**
+     * Get the fixture's transform relative to this sensor. NOTE: this transform is cached. The same
+     * Transform object is used for every Fixture passed to this method.
+     * @param fixture the fixture
+     * @return the fixture's body's transform relative to this sensor
+     */
+    protected final Transform getFixtureRelativeTransform(Fixture fixture) {
+        Transform objectTransform = fixture.getBody().getTransform();
+        Transform sensorTransform = getSensorTransform();
+
+        Transform.mulTransToOut(sensorTransform, objectTransform, cachedObjectRelativeTransform);
+        return cachedObjectRelativeTransform;
     }
 
     public final void attach(RobotObject robot) {
@@ -131,9 +157,13 @@ public abstract class Sensor implements Collideable {
         return DEFAULT_PAINT;
     }
 
-    protected abstract SensedObject senseFixture(Fixture fixture, Transform sensorTransform);
-
-    protected abstract SensorReading provideReading(List<SensedObject> objects);
+    /**
+     * Converts a list of fixtures that have been determined to fall within the sensor's range into
+     * the output of this sensor
+     * @param fixtures the fixtures in the sensor's field
+     * @return the reading of the objects produced by the sensor
+     */
+    protected abstract T provideReading(List<Fixture> fixtures);
 
     public final Body getBody() {
         return sensorFixture.getBody();
@@ -170,46 +200,4 @@ public abstract class Sensor implements Collideable {
         return !(fixture.getUserData() instanceof Sensor);
     }
 
-    /**
-     * Container class for intermediary sensor readings - contains the object to be sensed and
-     * information about its location.
-     */
-    protected static class SensedObject implements Comparable<SensedObject> {
-        private final PhysicalObject object;
-        private final double spanStart;
-        private final double spanEnd;
-        private final double distance;
-
-        public SensedObject(PhysicalObject object, double dist, double spanStart, double spanEnd) {
-            this.object = object;
-            this.distance = dist;
-            this.spanStart = spanStart;
-            this.spanEnd = spanEnd;
-        }
-
-        /** Get the object that has been sensed */
-        public PhysicalObject getObject() {
-            return object;
-        }
-
-        /** Get the estimated distance to the object. */
-        public double getDistance() {
-            return distance;
-        }
-
-        /** Get the start of the object's coverage of the field of view */
-        public double getSpanStart() {
-            return spanStart;
-        }
-
-        /** Get the end of the object's coverage of the field of view */
-        public double getSpanEnd() {
-            return spanEnd;
-        }
-
-        @Override
-        public int compareTo(SensedObject o) {
-            return Double.compare(distance, o.distance);
-        }
-    }
 }

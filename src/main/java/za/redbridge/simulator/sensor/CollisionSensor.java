@@ -6,20 +6,21 @@ import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Created by jamie on 2014/08/05.
  */
-public class CollisionSensor extends Sensor {
+public class CollisionSensor extends Sensor<SensorReading> {
 
     private final List<Double> readings = new ArrayList<>(1);
     private static final float DEFAULT_RANGE = 10.0f; //make sure this is > robot radius
@@ -52,22 +53,8 @@ public class CollisionSensor extends Sensor {
         return new CirclePortrayal(range, DEFAULT_PAINT, true);
     }
 
-    protected static class GeneralSensedObject extends SensedObject{
-        protected Vec2 position;
-        public GeneralSensedObject(PhysicalObject object, double dist, Vec2 position) {
-            super(object, dist, 0.0, 0.0);
-            this.position = position;
-        }
-
-        public Vec2 getPosition() {
-            return position;
-        }
-    }
-
-    @Override
-    protected SensedObject senseFixture(Fixture fixture, Transform sensorTransform) {
-        Transform objectTransform = fixture.getBody().getTransform();
-        Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
+    protected SensedObject senseFixture(Fixture fixture) {
+        Transform objectRelativeTransform = getFixtureRelativeTransform(fixture);
 
         Vec2 distNormal = new Vec2();
         double dist = fixture.computeDistance(getBody().getPosition(), 0, distNormal);
@@ -77,14 +64,15 @@ public class CollisionSensor extends Sensor {
         Rot r = objectRelativeTransform.q;
         Rot.mulToOut(r,them,them);
         PhysicalObject object = (PhysicalObject) fixture.getBody().getUserData();
-        return new GeneralSensedObject(object, dist, them);
+        return new SensedObject(object, dist, them);
     }
 
     @Override
-    protected SensorReading provideReading(List<SensedObject> objects) {
-        Optional<GeneralSensedObject> closest = objects.stream()
-                .min((a,b) -> new Double(a.getDistance()).compareTo(b.getDistance()))
-                .map(o -> (GeneralSensedObject)o);
+    protected SensorReading provideReading(List<Fixture> fixtures) {
+        Optional<SensedObject> closest = fixtures.stream()
+                .map(this::senseFixture)
+                .filter(o -> o != null)
+                .min((a, b) -> new Double(a.getDistance()).compareTo(b.getDistance()));
 
         readings.clear();
         closest.ifPresent(o -> readings.add((double)o.getPosition().x));
@@ -92,15 +80,34 @@ public class CollisionSensor extends Sensor {
         return new SensorReading(readings);
     }
 
-    protected double readingCurve(double fraction) {
-        // Sigmoid proximity response
-        final double offset = 0.5;
-        return 1 / (1 + Math.exp(fraction + offset));
-    }
-
     @Override
     public boolean isRelevantObject (Fixture fixture) {
         return !(fixture.getUserData() instanceof Sensor) &&
                 !(fixture.getBody().getUserData() instanceof TargetAreaObject);
+    }
+
+    protected static class SensedObject {
+
+        private final PhysicalObject object;
+        private final double distance;
+        private final Vec2 position;
+
+        public SensedObject(PhysicalObject object, double distance, Vec2 position) {
+            this.object = object;
+            this.distance = distance;
+            this.position = position;
+        }
+
+        public PhysicalObject getObject() {
+            return object;
+        }
+
+        public double getDistance() {
+            return distance;
+        }
+
+        public Vec2 getPosition() {
+            return position;
+        }
     }
 }
