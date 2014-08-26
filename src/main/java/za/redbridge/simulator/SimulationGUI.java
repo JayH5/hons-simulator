@@ -15,6 +15,7 @@ import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.interfaces.ResourceFactory;
 import za.redbridge.simulator.interfaces.RobotFactory;
+import za.redbridge.simulator.phenotype.ChasingPhenotype;
 import za.redbridge.simulator.phenotype.SimplePhenotype;
 
 /**
@@ -86,7 +87,7 @@ public class SimulationGUI extends GUIState {
 
         ResourceFactory resourceFactory = new HalfBigHalfSmallResourceFactory();
         RobotFactory robotFactory = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0,
-                new Color(106,128,200));
+                new Color(0,0,0));
 
         SimulationGUI video =
                 new SimulationGUI(new Simulation(robotFactory, resourceFactory, config));
