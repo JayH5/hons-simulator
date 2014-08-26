@@ -20,6 +20,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
+import za.redbridge.simulator.portrayal.DrawExtra;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
@@ -52,26 +53,37 @@ public class RobotObject extends PhysicalObject {
 
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
                        Phenotype phenotype) {
-        super(createPortrayal(radius, paint, phenotype), createBody(world, position, radius, mass));
+        super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
-        attachSensors();
+
+        collisionSensor = new CollisionSensor();
+        initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
         leftWheelPosition = new Vec2(0f, wheelDistance);
         rightWheelPosition = new Vec2(0f, -wheelDistance);
-
-        collisionSensor = new CollisionSensor();
-        collisionSensor.attach(this, 0.0f);
     }
 
-    private void attachSensors() {
+    private void initSensors() {
         for (AgentSensor sensor : phenotype.getSensors()) {
-            sensor.attach(this, this.getRadius());
+            sensor.attach(this);
         }
+
+        collisionSensor.attach(this);
+
+        getPortrayal().setDrawExtra(new DrawExtra() {
+            @Override
+            public void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
+                for (Sensor sensor : phenotype.getSensors()) {
+                    sensor.draw(object, graphics, info);
+                }
+                collisionSensor.draw(object, graphics, info);
+            }
+        });
     }
 
-    protected static Portrayal createPortrayal(double radius, Paint paint, Phenotype phenotype) {
-        return new RobotPortrayal(radius, paint, phenotype);
+    protected static Portrayal createPortrayal(double radius, Paint paint) {
+        return new CirclePortrayal(radius, paint, true);
     }
 
     protected static Body createBody(World world, Double2D position, double radius, double mass) {
@@ -168,21 +180,4 @@ public class RobotObject extends PhysicalObject {
         getBody().applyForce(wheelForce, wheelForcePosition);
     }
 
-    private static class RobotPortrayal extends CirclePortrayal {
-
-        final Phenotype phenotype;
-
-        public RobotPortrayal(double radius, Paint paint, Phenotype phenotype) {
-            super(radius, paint, true);
-            this.phenotype = phenotype;
-        }
-
-        @Override
-        protected void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
-            // Draw all the sensors
-            for (AgentSensor sensor : phenotype.getSensors()) {
-                sensor.draw(graphics);
-            }
-        }
-    }
 }

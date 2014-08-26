@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 
 import sim.display.GUIState;
 import sim.display.Manipulating2D;
@@ -28,6 +29,10 @@ public abstract class Portrayal extends SimplePortrayal2D {
     protected Paint paint;
 
     protected double orientation;
+
+    private DrawExtra drawExtra;
+
+    private AffineTransform transformOverride;
 
     public Portrayal() {
         this(Color.BLACK, true);
@@ -62,9 +67,13 @@ public abstract class Portrayal extends SimplePortrayal2D {
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
         Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
 
-        g.translate(info.draw.x, info.draw.y);
-        g.rotate(orientation);
-        g.scale(info.draw.width, info.draw.height);
+        if (transformOverride == null) {
+            g.translate(info.draw.x, info.draw.y);
+            g.rotate(orientation);
+            g.scale(info.draw.width, info.draw.height);
+        } else {
+            g.transform(transformOverride);
+        }
 
         g.setPaint(paint);
 
@@ -74,7 +83,9 @@ public abstract class Portrayal extends SimplePortrayal2D {
             drawImprecise(g);
         }
 
-        drawExtra(object, g, info);
+        if (drawExtra != null) {
+            drawExtra.drawExtra(object, g, info);
+        }
 
         g.dispose(); // glPopMatrix()
     }
@@ -82,15 +93,6 @@ public abstract class Portrayal extends SimplePortrayal2D {
     protected abstract void drawPrecise(Graphics2D graphics);
 
     protected abstract void drawImprecise(Graphics2D graphics);
-
-    /**
-     * Subclasses that wish to draw extra parts of the shape can override this method to draw the
-     * parts relative to their position/rotation/scale.
-     * @param graphics the scaled, rotated and translated graphics context
-     */
-    protected void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
-        // NO-OP
-    }
 
     @Override
     public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
@@ -118,4 +120,21 @@ public abstract class Portrayal extends SimplePortrayal2D {
         return false;
     }
 
+
+    public void setDrawExtra(DrawExtra drawExtra) {
+        this.drawExtra = drawExtra;
+    }
+
+    public AffineTransform getTransformOverride() {
+        return transformOverride;
+    }
+
+    /**
+     * Set a transform to override the orientation, scale and translation.
+     * Set to null to clear.
+     * @param transformOverride The transform to apply before drawing
+     */
+    public void setTransformOverride(AffineTransform transformOverride) {
+        this.transformOverride = transformOverride;
+    }
 }

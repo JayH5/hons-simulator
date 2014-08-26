@@ -6,63 +6,74 @@ import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.collision.shapes.ShapeType;
+import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.portrayal.ConicSensorPortrayal;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.portrayal.ConePortrayal;
+import za.redbridge.simulator.portrayal.Portrayal;
 
 /**
  * Describes a sensor implementation. The actual sensor is implemented in the simulator.
  */
 public abstract class AgentSensor extends Sensor {
-    private static final Paint PAINT = new Color(100, 100, 100, 100);
-    protected float fieldOfView;
-    protected final float fovGradient;
 
-    public AgentSensor(float bearing, float orientation, float range, boolean drawShape, float fieldOfView) {
-        super(bearing, orientation, range, drawShape);
+    protected final float bearing;
+    protected final float orientation;
+    protected final float range;
+    protected final float fieldOfView;
+
+    private final float fovGradient;
+
+    public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        this.bearing = bearing;
+        this.orientation = orientation;
+        this.range = range;
         this.fieldOfView = fieldOfView;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
 
-        if (drawShape) {
-            portrayal = new ConicSensorPortrayal(bearing, orientation, range, fieldOfView, PAINT);
-        }
-    }
-
-    public void draw(Graphics2D graphics) {
-        if (drawShape) {
-            portrayal.setPaint(getPaint());
-            portrayal.draw(null, graphics, null);
-        }
-    }
-
-    protected Paint getPaint() {
-        return PAINT;
-    }
-
-    public double getFieldOfView() {
-        return fieldOfView;
+        // Draw by default
+        setDrawEnabled(true);
     }
 
     @Override
-    public Shape createShape(Vec2 pos){
+    protected Transform createTransform(RobotObject robot) {
+        float robotRadius = robot.getRadius();
+
+        float x = (float) (Math.cos(bearing) * robotRadius);
+        float y = (float) (Math.sin(bearing) * robotRadius);
+
+        float angle = bearing + orientation;
+        return new Transform(new Vec2(x, y), new Rot(angle));
+    }
+
+    @Override
+    protected Shape createShape(Transform transform) {
         Vec2[] vertices = new Vec2[3];
-        vertices[0] = pos;
+        vertices[0] = new Vec2();
         float xDiff = (float) (range * Math.cos(fieldOfView / 2));
         float yDiff = (float) (range * Math.sin(fieldOfView / 2));
-        vertices[1] = new Vec2(pos.x + xDiff, pos.y + yDiff);
-        vertices[2] = new Vec2(pos.x + xDiff, pos.y - yDiff);
+        vertices[1] = new Vec2(xDiff, yDiff);
+        vertices[2] = new Vec2(xDiff, -yDiff);
+
+        for (int i = 0; i < 3; i++) {
+            Transform.mulToOut(transform, vertices[i], vertices[i]);
+        }
 
         PolygonShape shape = new PolygonShape();
         shape.set(vertices, 3);
         return shape;
+    }
+
+    @Override
+    protected Portrayal createPortrayal() {
+        return new ConePortrayal(range, fieldOfView, DEFAULT_PAINT);
     }
 
     /**

@@ -7,6 +7,9 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.portrayal.CirclePortrayal;
+import za.redbridge.simulator.portrayal.Portrayal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +21,34 @@ import java.util.Optional;
 public class CollisionSensor extends Sensor {
 
     private final List<Double> readings = new ArrayList<>(1);
-    protected static final float RANGE = 10.0f; //make sure this is > robot radius
+    private static final float DEFAULT_RANGE = 10.0f; //make sure this is > robot radius
 
-    public CollisionSensor() {
-        this(RANGE);
-    }
+    private final float range;
 
     public CollisionSensor(float range) {
-        super(0.0f, 0.0f, range, false);
+        this.range = range;
+        setDrawEnabled(true);
+    }
+
+    public CollisionSensor() {
+        this(DEFAULT_RANGE);
+    }
+
+    @Override
+    protected Transform createTransform(RobotObject robot) {
+        return new Transform(); // Centered, not rotated
+    }
+
+    @Override
+    protected Shape createShape(Transform transform) {
+        Shape shape = new CircleShape();
+        shape.setRadius(range);
+        return shape;
+    }
+
+    @Override
+    protected Portrayal createPortrayal() {
+        return new CirclePortrayal(range, DEFAULT_PAINT, true);
     }
 
     protected static class GeneralSensedObject extends SensedObject{
@@ -42,12 +65,13 @@ public class CollisionSensor extends Sensor {
 
     @Override
     protected SensedObject senseFixture(Fixture fixture, Transform sensorTransform) {
-        Vec2 distNormal = new Vec2();
         Transform objectTransform = fixture.getBody().getTransform();
         Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
-        fixture.getBody().getPosition();
-        double dist = fixture.computeDistance(sensorFixture.getBody().getPosition(), 0, distNormal);
-        if(dist > RANGE) return null;
+
+        Vec2 distNormal = new Vec2();
+        double dist = fixture.computeDistance(getBody().getPosition(), 0, distNormal);
+
+        if(dist > range) return null;
         Vec2 them = distNormal.mul((float)-dist); //negated because the normal is given from the fixture to the sensor
         Rot r = objectRelativeTransform.q;
         Rot.mulToOut(r,them,them);
@@ -65,12 +89,6 @@ public class CollisionSensor extends Sensor {
         closest.ifPresent(o -> readings.add((double)o.getPosition().x));
         closest.ifPresent(o -> readings.add((double)o.getPosition().y));
         return new SensorReading(readings);
-    }
-
-    protected Shape createShape(Vec2 pos){
-        Shape c = new CircleShape();
-        c.setRadius(range);
-        return c;
     }
 
     protected double readingCurve(double fraction) {

@@ -1,55 +1,43 @@
 package za.redbridge.simulator.sensor;
 
+import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
-import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.contacts.Contact;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 
+import sim.portrayal.DrawInfo2D;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.physics.Collideable;
-import za.redbridge.simulator.portrayal.ConicSensorPortrayal;
+import za.redbridge.simulator.portrayal.Portrayal;
 
 /**
  * Created by xenos on 8/22/14.
  */
 public abstract class Sensor implements Collideable {
-    protected final boolean drawShape;
+    protected static final Paint DEFAULT_PAINT = new Color(100, 100, 100, 100);
 
-    protected final float bearing;
-    protected final float orientation;
-    protected final float range;
+    private boolean drawEnabled = false;
 
-    protected ConicSensorPortrayal portrayal;
-    protected Fixture sensorFixture;
+    private Portrayal portrayal;
+    private Fixture sensorFixture;
 
-    protected final Transform robotRelativeTransform = new Transform();
-    protected final Transform cachedGlobalTransform = new Transform();
+    private Transform robotRelativeTransform;
+    private final Transform cachedGlobalTransform = new Transform();
 
-    protected final List<Fixture> sensedFixtures = new ArrayList<>();
+    private final List<Fixture> sensedFixtures = new ArrayList<>();
 
-    public Sensor(float bearing, float orientation, float range, boolean drawShape) {
-        this.bearing = bearing;
-        this.orientation = orientation;
-        this.range = range;
-        this.drawShape = drawShape;
-    }
-
-    public double getBearing() {
-        return bearing;
-    }
-
-    public double getOrientation() {
-        return orientation;
-    }
-
-    public double getRange() {
-        return range;
+    public Sensor() {
     }
 
     public SensorReading sense() {
@@ -71,7 +59,7 @@ public abstract class Sensor implements Collideable {
         return provideReading(sensedObjects);
     }
 
-    public void attach(RobotObject robot, float distFromCenter) {
+    public final void attach(RobotObject robot) {
         // Clear existing fixture
         if (sensorFixture != null) {
             sensorFixture.destroy();
@@ -81,38 +69,89 @@ public abstract class Sensor implements Collideable {
             sensedFixtures.clear();
         }
 
+        // Update transform
+        robotRelativeTransform = createTransform(robot);
+
         // Create a fixture definition
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.isSensor = true;
-        fixtureDef.friction = 0f;
 
-        // Calculate position relative to robot
-        float robotRadius = robot.getRadius();
-        float x = (float) (Math.min(distFromCenter, robotRadius) * Math.cos(bearing));
-        float y = (float) (Math.min(distFromCenter, robotRadius) * Math.sin(bearing));
-        Vec2 pos = new Vec2(x, y);
-
-        // Update transform
-        robotRelativeTransform.set(pos, bearing + orientation);
-
-        fixtureDef.shape = createShape(pos);
+        fixtureDef.shape = createShape(robotRelativeTransform);
 
         // Add ourselves as user data so we can be fetched
         fixtureDef.userData = this;
 
         // Attach
-        this.sensorFixture = robot.getBody().createFixture(fixtureDef);
+        sensorFixture = robot.getBody().createFixture(fixtureDef);
+        Shape shape = new CircleShape();
 
-        if (drawShape) {
-            portrayal.setRobotRadius(robotRadius);
+        // Create the portrayal
+        portrayal = createPortrayal();
+
+        // Make sure the portrayal is relative to the robot
+        if (portrayal != null) {
+            AffineTransform at = new AffineTransform();
+            at.translate(robotRelativeTransform.p.x, robotRelativeTransform.p.y);
+            at.rotate(robotRelativeTransform.q.getAngle());
+            portrayal.setTransformOverride(at);
         }
+    }
+
+    /**
+     * Create the transform for this sensor relative to the provided robot
+     * @param robot the robot this sensor is attached to
+     * @return the transform relative to the robot
+     */
+    protected abstract Transform createTransform(RobotObject robot);
+
+    /**
+     * Create the shape for this sensor relative to the robot's center.
+     * @param transform the shape vertices must be transformed by this transform
+     * @return the shape of this sensor
+     */
+    protected abstract Shape createShape(Transform transform);
+
+    /**
+     * Create the portrayal for this sensor (i.e. it's visualization). The portrayal need not be
+     * translated/rotated/scaled relative to the robot as this is done automatically. You may return
+     * null here if a visualization is not required.
+     * @return the sensor's portrayal, or null if one is not required
+     */
+    protected abstract Portrayal createPortrayal();
+
+    public final void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+        if (drawEnabled && portrayal != null) {
+            portrayal.setPaint(getPaint());
+            portrayal.draw(object, graphics, info);
+        }
+    }
+
+    /** Get the paint for drawing this sensor. */
+    protected Paint getPaint() {
+        return DEFAULT_PAINT;
     }
 
     protected abstract SensedObject senseFixture(Fixture fixture, Transform sensorTransform);
 
     protected abstract SensorReading provideReading(List<SensedObject> objects);
 
-    protected abstract Shape createShape(Vec2 pos);
+    public final Body getBody() {
+        return sensorFixture.getBody();
+    }
+
+    public final Portrayal getPortrayal() {
+        return portrayal;
+    }
+
+    /** Check whether drawing of this sensor is enabled. */
+    public boolean isDrawEnabled() {
+        return drawEnabled;
+    }
+
+    /** Set whether this sensor should be drawn. */
+    public void setDrawEnabled(boolean drawEnabled) {
+        this.drawEnabled = drawEnabled;
+    }
 
     @Override
     public void handleBeginContact(Contact contact, Fixture otherFixture) {
@@ -135,7 +174,6 @@ public abstract class Sensor implements Collideable {
      * Container class for intermediary sensor readings - contains the object to be sensed and
      * information about its location.
      */
-
     protected static class SensedObject implements Comparable<SensedObject> {
         private final PhysicalObject object;
         private final double spanStart;

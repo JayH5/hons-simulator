@@ -3,7 +3,6 @@ package za.redbridge.simulator.portrayal;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 
 /**
  * Provides a simple oval portrayal of an object.
