@@ -11,7 +11,7 @@ public class ProximityAgentSensor extends AgentSensor {
     private final List<Double> readings = new ArrayList<>(1);
 
     public ProximityAgentSensor(float bearing) {
-        this(bearing, 0.0f, 30.0f, 1.57f);
+        this(bearing, 0.0f, 30.0f, 0.1f);
     }
 
     public ProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {

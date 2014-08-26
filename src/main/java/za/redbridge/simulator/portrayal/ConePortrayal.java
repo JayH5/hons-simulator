@@ -25,11 +25,11 @@ public class ConePortrayal extends Portrayal {
         yVertices[0] = 0;
 
         double segmentRadians = theta / segments;
-        int halfSegments = (int) Math.ceil(segments / 2f);
+        double angle = -theta / 2;
         for (int i = 0; i <= segments; i++) {
-            double angle = (i - halfSegments) * segmentRadians;
             xVertices[i + 1] = (int) (length * Math.cos(angle));
             yVertices[i + 1] = (int) (length * Math.sin(angle));
+            angle += segmentRadians;
         }
 
         polygon = new Polygon(xVertices, yVertices, vertices);
