@@ -113,9 +113,7 @@ public class RobotObject extends PhysicalObject {
 
         List<AgentSensor> sensors = phenotype.getSensors();
         List<SensorReading> readings = new ArrayList<>(sensors.size());
-        for(AgentSensor sensor : sensors) {
-            readings.add(sensor.sense());
-        }
+        sensors.forEach(sensor -> readings.add(sensor.sense()));
 
         Optional<Vec2> collision = collisionSensor.sense();
         Double2D wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
@@ -129,10 +127,7 @@ public class RobotObject extends PhysicalObject {
         applyWheelForce(wheelDrives.y, rightWheelPosition);
 
         if (!isBoundToResource) {
-            ResourceObject resourceObject = pickupSensor.sense();
-            if (resourceObject != null) {
-                resourceObject.tryPickup(this);
-            }
+            pickupSensor.sense().ifPresent(resource -> resource.tryPickup(this));
         }
     }
 

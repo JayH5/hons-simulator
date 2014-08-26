@@ -8,6 +8,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
 import java.util.List;
+import java.util.Optional;
 
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
@@ -18,7 +19,7 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
  * Sensor to detect when object hit a certain position on the agent
  * Created by jamie on 2014/08/26.
  */
-public class PickupSensor extends Sensor<ResourceObject> {
+public class PickupSensor extends Sensor<Optional<ResourceObject>> {
 
     private final float width;
     private final float height;
@@ -54,11 +55,11 @@ public class PickupSensor extends Sensor<ResourceObject> {
     }
 
     @Override
-    protected ResourceObject provideReading(List<Fixture> fixtures) {
+    protected Optional<ResourceObject> provideReading(List<Fixture> fixtures) {
         if (!fixtures.isEmpty()) {
-            return (ResourceObject) fixtures.get(0).getBody().getUserData();
+            return Optional.of((ResourceObject) fixtures.get(0).getBody().getUserData());
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
