@@ -112,6 +112,7 @@ public class RobotObject extends PhysicalObject {
         Double2D wheelDrives = new Double2D(1.0, 0.2);
 
         List<Double> colReadings = collisionSensor.sense().getValues();
+
         if(!colReadings.isEmpty()) {
             //we negate the collision values to obtain a target coordinate
             double xColVal = -colReadings.get(0);
@@ -147,6 +148,7 @@ public class RobotObject extends PhysicalObject {
             }
             wheelDrives = new Double2D(a, b);
         }
+
         if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }

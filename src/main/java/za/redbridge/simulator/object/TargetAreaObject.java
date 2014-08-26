@@ -134,6 +134,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         if (!watchedFixtures.contains(otherFixture)) {
             watchedFixtures.add(otherFixture);
         }
+
     }
 
     @Override

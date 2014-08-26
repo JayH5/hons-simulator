@@ -38,11 +38,15 @@ public class ResourceObject extends PhysicalObject implements Collideable {
 
     private boolean isCollected = false;
 
+    private double width, height;
+
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
                           double value) {
         super(createPortrayal(width, height),
                 createBody(world, position, width, height, mass));
         this.value = value;
+        this.width = width;
+        this.height = height;
     }
 
     protected static Portrayal createPortrayal(double width, double height) {
@@ -106,6 +110,21 @@ public class ResourceObject extends PhysicalObject implements Collideable {
 
         // Mark the robot as bound
         robot.setBoundToResource(true);
+    }
+
+    //works out if an attachment is happening on a 'valid' side of the resource
+    public boolean isValidAttachment (Body resourceBody, Vec2 anchor) {
+
+        Vec2 anchorOnResource = new Vec2();
+
+        resourceBody.getLocalPointToOut(anchor, anchorOnResource);
+
+        double orientation = body.getAngle()% (2*Math.PI);
+
+        body.getLocalPoint(anchor);
+
+        return true;
+
     }
 
     @Override

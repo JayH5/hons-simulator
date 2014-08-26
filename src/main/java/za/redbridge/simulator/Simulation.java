@@ -56,7 +56,9 @@ public class Simulation extends SimState {
 
     @Override
     public void start() {
-        super.start();
+
+
+           super.start();
 
         environment =
                 new Continuous2D(1.0, config.getEnvironmentWidth(), config.getEnvironmentHeight());

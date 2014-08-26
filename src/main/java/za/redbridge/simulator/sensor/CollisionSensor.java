@@ -7,6 +7,7 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.TargetAreaObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,5 +78,11 @@ public class CollisionSensor extends Sensor {
         // Sigmoid proximity response
         final double offset = 0.5;
         return 1 / (1 + Math.exp(fraction + offset));
+    }
+
+    @Override
+    public boolean isRelevantObject (Fixture fixture) {
+        return !(fixture.getUserData() instanceof Sensor) &&
+                !(fixture.getBody().getUserData() instanceof TargetAreaObject);
     }
 }

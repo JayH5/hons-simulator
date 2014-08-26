@@ -17,7 +17,7 @@ import static za.redbridge.simulator.Utils.toDouble2D;
 public class PhysicalObject implements Steppable {
 
     private final Portrayal portrayal;
-    private final Body body;
+    protected final Body body;
 
     public PhysicalObject(Portrayal portrayal, Body body) {
         if (portrayal == null || body == null) {
