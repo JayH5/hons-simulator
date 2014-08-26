@@ -110,52 +110,12 @@ public class RobotObject extends PhysicalObject {
             readings.add(sensor.sense());
         }
 
-        // DEBUG
-        Sensor sensor = phenotype.getSensors().get(0);
-        SensorReading reading = sensor.sense();
-        List<Double> values = reading.getValues();
-        Double value = Collections.max(values);
-        double dist = value != null ? value : 0;
-        getPortrayal().setPaint(new Color((int) (dist * 255), 0, 0));
-
-        //Double2D wheelDrives = phenotype.step(readings);
-        Double2D wheelDrives = new Double2D(1.0, 0.2);
+        Double2D wheelDrives = phenotype.step(readings);
 
         List<Double> colReadings = collisionSensor.sense().getValues();
         if(!colReadings.isEmpty()) {
             //we negate the collision values to obtain a target coordinate
-            double xColVal = -colReadings.get(0);
-            double yColVal = -colReadings.get(1);
-            double p2 = Math.PI / 2;
-            double angle;
-            //handle division by 0
-            if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal >= 0) {
-                angle = p2;
-            }else if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal < 0){
-                angle = p2;
-            }else{
-                angle = Math.atan(yColVal / xColVal);
-            }
-            double a = -1000000, b = -1000000;
-            //4 quadrants
-            if(xColVal >= 0 && yColVal > 0){
-                //first
-                a = (p2 - angle) / p2;
-                b = 1;
-            }else if(xColVal < 0 && yColVal >= 0){
-                //second
-                a = -((p2 + angle) / p2);
-                b = -1;
-            }else if(xColVal <= 0 && yColVal < 0){
-                //third
-                a = -1;
-                b = -((p2 - angle) / p2);
-            }else if(xColVal > 0 && yColVal <= 0){
-                //fourth
-                a = 1;
-                b = (p2 + angle) / p2;
-            }
-            wheelDrives = new Double2D(a, b);
+            wheelDrives = wheelDriveFromTargetPosition(new Double2D(-colReadings.get(0), -colReadings.get(1)));
         }
         if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
@@ -180,4 +140,38 @@ public class RobotObject extends PhysicalObject {
         getBody().applyForce(wheelForce, wheelForcePosition);
     }
 
+    protected Double2D wheelDriveFromTargetPosition(Double2D targetPos){
+        double xColVal = targetPos.x;
+        double yColVal = targetPos.y;
+        double p2 = Math.PI / 2;
+        double angle;
+        //handle division by 0
+        if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal >= 0) {
+            angle = p2;
+        }else if(xColVal < 0.00001 && xColVal > -0.00001 && yColVal < 0){
+            angle = p2;
+        }else{
+            angle = Math.atan(yColVal / xColVal);
+        }
+        double a = -1000000, b = -1000000;
+        //4 quadrants
+        if(xColVal >= 0 && yColVal > 0){
+            //first
+            a = (p2 - angle) / p2;
+            b = 1;
+        }else if(xColVal < 0 && yColVal >= 0){
+            //second
+            a = -((p2 + angle) / p2);
+            b = -1;
+        }else if(xColVal <= 0 && yColVal < 0){
+            //third
+            a = -1;
+            b = -((p2 - angle) / p2);
+        }else if(xColVal > 0 && yColVal <= 0){
+            //fourth
+            a = 1;
+            b = (p2 + angle) / p2;
+        }
+        return new Double2D(a, b);
+    }
 }
