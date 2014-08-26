@@ -1,6 +1,7 @@
 package za.redbridge.simulator.object;
 
 import org.jbox2d.collision.WorldManifold;
+import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -15,6 +16,7 @@ import org.jbox2d.dynamics.joints.WeldJointDef;
 import java.awt.Color;
 import java.awt.Paint;
 
+import org.jfree.util.Rotation;
 import sim.engine.SimState;
 import sim.util.Double2D;
 import za.redbridge.simulator.physics.BodyBuilder;
@@ -36,6 +38,8 @@ public class ResourceObject extends PhysicalObject implements Collideable {
     private JointDef pendingJoint = null;
     private Joint robotJoint = null;
 
+    private double width, height;
+
     private boolean isCollected = false;
 
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
@@ -43,6 +47,8 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         super(createPortrayal(width, height),
                 createBody(world, position, width, height, mass));
         this.value = value;
+        this.width = width;
+        this.height = height;
     }
 
     protected static Portrayal createPortrayal(double width, double height) {
@@ -98,6 +104,10 @@ public class ResourceObject extends PhysicalObject implements Collideable {
         contact.getWorldManifold(manifold);
         Vec2 collisionPoint = manifold.points[0];
 
+        if (!isValidAttachment(resourceBody, collisionPoint)) {
+            return;
+        }
+
         WeldJointDef wjd = new WeldJointDef();
         wjd.initialize(resourceBody, robotBody, collisionPoint);
         wjd.collideConnected = true;
@@ -106,6 +116,23 @@ public class ResourceObject extends PhysicalObject implements Collideable {
 
         // Mark the robot as bound
         robot.setBoundToResource(true);
+    }
+
+    //works out if an attachment is happening on a 'valid' side of the resource
+    public boolean isValidAttachment (Body resourceBody, Vec2 anchor) {
+
+        Vec2 anchorOnResource = new Vec2();
+        resourceBody.getLocalPointToOut(anchor, anchorOnResource);
+
+        //get normalised angle
+        float orientation = (float) (getBody().getAngle()% (2*Math.PI));
+
+        Rot rot = new Rot(orientation);
+        Transform boxTransform = new Transform(getBody().getLocalCenter(), rot);
+
+        Vec2 rotatedAnchor = boxTransform.mul(boxTransform, anchorOnResource);
+
+        return rotatedAnchor.y <= 0 && rotatedAnchor.y >= -height/2;
     }
 
     @Override
