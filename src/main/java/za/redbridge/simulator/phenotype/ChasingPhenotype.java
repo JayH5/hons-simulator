@@ -37,14 +37,12 @@ public class ChasingPhenotype implements Phenotype {
         Double2D random = new Double2D((float)Math.random()*2f - 1f, (float)Math.random()*2f - 1f);
         Double2D nothing = new Double2D(0,0);
 
-        /*
         if(cooldownCounter > 0) {
             cooldownCounter--;
             return lastMove;
         }else {
             cooldownCounter = cooldown;
         }
-        */
 
         double leftReading = list.get(0).getValues().get(0);
         double forwardReading = list.get(1).getValues().get(0);

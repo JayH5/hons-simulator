@@ -16,6 +16,9 @@ import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.object.TargetAreaObject;
+
 
 /**
  * Created by jamie on 2014/08/05.
@@ -83,7 +86,9 @@ public class CollisionSensor extends Sensor<SensorReading> {
     @Override
     public boolean isRelevantObject (Fixture fixture) {
         return !(fixture.getUserData() instanceof Sensor) &&
-                !(fixture.getBody().getUserData() instanceof TargetAreaObject);
+                !(fixture.getBody().getUserData() instanceof TargetAreaObject) &&
+                !(fixture.getBody().getUserData() instanceof ResourceObject);
+
     }
 
     protected static class SensedObject {
