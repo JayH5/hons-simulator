@@ -16,6 +16,7 @@ import java.util.Optional;
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
+import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
@@ -42,6 +43,7 @@ public class RobotObject extends PhysicalObject {
     private static final double WHEEL_DISTANCE = 0.75;
 
     private final Phenotype phenotype;
+    private final HeuristicPhenotype heuristicPhenotype;
     private final CollisionSensor collisionSensor;
     private final PickupSensor pickupSensor;
 
@@ -62,6 +64,8 @@ public class RobotObject extends PhysicalObject {
         collisionSensor = new CollisionSensor();
         // TODO: Make configurable or decide on good defaults
         pickupSensor = new PickupSensor(1f, 2f, 0f);
+
+        heuristicPhenotype = new HeuristicPhenotype(collisionSensor, pickupSensor, phenotype);
         initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
@@ -74,8 +78,8 @@ public class RobotObject extends PhysicalObject {
             sensor.attach(this);
         }
 
-        collisionSensor.attach(this);
-        pickupSensor.attach(this);
+        heuristicPhenotype.getCollisionSensor().attach(this);
+        heuristicPhenotype.getPickupSensor().attach(this);
 
         getPortrayal().setDrawExtra(new DrawExtra() {
             @Override
@@ -83,8 +87,8 @@ public class RobotObject extends PhysicalObject {
                 for (Sensor sensor : phenotype.getSensors()) {
                     sensor.draw(object, graphics, info);
                 }
-                collisionSensor.draw(object, graphics, info);
-                pickupSensor.draw(object, graphics, info);
+                heuristicPhenotype.getCollisionSensor().draw(object, graphics, info);
+                heuristicPhenotype.getPickupSensor().draw(object, graphics, info);
             }
         });
     }
@@ -115,19 +119,17 @@ public class RobotObject extends PhysicalObject {
         List<SensorReading> readings = new ArrayList<>(sensors.size());
         sensors.forEach(sensor -> readings.add(sensor.sense()));
 
-        Optional<Vec2> collision = collisionSensor.sense();
-        Double2D wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
-                .orElse(phenotype.step(readings));
+        Double2D wheelDrives = heuristicPhenotype.step(readings);
+
+        applyWheelForce(wheelDrives.x, leftWheelPosition);
+        applyWheelForce(wheelDrives.y, rightWheelPosition);
 
         if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
-        applyWheelForce(wheelDrives.x, leftWheelPosition);
-        applyWheelForce(wheelDrives.y, rightWheelPosition);
-
         if (!isBoundToResource) {
-            pickupSensor.sense().ifPresent(resource -> resource.tryPickup(this));
+            heuristicPhenotype.getPickupSensor().sense().ifPresent(resource -> resource.tryPickup(this));
         }
     }
 
@@ -154,34 +156,6 @@ public class RobotObject extends PhysicalObject {
         this.isBoundToResource = isBoundToResource;
     }
 
-    protected Double2D wheelDriveFromTargetPosition(Vec2 targetPos){
-        double p2 = Math.PI / 2;
 
-        //handle division by 0
-        double angle = targetPos.x != 0.0 ? Math.atan(targetPos.y / targetPos.x) : p2;
-
-        double a, b;
-        //4 quadrants
-        if(targetPos.x >= 0 && targetPos.y > 0){
-            //first
-            a = (p2 - angle) / p2;
-            b = 1;
-        }else if(targetPos.x < 0 && targetPos.y >= 0){
-            //second
-            a = -((p2 + angle) / p2);
-            b = -1;
-        }else if(targetPos.x <= 0 && targetPos.y < 0){
-            //third
-            a = -1;
-            b = -((p2 - angle) / p2);
-        }else if(targetPos.x > 0 && targetPos.y <= 0){
-            //fourth
-            a = 1;
-            b = (p2 + angle) / p2;
-        }else{
-            throw new RuntimeException("wheelDriveFromTargetPosition quadrant check failed!");
-        }
-        return new Double2D(a, b);
-    }
 
 }
