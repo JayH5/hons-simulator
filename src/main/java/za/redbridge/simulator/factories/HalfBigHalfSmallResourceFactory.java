@@ -18,11 +18,13 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
     private static final double SMALL_OBJECT_HEIGHT = 3;
     private static final double SMALL_OBJECT_VALUE = 50.0;
     private static final double SMALL_OBJECT_MASS = 40.0;
+    private static final int SMALL_OBJECT_PUSHING_BOTS = 1;
 
     private static final double LARGE_OBJECT_WIDTH = 5.0;
     private static final double LARGE_OBJECT_HEIGHT = 5.0;
     private static final double LARGE_OBJECT_VALUE = 100.0;
     private static final double LARGE_OBJECT_MASS = 100.0;
+    private static final int LARGE_OBJECT_PUSHING_BOTS = 2;
 
     @Override
     public void placeInstances(PlacementArea.ForType<ResourceObject> placementArea, World world,
@@ -35,7 +37,8 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
                     placementArea.getRandomSpace(SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, value);
+                    SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS, value,
+                    SMALL_OBJECT_PUSHING_BOTS);
 
             placementArea.placeObject(space, resource);
         }
@@ -48,7 +51,8 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
                     placementArea.getRandomSpace(LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, value);
+                    LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS, value,
+                    LARGE_OBJECT_PUSHING_BOTS);
 
             placementArea.placeObject(space, resource);
         }
