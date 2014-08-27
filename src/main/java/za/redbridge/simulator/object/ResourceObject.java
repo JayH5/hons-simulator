@@ -8,7 +8,7 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.JointDef;
-import org.jbox2d.dynamics.joints.RevoluteJointDef;
+import org.jbox2d.dynamics.joints.WeldJointDef;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -30,6 +30,11 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
 public class ResourceObject extends PhysicalObject {
 
     private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
+
+    private enum Side {
+        LEFT, RIGHT, TOP, BOTTOM
+    }
+    private Side stickySide;
 
     private final double value;
 
@@ -96,44 +101,61 @@ public class ResourceObject extends PhysicalObject {
         Body resourceBody = getBody();
         Body robotBody = robot.getBody();
 
-        Transform resourceTransform = resourceBody.getTransform();
-        Transform robotTransform = robotBody.getTransform();
-
-        Transform robotRelativeTransform = Transform.mulTrans(resourceTransform, robotTransform);
-
         Vec2 anchorA;
         float referenceAngle;
-        if (Math.abs(robotRelativeTransform.p.x) > Math.abs(robotRelativeTransform.p.y)) {
-            if (robotRelativeTransform.p.x > 0) { // Right side
+        switch (getSideClosestToPoint(robotBody.getPosition())) {
+            case LEFT:
                 anchorA = new Vec2((float) width / 2, 0);
                 referenceAngle = (float) Math.PI;
-            } else { // Left side
+                break;
+            case RIGHT:
                 anchorA = new Vec2((float) -width / 2, 0);
                 referenceAngle = 0f;
-            }
-        } else {
-            if (robotRelativeTransform.p.y > 0) { // Top side
+                break;
+            case TOP:
                 anchorA = new Vec2(0, (float) height / 2);
                 referenceAngle = (float) -Math.PI / 2;
-            } else { // Bottom side
+                break;
+            case BOTTOM:
                 anchorA = new Vec2(0, (float) -height / 2);
                 referenceAngle = (float) Math.PI / 2;
-            }
+                break;
+            default:
+                throw new RuntimeException("Unable to match robot position to side");
         }
 
-        RevoluteJointDef rjd = new RevoluteJointDef();
-        rjd.bodyA = resourceBody;
-        rjd.bodyB = robotBody;
-        rjd.referenceAngle = referenceAngle;
-        rjd.localAnchorA = anchorA;
-        rjd.localAnchorB.set(robot.getRadius() + 0.01f, 0f); // Attach to front of robot
-        rjd.collideConnected = true;
+        WeldJointDef wjd = new WeldJointDef();
+        wjd.bodyA = resourceBody;
+        wjd.bodyB = robotBody;
+        wjd.referenceAngle = referenceAngle;
+        wjd.localAnchorA.set(anchorA);
+        wjd.localAnchorB.set(robot.getRadius() + 0.01f, 0f); // Attach to front of robot
+        wjd.collideConnected = true;
 
-        pendingJoints.push(rjd);
+        pendingJoints.push(wjd);
         pendingRobots.push(robot);
 
         // Mark the robot as bound
         robot.setBoundToResource(true);
+    }
+
+    private Side getSideClosestToPoint(Vec2 point) {
+        Vec2 relativePoint = Transform.mulTrans(getBody().getTransform(), point);
+        final Side side;
+        if (Math.abs(relativePoint.x) > Math.abs(relativePoint.y)) {
+            if (relativePoint.x > 0) {
+                side = Side.RIGHT;
+            } else {
+                side = Side.LEFT;
+            }
+        } else {
+            if (relativePoint.y > 0) {
+                side = Side.TOP;
+            } else {
+                side = Side.BOTTOM;
+            }
+        }
+        return side;
     }
 
     //works out if an attachment is happening on a 'valid' side of the resource
