@@ -1,6 +1,5 @@
 package za.redbridge.simulator.sensor;
 
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
 import org.jbox2d.dynamics.Body;
@@ -109,7 +108,6 @@ public abstract class Sensor<T> implements Collideable {
 
         // Attach
         sensorFixture = robot.getBody().createFixture(fixtureDef);
-        Shape shape = new CircleShape();
 
         // Create the portrayal
         portrayal = createPortrayal();
