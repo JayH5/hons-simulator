@@ -11,6 +11,7 @@ import za.redbridge.simulator.sensor.SensorReading;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Stack;
 
 /**
  * Created by shsu on 2014/08/27.
@@ -21,11 +22,15 @@ public class HeuristicPhenotype {
     private PickupSensor pickupSensor;
     private Phenotype controllerPhenotype;
 
+    private Stack<Vec2> pendingPath;
+
     public HeuristicPhenotype(CollisionSensor collisionSensor, PickupSensor pickupSensor, Phenotype controllerPhenotype) {
 
         this.collisionSensor = new CollisionSensor();
         this.pickupSensor = new PickupSensor(1f, 2f, 0f);
         this.controllerPhenotype = controllerPhenotype;
+
+        pendingPath = new Stack<>();
     }
 
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
@@ -35,9 +40,17 @@ public class HeuristicPhenotype {
 
     public Double2D step(List<SensorReading> list) {
 
-        Optional<Vec2> collision = collisionSensor.sense();
-        Double2D wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
-                .orElse(controllerPhenotype.step(list));
+        Double2D wheelDrives;
+
+        //if no pending path
+        if (pendingPath.empty()) {
+            Optional<Vec2> collision = collisionSensor.sense();
+            wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
+                    .orElse(controllerPhenotype.step(list));
+        }
+        else {
+            wheelDrives = wheelDriveFromTargetPosition(pendingPath.pop());
+        }
 
         return wheelDrives;
     }
@@ -71,5 +84,35 @@ public class HeuristicPhenotype {
         }
         return new Double2D(a, b);
     }
+
+    //returns wheeldrive heuristic steps for getting a point to a point. input should be global coords.
+    public Stack<Vec2> getPathToPoint(Vec2 begin, Vec2 end) {
+
+        //size of graph to explore is a square with diag dist(begin, end)
+        Stack<Vec2> path = new Stack<>();
+
+        int xDist = (int) Math.abs(end.x - begin.x);
+        int yDist = (int) Math.abs(end.y - begin.y);
+
+        int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
+        int yDirectionMultiplier = (int)((end.x - begin.x)/yDist);
+
+        int i = 0;
+        for (float x = begin.x; i < xDist; x+=xDirectionMultiplier*1) {
+
+            path.push(new Vec2(x, begin.y));
+            i++;
+        }
+
+        i = 0;
+        for (float y = begin.y; i < yDist; y+=xDirectionMultiplier*1) {
+
+            path.push(new Vec2(begin.x+xDist*xDirectionMultiplier, y));
+            i++;
+        }
+
+        return path;
+    }
+
 
 }
