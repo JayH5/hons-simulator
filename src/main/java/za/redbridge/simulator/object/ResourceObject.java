@@ -80,6 +80,7 @@ public class ResourceObject extends PhysicalObject {
     @Override
     public void step(SimState simState) {
         super.step(simState);
+
         if (!pendingJoints.isEmpty()) {
             for (Map.Entry<RobotObject, JointDef> entry : pendingJoints.entrySet()) {
                 Joint joint = getBody().getWorld().createJoint(entry.getValue());
@@ -200,6 +201,10 @@ public class ResourceObject extends PhysicalObject {
     public void markCollected() {
         this.isCollected = true;
         breakRobotWeldJoint();
+    }
+
+    public boolean pushedByMaxRobots() {
+        return joints.size() + pendingJoints.size() >= pushingRobots;
     }
 
     private void breakRobotWeldJoint() {
