@@ -78,9 +78,9 @@ public class ResourceObject extends PhysicalObject {
     @Override
     public void step(SimState simState) {
         super.step(simState);
-        if (!pendingJoints.empty() && !pendingRobots.empty()) {
-            Joint joint = getBody().getWorld().createJoint(pendingJoints.pop());
-            jointList.put(pendingRobots.pop(), joint);
+        while (!pendingJoints.empty() && !pendingRobots.empty()) {
+                Joint joint = getBody().getWorld().createJoint(pendingJoints.pop());
+                jointList.put(pendingRobots.pop(), joint);
         }
     }
 
