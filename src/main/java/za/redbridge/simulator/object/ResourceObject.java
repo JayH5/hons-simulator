@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -90,19 +91,20 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-    public void tryPickup(RobotObject robot) {
+    //returns whether or not robot trying to do a pickup should move to a better side
+    public boolean tryPickup(RobotObject robot) {
         if (isCollected) {
-            return;
+            return false;
         }
 
         // Check if max number of robots already attached
-        if (pendingJoints.size() + joints.size() >= pushingRobots) {
-            return;
+        if (pushedByMaxRobots()) {
+            return false;
         }
 
         // Check if robot not already attached or about to be attached
         if (joints.containsKey(robot) || pendingJoints.containsKey(robot)) {
-            return;
+            return false;
         }
 
         // Check the side that the robot wants to attach to
@@ -110,7 +112,7 @@ public class ResourceObject extends PhysicalObject {
         Body robotBody = robot.getBody();
         final Side attachSide = getSideClosestToPoint(robotBody.getPosition());
         if (stickySide != null && stickySide != attachSide) {
-            return;
+            return true;
         }
 
         // Set the sticky side
@@ -130,12 +132,12 @@ public class ResourceObject extends PhysicalObject {
 
         wjd.collideConnected = true;
 
-        System.out.println("fuck you Jeremy " + robot.getBody().getAngle()%(Math.PI*2));
-
         pendingJoints.put(robot, wjd);
 
         // Mark the robot as bound
         robot.setBoundToResource(true);
+
+        return false;
     }
 
     private Side getSideClosestToPoint(Vec2 point) {
@@ -188,6 +190,25 @@ public class ResourceObject extends PhysicalObject {
         }
         return referenceAngle;
     }
+    
+    public Vec2 getStickySideAttachmentPoint() {
+        int position = joints.size() + pendingJoints.size();
+        Vec2 anchorPoint;
+        if (stickySide == Side.LEFT || stickySide == Side.RIGHT) {
+            float spacing = (float) (height / pushingRobots);
+            float y = (float) height / 2 - (spacing * position + spacing / 2);
+            float x = stickySide == Side.LEFT ? (float) -width / 2 : (float) width / 2;
+            anchorPoint = new Vec2(x, y);
+        } else {
+            float spacing = (float) (width / pushingRobots);
+            float x = (float) -width / 2 + spacing * position + spacing / 2;
+            float y = stickySide == Side.BOTTOM ? (float) -height / 2 : (float) height / 2;
+            anchorPoint = new Vec2(x, y);
+        }
+
+        return anchorPoint;
+    }
+            
 
     /**
      * Check whether this object has been collected
@@ -215,6 +236,9 @@ public class ResourceObject extends PhysicalObject {
             robot.setBoundToResource(false);
             getBody().getWorld().destroyJoint(entry.getValue());
         }
+        joints.clear();
     }
+
+    public boolean isPushed() { return !joints.isEmpty(); }
 
 }

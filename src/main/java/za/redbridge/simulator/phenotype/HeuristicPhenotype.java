@@ -32,6 +32,9 @@ public class HeuristicPhenotype {
     //don't even know of this is necessary; just need next step
     private Stack<Vec2> pendingPath;
 
+    private Vec2 previousPendingTarget;
+    private Vec2 currentPendingTarget;
+
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot,
                               SimConfig.Direction targetAreaPlacement) {
 
@@ -46,6 +49,8 @@ public class HeuristicPhenotype {
         pickupSensor.attach(attachedRobot);
 
         pendingPath = new Stack<>();
+        previousPendingTarget = null;
+        currentPendingTarget = null;
     }
 
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
@@ -56,41 +61,45 @@ public class HeuristicPhenotype {
 
     public Double2D step(List<SensorReading> list) {
 
-        Double2D wheelDrives;
+        Double2D wheelDrives = new Double2D(0,0);
+        Optional<Vec2> collision = collisionSensor.sense();
+        Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
         //if no pending path
         if (pendingPath.empty()) {
-            Optional<Vec2> collision = collisionSensor.sense();
+
             wheelDrives = collision.map(o -> wheelDriveFromTargetPoint(o))
                     .orElse(controllerPhenotype.step(list));
-
-            Optional<ResourceObject> sensedResource = pickupSensor.sense();
-
-            /*Stack<Vec2> newPath = sensedResource.map(o -> getPerpendicularPathToPoint(attachedRobot.getBody().getLocalCenter(),
-                    o.getBody().getLocalCenter())).orElse(new Stack<>());
-
-            pendingPath = newPath;*/
         }
         //handle path overwrites as well here
         else {
-            wheelDrives = wheelDriveFromTargetPoint(pendingPath.pop());
 
+            if (!attachedRobot.isBoundToResource()) {
+                wheelDrives = wheelDriveFromTargetPoint(pendingPath.pop());
+            }
         }
-
 
         if (!attachedRobot.isBoundToResource()) {
-            pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
+
+            boolean shouldPath = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
+                    .orElse(false);
+
+            if (shouldPath) {
+
+                Vec2 start = attachedRobot.getBody().getLocalPoint(collisionSensor.getBody().getLocalCenter());
+                Vec2 destination = attachedRobot.getBody().
+                        getLocalPoint(sensedResource.get().getStickySideAttachmentPoint());
+                pendingPath = sensedResource.map(o -> getPerpendicularPathToPoint(start,
+                        destination)).orElse(new Stack<>());
+
+                //System.out.println("yeop u shud path " + pendingPath.size());
+            }
         }
         else {
-            /*wheelDrives = wheelDriveFromTargetPoint(guide(attachedRobot.getBody().getLocalCenter(),
-                    attachedRobot.getBody().getLocalPoint(new Vec2(0, 0))));*/
             wheelDrives = wheelDriveFromBearing(targetAreaBearing());
         }
 
-        //wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
-
         return wheelDrives;
-
     }
 
     protected Double2D wheelDriveFromTargetPoint(Vec2 target){
@@ -142,16 +151,12 @@ public class HeuristicPhenotype {
             targetAreaPosition = P2*2;
         }
         
-        System.out.println("robotAngle " + robotAngle + " targetAreaPlacement " + targetAreaPosition);
+        //System.out.println("robotAngle " + robotAngle + " targetAreaPlacement " + targetAreaPosition);
 
         double difference = targetAreaPosition - robotAngle;
         double bearing = (4*P2 + difference)%(4*P2);
 
-        if (bearing < 1) {
-            bearing = 0;
-        }
-
-        System.out.println("bearing is " + bearing);
+        //System.out.println("bearing is " + bearing);
         return bearing;
 
     }
@@ -216,7 +221,7 @@ public class HeuristicPhenotype {
         }
 
         i = 0;
-        for (float y = begin.y; i < yDist; y+=xDirectionMultiplier*1) {
+        for (float y = begin.y; i < yDist; y+=yDirectionMultiplier*1) {
 
             path.push(attachedRobot.getBody().getLocalPoint(new Vec2(begin.x+xDist*xDirectionMultiplier, y)));
             i++;
