@@ -7,8 +7,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
-import java.awt.Graphics2D;
-import java.awt.Paint;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,7 +150,4 @@ public class RobotObject extends PhysicalObject {
     public void setBoundToResource(boolean isBoundToResource) {
         this.isBoundToResource = isBoundToResource;
     }
-
-
-
 }
