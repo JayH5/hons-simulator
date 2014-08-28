@@ -42,7 +42,7 @@ public class PhysicalObject implements Steppable {
         simulation.getEnvironment().setObjectLocation(portrayal, toDouble2D(body.getPosition()));
 
         float orientation = body.getAngle();
-        portrayal.setOrientation(orientation);
+        portrayal.setRotation(orientation);
     }
 
     public Body getBody() {

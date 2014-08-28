@@ -10,7 +10,7 @@ import org.jbox2d.dynamics.contacts.Contact;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,10 +114,10 @@ public abstract class Sensor<T> implements Collideable {
 
         // Make sure the portrayal is relative to the robot
         if (portrayal != null) {
-            AffineTransform at = new AffineTransform();
-            at.translate(robotRelativeTransform.p.x, robotRelativeTransform.p.y);
-            at.rotate(robotRelativeTransform.q.getAngle());
-            portrayal.setTransformOverride(at);
+            Rectangle2D draw = new Rectangle2D.Double(robotRelativeTransform.p.x,
+                    robotRelativeTransform.p.y, 1, 1);
+            float rotation = robotRelativeTransform.q.getAngle();
+            portrayal.setLocalTransform(draw, rotation);
         }
     }
 

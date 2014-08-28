@@ -81,12 +81,12 @@ public class RobotObject extends PhysicalObject {
             }
 
             @Override
-            public void setOrientation(float orientation) {
+            public void setRotation(float orientation) {
                 for (Sensor sensor : phenotype.getSensors()) {
-                    sensor.getPortrayal().setOrientation(orientation);
+                    sensor.getPortrayal().setRotation(orientation);
                 }
-                heuristicPhenotype.getCollisionSensor().getPortrayal().setOrientation(orientation);
-                heuristicPhenotype.getPickupSensor().getPortrayal().setOrientation(orientation);
+                heuristicPhenotype.getCollisionSensor().getPortrayal().setRotation(orientation);
+                heuristicPhenotype.getPickupSensor().getPortrayal().setRotation(orientation);
             }
         });
     }

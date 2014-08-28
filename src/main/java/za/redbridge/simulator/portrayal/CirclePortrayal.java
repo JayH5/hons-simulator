@@ -3,8 +3,8 @@ package za.redbridge.simulator.portrayal;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Provides a simple oval portrayal of an object.
@@ -32,12 +32,12 @@ public class CirclePortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics, AffineTransform transform) {
+    protected void drawPrecise(Graphics2D graphics, Rectangle2D draw, float rotation) {
         if (preciseEllipse == null) {
             preciseEllipse = new Ellipse2D.Double(-radius, -radius, radius * 2, radius * 2);
         }
 
-        Shape transformedShape = transform.createTransformedShape(preciseEllipse);
+        Shape transformedShape = getTransform().createTransformedShape(preciseEllipse);
 
         if (filled) {
             graphics.fill(transformedShape);
@@ -47,7 +47,7 @@ public class CirclePortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawImprecise(Graphics2D graphics, AffineTransform transform) {
+    protected void drawImprecise(Graphics2D graphics, Rectangle2D draw, float rotation) {
         int drawWidth = (int) (draw.getWidth() * radius * 2);
         int drawHeight = (int) (draw.getHeight() * radius * 2);
         int x = (int) (-drawWidth / 2.0 + draw.getX());

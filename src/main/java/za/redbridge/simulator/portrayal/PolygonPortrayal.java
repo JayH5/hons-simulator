@@ -3,8 +3,8 @@ package za.redbridge.simulator.portrayal;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Base class for drawing polygon shapes. Subclasses should set the positions of the vertices of
@@ -42,14 +42,14 @@ public abstract class PolygonPortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics, AffineTransform transform) {
-        drawImprecise(graphics, transform);
+    protected void drawPrecise(Graphics2D graphics, Rectangle2D draw, float orientation) {
+        drawImprecise(graphics, draw, orientation);
     }
 
     @Override
-    protected void drawImprecise(Graphics2D graphics, AffineTransform transform) {
+    protected void drawImprecise(Graphics2D graphics, Rectangle2D draw, float orientation) {
         if (needsTransform()) {
-            transform.transform(vertices, 0, drawVertices, 0, nVertices);
+            getTransform().transform(vertices, 0, drawVertices, 0, nVertices);
             for (int i = 0; i < nVertices; i++) {
                 xPoints[i] = (int) drawVertices[i].getX();
                 yPoints[i] = (int) drawVertices[i].getY();
