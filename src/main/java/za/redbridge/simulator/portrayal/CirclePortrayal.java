@@ -48,10 +48,10 @@ public class CirclePortrayal extends Portrayal {
 
     @Override
     protected void drawImprecise(Graphics2D graphics, AffineTransform transform) {
-        int drawWidth = (int) (draw.width * radius * 2);
-        int drawHeight = (int) (draw.height * radius * 2);
-        int x = (int) (-drawWidth / 2.0 + draw.x);
-        int y = (int) (-drawHeight / 2.0 + draw.y);
+        int drawWidth = (int) (draw.getWidth() * radius * 2);
+        int drawHeight = (int) (draw.getHeight() * radius * 2);
+        int x = (int) (-drawWidth / 2.0 + draw.getX());
+        int y = (int) (-drawHeight / 2.0 + draw.getY());
 
         if (filled) {
             graphics.fillOval(x, y, drawWidth, drawHeight);
