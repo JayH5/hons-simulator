@@ -20,5 +20,5 @@ public interface Drawable {
      */
     void draw(Object object, Graphics2D graphics, DrawInfo2D info);
 
-    void setOrientation(float orientation);
+    void setRotation(float orientation);
 }

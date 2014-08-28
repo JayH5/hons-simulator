@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -45,12 +44,12 @@ public class RectanglePortrayal extends PolygonPortrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics, AffineTransform transform) {
+    protected void drawPrecise(Graphics2D graphics, Rectangle2D draw, float orientation) {
         if (preciseRect == null) {
             preciseRect = new Rectangle2D.Double(-width / 2.0, -height / 2.0, width, height);
         }
 
-        Shape transformedShape = transform.createTransformedShape(preciseRect);
+        Shape transformedShape = getTransform().createTransformedShape(preciseRect);
 
         if (filled) {
             graphics.fill(transformedShape);

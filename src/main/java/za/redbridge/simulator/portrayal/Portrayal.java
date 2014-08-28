@@ -29,16 +29,21 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
     protected boolean filled;
     protected Paint paint;
 
-    protected float orientation;
-    private boolean orientationChanged = true;
+    private float rotation;
+    private boolean rotationChanged = true;
 
-    protected final Rectangle2D draw = new Rectangle2D.Double();
+    private final Rectangle2D draw = new Rectangle2D.Double();
     private boolean drawChanged = true;
 
     private Drawable childDrawable;
 
-    private AffineTransform transformOverride;
-    private AffineTransform transform = new AffineTransform();
+    private float localRotation;
+    private Rectangle2D localDraw;
+    private AffineTransform localTransform;
+    private Rectangle2D effectiveLocalDraw;
+    private boolean hasLocalTransform = false;
+
+    private AffineTransform transform;
 
     public Portrayal() {
         this(Color.BLACK, true);
@@ -66,13 +71,13 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
     }
 
     @Override
-    public void setOrientation(float orientation) {
-        if (orientation != this.orientation) {
-            this.orientation = orientation;
-            orientationChanged = true;
+    public void setRotation(float rotation) {
+        if (rotation != this.rotation) {
+            this.rotation = rotation;
+            rotationChanged = true;
 
             if (childDrawable != null) {
-                childDrawable.setOrientation(orientation);
+                childDrawable.setRotation(rotation);
             }
         }
     }
@@ -86,23 +91,16 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
             draw.setRect(info.draw);
         }
 
-        if (needsTransform()) {
-            transform.setToIdentity();
-            transform.translate(info.draw.x, info.draw.y);
-            transform.rotate(orientation);
-            transform.scale(info.draw.width, info.draw.height);
-
-            if (transformOverride != null) {
-                transform.concatenate(transformOverride);
-            }
-        }
-
         g.setPaint(paint);
 
-        if (info.precise) {
-            drawPrecise(g, transform);
+        if (hasLocalTransform) {
+            drawLocal(object, g, info);
         } else {
-            drawImprecise(g, transform);
+            if (info.precise) {
+                drawPrecise(g, draw, rotation);
+            } else {
+                drawImprecise(g, draw, rotation);
+            }
         }
 
         if (childDrawable != null) {
@@ -110,14 +108,37 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
         }
 
         drawChanged = false;
-        orientationChanged = false;
+        rotationChanged = false;
 
         g.dispose(); // glPopMatrix()
     }
 
-    protected abstract void drawPrecise(Graphics2D graphics, AffineTransform transform);
+    private void drawLocal(Object object, Graphics2D graphics, DrawInfo2D info) {
+        if (drawChanged) {
+            effectiveLocalDraw.setRect(
+                    draw.getX() + localDraw.getX(), // Translate
+                    draw.getY() + localDraw.getY(),
+                    draw.getWidth() * localDraw.getWidth(), // Scale
+                    draw.getHeight() * localDraw.getHeight());
+        }
 
-    protected abstract void drawImprecise(Graphics2D graphics, AffineTransform transform);
+        final Rectangle2D draw = effectiveLocalDraw;
+        final float rotation = this.rotation + this.localRotation;
+
+        if (info.precise) {
+            drawPrecise(graphics, draw, rotation);
+        } else {
+            drawImprecise(graphics, draw, rotation);
+        }
+
+        if (childDrawable != null) {
+            childDrawable.draw(object, graphics, info);
+        }
+    }
+
+    protected abstract void drawPrecise(Graphics2D graphics, Rectangle2D draw, float rotation);
+
+    protected abstract void drawImprecise(Graphics2D graphics, Rectangle2D draw, float rotation);
 
     @Override
     public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
@@ -149,17 +170,44 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
         this.childDrawable = drawable;
     }
 
-    public AffineTransform getTransformOverride() {
-        return transformOverride;
+    protected AffineTransform getTransform() {
+        if (transform == null) {
+            transform = new AffineTransform();
+        }
+
+        if (needsTransform()) {
+            transform.setToIdentity();
+            transform.translate(draw.getX(), draw.getY());
+            transform.rotate(rotation);
+            transform.scale(draw.getWidth(), draw.getHeight());
+
+            if (hasLocalTransform) {
+                transform.concatenate(localTransform);
+            }
+        }
+        return transform;
     }
 
-    /**
-     * Set a transform to override the orientation, scale and translation.
-     * Set to null to clear.
-     * @param transformOverride The transform to apply before drawing
-     */
-    public void setTransformOverride(AffineTransform transformOverride) {
-        this.transformOverride = transformOverride;
+    public void setLocalTransform(Rectangle2D draw, float orientation) {
+        this.localDraw = draw;
+        this.localRotation = orientation;
+        effectiveLocalDraw = new Rectangle2D.Double();
+        hasLocalTransform = true;
+        buildExtraTransform();
+    }
+
+    public void clearLocalTransform() {
+        hasLocalTransform = false;
+    }
+
+    private void buildExtraTransform() {
+        if (localTransform == null) {
+            localTransform = new AffineTransform();
+        }
+        localTransform.setToIdentity();
+        localTransform.translate(localDraw.getX(), localDraw.getY());
+        localTransform.rotate(localRotation);
+        localTransform.scale(localDraw.getWidth(), localDraw.getHeight());
     }
 
     /**
@@ -168,6 +216,6 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
      * @return true if the Portrayal's transform has changed
      */
     protected boolean needsTransform() {
-        return orientationChanged || drawChanged;
+        return rotationChanged || drawChanged;
     }
 }
