@@ -96,7 +96,7 @@ public class BodyBuilder {
         CircleShape shape = new CircleShape();
         shape.setRadius(radius);
         fd.shape = shape;
-        fd.density = (float) Math.PI * radius * radius / mass;
+        fd.density =  mass / ((float) Math.PI * radius * radius);
         return this;
     }
 
@@ -119,7 +119,7 @@ public class BodyBuilder {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(width / 2, height / 2);
         fd.shape = shape;
-        fd.density = height * width / mass;
+        fd.density = mass / (height * width);
         return this;
     }
 

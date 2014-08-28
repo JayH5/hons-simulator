@@ -12,12 +12,12 @@ public class SimConfig {
 
     private static final long DEFAULT_SIMULATION_SEED = System.currentTimeMillis();
     private static final int DEFAULT_SIMULATION_ITERATIONS = 10000;
-    private static final int DEFAULT_ENVIRONMENT_WIDTH = 100;
-    private static final int DEFAULT_ENVIRONMENT_HEIGHT = 100;
-    private static final int DEFAULT_TARGET_AREA_THICKNESS = 20;
+    private static final int DEFAULT_ENVIRONMENT_WIDTH = 20;
+    private static final int DEFAULT_ENVIRONMENT_HEIGHT = 20;
+    private static final int DEFAULT_TARGET_AREA_THICKNESS = (int)(DEFAULT_ENVIRONMENT_HEIGHT * 0.1);
     private static final Direction DEFAULT_TARGET_AREA_PLACEMENT = Direction.SOUTH;
-    private static final int DEFAULT_OBJECTS_ROBOTS = 15;
-    private static final int DEFAULT_OBJECTS_RESOURCES = 10;
+    private static final int DEFAULT_OBJECTS_ROBOTS = 10;
+    private static final int DEFAULT_OBJECTS_RESOURCES = 40;
 
     public enum Direction {
         NORTH, SOUTH, EAST, WEST

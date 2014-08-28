@@ -7,8 +7,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
-import java.awt.Graphics2D;
-import java.awt.Paint;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +34,8 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class RobotObject extends PhysicalObject {
 
-    //how much force a wheel exerts when driven at full power
-    private static final double WHEEL_POWER = 0.001;
+    //how much force a wheel exerts when driven at full power, in newtons
+    private static final double WHEEL_POWER = 0.25;
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
 
@@ -151,7 +150,4 @@ public class RobotObject extends PhysicalObject {
     public void setBoundToResource(boolean isBoundToResource) {
         this.isBoundToResource = isBoundToResource;
     }
-
-
-
 }

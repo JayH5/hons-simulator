@@ -27,6 +27,8 @@ public class HeuristicPhenotype {
     private final RobotObject attachedRobot;
     private final SimConfig.Direction targetAreaPlacement;
 
+    protected static final double P2 = Math.PI / 2;
+
     //don't even know of this is necessary; just need next step
     private Stack<Vec2> pendingPath;
 
@@ -35,7 +37,7 @@ public class HeuristicPhenotype {
 
         // TODO: Make configurable or decide on good defaults
         this.collisionSensor = new CollisionSensor();
-        this.pickupSensor = new PickupSensor(1f, 2f, 0f);
+        this.pickupSensor = new PickupSensor(attachedRobot.getRadius()/2, attachedRobot.getRadius(), 0f);
         this.controllerPhenotype = controllerPhenotype;
         this.attachedRobot = attachedRobot;
         this.targetAreaPlacement = targetAreaPlacement;
@@ -59,7 +61,7 @@ public class HeuristicPhenotype {
         //if no pending path
         if (pendingPath.empty()) {
             Optional<Vec2> collision = collisionSensor.sense();
-            wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
+            wheelDrives = collision.map(o -> wheelDriveFromTargetPoint(o))
                     .orElse(controllerPhenotype.step(list));
 
             Optional<ResourceObject> sensedResource = pickupSensor.sense();
@@ -71,7 +73,7 @@ public class HeuristicPhenotype {
         }
         //handle path overwrites as well here
         else {
-            wheelDrives = wheelDriveFromTargetPosition(pendingPath.pop());
+            wheelDrives = wheelDriveFromTargetPoint(pendingPath.pop());
 
         }
 
@@ -80,8 +82,8 @@ public class HeuristicPhenotype {
             pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
         }
         else {
-            wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(),
-                    attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
+            wheelDrives = wheelDriveFromTargetPoint(guide(attachedRobot.getBody().getLocalCenter(),
+                    attachedRobot.getBody().getLocalPoint(new Vec2(0, 0))));
         }
 
         //wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
@@ -90,32 +92,51 @@ public class HeuristicPhenotype {
 
     }
 
-    protected Double2D wheelDriveFromTargetPosition(Vec2 targetPos){
-        double p2 = Math.PI / 2;
+    protected Double2D wheelDriveFromTargetPoint(Vec2 target){
+        return wheelDriveFromBearing(bearingFromTargetPoint(target));
+    }
 
-        //handle division by 0
-        double angle = targetPos.x != 0.0 ? Math.atan(targetPos.y / targetPos.x) : p2;
+    protected double bearingFromTargetPoint(Vec2 target){
+        double angle = target.x != 0.0 ? Math.atan(target.y / target.x) : P2;
+        if(target.x >= 0 && target.y >= 0){
+            //first
+        }else if(target.x < 0 && target.y >= 0){
+            //second
+            angle = P2 + (-angle);
+        }else if(target.x <= 0 && target.y < 0){
+            //third
+            angle = 2* P2 + angle;
+        }else if(target.x > 0 && target.y <= 0){
+            //fourth
+            angle = 3* P2 + (-angle);
+        }else{
+            throw new RuntimeException("bearingFromTargetPoint quadrant check failed!");
+        }
 
+        return angle;
+    }
+
+    protected Double2D wheelDriveFromBearing(double angle){
         double a, b;
         //4 quadrants
-        if(targetPos.x >= 0 && targetPos.y > 0){
+        if(angle <= P2 && angle >= 0.0){
             //first
-            a = (p2 - angle) / p2;
+            a = angle /P2;
             b = 1;
-        }else if(targetPos.x < 0 && targetPos.y >= 0){
+        }else if(angle <= 2* P2){
             //second
-            a = -((p2 + angle) / p2);
+            a = (angle - P2) / P2;
             b = -1;
-        }else if(targetPos.x <= 0 && targetPos.y < 0){
+        }else if(angle <= 3* P2){
             //third
             a = -1;
-            b = -((p2 - angle) / p2);
-        }else if(targetPos.x > 0 && targetPos.y <= 0){
+            b = (angle - 2*P2) / P2;
+        }else if(angle <= 4* P2){
             //fourth
             a = 1;
-            b = (p2 + angle) / p2;
+            b = (angle - 3*P2) / P2;
         }else{
-            throw new RuntimeException("wheelDriveFromTargetPosition quadrant check failed!");
+            throw new RuntimeException("wheelDriveFromBearing quadrant check failed!");
         }
         return new Double2D(a, b);
     }
