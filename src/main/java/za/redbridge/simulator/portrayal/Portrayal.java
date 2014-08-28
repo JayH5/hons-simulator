@@ -32,7 +32,7 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
     protected float orientation;
     private boolean orientationChanged = true;
 
-    protected final Rectangle2D.Double draw = new Rectangle2D.Double();
+    protected final Rectangle2D draw = new Rectangle2D.Double();
     private boolean drawChanged = true;
 
     private Drawable childDrawable;
@@ -81,7 +81,10 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
         Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
 
-        drawChanged = Rectangle2Dequals(info.draw, draw);
+        drawChanged = !draw.equals(info.draw);
+        if (drawChanged) {
+            draw.setRect(info.draw);
+        }
 
         if (needsTransform()) {
             transform.setToIdentity();
@@ -106,18 +109,10 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
             childDrawable.draw(object, g, info);
         }
 
-        if (drawChanged) {
-            draw.setRect(info.draw);
-            drawChanged = false;
-        }
+        drawChanged = false;
         orientationChanged = false;
 
         g.dispose(); // glPopMatrix()
-    }
-
-    private static boolean Rectangle2Dequals(Rectangle2D.Double lhs, Rectangle2D.Double rhs) {
-        return lhs.x == rhs.x && lhs.y == rhs.y
-                && lhs.width == rhs.width && lhs.height == rhs.height;
     }
 
     protected abstract void drawPrecise(Graphics2D graphics, AffineTransform transform);
