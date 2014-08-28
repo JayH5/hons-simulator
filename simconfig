@@ -1,0 +1,13 @@
+simulation:
+seed: 1234
+iterations: 10000
+environment:
+	width: 100
+	height: 100
+targetArea:
+	placement: north
+	thickness: 20
+objects:
+	robots: 15
+	resources: 20
+
