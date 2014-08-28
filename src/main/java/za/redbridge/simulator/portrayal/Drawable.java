@@ -8,7 +8,7 @@ import sim.portrayal.DrawInfo2D;
  * Interface for drawing child objects relative to other drawn objects
  * Created by jamie on 2014/08/26.
  */
-public interface DrawExtra {
+public interface Drawable {
 
     /**
      * This method will be called after the parent object has drawn itself but before it has
@@ -18,5 +18,7 @@ public interface DrawExtra {
      * @param graphics the translated, rotated and scaled graphics context
      * @param info the draw info from MASON
      */
-    void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info);
+    void draw(Object object, Graphics2D graphics, DrawInfo2D info);
+
+    void setOrientation(float orientation);
 }

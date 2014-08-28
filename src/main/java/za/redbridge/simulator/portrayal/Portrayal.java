@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import sim.display.GUIState;
 import sim.display.Manipulating2D;
@@ -23,16 +24,21 @@ import sim.portrayal.SimplePortrayal2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public abstract class Portrayal extends SimplePortrayal2D {
+public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
 
     protected boolean filled;
     protected Paint paint;
 
-    protected double orientation;
+    protected float orientation;
+    private boolean orientationChanged = true;
 
-    private DrawExtra drawExtra;
+    protected final Rectangle2D.Double draw = new Rectangle2D.Double();
+    private boolean drawChanged = true;
+
+    private Drawable childDrawable;
 
     private AffineTransform transformOverride;
+    private AffineTransform transform = new AffineTransform();
 
     public Portrayal() {
         this(Color.BLACK, true);
@@ -59,40 +65,64 @@ public abstract class Portrayal extends SimplePortrayal2D {
         this.filled = filled;
     }
 
-    public void setOrientation(double orientation) {
-        this.orientation = orientation;
+    @Override
+    public void setOrientation(float orientation) {
+        if (orientation != this.orientation) {
+            this.orientation = orientation;
+            orientationChanged = true;
+
+            if (childDrawable != null) {
+                childDrawable.setOrientation(orientation);
+            }
+        }
     }
 
     @Override
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
         Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
 
-        if (transformOverride == null) {
-            g.translate(info.draw.x, info.draw.y);
-            g.rotate(orientation);
-            g.scale(info.draw.width, info.draw.height);
-        } else {
-            g.transform(transformOverride);
+        drawChanged = Rectangle2Dequals(info.draw, draw);
+
+        if (needsTransform()) {
+            transform.setToIdentity();
+            transform.translate(info.draw.x, info.draw.y);
+            transform.rotate(orientation);
+            transform.scale(info.draw.width, info.draw.height);
+
+            if (transformOverride != null) {
+                transform.concatenate(transformOverride);
+            }
         }
 
         g.setPaint(paint);
 
         if (info.precise) {
-            drawPrecise(g);
+            drawPrecise(g, transform);
         } else {
-            drawImprecise(g);
+            drawImprecise(g, transform);
         }
 
-        if (drawExtra != null) {
-            drawExtra.drawExtra(object, g, info);
+        if (childDrawable != null) {
+            childDrawable.draw(object, g, info);
         }
+
+        if (drawChanged) {
+            draw.setRect(info.draw);
+            drawChanged = false;
+        }
+        orientationChanged = false;
 
         g.dispose(); // glPopMatrix()
     }
 
-    protected abstract void drawPrecise(Graphics2D graphics);
+    private static boolean Rectangle2Dequals(Rectangle2D.Double lhs, Rectangle2D.Double rhs) {
+        return lhs.x == rhs.x && lhs.y == rhs.y
+                && lhs.width == rhs.width && lhs.height == rhs.height;
+    }
 
-    protected abstract void drawImprecise(Graphics2D graphics);
+    protected abstract void drawPrecise(Graphics2D graphics, AffineTransform transform);
+
+    protected abstract void drawImprecise(Graphics2D graphics, AffineTransform transform);
 
     @Override
     public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
@@ -120,9 +150,8 @@ public abstract class Portrayal extends SimplePortrayal2D {
         return false;
     }
 
-
-    public void setDrawExtra(DrawExtra drawExtra) {
-        this.drawExtra = drawExtra;
+    public void setChildDrawable(Drawable drawable) {
+        this.childDrawable = drawable;
     }
 
     public AffineTransform getTransformOverride() {
@@ -136,5 +165,14 @@ public abstract class Portrayal extends SimplePortrayal2D {
      */
     public void setTransformOverride(AffineTransform transformOverride) {
         this.transformOverride = transformOverride;
+    }
+
+    /**
+     * Check if this Portrayal has had its scale, rotation or translation changed since the last
+     * draw call.
+     * @return true if the Portrayal's transform has changed
+     */
+    protected boolean needsTransform() {
+        return orientationChanged || drawChanged;
     }
 }

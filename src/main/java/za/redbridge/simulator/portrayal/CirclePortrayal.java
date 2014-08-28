@@ -2,6 +2,8 @@ package za.redbridge.simulator.portrayal;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 
 /**
@@ -30,30 +32,37 @@ public class CirclePortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics) {
+    protected void drawPrecise(Graphics2D graphics, AffineTransform transform) {
         if (preciseEllipse == null) {
             preciseEllipse = new Ellipse2D.Double(-radius, -radius, radius * 2, radius * 2);
         }
 
+        Shape transformedShape = transform.createTransformedShape(preciseEllipse);
+
         if (filled) {
-            graphics.fill(preciseEllipse);
+            graphics.fill(transformedShape);
         } else {
-            graphics.draw(preciseEllipse);
+            graphics.draw(transformedShape);
         }
     }
 
     @Override
-    protected void drawImprecise(Graphics2D graphics) {
+    protected void drawImprecise(Graphics2D graphics, AffineTransform transform) {
         int drawWidth = (int) (radius * 2);
         int drawHeight = (int) (radius * 2);
         int x = (int) -radius;
         int y = (int) -radius;
 
+        Graphics2D g = (Graphics2D) graphics.create();
+        g.setTransform(transform);
+
         if (filled) {
-            graphics.fillOval(x, y, drawWidth, drawHeight);
+            g.fillOval(x, y, drawWidth, drawHeight);
         } else {
-            graphics.drawOval(x, y, drawWidth, drawHeight);
+            g.drawOval(x, y, drawWidth, drawHeight);
         }
+
+        g.dispose();
     }
 
 }

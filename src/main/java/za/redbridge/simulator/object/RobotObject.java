@@ -19,7 +19,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
-import za.redbridge.simulator.portrayal.DrawExtra;
+import za.redbridge.simulator.portrayal.Drawable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
@@ -77,14 +77,23 @@ public class RobotObject extends PhysicalObject {
         collisionSensor.attach(this);
         pickupSensor.attach(this);
 
-        getPortrayal().setDrawExtra(new DrawExtra() {
+        getPortrayal().setChildDrawable(new Drawable() {
             @Override
-            public void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
+            public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
                 for (Sensor sensor : phenotype.getSensors()) {
                     sensor.draw(object, graphics, info);
                 }
                 collisionSensor.draw(object, graphics, info);
                 pickupSensor.draw(object, graphics, info);
+            }
+
+            @Override
+            public void setOrientation(float orientation) {
+                for (Sensor sensor : phenotype.getSensors()) {
+                    sensor.getPortrayal().setOrientation(orientation);
+                }
+                collisionSensor.getPortrayal().setOrientation(orientation);
+                pickupSensor.getPortrayal().setOrientation(orientation);
             }
         });
     }
