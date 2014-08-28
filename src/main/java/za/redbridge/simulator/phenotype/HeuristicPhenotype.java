@@ -3,6 +3,7 @@ package za.redbridge.simulator.phenotype;
 import org.jbox2d.collision.Collision;
 import org.jbox2d.common.Vec2;
 import sim.util.Double2D;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
@@ -24,6 +25,7 @@ public class HeuristicPhenotype {
     private final Phenotype controllerPhenotype;
     private final RobotObject attachedRobot;
 
+    //don't even know of this is necessary; just need next step
     private Stack<Vec2> pendingPath;
 
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot) {
@@ -55,17 +57,31 @@ public class HeuristicPhenotype {
             wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
                     .orElse(controllerPhenotype.step(list));
 
-            if (!attachedRobot.isBoundToResource()) {
-                pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
-            }
+            Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
+            /*Stack<Vec2> newPath = sensedResource.map(o -> getPerpendicularPathToPoint(attachedRobot.getBody().getLocalCenter(),
+                    o.getBody().getLocalCenter())).orElse(new Stack<>());
+
+            pendingPath = newPath;*/
         }
         //handle path overwrites as well here
         else {
             wheelDrives = wheelDriveFromTargetPosition(pendingPath.pop());
+
         }
 
+
+        if (!attachedRobot.isBoundToResource()) {
+            pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
+        }
+        else {
+            wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
+        }
+
+        //wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
+
         return wheelDrives;
+
     }
 
     protected Double2D wheelDriveFromTargetPosition(Vec2 targetPos){
@@ -98,9 +114,24 @@ public class HeuristicPhenotype {
         return new Double2D(a, b);
     }
 
+    //move one step so that you eventually get to the target area. (local, local)
+    public Vec2 guide(Vec2 begin, Vec2 end) {
+
+        int xDist = (int) Math.abs(end.x - begin.x);
+        int yDist = (int) Math.abs(end.y - begin.y);
+
+        int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
+        int yDirectionMultiplier = (int)((end.x - begin.x)/yDist);
+
+        Vec2 result = new Vec2 (begin.x+1*xDirectionMultiplier, begin.y+1*yDirectionMultiplier);
+        return attachedRobot.getBody().getLocalPoint(result);
+
+    }
+
     //returns wheeldrive heuristic steps for getting a point to a point with a perpendicular path. input should be global coords.
     public Stack<Vec2> getPerpendicularPathToPoint(Vec2 begin, Vec2 end) {
 
+        //TODO: Convert to local coord system
         //size of graph to explore is a square with diag dist(begin, end)
         Stack<Vec2> path = new Stack<>();
 
@@ -113,14 +144,14 @@ public class HeuristicPhenotype {
         int i = 0;
         for (float x = begin.x; i < xDist; x+=xDirectionMultiplier*1) {
 
-            path.push(new Vec2(x, begin.y));
+            path.push(attachedRobot.getBody().getLocalPoint(new Vec2(x, begin.y)));
             i++;
         }
 
         i = 0;
         for (float y = begin.y; i < yDist; y+=xDirectionMultiplier*1) {
 
-            path.push(new Vec2(begin.x+xDist*xDirectionMultiplier, y));
+            path.push(attachedRobot.getBody().getLocalPoint(new Vec2(begin.x+xDist*xDirectionMultiplier, y)));
             i++;
         }
 
