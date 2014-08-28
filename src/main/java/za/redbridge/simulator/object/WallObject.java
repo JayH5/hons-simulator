@@ -14,15 +14,15 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
  */
 public class WallObject extends PhysicalObject {
 
-    public WallObject(World world, Double2D pos, int width, int height) {
+    public WallObject(World world, Double2D pos, float width, float height) {
         super(createPortrayal(width, height), createBody(world, pos, width, height));
     }
 
-    protected static Portrayal createPortrayal(int width, int height) {
+    protected static Portrayal createPortrayal(float width, float height) {
         return new RectanglePortrayal(width, height);
     }
 
-    protected static Body createBody(World world, Double2D position, int width, int height) {
+    protected static Body createBody(World world, Double2D position, float width, float height) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.STATIC)
                 .setPosition(position)

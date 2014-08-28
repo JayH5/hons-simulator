@@ -14,16 +14,16 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
 
     private static final boolean AREA_VALUE = false;
 
-    private static final double SMALL_OBJECT_WIDTH = 3;
-    private static final double SMALL_OBJECT_HEIGHT = 3;
+    private static final double SMALL_OBJECT_WIDTH = 0.4;
+    private static final double SMALL_OBJECT_HEIGHT = 0.4;
     private static final double SMALL_OBJECT_VALUE = 50.0;
-    private static final double SMALL_OBJECT_MASS = 40.0;
+    private static final double SMALL_OBJECT_MASS = 2.0;
     private static final int SMALL_OBJECT_PUSHING_BOTS = 1;
 
-    private static final double LARGE_OBJECT_WIDTH = 5.0;
-    private static final double LARGE_OBJECT_HEIGHT = 5.0;
+    private static final double LARGE_OBJECT_WIDTH = 0.6;
+    private static final double LARGE_OBJECT_HEIGHT = 0.6;
     private static final double LARGE_OBJECT_VALUE = 100.0;
-    private static final double LARGE_OBJECT_MASS = 100.0;
+    private static final double LARGE_OBJECT_MASS = 5.0;
     private static final int LARGE_OBJECT_PUSHING_BOTS = 2;
 
     @Override

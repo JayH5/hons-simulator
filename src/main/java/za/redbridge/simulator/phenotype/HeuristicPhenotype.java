@@ -37,7 +37,7 @@ public class HeuristicPhenotype {
 
         // TODO: Make configurable or decide on good defaults
         this.collisionSensor = new CollisionSensor();
-        this.pickupSensor = new PickupSensor(1f, 2f, 0f);
+        this.pickupSensor = new PickupSensor(attachedRobot.getRadius()/2, attachedRobot.getRadius(), 0f);
         this.controllerPhenotype = controllerPhenotype;
         this.attachedRobot = attachedRobot;
         this.targetAreaPlacement = targetAreaPlacement;

@@ -28,6 +28,7 @@ import static za.redbridge.simulator.Utils.toDouble2D;
 public class Simulation extends SimState {
 
     private static final float VELOCITY_THRESHOLD = 0.000001f;
+    private static final float WALL_THICKNESS = 0.05f;
 
     private Continuous2D environment;
     private World physicsWorld;
@@ -35,7 +36,7 @@ public class Simulation extends SimState {
 
     private final SimulationContactListener contactListener = new SimulationContactListener();
 
-    private static final float TIME_STEP = 1f / 60f * 1000f; // 60fps
+    private static final float TIME_STEP = 1f / 10f;
     private static final int VELOCITY_ITERATIONS = 6;
     private static final int POSITION_ITERATIONS = 3;
 
@@ -104,25 +105,24 @@ public class Simulation extends SimState {
     private void createWalls() {
         int environmentWidth = config.getEnvironmentWidth();
         int environmentHeight = config.getEnvironmentHeight();
-
         // Left
-        Double2D pos = new Double2D(-1, environmentHeight / 2.0);
-        WallObject wall = new WallObject(physicsWorld, pos, 1, environmentHeight + 2);
+        Double2D pos = new Double2D(-WALL_THICKNESS, environmentHeight / 2.0);
+        WallObject wall = new WallObject(physicsWorld, pos, WALL_THICKNESS, environmentHeight + 2*WALL_THICKNESS);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Right
-        pos = new Double2D(environmentWidth + 1, environmentHeight / 2.0);
-        wall = new WallObject(physicsWorld, pos, 1, environmentHeight + 2);
+        pos = new Double2D(environmentWidth + WALL_THICKNESS, environmentHeight / 2.0);
+        wall = new WallObject(physicsWorld, pos, WALL_THICKNESS, environmentHeight + 2*WALL_THICKNESS);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Top
-        pos = new Double2D(environmentWidth / 2.0, -1);
-        wall = new WallObject(physicsWorld, pos, environmentWidth + 2, 1);
+        pos = new Double2D(environmentWidth / 2.0, -WALL_THICKNESS);
+        wall = new WallObject(physicsWorld, pos, environmentWidth + 2*WALL_THICKNESS, WALL_THICKNESS);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Bottom
-        pos = new Double2D(environmentWidth / 2.0, environmentHeight + 1);
-        wall = new WallObject(physicsWorld, pos, environmentWidth + 2, 1);
+        pos = new Double2D(environmentWidth / 2.0, environmentHeight + WALL_THICKNESS);
+        wall = new WallObject(physicsWorld, pos, environmentWidth + 2*WALL_THICKNESS, WALL_THICKNESS);
         environment.setObjectLocation(wall.getPortrayal(), pos);
     }
 
