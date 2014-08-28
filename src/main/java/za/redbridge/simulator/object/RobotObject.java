@@ -44,8 +44,6 @@ public class RobotObject extends PhysicalObject {
 
     private final Phenotype phenotype;
     private final HeuristicPhenotype heuristicPhenotype;
-    private final CollisionSensor collisionSensor;
-    private final PickupSensor pickupSensor;
 
     private final Vec2 leftWheelPosition;
     private final Vec2 rightWheelPosition;
@@ -60,12 +58,7 @@ public class RobotObject extends PhysicalObject {
                        Phenotype phenotype) {
         super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
-
-        collisionSensor = new CollisionSensor();
-        // TODO: Make configurable or decide on good defaults
-        pickupSensor = new PickupSensor(1f, 2f, 0f);
-
-        heuristicPhenotype = new HeuristicPhenotype(collisionSensor, pickupSensor, phenotype);
+        heuristicPhenotype = new HeuristicPhenotype(phenotype, this);
         initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
@@ -77,9 +70,6 @@ public class RobotObject extends PhysicalObject {
         for (AgentSensor sensor : phenotype.getSensors()) {
             sensor.attach(this);
         }
-
-        heuristicPhenotype.getCollisionSensor().attach(this);
-        heuristicPhenotype.getPickupSensor().attach(this);
 
         getPortrayal().setDrawExtra(new DrawExtra() {
             @Override
@@ -128,9 +118,7 @@ public class RobotObject extends PhysicalObject {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
-        if (!isBoundToResource) {
-            heuristicPhenotype.getPickupSensor().sense().ifPresent(resource -> resource.tryPickup(this));
-        }
+
     }
 
     private void applyWheelForce(double wheelDrive, Vec2 wheelPosition) {

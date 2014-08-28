@@ -3,6 +3,7 @@ package za.redbridge.simulator.phenotype;
 import org.jbox2d.collision.Collision;
 import org.jbox2d.common.Vec2;
 import sim.util.Double2D;
+import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
@@ -18,17 +19,23 @@ import java.util.Stack;
  */
 public class HeuristicPhenotype {
 
-    private CollisionSensor collisionSensor;
-    private PickupSensor pickupSensor;
-    private Phenotype controllerPhenotype;
+    private final CollisionSensor collisionSensor;
+    private final PickupSensor pickupSensor;
+    private final Phenotype controllerPhenotype;
+    private final RobotObject attachedRobot;
 
     private Stack<Vec2> pendingPath;
 
-    public HeuristicPhenotype(CollisionSensor collisionSensor, PickupSensor pickupSensor, Phenotype controllerPhenotype) {
+    public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot) {
 
+        // TODO: Make configurable or decide on good defaults
         this.collisionSensor = new CollisionSensor();
         this.pickupSensor = new PickupSensor(1f, 2f, 0f);
         this.controllerPhenotype = controllerPhenotype;
+        this.attachedRobot = attachedRobot;
+
+        collisionSensor.attach(attachedRobot);
+        pickupSensor.attach(attachedRobot);
 
         pendingPath = new Stack<>();
     }
@@ -36,7 +43,7 @@ public class HeuristicPhenotype {
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
     public PickupSensor getPickupSensor() { return pickupSensor; }
 
-    public HeuristicPhenotype clone() { return new HeuristicPhenotype(collisionSensor, pickupSensor, controllerPhenotype); }
+    public HeuristicPhenotype clone() { return new HeuristicPhenotype(controllerPhenotype, attachedRobot); }
 
     public Double2D step(List<SensorReading> list) {
 
@@ -47,7 +54,13 @@ public class HeuristicPhenotype {
             Optional<Vec2> collision = collisionSensor.sense();
             wheelDrives = collision.map(o -> wheelDriveFromTargetPosition(o))
                     .orElse(controllerPhenotype.step(list));
+
+            if (!attachedRobot.isBoundToResource()) {
+                pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
+            }
+
         }
+        //handle path overwrites as well here
         else {
             wheelDrives = wheelDriveFromTargetPosition(pendingPath.pop());
         }
@@ -85,8 +98,8 @@ public class HeuristicPhenotype {
         return new Double2D(a, b);
     }
 
-    //returns wheeldrive heuristic steps for getting a point to a point. input should be global coords.
-    public Stack<Vec2> getPathToPoint(Vec2 begin, Vec2 end) {
+    //returns wheeldrive heuristic steps for getting a point to a point with a perpendicular path. input should be global coords.
+    public Stack<Vec2> getPerpendicularPathToPoint(Vec2 begin, Vec2 end) {
 
         //size of graph to explore is a square with diag dist(begin, end)
         Stack<Vec2> path = new Stack<>();
