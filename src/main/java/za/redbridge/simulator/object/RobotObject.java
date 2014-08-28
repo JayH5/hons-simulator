@@ -16,6 +16,7 @@ import java.util.Optional;
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
+import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
@@ -55,10 +56,11 @@ public class RobotObject extends PhysicalObject {
     private boolean isBoundToResource = false;
 
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
-                       Phenotype phenotype) {
+                        Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
+
         super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
-        heuristicPhenotype = new HeuristicPhenotype(phenotype, this);
+        heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPlacement);
         initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);

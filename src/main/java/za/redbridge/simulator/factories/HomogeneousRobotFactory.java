@@ -5,8 +5,11 @@ import org.jbox2d.dynamics.World;
 import java.awt.Paint;
 
 import za.redbridge.simulator.PlacementArea;
+import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.object.TargetAreaObject;
+import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 
 public class HomogeneousRobotFactory implements RobotFactory {
@@ -24,13 +27,14 @@ public class HomogeneousRobotFactory implements RobotFactory {
 
     @Override
     public void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world,
-            int quantity) {
+            int quantity, SimConfig.Direction targetAreaPlacement) {
         for (int i = 0; i < quantity; i++) {
             PlacementArea.Space space = placementArea.getRandomSpace(radius);
 
             Phenotype phenotype = this.phenotype.clone();
+
             RobotObject robot =
-                    new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype);
+                    new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype, targetAreaPlacement);
 
             placementArea.placeObject(space, robot);
         }

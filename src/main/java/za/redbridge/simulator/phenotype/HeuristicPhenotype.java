@@ -3,6 +3,7 @@ package za.redbridge.simulator.phenotype;
 import org.jbox2d.collision.Collision;
 import org.jbox2d.common.Vec2;
 import sim.util.Double2D;
+import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.AgentSensor;
@@ -24,17 +25,20 @@ public class HeuristicPhenotype {
     private final PickupSensor pickupSensor;
     private final Phenotype controllerPhenotype;
     private final RobotObject attachedRobot;
+    private final SimConfig.Direction targetAreaPlacement;
 
     //don't even know of this is necessary; just need next step
     private Stack<Vec2> pendingPath;
 
-    public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot) {
+    public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot,
+                              SimConfig.Direction targetAreaPlacement) {
 
         // TODO: Make configurable or decide on good defaults
         this.collisionSensor = new CollisionSensor();
         this.pickupSensor = new PickupSensor(1f, 2f, 0f);
         this.controllerPhenotype = controllerPhenotype;
         this.attachedRobot = attachedRobot;
+        this.targetAreaPlacement = targetAreaPlacement;
 
         collisionSensor.attach(attachedRobot);
         pickupSensor.attach(attachedRobot);
@@ -45,7 +49,8 @@ public class HeuristicPhenotype {
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
     public PickupSensor getPickupSensor() { return pickupSensor; }
 
-    public HeuristicPhenotype clone() { return new HeuristicPhenotype(controllerPhenotype, attachedRobot); }
+    public HeuristicPhenotype clone() { return new HeuristicPhenotype(controllerPhenotype,
+            attachedRobot, targetAreaPlacement); }
 
     public Double2D step(List<SensorReading> list) {
 
@@ -75,7 +80,8 @@ public class HeuristicPhenotype {
             pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
         }
         else {
-            wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
+            wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(),
+                    attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
         }
 
         //wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
