@@ -86,7 +86,7 @@ public class SimulationGUI extends GUIState {
         }
 
         ResourceFactory resourceFactory = new HalfBigHalfSmallResourceFactory();
-        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
+        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.30,
                 new Color(0,0,0));
 
         SimulationGUI video =

@@ -130,6 +130,8 @@ public class ResourceObject extends PhysicalObject {
 
         wjd.collideConnected = true;
 
+        System.out.println("fuck you Jeremy " + robot.getBody().getAngle()%(Math.PI*2));
+
         pendingJoints.put(robot, wjd);
 
         // Mark the robot as bound

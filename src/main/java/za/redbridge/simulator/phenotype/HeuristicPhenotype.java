@@ -82,8 +82,9 @@ public class HeuristicPhenotype {
             pickupSensor.sense().ifPresent(resource -> resource.tryPickup(attachedRobot));
         }
         else {
-            wheelDrives = wheelDriveFromTargetPoint(guide(attachedRobot.getBody().getLocalCenter(),
-                    attachedRobot.getBody().getLocalPoint(new Vec2(0, 0))));
+            /*wheelDrives = wheelDriveFromTargetPoint(guide(attachedRobot.getBody().getLocalCenter(),
+                    attachedRobot.getBody().getLocalPoint(new Vec2(0, 0))));*/
+            wheelDrives = wheelDriveFromBearing(targetAreaBearing());
         }
 
         //wheelDrives = wheelDriveFromTargetPosition(guide(attachedRobot.getBody().getLocalCenter(), attachedRobot.getBody().getLocalPoint(new Vec2(0,0))));
@@ -116,6 +117,39 @@ public class HeuristicPhenotype {
         return angle;
     }
 
+    //target area bearing from robot angle
+    protected double targetAreaBearing() {
+
+        double robotAngle = (attachedRobot.getBody().getTransform().q.getAngle()+(4*P2))%(4*P2);
+        double targetAreaPosition = -1;
+
+        if (targetAreaPlacement == SimConfig.Direction.NORTH) {
+            targetAreaPosition = P2*3;
+        }
+        else if (targetAreaPlacement == SimConfig.Direction.SOUTH) {
+            targetAreaPosition = P2;
+        }
+        else if (targetAreaPlacement == SimConfig.Direction.EAST) {
+            targetAreaPosition = 0;
+        }
+        else if (targetAreaPlacement == SimConfig.Direction.WEST) {
+            targetAreaPosition = P2*2;
+        }
+        
+        System.out.println("robotAngle " + robotAngle + " targetAreaPlacement " + targetAreaPosition);
+
+        double difference = targetAreaPosition - robotAngle;
+        double bearing = (4*P2 + difference)%(4*P2);
+
+        if (bearing < 1) {
+            bearing = 0;
+        }
+
+        System.out.println("bearing is " + bearing);
+        return bearing;
+
+    }
+
     protected Double2D wheelDriveFromBearing(double angle){
         double a, b;
         //4 quadrants
@@ -136,7 +170,7 @@ public class HeuristicPhenotype {
             a = 1;
             b = (angle - 3*P2) / P2;
         }else{
-            throw new RuntimeException("wheelDriveFromBearing quadrant check failed!");
+            throw new RuntimeException("wheelDriveFromBearing quadrant check failed! " + angle);
         }
         return new Double2D(a, b);
     }
@@ -155,7 +189,7 @@ public class HeuristicPhenotype {
 
     }
 
-    //returns wheeldrive heuristic steps for getting a point to a point with a perpendicular path. input should be global coords.
+    //returns wheeldrive heuristic steps for getting a point to a point with a perpendicular path.
     public Stack<Vec2> getPerpendicularPathToPoint(Vec2 begin, Vec2 end) {
 
         //TODO: Convert to local coord system

@@ -52,16 +52,13 @@ public class ChasingPhenotype implements Phenotype {
             lastMove = random;
             return random;
         }else if(leftReading == max) {
-            System.out.println("Left!");
             lastMove = left;
             return left;
         }else if(rightReading == max) {
-            System.out.println("Right!");
             lastMove = right;
             return right;
         }else {
             lastMove = forward;
-            System.out.println("Forward!");
             return forward;
         }
     }
