@@ -56,8 +56,10 @@ public class HeuristicPhenotype {
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
     public PickupSensor getPickupSensor() { return pickupSensor; }
 
-    public HeuristicPhenotype clone() { return new HeuristicPhenotype(controllerPhenotype,
-            attachedRobot, targetAreaPlacement); }
+    public HeuristicPhenotype clone() {
+        return new HeuristicPhenotype(controllerPhenotype.clone(), attachedRobot,
+                targetAreaPlacement);
+    }
 
     public Double2D step(List<SensorReading> list) {
 
@@ -144,7 +146,7 @@ public class HeuristicPhenotype {
         else if (targetAreaPlacement == SimConfig.Direction.WEST) {
             targetAreaPosition = P2*2;
         }
-        
+
         //System.out.println("robotAngle " + robotAngle + " targetAreaPlacement " + targetAreaPosition);
 
         double difference = targetAreaPosition - robotAngle;
