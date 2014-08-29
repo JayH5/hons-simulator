@@ -73,7 +73,7 @@ public class HeuristicPhenotype {
         }
         //handle path overwrites as well here
         else {
-
+            
             if (!attachedRobot.isBoundToResource()) {
                 wheelDrives = wheelDriveFromTargetPoint(pendingPath.pop());
             }
@@ -82,7 +82,7 @@ public class HeuristicPhenotype {
         if (!attachedRobot.isBoundToResource()) {
 
             boolean shouldPath = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(false);
+                        .orElse(false);
 
             if (shouldPath) {
 
@@ -92,7 +92,7 @@ public class HeuristicPhenotype {
                 pendingPath = sensedResource.map(o -> getPerpendicularPathToPoint(start,
                         destination)).orElse(new Stack<>());
 
-                System.out.println("yeop u shud path " + pendingPath.size());
+                //System.out.println("yeop u shud path " + pendingPath.size());
             }
         }
         else {
@@ -133,7 +133,7 @@ public class HeuristicPhenotype {
         double targetAreaPosition = -1;
 
         if (targetAreaPlacement == SimConfig.Direction.NORTH) {
-            targetAreaPosition = P2*3;
+            targetAreaPosition = 3*P2;
         }
         else if (targetAreaPlacement == SimConfig.Direction.SOUTH) {
             targetAreaPosition = P2;
