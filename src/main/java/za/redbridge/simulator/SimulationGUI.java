@@ -11,6 +11,7 @@ import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.interfaces.ResourceFactory;
@@ -85,7 +86,10 @@ public class SimulationGUI extends GUIState {
             config = new SimConfig(); // Default
         }
 
-        ResourceFactory resourceFactory = new HalfBigHalfSmallResourceFactory();
+        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
+                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
+                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
+
         RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.10,
                 new Color(0,0,0));
 

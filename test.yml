@@ -1,6 +1,6 @@
 ---
 objects:
-  robots: 50
-  resources: 50
+  robots: 30
+  resources: 20
 targetArea:
   placement: north

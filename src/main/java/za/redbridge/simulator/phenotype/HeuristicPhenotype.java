@@ -92,7 +92,7 @@ public class HeuristicPhenotype {
                 pendingPath = sensedResource.map(o -> getPerpendicularPathToPoint(start,
                         destination)).orElse(new Stack<>());
 
-                //System.out.println("yeop u shud path " + pendingPath.size());
+                System.out.println("yeop u shud path " + pendingPath.size());
             }
         }
         else {
@@ -212,6 +212,8 @@ public class HeuristicPhenotype {
 
         int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
         int yDirectionMultiplier = (int)((end.x - begin.x)/yDist);
+
+        System.out.println("xdist: " + xDist + " ydist: " + yDist);
 
         int i = 0;
         for (float x = begin.x; i < xDist; x+=xDirectionMultiplier*1) {

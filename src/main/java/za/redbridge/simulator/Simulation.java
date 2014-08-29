@@ -76,7 +76,7 @@ public class Simulation extends SimState {
                 .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots(),
                         config.getTargetAreaPlacement());
         resourceFactory.placeInstances(placementArea.new ForType<>(), physicsWorld,
-                config.getObjectsResources());
+                config.getLargeObjects(), config.getSmallObjects());
 
 
         // Now actually add the objects that have been placed to the world and schedule
@@ -156,7 +156,7 @@ public class Simulation extends SimState {
 
         //for now just give it the default fitness function
         targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
-                                                            new DefaultFitnessFunction());
+                                                            config.getFitnessFunction());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).

@@ -34,9 +34,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private FitnessFunction fitnessFunction;
 
-    //total value of resources within this forage area
-    private double totalObjectValue;
-
     //total fitness value for the agents in this simulation. unfortunately fitness is dead tied to forage area and
     //how much stuff is in there.
     private double totalFitness;
@@ -51,7 +48,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         super(createPortrayal(width, height), createBody(world, pos, width, height));
 
         this.fitnessFunction = fitnessFunction;
-        totalObjectValue = 0;
         totalFitness = 0;
         this.width = width;
         this.height = height;
@@ -85,32 +81,25 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 if (containedObjects.add(resource)) {
                     resource.markCollected();
                     resource.getPortrayal().setPaint(Color.CYAN);
-                    incrementTotalObjectValue(resource.getValue());
+                    incrementTotalObjectValue(resource);
                 }
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
                 if (containedObjects.remove(resource)) {
                     resource.getPortrayal().setPaint(Color.MAGENTA);
-                    decrementTotalObjectValue(resource.getValue());
+                    decrementTotalObjectValue(resource);
                 }
             }
         }
     }
 
     //these also update the overall fitness value
-    public void setTotalObjectValue(double totalObjectValue) {
-        this.totalObjectValue = totalObjectValue;
-        totalFitness = fitnessFunction.calculateFitness(this.totalObjectValue);
+    private void incrementTotalObjectValue(ResourceObject resource) {
+        totalFitness += fitnessFunction.calculateFitness(resource);
     }
 
-    private void incrementTotalObjectValue(double value) {
-        totalObjectValue += value;
-        totalFitness = fitnessFunction.calculateFitness(totalObjectValue);
-    }
-
-    private void decrementTotalObjectValue(double value) {
-        totalObjectValue -= value;
-        totalFitness = fitnessFunction.calculateFitness(totalObjectValue);
+    private void decrementTotalObjectValue(ResourceObject resource) {
+        totalFitness -= fitnessFunction.calculateFitness(resource);
     }
 
     public double getTotalFitness() {
@@ -145,7 +134,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         if (ALLOW_REMOVAL) {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
             if (containedObjects.remove(resource)) {
-                decrementTotalObjectValue(resource.getValue());
+                decrementTotalObjectValue(resource);
             }
         }
     }

@@ -37,7 +37,6 @@ public class ResourceObject extends PhysicalObject {
 
     private final double width;
     private final double height;
-    private final double value;
     private final int pushingRobots;
 
     private boolean isCollected = false;
@@ -46,12 +45,11 @@ public class ResourceObject extends PhysicalObject {
     private Map<RobotObject, Joint> joints;
 
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
-                          double value, int pushingRobots) {
+                          int pushingRobots) {
         super(createPortrayal(width, height),
                 createBody(world, position, width, height, mass));
         this.width = width;
         this.height = height;
-        this.value = value;
         this.pushingRobots = pushingRobots;
 
 
@@ -72,10 +70,6 @@ public class ResourceObject extends PhysicalObject {
                 .setFriction(0.9f)
                 .setRestitution(1.0f)
                 .build(world);
-    }
-
-    public double getValue() {
-        return value;
     }
 
     @Override
@@ -230,6 +224,8 @@ public class ResourceObject extends PhysicalObject {
         return joints.size() + pendingJoints.size() >= pushingRobots;
     }
 
+    public int getNumPushingBots() { return joints.size(); }
+
     private void breakRobotWeldJoint() {
         for (Map.Entry<RobotObject, Joint> entry: joints.entrySet()) {
             RobotObject robot = entry.getKey();
@@ -241,4 +237,11 @@ public class ResourceObject extends PhysicalObject {
 
     public boolean isPushed() { return !joints.isEmpty(); }
 
+    public double getWidth() {
+        return width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
 }

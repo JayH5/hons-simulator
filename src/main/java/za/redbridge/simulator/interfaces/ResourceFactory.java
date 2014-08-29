@@ -11,5 +11,5 @@ import za.redbridge.simulator.object.ResourceObject;
  */
 public interface ResourceFactory {
     void placeInstances(PlacementArea.ForType<ResourceObject> placementArea, World world,
-            int quantity);
+            int quantityLarge, int quantitySmall);
 }

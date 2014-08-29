@@ -1,5 +1,9 @@
 package za.redbridge.simulator.config;
 
+import za.redbridge.simulator.ea.FitnessFunction;
+
+import javax.print.attribute.standard.Finishings;
+
 /**
  * Created by shsu on 2014/08/19.
  */
