@@ -13,7 +13,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -42,8 +41,10 @@ public class ResourceObject extends PhysicalObject {
 
     private boolean isCollected = false;
 
-    private Map<RobotObject, JointDef> pendingJoints;
-    private Map<RobotObject, Joint> joints;
+    private final AnchorPoint[] anchorPoints;
+
+    private final Map<RobotObject, JointDef> pendingJoints;
+    private final Map<RobotObject, Joint> joints;
 
     public ResourceObject(World world, Double2D position, double width, double height, double mass,
                           double value, int pushingRobots) {
@@ -54,6 +55,7 @@ public class ResourceObject extends PhysicalObject {
         this.value = value;
         this.pushingRobots = pushingRobots;
 
+        anchorPoints = new AnchorPoint[pushingRobots];
 
         joints = new HashMap<>(pushingRobots);
         pendingJoints = new HashMap<>(pushingRobots);
@@ -110,7 +112,8 @@ public class ResourceObject extends PhysicalObject {
         // Check the side that the robot wants to attach to
         // If it is not the sticky side don't allow it to attach
         Body robotBody = robot.getBody();
-        final Side attachSide = getSideClosestToPoint(robotBody.getPosition());
+        Vec2 robotPosition = robotBody.getPosition();
+        final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
             return true;
         }
@@ -118,6 +121,7 @@ public class ResourceObject extends PhysicalObject {
         // Set the sticky side
         if (stickySide == null) {
             stickySide = attachSide;
+            createAnchorPoints();
         }
 
         // Create the joint definition
@@ -125,9 +129,9 @@ public class ResourceObject extends PhysicalObject {
         wjd.bodyA = getBody();
         wjd.bodyB = robotBody;
 
-        wjd.referenceAngle = getReferenceAngleForSide(attachSide);
+        wjd.referenceAngle = getReferenceAngle();
 
-        wjd.localAnchorA.set(getAnchorPointForSide(attachSide));
+        wjd.localAnchorA.set(getClosestAnchorPoint(robotPosition));
         wjd.localAnchorB.set(robot.getRadius() + 0.01f, 0f); // Attach to front of robot
 
         wjd.collideConnected = true;
@@ -159,38 +163,63 @@ public class ResourceObject extends PhysicalObject {
         return side;
     }
 
-    private Vec2 getAnchorPointForSide(Side side) {
-        int position = joints.size() + pendingJoints.size();
-        Vec2 anchorPoint;
-        if (side == Side.LEFT || side == Side.RIGHT) {
-            float spacing = (float) (height / pushingRobots);
-            float y = (float) height / 2 - (spacing * position + spacing / 2);
-            float x = side == Side.LEFT ? (float) -width / 2 : (float) width / 2;
-            anchorPoint = new Vec2(x, y);
-        } else {
-            float spacing = (float) (width / pushingRobots);
-            float x = (float) -width / 2 + spacing * position + spacing / 2;
-            float y = side == Side.BOTTOM ? (float) -height / 2 : (float) height / 2;
-            anchorPoint = new Vec2(x, y);
+    private void createAnchorPoints() {
+        for (int i = 0; i < pushingRobots; i++) {
+            Vec2 position;
+            if (stickySide == Side.LEFT || stickySide == Side.RIGHT) {
+                float spacing = (float) (height / pushingRobots);
+                float y = (float) height / 2 - (spacing * i + spacing / 2);
+                float x = stickySide == Side.LEFT ? (float) -width / 2 : (float) width / 2;
+                position = new Vec2(x, y);
+            } else {
+                float spacing = (float) (width / pushingRobots);
+                float x = (float) -width / 2 + spacing * i + spacing / 2;
+                float y = stickySide == Side.BOTTOM ? (float) -height / 2 : (float) height / 2;
+                position = new Vec2(x, y);
+            }
+            anchorPoints[i] = new AnchorPoint(position);
         }
-
-        return anchorPoint;
     }
 
-    private float getReferenceAngleForSide(Side side) {
+    private Vec2 getClosestAnchorPoint(Vec2 position) {
+        // Fast path for single robot resource
+        if (pushingRobots == 1) {
+            return anchorPoints[0].position;
+        }
+
+        // Else iterate through anchor points finding closest one (generally only 2 options)
+        Vec2 closestAnchorPoint = null;
+        float shortestDistance = Float.MAX_VALUE;
+        for (int i = 0; i < pushingRobots; i++) {
+            AnchorPoint anchorPoint = anchorPoints[i];
+            if (anchorPoint.taken) {
+                continue;
+            }
+
+            float distance = getBody().getPosition().sub(position).lengthSquared();
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                closestAnchorPoint = anchorPoint.position;
+            }
+        }
+
+        return closestAnchorPoint;
+    }
+
+    private float getReferenceAngle() {
         final float referenceAngle;
-        if (side == Side.LEFT) {
+        if (stickySide == Side.LEFT) {
             referenceAngle = 0f;
-        } else if (side == Side.RIGHT) {
+        } else if (stickySide == Side.RIGHT) {
             referenceAngle = (float) Math.PI;
-        } else if (side == Side.TOP) {
+        } else if (stickySide == Side.TOP) {
             referenceAngle = (float) -Math.PI / 2;
         } else {
             referenceAngle = (float) Math.PI / 2;
         }
         return referenceAngle;
     }
-    
+
     public Vec2 getStickySideAttachmentPoint() {
         int position = joints.size() + pendingJoints.size();
         Vec2 anchorPoint;
@@ -208,7 +237,7 @@ public class ResourceObject extends PhysicalObject {
 
         return anchorPoint;
     }
-            
+
 
     /**
      * Check whether this object has been collected
@@ -240,5 +269,18 @@ public class ResourceObject extends PhysicalObject {
     }
 
     public boolean isPushed() { return !joints.isEmpty(); }
+
+    private static class AnchorPoint {
+        final Vec2 position;
+        boolean taken = false;
+
+        private AnchorPoint(Vec2 position) {
+            this.position = position;
+        }
+
+        private void markTaken() {
+            taken = true;
+        }
+    }
 
 }
