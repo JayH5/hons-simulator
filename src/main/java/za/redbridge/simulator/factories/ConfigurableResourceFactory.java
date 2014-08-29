@@ -2,7 +2,6 @@ package za.redbridge.simulator.factories;
 
 import org.jbox2d.dynamics.World;
 import za.redbridge.simulator.PlacementArea;
-import za.redbridge.simulator.interfaces.ResourceFactory;
 import za.redbridge.simulator.object.ResourceObject;
 
 /**
