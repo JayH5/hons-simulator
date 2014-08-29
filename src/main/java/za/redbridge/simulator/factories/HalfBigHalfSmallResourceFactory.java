@@ -12,8 +12,6 @@ import za.redbridge.simulator.object.ResourceObject;
  */
 public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
 
-    private static final boolean AREA_VALUE = false;
-
     private static final double SMALL_OBJECT_WIDTH = 0.4;
     private static final double SMALL_OBJECT_HEIGHT = 0.4;
     private static final double SMALL_OBJECT_MASS = 2.0;

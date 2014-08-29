@@ -241,12 +241,12 @@ public class SimConfig {
         // Fitness function
         Map fitnessFunc = (Map) config.get("scoring");
         if (checkFieldPresent(fitnessFunc, "scoring")) {
-            String fitnessF = (String) fitnessFunc.get("scoring");
+            String fitnessF = (String) fitnessFunc.get("fitnessFunction");
             if (checkFieldPresent(fitnessF, "scoring:fitnessFunction")) {
 
                 try {
                     Class f = Class.forName(fitnessF);
-                    Object o = f.cast(fitnessF);
+                    Object o = f.newInstance();
 
                     if (!(o instanceof FitnessFunction)) {
                         throw new InvalidClassException("");
@@ -255,12 +255,18 @@ public class SimConfig {
                     fitness = (FitnessFunction) o;
                 }
                 catch (ClassNotFoundException c) {
-                    System.out.println("Invalid class name specified in SimConfig.");
+                    System.out.println("Invalid class name specified in SimConfig: " + fitnessF + ". Using default fitness function.");
                     c.printStackTrace();
                 }
                 catch (InvalidClassException i) {
-                    System.out.println("Invalid specified fitness class.");
+                    System.out.println("Invalid specified fitness class. " + fitnessF + ". Using default fitness function.");
                     i.printStackTrace();
+                }
+                catch (InstantiationException ins) {
+                    ins.printStackTrace();
+                }
+                catch (IllegalAccessException ill) {
+                    ill.printStackTrace();
                 }
             }
         }

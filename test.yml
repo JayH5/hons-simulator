@@ -1,6 +1,25 @@
 ---
-objects:
-  robots: 30
-  resources: 20
+simulation:
+  seed: 1234
+  iterations: 10000
+environment:
+  width: 100
+  height: 100
 targetArea:
   placement: north
+  thickness: 20
+objects:
+  robots: 30
+  largeResources: 20
+  smallResources: 20
+resourceProperties:
+  smallObjectWidth: 0.4
+  smallObjectHeight: 0.4
+  smallObjectMass: 2.0
+  maxSmallObjectPushingBots: 1
+  largeObjectWidth: 1
+  largeObjectHeight: 1
+  largeObjectMass: 10
+  maxLargeObjectPushingBots: 3
+scoring:
+  fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
