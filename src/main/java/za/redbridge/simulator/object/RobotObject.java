@@ -147,6 +147,8 @@ public class RobotObject extends PhysicalObject {
         return isBoundToResource;
     }
 
+    public HeuristicPhenotype getHeuristicPhenotype() { return heuristicPhenotype; }
+
     public void setBoundToResource(boolean isBoundToResource) {
         this.isBoundToResource = isBoundToResource;
     }
