@@ -1,10 +1,10 @@
 package za.redbridge.simulator.portrayal;
 
+import org.jbox2d.common.Vec2;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 
 /**
  * Base class for drawing polygon shapes. Subclasses should set the positions of the vertices of
@@ -13,8 +13,7 @@ import java.awt.geom.Rectangle2D;
  */
 public abstract class PolygonPortrayal extends Portrayal {
 
-    protected final Point2D[] vertices;
-    private final Point2D[] drawVertices;
+    protected final Vec2[] vertices;
 
     private final int[] xPoints;
     private final int[] yPoints;
@@ -30,11 +29,9 @@ public abstract class PolygonPortrayal extends Portrayal {
 
         this.nVertices = nVertices;
 
-        vertices = new Point2D[nVertices];
-        drawVertices = new Point2D[nVertices];
+        vertices = new Vec2[nVertices];
         for (int i = 0; i < nVertices; i++) {
-            vertices[i] = new Point2D.Double();
-            drawVertices[i] = new Point2D.Double();
+            vertices[i] = new Vec2();
         }
 
         xPoints = new int[nVertices];
@@ -42,18 +39,16 @@ public abstract class PolygonPortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics, Rectangle2D draw, float orientation) {
-        drawImprecise(graphics, draw, orientation);
+    protected void drawPrecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated) {
+        drawImprecise(graphics, transform, transformUpdated);
     }
 
     @Override
-    protected void drawImprecise(Graphics2D graphics, Rectangle2D draw, float orientation) {
-        if (needsTransform()) {
-            getTransform().transform(vertices, 0, drawVertices, 0, nVertices);
-            for (int i = 0; i < nVertices; i++) {
-                xPoints[i] = (int) drawVertices[i].getX();
-                yPoints[i] = (int) drawVertices[i].getY();
-            }
+    protected void drawImprecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated) {
+        if (transformUpdated) {
+            transform.transformVertices(vertices, xPoints, yPoints);
         }
 
         if (filled) {

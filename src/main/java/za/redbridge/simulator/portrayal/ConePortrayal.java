@@ -16,10 +16,10 @@ public class ConePortrayal extends PolygonPortrayal {
         double segmentRadians = theta / segments;
         double angle = -theta / 2;
         for (int i = 0; i <= segments; i++) {
-            double x = length * Math.cos(angle);
-            double y = length * Math.sin(angle);
+            float x = (float) (length * Math.cos(angle));
+            float y = (float) (length * Math.sin(angle));
 
-            vertices[i + 1].setLocation(x, y);
+            vertices[i + 1].set(x, y);
 
             angle += segmentRadians;
         }

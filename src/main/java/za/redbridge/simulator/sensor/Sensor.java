@@ -10,7 +10,6 @@ import org.jbox2d.dynamics.contacts.Contact;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +17,7 @@ import sim.portrayal.DrawInfo2D;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.portrayal.STRTransform;
 
 /**
  * The base class for all sensors that attach to a RobotObject.
@@ -114,10 +114,8 @@ public abstract class Sensor<T> implements Collideable {
 
         // Make sure the portrayal is relative to the robot
         if (portrayal != null) {
-            Rectangle2D draw = new Rectangle2D.Double(robotRelativeTransform.p.x,
-                    robotRelativeTransform.p.y, 1, 1);
-            float rotation = robotRelativeTransform.q.getAngle();
-            portrayal.setLocalTransform(draw, rotation);
+            STRTransform transform = new STRTransform(robotRelativeTransform);
+            portrayal.setLocalTransform(transform);
         }
     }
 

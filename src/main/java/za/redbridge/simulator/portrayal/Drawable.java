@@ -1,5 +1,7 @@
 package za.redbridge.simulator.portrayal;
 
+import org.jbox2d.common.Transform;
+
 import java.awt.Graphics2D;
 
 import sim.portrayal.DrawInfo2D;
@@ -20,5 +22,5 @@ public interface Drawable {
      */
     void draw(Object object, Graphics2D graphics, DrawInfo2D info);
 
-    void setRotation(float orientation);
+    void setTransform(Transform transform);
 }

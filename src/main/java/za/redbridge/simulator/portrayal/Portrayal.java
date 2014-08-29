@@ -1,11 +1,11 @@
 package za.redbridge.simulator.portrayal;
 
+import org.jbox2d.common.Transform;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 
 import sim.display.GUIState;
 import sim.display.Manipulating2D;
@@ -18,7 +18,7 @@ import sim.portrayal.SimplePortrayal2D;
 /**
  * Base class for all our portrayal objects.
  *
- * NOTE: Does implement more specific versions of {@link SimplePortrayal2D#hitObject(Object,
+ * NOTE: Does not implement more specific versions of {@link SimplePortrayal2D#hitObject(Object,
  * DrawInfo2D)} or {@link SimplePortrayal2D#handleMouseEvent(GUIState, Manipulating2D,
  * LocationWrapper, MouseEvent, DrawInfo2D, int)}.
  *
@@ -29,21 +29,14 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
     protected boolean filled;
     protected Paint paint;
 
-    private float rotation;
-    private boolean rotationChanged = true;
-
-    private final Rectangle2D draw = new Rectangle2D.Double();
-    private boolean drawChanged = true;
+    private final STRTransform transform = new STRTransform();
+    private boolean transformUpdated = true;
 
     private Drawable childDrawable;
 
-    private float localRotation;
-    private Rectangle2D localDraw;
-    private AffineTransform localTransform;
-    private Rectangle2D effectiveLocalDraw;
+    private STRTransform localTransform;
+    private STRTransform effectiveLocalTransform;
     private boolean hasLocalTransform = false;
-
-    private AffineTransform transform;
 
     public Portrayal() {
         this(Color.BLACK, true);
@@ -71,35 +64,30 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
     }
 
     @Override
-    public void setRotation(float rotation) {
-        if (rotation != this.rotation) {
-            this.rotation = rotation;
-            rotationChanged = true;
-
-            if (childDrawable != null) {
-                childDrawable.setRotation(rotation);
-            }
+    public void setTransform(Transform transform) {
+        this.transform.setTransform(transform);
+        if (childDrawable != null) {
+            childDrawable.setTransform(transform);
         }
+
+        transformUpdated = true;
     }
 
     @Override
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
         Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
 
-        drawChanged = !draw.equals(info.draw);
-        if (drawChanged) {
-            draw.setRect(info.draw);
-        }
-
         g.setPaint(paint);
+
+        updateScale(info);
 
         if (hasLocalTransform) {
             drawLocal(object, g, info);
         } else {
             if (info.precise) {
-                drawPrecise(g, draw, rotation);
+                drawPrecise(g, transform, transformUpdated);
             } else {
-                drawImprecise(g, draw, rotation);
+                drawImprecise(g, transform, transformUpdated);
             }
         }
 
@@ -107,28 +95,18 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
             childDrawable.draw(object, g, info);
         }
 
-        drawChanged = false;
-        rotationChanged = false;
-
         g.dispose(); // glPopMatrix()
+
+        transformUpdated = false;
     }
 
     private void drawLocal(Object object, Graphics2D graphics, DrawInfo2D info) {
-        if (drawChanged) {
-            effectiveLocalDraw.setRect(
-                    draw.getX() + localDraw.getX(), // Translate
-                    draw.getY() + localDraw.getY(),
-                    draw.getWidth() * localDraw.getWidth(), // Scale
-                    draw.getHeight() * localDraw.getHeight());
-        }
-
-        final Rectangle2D draw = effectiveLocalDraw;
-        final float rotation = this.rotation + this.localRotation;
+        STRTransform.mulToOut(transform, localTransform, effectiveLocalTransform);
 
         if (info.precise) {
-            drawPrecise(graphics, draw, rotation);
+            drawPrecise(graphics, effectiveLocalTransform, transformUpdated);
         } else {
-            drawImprecise(graphics, draw, rotation);
+            drawImprecise(graphics, effectiveLocalTransform, transformUpdated);
         }
 
         if (childDrawable != null) {
@@ -136,9 +114,20 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
         }
     }
 
-    protected abstract void drawPrecise(Graphics2D graphics, Rectangle2D draw, float rotation);
+    private void updateScale(DrawInfo2D info) {
+        float sx = (float) info.draw.width;
+        float sy = (float) info.draw.height;
+        if (sx != transform.getScaleX() || sy != transform.getScaleY()) {
+            transform.setScale(sx, sy);
+            transformUpdated = true;
+        }
+    }
 
-    protected abstract void drawImprecise(Graphics2D graphics, Rectangle2D draw, float rotation);
+    protected abstract void drawPrecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated);
+
+    protected abstract void drawImprecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated);
 
     @Override
     public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
@@ -170,52 +159,19 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
         this.childDrawable = drawable;
     }
 
-    protected AffineTransform getTransform() {
-        if (transform == null) {
-            transform = new AffineTransform();
+    public void setLocalTransform(STRTransform localTransform) {
+        this.localTransform = localTransform;
+
+        if (effectiveLocalTransform == null) {
+            effectiveLocalTransform = new STRTransform();
         }
+        STRTransform.mulToOut(transform, localTransform, effectiveLocalTransform);
 
-        if (needsTransform()) {
-            transform.setToIdentity();
-            transform.translate(draw.getX(), draw.getY());
-            transform.rotate(rotation);
-            transform.scale(draw.getWidth(), draw.getHeight());
-
-            if (hasLocalTransform) {
-                transform.concatenate(localTransform);
-            }
-        }
-        return transform;
-    }
-
-    public void setLocalTransform(Rectangle2D draw, float orientation) {
-        this.localDraw = draw;
-        this.localRotation = orientation;
-        effectiveLocalDraw = new Rectangle2D.Double();
         hasLocalTransform = true;
-        buildExtraTransform();
     }
 
     public void clearLocalTransform() {
         hasLocalTransform = false;
     }
 
-    private void buildExtraTransform() {
-        if (localTransform == null) {
-            localTransform = new AffineTransform();
-        }
-        localTransform.setToIdentity();
-        localTransform.translate(localDraw.getX(), localDraw.getY());
-        localTransform.rotate(localRotation);
-        localTransform.scale(localDraw.getWidth(), localDraw.getHeight());
-    }
-
-    /**
-     * Check if this Portrayal has had its scale, rotation or translation changed since the last
-     * draw call.
-     * @return true if the Portrayal's transform has changed
-     */
-    protected boolean needsTransform() {
-        return rotationChanged || drawChanged;
-    }
 }

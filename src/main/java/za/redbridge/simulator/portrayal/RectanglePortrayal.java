@@ -27,12 +27,12 @@ public class RectanglePortrayal extends PolygonPortrayal {
         this.width = width;
         this.height = height;
 
-        double halfWidth = width / 2;
-        double halfHeight = height / 2;
-        vertices[0].setLocation(-halfWidth, -halfHeight);
-        vertices[1].setLocation(halfWidth, -halfHeight);
-        vertices[2].setLocation(halfWidth, halfHeight);
-        vertices[3].setLocation(-halfWidth, halfHeight);
+        float halfWidth = (float) (width / 2);
+        float halfHeight = (float) (height / 2);
+        vertices[0].set(-halfWidth, -halfHeight);
+        vertices[1].set(halfWidth, -halfHeight);
+        vertices[2].set(halfWidth, halfHeight);
+        vertices[3].set(-halfWidth, halfHeight);
     }
 
     public double getWidth() {
@@ -44,12 +44,13 @@ public class RectanglePortrayal extends PolygonPortrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics, Rectangle2D draw, float orientation) {
+    protected void drawPrecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated) {
         if (preciseRect == null) {
             preciseRect = new Rectangle2D.Double(-width / 2.0, -height / 2.0, width, height);
         }
 
-        Shape transformedShape = getTransform().createTransformedShape(preciseRect);
+        Shape transformedShape = transform.getAffineTransform().createTransformedShape(preciseRect);
 
         if (filled) {
             graphics.fill(transformedShape);

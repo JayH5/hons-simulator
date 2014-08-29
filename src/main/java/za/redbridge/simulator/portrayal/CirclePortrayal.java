@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 
 /**
  * Provides a simple oval portrayal of an object.
@@ -32,12 +31,14 @@ public class CirclePortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics, Rectangle2D draw, float rotation) {
+    protected void drawPrecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated) {
         if (preciseEllipse == null) {
             preciseEllipse = new Ellipse2D.Double(-radius, -radius, radius * 2, radius * 2);
         }
 
-        Shape transformedShape = getTransform().createTransformedShape(preciseEllipse);
+        Shape transformedShape =
+                transform.getAffineTransform().createTransformedShape(preciseEllipse);
 
         if (filled) {
             graphics.fill(transformedShape);
@@ -47,16 +48,17 @@ public class CirclePortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawImprecise(Graphics2D graphics, Rectangle2D draw, float rotation) {
-        int drawWidth = (int) (draw.getWidth() * radius * 2);
-        int drawHeight = (int) (draw.getHeight() * radius * 2);
-        int x = (int) (-drawWidth / 2.0 + draw.getX());
-        int y = (int) (-drawHeight / 2.0 + draw.getY());
+    protected void drawImprecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated) {
+        int x = (int) ((-radius + transform.getTranslationX()) * transform.getScaleX());
+        int y = (int) ((-radius + transform.getTranslationY()) * transform.getScaleY());
+        int width = (int) (radius * 2 * transform.getScaleX());
+        int height = (int) (radius * 2 * transform.getScaleY());
 
         if (filled) {
-            graphics.fillOval(x, y, drawWidth, drawHeight);
+            graphics.fillOval(x, y, width, height);
         } else {
-            graphics.drawOval(x, y, drawWidth, drawHeight);
+            graphics.drawOval(x, y, width, height);
         }
     }
 
