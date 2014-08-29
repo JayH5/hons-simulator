@@ -107,24 +107,18 @@ public class HeuristicPhenotype {
     }
 
     protected double bearingFromTargetPoint(Vec2 target){
-        if(target.x==0.0){
-            if(target.y > 0) return 3*P2;
-            else if(target.y < 0) return P2;
-            else return 0;
-        }
-        double angle = Math.atan(target.y/target.x);
-        if(target.x > 0 && target.y <= 0 || target.x == 0.0 && target.y == 0.0){
+        double angle = target.x != 0.0 ? Math.atan(target.y / target.x) : P2;
+        if(target.x >= 0 && target.y >= 0){
             //first
-            angle = -angle;
-        }else if(target.x <= 0 && target.y < 0){
-            //second
-            angle = (P2 - angle) + P2;
         }else if(target.x < 0 && target.y >= 0){
+            //second
+            angle = P2 + (-angle);
+        }else if(target.x <= 0 && target.y < 0){
             //third
-            angle = 2*P2 + (-angle);
-        }else if(target.x >= 0 && target.y > 0){
+            angle = 2* P2 + angle;
+        }else if(target.x > 0 && target.y <= 0){
             //fourth
-            angle = 3*P2 + (P2 - angle);
+            angle = 3* P2 + (-angle);
         }else{
             throw new RuntimeException("bearingFromTargetPoint quadrant check failed!");
         }
@@ -166,20 +160,20 @@ public class HeuristicPhenotype {
         //4 quadrants
         if(angle <= P2 && angle >= 0.0){
             //first
-            a = 1;
-            b = (P2 - angle) / P2;
-        }else if(angle <= 2*P2){
-            //second
-            a = -1;
-            b = -(angle - P2)/P2;
-        }else if(angle <= 3*P2){
-            //third
-            a = -(P2 - (angle - 2*P2)) / P2;
-            b = -1;
-        }else if(angle <= 4*P2){
-            //fourth
-            a = (angle - 3*P2) / P2;
+            a = angle /P2;
             b = 1;
+        }else if(angle <= 2* P2){
+            //second
+            a = (angle - P2) / P2;
+            b = -1;
+        }else if(angle <= 3* P2){
+            //third
+            a = -1;
+            b = (angle - 2*P2) / P2;
+        }else if(angle <= 4* P2){
+            //fourth
+            a = 1;
+            b = (angle - 3*P2) / P2;
         }else{
             throw new RuntimeException("wheelDriveFromBearing quadrant check failed! " + angle);
         }
