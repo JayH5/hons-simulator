@@ -14,10 +14,9 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.interfaces.ResourceFactory;
-import za.redbridge.simulator.interfaces.RobotFactory;
+import za.redbridge.simulator.factories.ResourceFactory;
+import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.phenotype.ChasingPhenotype;
-import za.redbridge.simulator.phenotype.SimplePhenotype;
 
 /**
  * Created by jamie on 2014/07/24.

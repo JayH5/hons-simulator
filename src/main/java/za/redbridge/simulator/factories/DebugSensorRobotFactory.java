@@ -7,7 +7,6 @@ import java.awt.Paint;
 import sim.util.Double2D;
 import za.redbridge.simulator.PlacementArea;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.interfaces.RobotFactory;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;

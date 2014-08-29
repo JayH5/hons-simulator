@@ -1,4 +1,4 @@
-package za.redbridge.simulator.interfaces;
+package za.redbridge.simulator.factories;
 
 import org.jbox2d.dynamics.World;
 

@@ -6,8 +6,8 @@ import org.encog.ml.MLMethod;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.interfaces.ResourceFactory;
-import za.redbridge.simulator.interfaces.RobotFactory;
+import za.redbridge.simulator.factories.ResourceFactory;
+import za.redbridge.simulator.factories.RobotFactory;
 
 /**
  * Created by shsu on 2014/08/13.
