@@ -87,7 +87,7 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-    //returns whether or not robot trying to do a pickup should move to a better side
+    //returns whether or not object has been picked up
     public boolean tryPickup(RobotObject robot) {
         if (isCollected) {
             return false;
@@ -109,7 +109,7 @@ public class ResourceObject extends PhysicalObject {
         Vec2 robotPosition = robotBody.getPosition();
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
-            return true;
+            return false;
         }
 
         // Set the sticky side
@@ -135,7 +135,7 @@ public class ResourceObject extends PhysicalObject {
         // Mark the robot as bound
         robot.setBoundToResource(true);
 
-        return false;
+        return true;
     }
 
     private Side getSideClosestToPoint(Vec2 point) {

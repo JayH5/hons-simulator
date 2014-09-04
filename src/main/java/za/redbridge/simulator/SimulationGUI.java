@@ -89,7 +89,7 @@ public class SimulationGUI extends GUIState {
                 config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
                 config.getLargeObjectMass(), config.getLargeObjectPushingBots());
 
-        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.10,
+        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.30,
                 new Color(0,0,0));
 
         SimulationGUI video =
