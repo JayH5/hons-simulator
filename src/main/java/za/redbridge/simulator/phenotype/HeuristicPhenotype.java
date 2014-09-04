@@ -1,39 +1,33 @@
 package za.redbridge.simulator.phenotype;
 
-import org.jbox2d.collision.Collision;
 import org.jbox2d.common.Vec2;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.sensor.AgentSensor;
+import za.redbridge.simulator.phenotype.heuristics.CollisionAvoidanceHeuristic;
+import za.redbridge.simulator.phenotype.heuristics.Heuristic;
+import za.redbridge.simulator.phenotype.heuristics.PickupHeuristic;
 import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by shsu on 2014/08/27.
  */
 public class HeuristicPhenotype {
 
-    private final CollisionSensor collisionSensor;
-    private final PickupSensor pickupSensor;
-    private final Phenotype controllerPhenotype;
-    private final RobotObject attachedRobot;
-    private final SimConfig.Direction targetAreaPlacement;
+    protected final CollisionSensor collisionSensor;
+    protected final PickupSensor pickupSensor;
+    protected final Phenotype controllerPhenotype;
+    protected final RobotObject attachedRobot;
+    protected final SimConfig.Direction targetAreaPlacement;
 
     protected static final double P2 = Math.PI / 2;
 
-    //don't even know of this is necessary; just need next step
-    private Stack<Vec2> pendingPath;
+    protected final PriorityQueue<Heuristic> heuristicList;
 
-    private Vec2 previousPendingTarget;
-    private Vec2 currentPendingTarget;
 
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot,
                               SimConfig.Direction targetAreaPlacement) {
@@ -48,9 +42,10 @@ public class HeuristicPhenotype {
         collisionSensor.attach(attachedRobot);
         pickupSensor.attach(attachedRobot);
 
-        pendingPath = new Stack<>();
-        previousPendingTarget = null;
-        currentPendingTarget = null;
+        heuristicList = new PriorityQueue<>();
+
+        heuristicList.add(new CollisionAvoidanceHeuristic(collisionSensor, attachedRobot));
+        heuristicList.add(new PickupHeuristic(pickupSensor, attachedRobot, targetAreaPlacement));
     }
 
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
@@ -63,43 +58,14 @@ public class HeuristicPhenotype {
 
     public Double2D step(List<SensorReading> list) {
 
-        Double2D wheelDrives = new Double2D(0,0);
-        Optional<Vec2> collision = collisionSensor.sense();
-        Optional<ResourceObject> sensedResource = pickupSensor.sense();
+        Iterator<Heuristic> iterator = heuristicList.iterator();
 
-        //if no pending path
-        if (pendingPath.empty()) {
+        Double2D wheelDrives = null;
 
-            wheelDrives = collision.map(o -> wheelDriveFromTargetPoint(o))
-                    .orElse(controllerPhenotype.step(list));
+        do {
+             wheelDrives = iterator.next().step(list);
         }
-        //handle path overwrites as well here
-        else {
-            
-            if (!attachedRobot.isBoundToResource()) {
-                wheelDrives = wheelDriveFromTargetPoint(pendingPath.pop());
-            }
-        }
-
-        if (!attachedRobot.isBoundToResource()) {
-
-            boolean shouldPath = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                        .orElse(false);
-
-            if (shouldPath) {
-
-                Vec2 start = attachedRobot.getBody().getLocalPoint(collisionSensor.getBody().getLocalCenter());
-                Vec2 destination = attachedRobot.getBody().
-                        getLocalPoint(sensedResource.get().getStickySideAttachmentPoint());
-                pendingPath = sensedResource.map(o -> getPerpendicularPathToPoint(start,
-                        destination)).orElse(new Stack<>());
-
-                //System.out.println("yeop u shud path " + pendingPath.size());
-            }
-        }
-        else {
-            wheelDrives = wheelDriveFromBearing(targetAreaBearing());
-        }
+        while (wheelDrives == null && iterator.hasNext());
 
         return wheelDrives;
     }
@@ -128,12 +94,8 @@ public class HeuristicPhenotype {
         return angle;
     }
 
-    //target area bearing from robot angle
-    protected double targetAreaBearing() {
 
-        double robotAngle = (attachedRobot.getBody().getTransform().q.getAngle()+(4*P2))%(4*P2);
-        double targetAreaPosition = -1;
-
+<<<<<<< HEAD
         if (targetAreaPlacement == SimConfig.Direction.NORTH) {
             targetAreaPosition = 3*P2;
         }
@@ -156,6 +118,8 @@ public class HeuristicPhenotype {
         return bearing;
 
     }
+=======
+>>>>>>> f2080ac66edea7417abbba0fd6c045ea97e703fa
 
     protected Double2D wheelDriveFromBearing(double angle){
         double a, b;
