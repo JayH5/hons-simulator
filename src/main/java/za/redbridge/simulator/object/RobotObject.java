@@ -35,7 +35,7 @@ import za.redbridge.simulator.sensor.SensorReading;
 public class RobotObject extends PhysicalObject {
 
     //how much force a wheel exerts when driven at full power, in newtons
-    private static final double WHEEL_POWER = 0.25;
+    private static final double WHEEL_POWER = 0.15;
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
 

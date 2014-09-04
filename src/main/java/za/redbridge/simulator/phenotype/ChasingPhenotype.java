@@ -2,6 +2,7 @@ package za.redbridge.simulator.phenotype;
 
 import org.jbox2d.dynamics.Fixture;
 
+import ec.util.MersenneTwisterFast;
 import sim.util.Double2D;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.TargetAreaObject;
@@ -12,20 +13,26 @@ import za.redbridge.simulator.sensor.SensorReading;
 import java.util.ArrayList;
 import java.util.List;
 
+import static za.redbridge.simulator.Utils.randomRange;
+
 public class ChasingPhenotype implements Phenotype {
     private int cooldown = 10;
     private int cooldownCounter = 0;
     private Double2D lastMove = null;
     private final List<AgentSensor> sensors;
 
+    private final MersenneTwisterFast rand = new MersenneTwisterFast();
+
     public ChasingPhenotype() {
-        AgentSensor leftSensor = new ChasingSensor((float) ((7 / 4.0f) * Math.PI));
-        AgentSensor forwardSensor = new ChasingSensor(0.0f);
-        AgentSensor rightSensor = new ChasingSensor((float) (Math.PI/4));
+        AgentSensor leftSensor = new ChasingSensor((float) Math.PI, 0f, 0.8f, 0.2f);
+        AgentSensor forwardSensor = new ChasingSensor(0.0f, 0f, 0.8f, 0.2f);
+        AgentSensor rightSensor = new ChasingSensor((float) (Math.PI/2), 0f, 0.8f, 0.2f);
+        AgentSensor topSensor = new ChasingSensor((float) (-Math.PI/2), 0f, 0.8f, 0.2f);
         sensors = new ArrayList<>();
         sensors.add(leftSensor);
         sensors.add(forwardSensor);
         sensors.add(rightSensor);
+        sensors.add(topSensor);
     }
 
     @Override
@@ -35,10 +42,12 @@ public class ChasingPhenotype implements Phenotype {
 
     @Override
     public Double2D step(List<SensorReading> list) {
-        Double2D left = new Double2D(0.5,1.0);
+        Double2D left = new Double2D(0.7,1.0);
         Double2D forward = new Double2D(1.0,1.0);
-        Double2D right = new Double2D(1.0,0.5);
-        Double2D random = new Double2D((float)Math.random()*2f - 1f, (float)Math.random()*2f - 1f);
+        Double2D right = new Double2D(1.0,0.7);
+        Double2D random = new Double2D(
+                randomRange(rand, -0.5, 0.5),
+                randomRange(rand, -0.5, 0.5));
 
         if(cooldownCounter > 0) {
             cooldownCounter--;

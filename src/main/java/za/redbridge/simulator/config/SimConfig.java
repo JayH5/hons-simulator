@@ -24,14 +24,14 @@ public class SimConfig {
     private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
     private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
 
-    private static final double DEFAULT_SMALL_OBJECT_WIDTH = 0.4; 
-    private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4; 
-    private static final double DEFAULT_SMALL_OBJECT_MASS = 2.0;
-    private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1; 
+    private static final double DEFAULT_SMALL_OBJECT_WIDTH = 0.4;
+    private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4;
+    private static final double DEFAULT_SMALL_OBJECT_MASS = 5.0;
+    private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
 
-    private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6; 
-    private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6; 
-    private static final double DEFAULT_LARGE_OBJECT_MASS = 5.0; 
+    private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6;
+    private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6;
+    private static final double DEFAULT_LARGE_OBJECT_MASS = 15.0;
     private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
 
     private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
