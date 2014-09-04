@@ -214,25 +214,6 @@ public class ResourceObject extends PhysicalObject {
         return referenceAngle;
     }
 
-    public Vec2 getStickySideAttachmentPoint() {
-        int position = joints.size() + pendingJoints.size();
-        Vec2 anchorPoint;
-        if (stickySide == Side.LEFT || stickySide == Side.RIGHT) {
-            float spacing = (float) (height / pushingRobots);
-            float y = (float) height / 2 - (spacing * position + spacing / 2);
-            float x = stickySide == Side.LEFT ? (float) -width / 2 : (float) width / 2;
-            anchorPoint = new Vec2(x, y);
-        } else {
-            float spacing = (float) (width / pushingRobots);
-            float x = (float) -width / 2 + spacing * position + spacing / 2;
-            float y = stickySide == Side.BOTTOM ? (float) -height / 2 : (float) height / 2;
-            anchorPoint = new Vec2(x, y);
-        }
-
-        return anchorPoint;
-    }
-
-
     /**
      * Check whether this object has been collected
      * @return true if the object is in the target area
