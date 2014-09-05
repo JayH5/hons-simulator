@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
+
 public class FilteredProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(1);

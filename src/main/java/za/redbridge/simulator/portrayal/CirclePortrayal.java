@@ -14,7 +14,7 @@ public class CirclePortrayal extends Portrayal {
 
     private final double radius;
 
-    private transient Ellipse2D.Double preciseEllipse;
+    private transient Ellipse2D preciseEllipse;
 
     public CirclePortrayal(double radius) {
         super();
