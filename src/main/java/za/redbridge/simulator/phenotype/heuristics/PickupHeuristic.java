@@ -10,6 +10,8 @@ import za.redbridge.simulator.sensor.SensorReading;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Heuristic for picking up things and carrying them to target area
@@ -20,14 +22,18 @@ public class PickupHeuristic extends Heuristic {
     protected final PickupSensor pickupSensor;
     protected final RobotObject attachedRobot;
     protected final SimConfig.Direction targetAreaBearing;
-    protected int priority = 6;
+    protected final PriorityBlockingQueue<Heuristic> schedule;
+
+    protected int priority = 3;
 
     public PickupHeuristic(PickupSensor pickupSensor, RobotObject attachedRobot,
+                           PriorityBlockingQueue<Heuristic> schedule,
                            SimConfig.Direction targetAreaBearing) {
 
         this.pickupSensor = pickupSensor;
         this.attachedRobot = attachedRobot;
         this.targetAreaBearing = targetAreaBearing;
+        this.schedule = schedule;
     }
 
     @Override
@@ -42,7 +48,13 @@ public class PickupHeuristic extends Heuristic {
                     .orElse(false);
 
             if (success) {
+                System.out.println("Pickup success!");
                 wheelDrives = wheelDriveFromBearing(targetAreaBearing());
+            }
+            else if (!success && sensedResource.isPresent()) {
+                System.out.println("Pickup failed, pathing to attachment point.");
+                schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
+                        attachedRobot, schedule));
             }
         }
         else {

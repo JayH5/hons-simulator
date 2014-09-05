@@ -17,7 +17,7 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
 
     protected final CollisionSensor collisionSensor;
     protected final RobotObject attachedRobot;
-    protected int priority = 5;
+    protected int priority = 4;
 
     public CollisionAvoidanceHeuristic(CollisionSensor collisionSensor, RobotObject attachedRobot) {
 

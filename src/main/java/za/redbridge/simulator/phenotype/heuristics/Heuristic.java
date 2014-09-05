@@ -94,4 +94,12 @@ public abstract class Heuristic implements Comparable{
     public void setPriority(int priority) { this.priority = priority; }
 
     public RobotObject getAttachedRobot() { return attachedRobot; }
+
+    public double distance (Vec2 start, Vec2 end) {
+
+        double xDiff = (end.x - start.x);
+        double yDiff = (end.y - start.y);
+
+        return Math.sqrt((xDiff*xDiff) - (yDiff*yDiff));
+    }
 }

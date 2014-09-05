@@ -69,8 +69,8 @@ public class ResourceObject extends PhysicalObject {
         return bb.setBodyType(BodyType.DYNAMIC)
                 .setPosition(position)
                 .setRectangular(width, height, mass)
-                .setFriction(0.9f)
-                .setRestitution(1.0f)
+                .setFriction(2.9f)
+                .setRestitution(0.4f)
                 .build(world);
     }
 
@@ -90,16 +90,19 @@ public class ResourceObject extends PhysicalObject {
     //returns whether or not object has been picked up
     public boolean tryPickup(RobotObject robot) {
         if (isCollected) {
+            System.out.println("Pickup failed: has been collected.");
             return false;
         }
 
         // Check if max number of robots already attached
         if (pushedByMaxRobots()) {
+            System.out.println("Pickup failed: pushed by max bots.");
             return false;
         }
 
         // Check if robot not already attached or about to be attached
         if (joints.containsKey(robot) || pendingJoints.containsKey(robot)) {
+            System.out.println("Pickup failed: already attached or about to be attached.");
             return false;
         }
 
@@ -109,6 +112,7 @@ public class ResourceObject extends PhysicalObject {
         Vec2 robotPosition = robotBody.getPosition();
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
+            System.out.println("Pickup failed: wrong sticky side.");
             return false;
         }
 
@@ -116,6 +120,21 @@ public class ResourceObject extends PhysicalObject {
         if (stickySide == null) {
             stickySide = attachSide;
             createAnchorPoints();
+        }
+
+        //check if the anchor point is too far away from the robot
+        double xDiff = (robot.getHeuristicPhenotype().getPickupSensor().getBody().getLocalCenter().x
+                - robot.getBody().getWorldPoint(getClosestAnchorPoint(robot.getHeuristicPhenotype().getPickupSensor().getBody().getLocalCenter())).x);
+        double yDiff = (robot.getHeuristicPhenotype().getPickupSensor().getBody().getWorldCenter().y
+                - robot.getBody().getWorldPoint(getClosestAnchorPoint(robot.getHeuristicPhenotype().getPickupSensor().getBody().getLocalCenter())).y);
+
+        double dist = Math.sqrt((xDiff*xDiff) - (yDiff*yDiff));
+
+        System.out.println("Dist is " + dist);
+        if (dist > robot.getRadius()) {
+            System.out.println("Pickup failed: too far away.");
+            stickySide = null;
+            return false;
         }
 
         // Create the joint definition
