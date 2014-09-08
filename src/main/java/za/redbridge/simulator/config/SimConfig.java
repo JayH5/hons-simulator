@@ -12,7 +12,7 @@ import java.util.Map;
 import za.redbridge.simulator.ea.DefaultFitnessFunction;
 import za.redbridge.simulator.ea.FitnessFunction;
 
-public class SimConfig {
+public class SimConfig extends Config {
 
     private static final long DEFAULT_SIMULATION_SEED = System.currentTimeMillis();
     private static final int DEFAULT_SIMULATION_ITERATIONS = 10000;
@@ -276,13 +276,7 @@ public class SimConfig {
                 largeObjWidth, largeObjHeight, largeObjMass, largeObjPushingBots, fitness);
     }
 
-    private static boolean checkFieldPresent(Object field, String name) {
-        if (field != null) {
-            return true;
-        }
-        System.out.println("Field '" + name + "' not present, using default");
-        return false;
-    }
+
 
     public long getSimulationSeed() {
         return simulationSeed;

@@ -36,7 +36,6 @@ public class HeuristicPhenotype {
         }
     }
 
-
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot,
                               SimConfig.Direction targetAreaPlacement) {
 

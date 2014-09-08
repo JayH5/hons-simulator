@@ -72,7 +72,7 @@ public class PickupPositioningHeuristic extends Heuristic {
         ResourceObject.Side stickySide = resource.getStickySide();
         ResourceObject.Side robotSide = resource.getSideClosestToPoint(attachedRobot.getBody().getPosition());
 
-        System.out.println("Pathing from " + robotSide.name() + " to " + stickySide.name() + "...");
+        //System.out.println("Pathing from " + robotSide.name() + " to " + stickySide.name() + "...");
 
         Vec2 closestAttachmentPoint = resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition());
         Vec2 robotPosition = attachedRobot.getBody().getPosition();
@@ -91,9 +91,6 @@ public class PickupPositioningHeuristic extends Heuristic {
         }
         //different side
         else {
-
-            System.out.println("whoa diffside");
-
             Vec2 robotPositionLocalToResource = resource.getBody().getLocalPoint(robotPosition);
 
             float spacing = 0.0f;

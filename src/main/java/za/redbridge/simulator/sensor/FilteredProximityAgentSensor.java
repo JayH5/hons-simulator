@@ -1,9 +1,7 @@
 package za.redbridge.simulator.sensor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.text.ParseException;
+import java.util.*;
 
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
@@ -46,5 +44,38 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         // Sigmoid proximity response
         final double offset = 0.5;
         return 1 / (1 + Math.exp(fraction + offset));
+    }
+
+    public void setWhitelist(Collection<String> whitelist){
+
+        for(String cs : whitelist){
+            try {
+                this.whitelist.add(Class.forName(cs));
+            }catch(ClassNotFoundException e){}
+        }
+    }
+
+    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {
+
+        String[] whiteList = null;
+
+        if (checkFieldPresent(map, "whiteList")) {
+            whiteList = ((String) map.get("whiteList")).split(" ");
+
+            for (String cs: whiteList) {
+
+                try {
+                    whitelist.add(Class.forName(cs));
+                }
+                catch (ClassNotFoundException c) {
+                    System.out.println("Specified whitelist class not found.");
+                    System.exit(-1);
+                }
+            }
+        }
+        else {
+            throw new ParseException("No whitelist found for FilteredProximitySensor configs.", 0);
+        }
+
     }
 }

@@ -1,0 +1,11 @@
+control:
+  maxEpochs: 100
+
+phenotype:
+  factory: za.redbridge.simulator.factories.HomogeneousRobotFactory
+
+evolutionaryAlgorithm:
+  fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
+
+morphology:
+  morphologyFileName: sensorlist.yml

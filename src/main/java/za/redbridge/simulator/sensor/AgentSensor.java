@@ -12,7 +12,8 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
-import java.util.List;
+import java.text.ParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import za.redbridge.simulator.object.PhysicalObject;
@@ -289,6 +290,14 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         return new EdgeSensedObject(physicalObject, distance, x1, y1, x2, y2);
     }
 
+    protected static boolean checkFieldPresent(Object field, String name) {
+        if (field != null) {
+            return true;
+        }
+        System.out.println("Field '" + name + "' not present, using default");
+        return false;
+    }
+
     /**
      * Converts a list of objects that have been determined to fall within the sensor's range into
      * an actual {@link SensorReading} instance.
@@ -297,5 +306,10 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
      */
     protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
 
+    /**
+     * Reads the parameters that this sensor needs from a YAML map and configures the sensor object according to these
+     * parameters.
+     */
+    public abstract void readAdditionalConfigs(Map<String, Object> map) throws ParseException;
 
 }

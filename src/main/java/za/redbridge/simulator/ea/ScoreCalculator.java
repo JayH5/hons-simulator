@@ -4,8 +4,8 @@ import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
 
 import za.redbridge.simulator.Simulation;
-import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
 
@@ -19,8 +19,7 @@ public class ScoreCalculator implements CalculateScore {
     private ResourceFactory resourceFactory;
     private SimConfig config;
 
-    public ScoreCalculator(RobotFactory robotFactory, ResourceFactory resourceFactory,
-            SimConfig config) {
+    public ScoreCalculator(ExperimentConfig experimentConfig, SimConfig config) {
         this.robotFactory = robotFactory;
         this.resourceFactory = resourceFactory;
         this.config = config;

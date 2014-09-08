@@ -1,7 +1,9 @@
 package za.redbridge.simulator.sensor;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
@@ -37,4 +39,6 @@ public class ProximityAgentSensor extends AgentSensor {
         final double offset = 0.5;
         return 1 / (1 + Math.exp(fraction + offset));
     }
+
+    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
 }
