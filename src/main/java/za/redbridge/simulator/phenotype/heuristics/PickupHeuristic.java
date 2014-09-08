@@ -54,7 +54,7 @@ public class PickupHeuristic extends Heuristic {
                 System.out.println("Pickup success!");
                 wheelDrives = wheelDriveFromBearing(targetAreaBearing());
             }
-            else if (attachmentResult.x > 0) {
+            else if (attachmentResult.x > 0 && sensedResource.isPresent()) {
                 System.out.println("Pickup failed, pathing to attachment point.");
                 schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
                         attachedRobot, schedule));

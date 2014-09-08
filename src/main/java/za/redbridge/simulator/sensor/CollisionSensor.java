@@ -85,7 +85,7 @@ public class CollisionSensor extends Sensor<Optional<Vec2>> {
                 !(fixture.getBody().getUserData() instanceof TargetAreaObject) &&
                 !(fixture.getBody().getUserData() instanceof ResourceObject) &&
                 !(fixture.getBody().getUserData() instanceof RobotObject &&
-                        !((RobotObject) fixture.getBody().getUserData()).isBoundToResource());
+                        ((RobotObject) fixture.getBody().getUserData()).isBoundToResource());
 
     }
 

@@ -1,6 +1,6 @@
 ---
 objects:
-  robots: 4
+  robots: 6
   largeResources: 1
   smallResources: 0
 resourceProperties:

@@ -140,7 +140,7 @@ public class ResourceObject extends PhysicalObject {
         double dist = getBody().getWorldPoint(getClosestAnchorPoint(robotPosition)).sub(robot.getBody().getPosition()).length();
         System.out.println("Dist from bot origin to resource origin is " + dist);
 
-        if (dist > getHypot()) {
+        if (dist > getHypot() * 0.5) {
             System.out.println("Pickup failed: too far away.");
             return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
