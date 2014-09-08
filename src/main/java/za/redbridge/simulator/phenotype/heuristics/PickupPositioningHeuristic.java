@@ -123,13 +123,6 @@ public class PickupPositioningHeuristic extends Heuristic {
     //next step in straight line along axis of greatest change
     public Vec2 straightGuide(Vec2 begin, Vec2 end) {
 
-        System.out.println("straightguide");
-        System.out.println("Begin x: " + begin.x + " Begin y: " + begin.y);
-        System.out.println("End x: " + end.x + " End y: " + end.y);
-
-        System.out.println("Dist is " + Math.sqrt(end.sub(begin).lengthSquared()));
-
-
         double xDist = Math.abs(end.x - begin.x);
         double yDist = Math.abs(end.y - begin.y);
 
@@ -149,7 +142,6 @@ public class PickupPositioningHeuristic extends Heuristic {
             result = new Vec2 (begin.x, begin.y+yDirectionMultiplier);
         }
 
-        System.out.println("result x is: " + result.x + " and result y is: " + result.y);
         return result;
     }
 
