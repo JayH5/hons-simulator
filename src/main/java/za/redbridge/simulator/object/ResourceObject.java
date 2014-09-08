@@ -212,7 +212,7 @@ public class ResourceObject extends PhysicalObject {
             } else {
                 float spacing = (float) (width / pushingRobots);
                 float x = (float) -width / 2 + spacing * i + spacing / 2;
-                float y = stickySide == Side.BOTTOM ? (float) -height / 2 : (float) height / 2;
+                float y = stickySide == Side.TOP ? (float) -height / 2 : (float) height / 2;
                 position = new Vec2(x, y);
             }
             anchorPoints[i] = new AnchorPoint(position);
@@ -282,9 +282,9 @@ public class ResourceObject extends PhysicalObject {
         } else if (stickySide == Side.RIGHT) {
             referenceAngle = (float) Math.PI;
         } else if (stickySide == Side.TOP) {
-            referenceAngle = (float) -Math.PI / 2;
-        } else {
             referenceAngle = (float) Math.PI / 2;
+        } else {
+            referenceAngle = (float) -Math.PI / 2;
         }
         return referenceAngle;
     }
