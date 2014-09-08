@@ -175,7 +175,7 @@ public class ResourceObject extends PhysicalObject {
             } else {
                 float spacing = (float) (width / pushingRobots);
                 float x = (float) -width / 2 + spacing * i + spacing / 2;
-                float y = stickySide == Side.BOTTOM ? (float) -height / 2 : (float) height / 2;
+                float y = stickySide == Side.TOP ? (float) -height / 2 : (float) height / 2;
                 position = new Vec2(x, y);
             }
             anchorPoints[i] = new AnchorPoint(position);
