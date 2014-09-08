@@ -31,7 +31,7 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
         Double2D wheelDrives = null;
         Optional<Vec2> collision = collisionSensor.sense();
 
-        wheelDrives = collision.map(o -> wheelDriveFromTargetPoint(o))
+        wheelDrives = collision.map(o -> wheelDriveFromTargetPoint(o.negate()))
                 .orElse(null);
 
         return wheelDrives;

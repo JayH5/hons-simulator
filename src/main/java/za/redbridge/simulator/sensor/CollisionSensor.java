@@ -23,7 +23,7 @@ import za.redbridge.simulator.portrayal.Portrayal;
  */
 public class CollisionSensor extends Sensor<Optional<Vec2>> {
 
-    private static final float DEFAULT_RANGE = 0.15f + 0.05f; //make sure this is > robot radius
+    private static final float DEFAULT_RANGE = 0.15f + 0.4f; //make sure this is > robot radius
 
     private final float range;
 

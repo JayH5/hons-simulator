@@ -47,21 +47,24 @@ public class STRTransform {
         }
 
         final Vec2 v = this.pool;
-        final Transform t = this.transform;
         for (int i = 0; i < nVertices; i++) {
-            v.set(vertices[i]);
-
-            // Transform (translate + rotate)
-            Transform.mulToOut(t, v, v);
-
-            // Scale
-            v.x *= scaleX;
-            v.y *= scaleY;
+            transformVertex(vertices[i], v);
 
             // Convert to int
             xPoints[i] = (int) v.x;
             yPoints[i] = (int) v.y;
         }
+    }
+
+    public void transformVertex(Vec2 vertex, Vec2 vOut) {
+        vOut.set(vertex);
+
+        // Transform (translate + rotate)
+        Transform.mulToOut(transform, vOut, vOut);
+
+        // Scale
+        vOut.x *= scaleX;
+        vOut.y *= scaleY;
     }
 
     public float getScaleX() {

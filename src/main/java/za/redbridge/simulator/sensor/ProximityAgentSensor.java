@@ -3,6 +3,8 @@ package za.redbridge.simulator.sensor;
 import java.util.ArrayList;
 import java.util.List;
 
+import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
+
 /**
  * Created by jamie on 2014/08/05.
  */
