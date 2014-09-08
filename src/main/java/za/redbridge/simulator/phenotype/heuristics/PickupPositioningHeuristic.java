@@ -42,9 +42,6 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
-        if (sensedResource.isPresent() && !attachedRobot.isBoundToResource())
-            System.out.println("sensed resource");
-
         if (!attachedRobot.isBoundToResource()) {
 
             Vec2 attachmentResult = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
@@ -55,12 +52,12 @@ public class PickupPositioningHeuristic extends Heuristic {
                 schedule.remove(this);
             }
             else if (resource.getBody().getPosition().sub(attachedRobot.getBody().getPosition()).length() > resource.getHypot()*2) {
-                System.out.println("I'm too fucking far. dist " + resource.getBody().getPosition().sub(attachedRobot.getBody().getPosition()).length());
+
                 schedule.remove(this);
             }
         }
 
-        System.out.println("Wheeldrives " + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).x + "," + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).y);
+        //System.out.println("Wheeldrives " + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).x + "," + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).y);
 
         return wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition));
 
@@ -72,7 +69,7 @@ public class PickupPositioningHeuristic extends Heuristic {
         ResourceObject.Side stickySide = resource.getStickySide();
         ResourceObject.Side robotSide = resource.getSideClosestToPoint(attachedRobot.getBody().getPosition());
 
-        System.out.println("Pathing from " + robotSide.name() + " to " + stickySide.name() + "...");
+        //System.out.println("Pathing from " + robotSide.name() + " to " + stickySide.name() + "...");
 
         Vec2 closestAttachmentPoint = resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition());
         Vec2 robotPosition = attachedRobot.getBody().getPosition();
@@ -101,18 +98,18 @@ public class PickupPositioningHeuristic extends Heuristic {
             double xDist = Math.abs(closestAttachmentPoint.x - robotPosition.x);
             double yDist = Math.abs(closestAttachmentPoint.y - robotPosition.y);
 
-            int xDirectionMultiplier = (int)((closestAttachmentPoint.x - robotPosition.x)/xDist);
-            int yDirectionMultiplier = (int)((closestAttachmentPoint.y - robotPosition.y)/yDist);
+            int xDirectionMultiplier = (int)((closestAttachmentPoint.x - robotPosition.x)/xDist)*-1;
+            int yDirectionMultiplier = (int)((closestAttachmentPoint.y - robotPosition.y)/yDist)*-1;
 
             //anchor point relative to the ResourceObject
             if (robotSide == ResourceObject.Side.LEFT || robotSide == ResourceObject.Side.RIGHT) {
 
-                float y = (float) height / 2 - (robotPositionLocalToResource.y + spacing / 2);
+                float y = (float) height / 2 - yDirectionMultiplier*(robotPositionLocalToResource.y + spacing / 2);
                 float x = robotSide == ResourceObject.Side.LEFT ? (float) -width / 2 : (float) width / 2;
                 position = new Vec2(x,y);
             } else {
 
-                float x = (float) -width / 2 + (robotPositionLocalToResource.x + spacing / 2);
+                float x = (float) -width / 2 + xDirectionMultiplier*(robotPositionLocalToResource.x + spacing / 2);
                 float y = robotSide == ResourceObject.Side.TOP ? (float) -height / 2 : (float) height / 2;
                 position = new Vec2(x,y);
             }
@@ -154,22 +151,6 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         System.out.println("result x is: " + result.x + " and result y is: " + result.y);
         return result;
-    }
-
-    //next step in straight line along axis of greatest change
-    public Vec2 guide(Vec2 begin, Vec2 end) {
-
-        double xDist = Math.abs(end.x - begin.x);
-        double yDist = Math.abs(end.y - begin.y);
-
-        if (xDist < 0.01 || yDist < 0.01) {
-            return begin;
-        }
-
-        int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
-        int yDirectionMultiplier = (int)((end.y - begin.y)/yDist);
-
-        return new Vec2(begin.x+xDirectionMultiplier, begin.y+yDirectionMultiplier);
     }
 
 }

@@ -100,19 +100,16 @@ public class ResourceObject extends PhysicalObject {
     //otherwise, it returns a vector with a negative x value for other failures, negative y for success.
     public Vec2 tryPickup(RobotObject robot) {
         if (isCollected) {
-            System.out.println("Pickup failed: has been collected.");
             return new Vec2(-1, 0);
         }
 
         // Check if max number of robots already attached
         if (pushedByMaxRobots()) {
-            System.out.println("Pickup failed: pushed by max bots.");
             return new Vec2(-2, 0);
         }
 
         // Check if robot not already attached or about to be attached
         if (joints.containsKey(robot) || pendingJoints.containsKey(robot)) {
-            System.out.println("Pickup failed: already attached or about to be attached.");
             return new Vec2(-3, 0);
         }
 
@@ -122,7 +119,6 @@ public class ResourceObject extends PhysicalObject {
         Vec2 robotPosition = robotBody.getPosition();
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
-            System.out.println("Pickup failed: wrong sticky side.");
             return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
 
@@ -133,14 +129,12 @@ public class ResourceObject extends PhysicalObject {
             createAnchorPoints();
         }
 
-        System.out.println("sticky side is: " + stickySide.name()+ " potential attach side is: " + attachSide.name());
 
         //check if the anchor point is too far away from the robot
 
         double dist = getBody().getWorldPoint(getClosestAnchorPoint(robotPosition)).sub(robot.getBody().getPosition()).length();
-        System.out.println("Dist from bot origin to resource origin is " + dist);
 
-        if (dist > getHypot() * 0.5) {
+        if (dist > robot.getRadius()*1.5) {
             System.out.println("Pickup failed: too far away.");
             return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
@@ -165,9 +159,6 @@ public class ResourceObject extends PhysicalObject {
 
         // Mark the robot as bound
         robot.setBoundToResource(true);
-
-        dist = this.getBody().getPosition().sub(robot.getBody().getPosition()).length();
-        System.out.println("connected dist from bot origin to resource origin is " + dist);
 
         return new Vec2(0, -1);
     }
