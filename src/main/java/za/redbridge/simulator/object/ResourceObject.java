@@ -17,6 +17,7 @@ import java.util.Map;
 import sim.engine.SimState;
 import sim.util.Double2D;
 import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.portrayal.PolygonPortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
@@ -28,6 +29,8 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
 public class ResourceObject extends PhysicalObject {
 
     private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
+
+    private static final boolean DEBUG = true;
 
     private enum Side {
         LEFT, RIGHT, TOP, BOTTOM
@@ -57,6 +60,10 @@ public class ResourceObject extends PhysicalObject {
 
         joints = new HashMap<>(pushingRobots);
         pendingJoints = new HashMap<>(pushingRobots);
+
+        if (DEBUG) {
+            getPortrayal().setChildDrawable(new DebugPortrayal(Color.BLACK, true));
+        }
     }
 
     protected static Portrayal createPortrayal(double width, double height) {
@@ -265,6 +272,26 @@ public class ResourceObject extends PhysicalObject {
 
         private void markTaken() {
             taken = true;
+        }
+    }
+
+
+    private class DebugPortrayal extends PolygonPortrayal {
+
+        public DebugPortrayal(Paint paint, boolean filled) {
+            super(4, paint, filled);
+
+            final float width = (float) getWidth() * 0.8f;
+            final float height = (float) getHeight() * 0.1f;
+
+            final float dy = (float) getHeight() * 0.3f;
+
+            float halfWidth = width / 2;
+            float halfHeight = height / 2;
+            vertices[0].set(-halfWidth, -halfHeight + dy);
+            vertices[1].set(halfWidth, -halfHeight + dy);
+            vertices[2].set(halfWidth, halfHeight + dy);
+            vertices[3].set(-halfWidth, halfHeight + dy);
         }
     }
 
