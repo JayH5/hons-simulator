@@ -115,7 +115,7 @@ public class ResourceObject extends PhysicalObject {
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
             System.out.println("Pickup failed: wrong sticky side.");
-            return robot.getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
+            return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
 
 
@@ -129,14 +129,12 @@ public class ResourceObject extends PhysicalObject {
 
         //check if the anchor point is too far away from the robot
 
-        double dist = this.getBody().getPosition().sub(robot.getBody().getPosition()).length();
+        double dist = getBody().getWorldPoint(getClosestAnchorPoint(robotPosition)).sub(robot.getBody().getPosition()).length();
         System.out.println("Dist from bot origin to resource origin is " + dist);
 
-        double resourceHypot = Math.sqrt(width*width + height*height);
-
-        if (dist > resourceHypot) {
+        if (dist > getHypot()) {
             System.out.println("Pickup failed: too far away.");
-            return robot.getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
+            return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
 
         // Create the joint definition
@@ -164,6 +162,10 @@ public class ResourceObject extends PhysicalObject {
         System.out.println("connected dist from bot origin to resource origin is " + dist);
 
         return new Vec2(0, -1);
+    }
+
+    public double getHypot() {
+        return Math.sqrt(width*width + height*height);
     }
 
     public Side getStickySide () {

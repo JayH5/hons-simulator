@@ -61,6 +61,7 @@ public class PickupHeuristic extends Heuristic {
             }
         }
         else {
+
             wheelDrives = wheelDriveFromBearing(targetAreaBearing());
         }
 
