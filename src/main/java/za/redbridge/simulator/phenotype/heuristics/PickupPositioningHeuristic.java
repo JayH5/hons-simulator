@@ -51,7 +51,7 @@ public class PickupPositioningHeuristic extends Heuristic {
                 System.out.println("Success!");
                 schedule.remove(this);
             }
-            else if (resource.getBody().getPosition().sub(attachedRobot.getBody().getPosition()).length() > resource.getHypot()*2) {
+            else if (resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition()).sub(attachedRobot.getBody().getPosition()).length() > resource.getHypot()) {
 
                 schedule.remove(this);
             }
@@ -88,8 +88,6 @@ public class PickupPositioningHeuristic extends Heuristic {
         }
         //different side
         else {
-
-            System.out.println("whoa diffside");
 
             Vec2 robotPositionLocalToResource = resource.getBody().getLocalPoint(robotPosition);
 
