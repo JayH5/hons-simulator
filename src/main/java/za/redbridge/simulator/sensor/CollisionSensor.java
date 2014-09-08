@@ -83,7 +83,9 @@ public class CollisionSensor extends Sensor<Optional<Vec2>> {
     public boolean isRelevantObject (Fixture fixture) {
         return !(fixture.getUserData() instanceof Sensor) &&
                 !(fixture.getBody().getUserData() instanceof TargetAreaObject) &&
-                !(fixture.getBody().getUserData() instanceof ResourceObject);
+                !(fixture.getBody().getUserData() instanceof ResourceObject) &&
+                !(fixture.getBody().getUserData() instanceof RobotObject &&
+                        !((RobotObject) fixture.getBody().getUserData()).isBoundToResource());
 
     }
 

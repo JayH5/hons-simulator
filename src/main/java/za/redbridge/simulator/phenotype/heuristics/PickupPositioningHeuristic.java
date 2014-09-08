@@ -38,22 +38,23 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         Double2D wheelDrives = null;
 
-        Vec2 newPosition = guide(attachedRobot.getBody().getWorldCenter(),
-                resource.getBody().getWorldCenter());
+        Vec2 newPosition = nextStep();
 
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
+
+
         if (!attachedRobot.isBoundToResource()) {
 
-            boolean success = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(false);
+            Vec2 attachmentResult = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
+                    .orElse(new Vec2(-4, 0));
 
-            if (success) {
+            if (attachmentResult.y < 0) {
                 System.out.println("Success!");
                 schedule.remove(this);
             }
-            else if (resource.getBody().getWorldCenter().sub(attachedRobot.getBody().getWorldCenter()).length() > attachedRobot.getRadius()*3) {
-                System.out.println("I'm too fucking far.");
+            else if (resource.getBody().getWorldCenter().sub(attachedRobot.getBody().getWorldCenter()).length() > attachedRobot.getRadius()*15) {
+                System.out.println("I'm too fucking far. dist " + resource.getBody().getWorldCenter().sub(attachedRobot.getBody().getWorldCenter()).length());
                 schedule.remove(this);
             }
         }
@@ -62,6 +63,88 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         return wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition));
 
+    }
+
+    //next step (out: world)
+    private Vec2 nextStep() {
+
+        System.out.println("Pathing...");
+
+        ResourceObject.Side stickySide = resource.getStickySide();
+        ResourceObject.Side robotSide = resource.getSideClosestToPoint(attachedRobot.getBody().getPosition());
+
+        Vec2 closestAttachmentPoint = resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition());
+        Vec2 robotPosition = attachedRobot.getBody().getPosition();
+
+        if (stickySide == null) {
+            return new Vec2(-8, 0);
+        }
+
+        Vec2 position;
+        double width = resource.getWidth();
+        double height = resource.getHeight();
+
+        //same side
+        if (stickySide == robotSide) {
+            return straightGuide(robotPosition, closestAttachmentPoint);
+        }
+        //different side
+        else {
+
+            System.out.println("whoa diffside");
+
+            Vec2 robotPositionLocalToResource = resource.getBody().getLocalPoint(robotPosition);
+
+            //anchor point relative to the ResourceObject
+            if (robotSide == ResourceObject.Side.LEFT || robotSide == ResourceObject.Side.RIGHT) {
+
+                position = new Vec2(robotPositionLocalToResource.x+1, robotPositionLocalToResource.y);
+            } else {
+
+                position = new Vec2(robotPositionLocalToResource.x, robotPositionLocalToResource.y+1);
+            }
+
+            return attachedRobot.getBody().getWorldPoint(position);
+
+        }
+
+    }
+
+    //next step in straight line along axis of greatest change
+    public Vec2 straightGuide(Vec2 begin, Vec2 end) {
+
+        System.out.println("straightguide");
+        System.out.println("Begin x: " + begin.x + " Begin y: " + begin.y);
+        System.out.println("End x: " + end.x + " End y: " + end.y);
+
+        System.out.println("Dist is " + Math.sqrt(end.sub(begin).lengthSquared()));
+
+
+        double xDist = Math.abs(end.x - begin.x);
+        double yDist = Math.abs(end.y - begin.y);
+
+        if (xDist < 0.01 || yDist < 0.01) {
+            return begin;
+        }
+
+        int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
+        int yDirectionMultiplier = (int)((end.y - begin.y)/yDist);
+
+        Vec2 result;
+
+        if (xDist > yDist) {
+            result = new Vec2 (begin.x+xDirectionMultiplier, begin.y);
+        }
+        else {
+            result = new Vec2 (begin.x, begin.y+yDirectionMultiplier);
+        }
+
+        //System.out.println("xdist " + xDist + " yDist " + yDist);
+
+        //System.out.println("Pickup sensor x: " + pickupSensor.getBody().getWorldCenter().x + " y: " + pickupSensor.getBody().getWorldCenter().y + " xMultiplier: " + xDirectionMultiplier + " yMultiplier: " + yDirectionMultiplier);
+
+        System.out.println("result x is: " + result.x + " and result y is: " + result.y);
+        return result;
     }
 
     //move one step so that you eventually get to the target area. (world, world)
@@ -85,9 +168,11 @@ public class PickupPositioningHeuristic extends Heuristic {
         int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
         int yDirectionMultiplier = (int)((end.y - begin.y)/yDist);
 
-        System.out.println("Pickup sensor x: " + pickupSensor.getBody().getWorldCenter().x + " y: " + pickupSensor.getBody().getWorldCenter().y + " xMultiplier: " + xDirectionMultiplier + " yMultiplier: " + yDirectionMultiplier);
+        //System.out.println("Pickup sensor x: " + pickupSensor.getBody().getWorldCenter().x + " y: " + pickupSensor.getBody().getWorldCenter().y + " xMultiplier: " + xDirectionMultiplier + " yMultiplier: " + yDirectionMultiplier);
 
         Vec2 result = new Vec2 (begin.x+xDirectionMultiplier, begin.y+yDirectionMultiplier);
+
+        System.out.println("result x is: " + result.x + " and result y is: " + result.y);
         return result;
 
     }
