@@ -9,7 +9,7 @@ import org.kohsuke.args4j.Option;
 /**
  * Created by racter on 2014/08/19.
  */
-public class Program {
+public class Main {
 
     //config files for this experiment
 
@@ -24,7 +24,7 @@ public class Program {
 
     public static void main (String[] args) {
 
-        Program options = new Program();
+        Main options = new Main();
         CmdLineParser parser = new CmdLineParser(options);
 
         try {

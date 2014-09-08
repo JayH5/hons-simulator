@@ -29,8 +29,6 @@ public class ScoreCalculator implements CalculateScore {
     @Override
     public double calculateScore(MLMethod method) {
         Simulation currentSimulation = new Simulation(robotFactory, resourceFactory, config);
-        SimulationGUI video = new SimulationGUI(currentSimulation);
-
         return currentSimulation.getFitness();
     }
 
