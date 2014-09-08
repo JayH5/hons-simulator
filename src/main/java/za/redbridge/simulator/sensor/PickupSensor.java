@@ -29,7 +29,6 @@ public class PickupSensor extends Sensor<Optional<ResourceObject>> {
         this.width = width;
         this.height = height;
         this.bearing = bearing;
-
         setDrawEnabled(true);
     }
 
@@ -37,7 +36,7 @@ public class PickupSensor extends Sensor<Optional<ResourceObject>> {
     protected Transform createTransform(RobotObject robot) {
         float robotRadius = robot.getRadius();
         Rot rot = new Rot(bearing);
-        float x = rot.c * robotRadius + width / 2;
+        float x = rot.c * robotRadius;
         float y = rot.s * robotRadius;
 
         return new Transform(new Vec2(x, y), rot);
@@ -58,23 +57,9 @@ public class PickupSensor extends Sensor<Optional<ResourceObject>> {
     @Override
     protected Optional<ResourceObject> provideReading(List<Fixture> fixtures) {
         if (!fixtures.isEmpty()) {
-            // Rectangle/rectangle collision - we can cheat and check if three corners of the
-            // sensor are within the other rectangle
-            Fixture fixture = fixtures.get(0);
-            Vec2 testPoint = new Vec2();
-            if (testLocalPoint(0, 0, testPoint, fixture)
-                    && testLocalPoint(width, height, testPoint, fixture)
-                    && testLocalPoint(width, 0, testPoint, fixture)) {
-                return Optional.of((ResourceObject) fixture.getBody().getUserData());
-            }
+            return Optional.of((ResourceObject) fixtures.get(0).getBody().getUserData());
         }
         return Optional.empty();
-    }
-
-    private boolean testLocalPoint(float x, float y, Vec2 point, Fixture otherFixture) {
-        point.set(x, y);
-        Transform.mulToOut(getSensorTransform(), point, point);
-        return otherFixture.testPoint(point);
     }
 
     @Override
