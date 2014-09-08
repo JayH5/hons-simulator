@@ -7,7 +7,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +36,13 @@ import za.redbridge.simulator.sensor.SensorReading;
 public class RobotObject extends PhysicalObject {
 
     //how much force a wheel exerts when driven at full power, in newtons
-    private static final double WHEEL_POWER = 0.25;
+    private static final double WHEEL_POWER = 0.15;
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
+
+    private static final float MAX_LATERAL_IMPULSE = 1.0f;
+
+    private static final float GROUND_TRACTION = 0.8f;
 
     private final Phenotype phenotype;
     private final HeuristicPhenotype heuristicPhenotype;
@@ -125,7 +130,7 @@ public class RobotObject extends PhysicalObject {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
-
+        updateFriction();
     }
 
     private void applyWheelForce(double wheelDrive, Vec2 wheelPosition) {
@@ -142,6 +147,31 @@ public class RobotObject extends PhysicalObject {
         // Apply force
         getBody().applyForce(wheelForce, wheelForcePosition);
     }
+
+    /**
+     * For the below 2 methods, see: http://www.iforce2d.net/src/iforce2d_TopdownCar.h
+     */
+    private Vec2 getLateralVelocity() {
+        Vec2 currentRightNormal = getBody().getWorldVector(new Vec2(1, 0));
+        currentRightNormal.mulLocal(Vec2.dot(currentRightNormal, getBody().getLinearVelocity()));
+        return currentRightNormal;
+    }
+
+    private void updateFriction() {
+        Vec2 impulse = getLateralVelocity()
+                .negateLocal()
+                .mulLocal(getBody().getMass());
+
+        float impulseMagnitude = impulse.length();
+        if (impulseMagnitude > MAX_LATERAL_IMPULSE) {
+            impulse.mulLocal(MAX_LATERAL_IMPULSE / impulseMagnitude);
+        }
+
+        getBody().applyLinearImpulse(impulse.mulLocal(GROUND_TRACTION), getBody().getWorldCenter(),
+                false);
+        getBody().applyAngularImpulse(GROUND_TRACTION * 0.1f * getBody().getInertia()
+                * -getBody().getAngularVelocity());
+     }
 
     public boolean isBoundToResource() {
         return isBoundToResource;

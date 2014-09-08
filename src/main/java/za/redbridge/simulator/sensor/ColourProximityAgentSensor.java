@@ -3,6 +3,7 @@ package za.redbridge.simulator.sensor;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 import java.awt.Color;
 import java.awt.Paint;

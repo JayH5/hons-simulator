@@ -13,15 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChasingPhenotype implements Phenotype {
-    private int cooldown = 10;
+    private static final int COOLDOWN = 10;
+    
     private int cooldownCounter = 0;
     private Double2D lastMove = null;
     private final List<AgentSensor> sensors;
 
     public ChasingPhenotype() {
-        AgentSensor leftSensor = new ChasingSensor((float) ((7 / 4.0f) * Math.PI));
-        AgentSensor forwardSensor = new ChasingSensor(0.0f);
-        AgentSensor rightSensor = new ChasingSensor((float) (Math.PI/4));
+        AgentSensor leftSensor = new ChasingSensor((float) ((7 / 4.0f) * Math.PI), 0f, 1f, 0.2f);
+        AgentSensor forwardSensor = new ChasingSensor(0f, 0f, 1f, 0.2f);
+        AgentSensor rightSensor = new ChasingSensor((float) (Math.PI/4), 0f, 1f, 0.2f);
         sensors = new ArrayList<>();
         sensors.add(leftSensor);
         sensors.add(forwardSensor);
@@ -44,7 +45,7 @@ public class ChasingPhenotype implements Phenotype {
             cooldownCounter--;
             return lastMove;
         }else {
-            cooldownCounter = cooldown;
+            cooldownCounter = COOLDOWN;
         }
 
         double leftReading = list.get(0).getValues().get(0);

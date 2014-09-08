@@ -13,7 +13,7 @@ import java.awt.geom.Rectangle2D;
  */
 public class RectanglePortrayal extends PolygonPortrayal {
 
-    private transient Rectangle2D.Double preciseRect;
+    private transient Rectangle2D preciseRect;
 
     private final double width;
     private final double height;
