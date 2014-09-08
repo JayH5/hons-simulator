@@ -214,9 +214,9 @@ public class ResourceObject extends PhysicalObject {
         } else if (stickySide == Side.RIGHT) {
             referenceAngle = (float) Math.PI;
         } else if (stickySide == Side.TOP) {
-            referenceAngle = (float) -Math.PI / 2;
-        } else {
             referenceAngle = (float) Math.PI / 2;
+        } else {
+            referenceAngle = (float) -Math.PI / 2;
         }
         return referenceAngle;
     }
