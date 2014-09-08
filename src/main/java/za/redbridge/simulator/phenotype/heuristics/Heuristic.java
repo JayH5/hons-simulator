@@ -6,12 +6,12 @@ import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.SensorReading;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Comparator;
 
 /**
  * Created by racter on 2014/09/01.
  */
-public abstract class Heuristic implements Comparable{
+public abstract class Heuristic implements Comparator<Heuristic>{
 
     protected static final double P2 = Math.PI / 2;
 
@@ -19,16 +19,6 @@ public abstract class Heuristic implements Comparable{
     protected int priority;
 
     public abstract Double2D step (List<SensorReading> list);
-
-    @Override
-    public int compareTo(Object o) {
-
-        if (!(o instanceof Heuristic)) {
-            throw new ClassCastException("Supplied object not member of Heuristic class.");
-        }
-        else
-            return this.getPriority() - ((Heuristic) o).getPriority();
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -102,4 +92,11 @@ public abstract class Heuristic implements Comparable{
 
         return Math.sqrt((xDiff*xDiff) - (yDiff*yDiff));
     }
+
+    @Override
+    public int compare(Heuristic a, Heuristic b) {
+
+        return a.getPriority() - b.getPriority();
+    }
+
 }

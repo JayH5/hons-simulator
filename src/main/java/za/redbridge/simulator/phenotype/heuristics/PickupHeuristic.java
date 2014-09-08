@@ -42,22 +42,26 @@ public class PickupHeuristic extends Heuristic {
         Double2D wheelDrives = null;
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
+        if (sensedResource.isPresent() && !attachedRobot.isBoundToResource())
+            System.out.println("sensed resource");
+
         if (!attachedRobot.isBoundToResource()) {
 
-            boolean success = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(false);
+            Vec2 attachmentResult = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
+                    .orElse(new Vec2(-4, 0));
 
-            if (success) {
+            if (attachmentResult.y < 0) {
                 System.out.println("Pickup success!");
                 wheelDrives = wheelDriveFromBearing(targetAreaBearing());
             }
-            else if (!success && sensedResource.isPresent()) {
+            else if (attachmentResult.x > 0 && sensedResource.isPresent()) {
                 System.out.println("Pickup failed, pathing to attachment point.");
                 schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
                         attachedRobot, schedule));
             }
         }
         else {
+
             wheelDrives = wheelDriveFromBearing(targetAreaBearing());
         }
 

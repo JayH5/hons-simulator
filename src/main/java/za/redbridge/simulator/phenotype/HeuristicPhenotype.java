@@ -28,13 +28,21 @@ public class HeuristicPhenotype {
 
     protected final PriorityBlockingQueue<Heuristic> heuristicList;
 
+    public class HeuristicComparator implements Comparator<Heuristic> {
+        @Override
+        public int compare(Heuristic a, Heuristic b) {
+
+            return a.getPriority() - b.getPriority();
+        }
+    }
+
 
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot,
                               SimConfig.Direction targetAreaPlacement) {
 
         // TODO: Make configurable or decide on good defaults
         this.collisionSensor = new CollisionSensor();
-        this.pickupSensor = new PickupSensor(attachedRobot.getRadius()/2, attachedRobot.getRadius(), 0f);
+        this.pickupSensor = new PickupSensor(3, 3, 0f);
         this.controllerPhenotype = controllerPhenotype;
         this.attachedRobot = attachedRobot;
         this.targetAreaPlacement = targetAreaPlacement;
@@ -42,10 +50,11 @@ public class HeuristicPhenotype {
         collisionSensor.attach(attachedRobot);
         pickupSensor.attach(attachedRobot);
 
-        heuristicList = new PriorityBlockingQueue<>();
+        heuristicList = new PriorityBlockingQueue<>(5, new HeuristicComparator());
 
-        heuristicList.add(new CollisionAvoidanceHeuristic(collisionSensor, attachedRobot));
         heuristicList.add(new PickupHeuristic(pickupSensor, attachedRobot, heuristicList, targetAreaPlacement));
+        heuristicList.add(new CollisionAvoidanceHeuristic(collisionSensor, attachedRobot));
+
     }
 
     public CollisionSensor getCollisionSensor() { return collisionSensor; }
@@ -68,7 +77,6 @@ public class HeuristicPhenotype {
 
         if (wheelDrives == null) {
             wheelDrives = controllerPhenotype.step(list);
-            System.out.println("Using controller.");
         }
 
         return wheelDrives;

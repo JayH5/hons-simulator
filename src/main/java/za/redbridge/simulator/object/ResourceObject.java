@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -29,12 +30,13 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
 public class ResourceObject extends PhysicalObject {
 
     private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
-
     private static final boolean DEBUG = true;
 
-    private enum Side {
+    public enum Side {
+
         LEFT, RIGHT, TOP, BOTTOM
     }
+
     private Side stickySide;
 
     private final double width;
@@ -94,23 +96,21 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-    //returns whether or not object has been picked up
-    public boolean tryPickup(RobotObject robot) {
+    //returns closest attachment point to robot (global) if attachment fails because bot is on wrong side.
+    //otherwise, it returns a vector with a negative x value for other failures, negative y for success.
+    public Vec2 tryPickup(RobotObject robot) {
         if (isCollected) {
-            System.out.println("Pickup failed: has been collected.");
-            return false;
+            return new Vec2(-1, 0);
         }
 
         // Check if max number of robots already attached
         if (pushedByMaxRobots()) {
-            System.out.println("Pickup failed: pushed by max bots.");
-            return false;
+            return new Vec2(-2, 0);
         }
 
         // Check if robot not already attached or about to be attached
         if (joints.containsKey(robot) || pendingJoints.containsKey(robot)) {
-            System.out.println("Pickup failed: already attached or about to be attached.");
-            return false;
+            return new Vec2(-3, 0);
         }
 
         // Check the side that the robot wants to attach to
@@ -119,9 +119,9 @@ public class ResourceObject extends PhysicalObject {
         Vec2 robotPosition = robotBody.getPosition();
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
-            System.out.println("Pickup failed: wrong sticky side.");
-            return false;
+            return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
+
 
         // Set the sticky side
         if (stickySide == null) {
@@ -129,19 +129,14 @@ public class ResourceObject extends PhysicalObject {
             createAnchorPoints();
         }
 
+
         //check if the anchor point is too far away from the robot
-        double xDiff = (robot.getHeuristicPhenotype().getPickupSensor().getBody().getLocalCenter().x
-                - robot.getBody().getWorldPoint(getClosestAnchorPoint(robot.getHeuristicPhenotype().getPickupSensor().getBody().getLocalCenter())).x);
-        double yDiff = (robot.getHeuristicPhenotype().getPickupSensor().getBody().getWorldCenter().y
-                - robot.getBody().getWorldPoint(getClosestAnchorPoint(robot.getHeuristicPhenotype().getPickupSensor().getBody().getLocalCenter())).y);
 
-        double dist = Math.sqrt((xDiff*xDiff) - (yDiff*yDiff));
+        double dist = getBody().getWorldPoint(getClosestAnchorPoint(robotPosition)).sub(robot.getBody().getPosition()).length();
 
-        System.out.println("Dist is " + dist);
-        if (dist > robot.getRadius()) {
+        if (dist > robot.getRadius()*1.5) {
             System.out.println("Pickup failed: too far away.");
-            stickySide = null;
-            return false;
+            return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
 
         // Create the joint definition
@@ -151,7 +146,11 @@ public class ResourceObject extends PhysicalObject {
 
         wjd.referenceAngle = getReferenceAngle();
 
-        wjd.localAnchorA.set(getClosestAnchorPoint(robotPosition));
+        AnchorPoint closestAnchor = getClosestAnchor(robotPosition);
+        wjd.localAnchorA.set(closestAnchor.position);
+
+        closestAnchor.markTaken();
+
         wjd.localAnchorB.set(robot.getRadius() + 0.01f, 0f); // Attach to front of robot
 
         wjd.collideConnected = true;
@@ -161,10 +160,20 @@ public class ResourceObject extends PhysicalObject {
         // Mark the robot as bound
         robot.setBoundToResource(true);
 
-        return true;
+        return new Vec2(0, -1);
     }
 
-    private Side getSideClosestToPoint(Vec2 point) {
+    public double getHypot() {
+        return Math.sqrt(width*width + height*height);
+    }
+
+    public Side getStickySide () {
+
+        return stickySide;
+    }
+
+    //in: world
+    public Side getSideClosestToPoint(Vec2 point) {
         Vec2 relativePoint = Transform.mulTrans(getBody().getTransform(), point);
         final Side side;
         if (Math.abs(relativePoint.x) > Math.abs(relativePoint.y)) {
@@ -201,6 +210,12 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
+    //return global coord
+    public Vec2 getClosestAnchorPointWorld(Vec2 position) {
+        return this.getBody().getWorldPoint(getClosestAnchorPoint(position));
+    }
+
+    //in: world out: local
     private Vec2 getClosestAnchorPoint(Vec2 position) {
         // Fast path for single robot resource
         if (pushingRobots == 1) {
@@ -220,6 +235,31 @@ public class ResourceObject extends PhysicalObject {
             if (distance < shortestDistance) {
                 shortestDistance = distance;
                 closestAnchorPoint = anchorPoint.position;
+            }
+        }
+
+        return closestAnchorPoint;
+    }
+
+    private AnchorPoint getClosestAnchor(Vec2 position) {
+        // Fast path for single robot resource
+        if (pushingRobots == 1) {
+            return anchorPoints[0];
+        }
+
+        // Else iterate through anchor points finding closest one (generally only 2 options)
+        AnchorPoint closestAnchorPoint = null;
+        float shortestDistance = Float.MAX_VALUE;
+        for (int i = 0; i < pushingRobots; i++) {
+            AnchorPoint anchorPoint = anchorPoints[i];
+            if (anchorPoint.taken) {
+                continue;
+            }
+
+            float distance = getBody().getPosition().sub(position).lengthSquared();
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                closestAnchorPoint = anchorPoint;
             }
         }
 
