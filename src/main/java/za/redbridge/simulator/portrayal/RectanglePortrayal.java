@@ -1,7 +1,9 @@
 package za.redbridge.simulator.portrayal;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -9,22 +11,28 @@ import java.awt.geom.Rectangle2D;
  *
  * Created by jamie on 2014/07/23.
  */
-public class RectanglePortrayal extends Portrayal {
+public class RectanglePortrayal extends PolygonPortrayal {
 
-    private transient Rectangle2D.Double preciseRect;
+    private transient Rectangle2D preciseRect;
 
     private final double width;
     private final double height;
 
     public RectanglePortrayal(double width, double height) {
-        this.width = width;
-        this.height = height;
+        this(width, height, Color.BLACK, true);
     }
 
     public RectanglePortrayal(double width, double height, Paint paint, boolean filled) {
-        super(paint, filled);
+        super(4, paint, filled);
         this.width = width;
         this.height = height;
+
+        float halfWidth = (float) (width / 2);
+        float halfHeight = (float) (height / 2);
+        vertices[0].set(-halfWidth, -halfHeight);
+        vertices[1].set(halfWidth, -halfHeight);
+        vertices[2].set(halfWidth, halfHeight);
+        vertices[3].set(-halfWidth, halfHeight);
     }
 
     public double getWidth() {
@@ -36,29 +44,19 @@ public class RectanglePortrayal extends Portrayal {
     }
 
     @Override
-    protected void drawPrecise(Graphics2D graphics) {
+    protected void drawPrecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated) {
         if (preciseRect == null) {
             preciseRect = new Rectangle2D.Double(-width / 2.0, -height / 2.0, width, height);
         }
 
+        Shape transformedShape = transform.getAffineTransform().createTransformedShape(preciseRect);
+
         if (filled) {
-            graphics.fill(preciseRect);
+            graphics.fill(transformedShape);
         } else {
-            graphics.draw(preciseRect);
+            graphics.draw(transformedShape);
         }
     }
 
-    @Override
-    protected void drawImprecise(Graphics2D graphics) {
-        int drawWidth = (int) width;
-        int drawHeight = (int) height;
-        int x = -drawWidth / 2;
-        int y = -drawHeight / 2;
-
-        if (filled) {
-            graphics.fillRect(x, y, drawWidth, drawHeight);
-        } else {
-            graphics.drawRect(x, y, drawWidth, drawHeight);
-        }
-    }
 }

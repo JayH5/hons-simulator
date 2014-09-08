@@ -6,8 +6,9 @@ import java.awt.Paint;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.PlacementArea;
-import za.redbridge.simulator.interfaces.RobotFactory;
+import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 
 public class DebugSensorRobotFactory implements RobotFactory {
@@ -15,8 +16,10 @@ public class DebugSensorRobotFactory implements RobotFactory {
     protected double radius;
     protected Paint paint;
     protected Phenotype phenotype;
+    protected HeuristicPhenotype heuristicPhenotype;
 
-    public DebugSensorRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint) {
+    public DebugSensorRobotFactory(Phenotype phenotype,
+                                   double mass, double radius, Paint paint) {
         this.phenotype = phenotype;
         this.mass = mass;
         this.radius = radius;
@@ -25,16 +28,16 @@ public class DebugSensorRobotFactory implements RobotFactory {
 
     @Override
     public void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world,
-            int quantity) {
+            int quantity, SimConfig.Direction targetAreaPlacement) {
         PlacementArea.Space space =
                 placementArea.getSpaceAtPosition(radius, new Double2D(50, 50));
         RobotObject r1 =
-                new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype.clone());
+                new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype.clone(), targetAreaPlacement);
         placementArea.placeObject(space, r1);
 
         space = placementArea.getSpaceAtPosition(radius, new Double2D(70, 50));
         RobotObject r2 =
-                new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype.clone());
+                new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype.clone(), targetAreaPlacement);
         placementArea.placeObject(space, r2);
     }
 }

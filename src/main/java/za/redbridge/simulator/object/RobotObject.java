@@ -3,21 +3,26 @@ package za.redbridge.simulator.object;
 import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.World;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
+import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
+import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
+import za.redbridge.simulator.portrayal.Drawable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.Sensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
@@ -30,13 +35,17 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class RobotObject extends PhysicalObject {
 
-    //how much force a wheel exerts when driven at full power
-    private static final double WHEEL_POWER = 0.001;
+    //how much force a wheel exerts when driven at full power, in newtons
+    private static final double WHEEL_POWER = 0.15;
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
 
+    private static final float MAX_LATERAL_IMPULSE = 1.0f;
+
+    private static final float GROUND_TRACTION = 0.8f;
+
     private final Phenotype phenotype;
-    private final CollisionSensor collisionSensor;
+    private final HeuristicPhenotype heuristicPhenotype;
 
     private final Vec2 leftWheelPosition;
     private final Vec2 rightWheelPosition;
@@ -45,28 +54,49 @@ public class RobotObject extends PhysicalObject {
     private final Vec2 wheelForce = new Vec2();
     private final Vec2 wheelForcePosition = new Vec2();
 
+    private boolean isBoundToResource = false;
+
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
-                       Phenotype phenotype) {
-        super(createPortrayal(radius, paint, phenotype), createBody(world, position, radius, mass));
+                        Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
+
+        super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
-        attachSensors();
+        heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPlacement);
+        initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
         leftWheelPosition = new Vec2(0f, wheelDistance);
         rightWheelPosition = new Vec2(0f, -wheelDistance);
-
-        collisionSensor = new CollisionSensor();
-        collisionSensor.attach(this, 0.0f);
     }
 
-    private void attachSensors() {
+    private void initSensors() {
         for (AgentSensor sensor : phenotype.getSensors()) {
-            sensor.attach(this, this.getRadius());
+            sensor.attach(this);
         }
+
+        getPortrayal().setChildDrawable(new Drawable() {
+            @Override
+            public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+                for (Sensor sensor : phenotype.getSensors()) {
+                    sensor.draw(object, graphics, info);
+                }
+                heuristicPhenotype.getCollisionSensor().draw(object, graphics, info);
+                heuristicPhenotype.getPickupSensor().draw(object, graphics, info);
+            }
+
+            @Override
+            public void setTransform(Transform transform) {
+                for (Sensor sensor : phenotype.getSensors()) {
+                    sensor.getPortrayal().setTransform(transform);
+                }
+                heuristicPhenotype.getCollisionSensor().getPortrayal().setTransform(transform);
+                heuristicPhenotype.getPickupSensor().getPortrayal().setTransform(transform);
+            }
+        });
     }
 
-    protected static Portrayal createPortrayal(double radius, Paint paint, Phenotype phenotype) {
-        return new RobotPortrayal(radius, paint, phenotype);
+    protected static Portrayal createPortrayal(double radius, Paint paint) {
+        return new CirclePortrayal(radius, paint, true);
     }
 
     protected static Body createBody(World world, Double2D position, double radius, double mass) {
@@ -88,60 +118,19 @@ public class RobotObject extends PhysicalObject {
         super.step(sim);
 
         List<AgentSensor> sensors = phenotype.getSensors();
-        List<SensorReading> readings = new ArrayList<SensorReading>(sensors.size());
-        for(AgentSensor sensor : sensors) {
-            readings.add(sensor.sense());
-        }
+        List<SensorReading> readings = new ArrayList<>(sensors.size());
+        sensors.forEach(sensor -> readings.add(sensor.sense()));
 
-        // DEBUG
-        Sensor sensor = phenotype.getSensors().get(0);
-        SensorReading reading = sensor.sense();
-        List<Double> values = reading.getValues();
-        Double value = Collections.max(values);
-        double dist = value != null ? value : 0;
-        getPortrayal().setPaint(new Color((int) (dist * 255), 0, 0));
-
-        //Double2D wheelDrives = phenotype.step(readings);
-        Double2D wheelDrives = new Double2D(1.0, 0.2);
-
-        List<Double> colReadings = collisionSensor.sense().getValues();
-        if(!colReadings.isEmpty()) {
-            double xColVal = colReadings.get(0);
-            double yColVal = colReadings.get(1);
-            //double angle = Math.tan(yColVal / xColVal);
-            double angle;
-            double ratio = yColVal / xColVal;
-            if (ratio < 0) {
-                angle = -Math.atan(ratio);
-            } else {
-                angle = Math.atan(ratio);
-            }
-            double x, y;
-            if (angle < Math.PI / 2) {
-                //scales 1 to 0
-                x = 1 - (angle / (Math.PI / 2));
-                y = 1;
-            } else if (angle < Math.PI) {
-                //scales 0 to -1
-                x = -((angle - (Math.PI / 2)) / (Math.PI / 2));
-                y = -1;
-            } else if (angle < 3 * Math.PI / 2) {
-                x = -1;
-                //scales -1 to 0
-                y = -(1 - ((angle - Math.PI) / (Math.PI / 2)));
-            } else {
-                x = 1;
-                //scales 0 to 1
-                y = ((angle - 3 * Math.PI / 2) / (Math.PI / 2));
-            }
-            wheelDrives = new Double2D(x, y);
-        }
-        if(Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
-            throw new RuntimeException("Invalid force applied: " + wheelDrives);
-        }
+        Double2D wheelDrives = heuristicPhenotype.step(readings);
 
         applyWheelForce(wheelDrives.x, leftWheelPosition);
         applyWheelForce(wheelDrives.y, rightWheelPosition);
+
+        if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
+            throw new RuntimeException("Invalid force applied: " + wheelDrives);
+        }
+
+        updateFriction();
     }
 
     private void applyWheelForce(double wheelDrive, Vec2 wheelPosition) {
@@ -159,21 +148,38 @@ public class RobotObject extends PhysicalObject {
         getBody().applyForce(wheelForce, wheelForcePosition);
     }
 
-    private static class RobotPortrayal extends CirclePortrayal {
+    /**
+     * For the below 2 methods, see: http://www.iforce2d.net/src/iforce2d_TopdownCar.h
+     */
+    private Vec2 getLateralVelocity() {
+        Vec2 currentRightNormal = getBody().getWorldVector(new Vec2(1, 0));
+        currentRightNormal.mulLocal(Vec2.dot(currentRightNormal, getBody().getLinearVelocity()));
+        return currentRightNormal;
+    }
 
-        final Phenotype phenotype;
+    private void updateFriction() {
+        Vec2 impulse = getLateralVelocity()
+                .negateLocal()
+                .mulLocal(getBody().getMass());
 
-        public RobotPortrayal(double radius, Paint paint, Phenotype phenotype) {
-            super(radius, paint, true);
-            this.phenotype = phenotype;
+        float impulseMagnitude = impulse.length();
+        if (impulseMagnitude > MAX_LATERAL_IMPULSE) {
+            impulse.mulLocal(MAX_LATERAL_IMPULSE / impulseMagnitude);
         }
 
-        @Override
-        protected void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
-            // Draw all the sensors
-            for (AgentSensor sensor : phenotype.getSensors()) {
-                sensor.draw(graphics);
-            }
-        }
+        getBody().applyLinearImpulse(impulse.mulLocal(GROUND_TRACTION), getBody().getWorldCenter(),
+                false);
+        getBody().applyAngularImpulse(GROUND_TRACTION * 0.1f * getBody().getInertia()
+                * -getBody().getAngularVelocity());
+     }
+
+    public boolean isBoundToResource() {
+        return isBoundToResource;
+    }
+
+    public HeuristicPhenotype getHeuristicPhenotype() { return heuristicPhenotype; }
+
+    public void setBoundToResource(boolean isBoundToResource) {
+        this.isBoundToResource = isBoundToResource;
     }
 }

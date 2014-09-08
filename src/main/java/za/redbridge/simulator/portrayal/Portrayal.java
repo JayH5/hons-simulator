@@ -1,5 +1,7 @@
 package za.redbridge.simulator.portrayal;
 
+import org.jbox2d.common.Transform;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -16,18 +18,25 @@ import sim.portrayal.SimplePortrayal2D;
 /**
  * Base class for all our portrayal objects.
  *
- * NOTE: Does implement more specific versions of {@link SimplePortrayal2D#hitObject(Object,
+ * NOTE: Does not implement more specific versions of {@link SimplePortrayal2D#hitObject(Object,
  * DrawInfo2D)} or {@link SimplePortrayal2D#handleMouseEvent(GUIState, Manipulating2D,
  * LocationWrapper, MouseEvent, DrawInfo2D, int)}.
  *
  * Created by jamie on 2014/07/23.
  */
-public abstract class Portrayal extends SimplePortrayal2D {
+public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
 
     protected boolean filled;
     protected Paint paint;
 
-    protected double orientation;
+    private final STRTransform transform = new STRTransform();
+    private boolean transformUpdated = true;
+
+    private Drawable childDrawable;
+
+    private STRTransform localTransform;
+    private STRTransform effectiveLocalTransform;
+    private boolean hasLocalTransform = false;
 
     public Portrayal() {
         this(Color.BLACK, true);
@@ -54,43 +63,71 @@ public abstract class Portrayal extends SimplePortrayal2D {
         this.filled = filled;
     }
 
-    public void setOrientation(double orientation) {
-        this.orientation = orientation;
+    @Override
+    public void setTransform(Transform transform) {
+        this.transform.setTransform(transform);
+        if (childDrawable != null) {
+            childDrawable.setTransform(transform);
+        }
+
+        transformUpdated = true;
     }
 
     @Override
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
         Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
 
-        g.translate(info.draw.x, info.draw.y);
-        g.rotate(orientation);
-        g.scale(info.draw.width, info.draw.height);
-
         g.setPaint(paint);
 
-        if (info.precise) {
-            drawPrecise(g);
+        updateScale(info);
+
+        if (hasLocalTransform) {
+            drawLocal(object, g, info);
         } else {
-            drawImprecise(g);
+            if (info.precise) {
+                drawPrecise(g, transform, transformUpdated);
+            } else {
+                drawImprecise(g, transform, transformUpdated);
+            }
         }
 
-        drawExtra(object, g, info);
+        if (childDrawable != null) {
+            childDrawable.draw(object, g, info);
+        }
 
         g.dispose(); // glPopMatrix()
+
+        transformUpdated = false;
     }
 
-    protected abstract void drawPrecise(Graphics2D graphics);
+    private void drawLocal(Object object, Graphics2D graphics, DrawInfo2D info) {
+        STRTransform.mulToOut(transform, localTransform, effectiveLocalTransform);
 
-    protected abstract void drawImprecise(Graphics2D graphics);
+        if (info.precise) {
+            drawPrecise(graphics, effectiveLocalTransform, transformUpdated);
+        } else {
+            drawImprecise(graphics, effectiveLocalTransform, transformUpdated);
+        }
 
-    /**
-     * Subclasses that wish to draw extra parts of the shape can override this method to draw the
-     * parts relative to their position/rotation/scale.
-     * @param graphics the scaled, rotated and translated graphics context
-     */
-    protected void drawExtra(Object object, Graphics2D graphics, DrawInfo2D info) {
-        // NO-OP
+        if (childDrawable != null) {
+            childDrawable.draw(object, graphics, info);
+        }
     }
+
+    private void updateScale(DrawInfo2D info) {
+        float sx = (float) info.draw.width;
+        float sy = (float) info.draw.height;
+        if (sx != transform.getScaleX() || sy != transform.getScaleY()) {
+            transform.setScale(sx, sy);
+            transformUpdated = true;
+        }
+    }
+
+    protected abstract void drawPrecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated);
+
+    protected abstract void drawImprecise(Graphics2D graphics, STRTransform transform,
+            boolean transformUpdated);
 
     @Override
     public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
@@ -116,6 +153,25 @@ public abstract class Portrayal extends SimplePortrayal2D {
     @Override
     public boolean setSelected(LocationWrapper wrapper, boolean selected) {
         return false;
+    }
+
+    public void setChildDrawable(Drawable drawable) {
+        this.childDrawable = drawable;
+    }
+
+    public void setLocalTransform(STRTransform localTransform) {
+        this.localTransform = localTransform;
+
+        if (effectiveLocalTransform == null) {
+            effectiveLocalTransform = new STRTransform();
+        }
+        STRTransform.mulToOut(transform, localTransform, effectiveLocalTransform);
+
+        hasLocalTransform = true;
+    }
+
+    public void clearLocalTransform() {
+        hasLocalTransform = false;
     }
 
 }

@@ -1,6 +1,11 @@
 package za.redbridge.simulator.sensor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 public class FilteredProximityAgentSensor extends AgentSensor {
 
@@ -8,7 +13,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     private Set<Class> whitelist = null;
 
     public FilteredProximityAgentSensor(float bearing, Collection<String> whitelist) {
-        super(bearing, 0.0f, 30.0f, true, 0.1f);
+        super(bearing, 0.0f, 30.0f, 0.1f);
         for(String cs : whitelist){
             try {
                 this.whitelist.add(Class.forName(cs));
@@ -17,11 +22,11 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     }
 
     public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
-        super(bearing, orientation, range, true, fieldOfView);
+        super(bearing, orientation, range, fieldOfView);
     }
 
     @Override
-    protected SensorReading provideReading(List<SensedObject> objects) {
+    protected SensorReading provideObjectReading(List<SensedObject> objects) {
         for(SensedObject o : objects){
             if(!whitelist.contains(o.getObject().getClass())){
                 objects.remove(o);

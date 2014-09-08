@@ -2,81 +2,89 @@ package za.redbridge.simulator.sensor;
 
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
-import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
-import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.portrayal.ConicSensorPortrayal;
+import org.jbox2d.dynamics.contacts.Contact;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
+import sim.portrayal.DrawInfo2D;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.physics.Collideable;
+import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.portrayal.STRTransform;
+
 /**
+ * The base class for all sensors that attach to a RobotObject.
+ *
  * Created by xenos on 8/22/14.
+ * @param <T> the type that this Sensor returns from the {@link #sense()} method
  */
-public abstract class Sensor {
-    protected final boolean drawShape;
+public abstract class Sensor<T> implements Collideable {
+    protected static final Paint DEFAULT_PAINT = new Color(100, 100, 100, 100);
 
-    protected final float bearing;
-    protected final float orientation;
-    protected final float range;
+    private boolean drawEnabled = false;
 
-    protected ConicSensorPortrayal portrayal;
-    protected Fixture sensorFixture;
+    private Portrayal portrayal;
+    private Fixture sensorFixture;
 
-    protected final Transform robotRelativeTransform = new Transform();
-    protected final Transform cachedGlobalTransform = new Transform();
+    private Transform robotRelativeTransform;
 
-    protected final List<Fixture> sensedFixtures = new ArrayList<Fixture>();
+    private boolean cachedSensorTransformValid;
+    private final Transform cachedSensorTransform = new Transform();
+    private final Transform cachedObjectRelativeTransform = new Transform();
 
-    public Sensor(float bearing, float orientation, float range, boolean drawShape) {
-        this.bearing = bearing;
-        this.orientation = orientation;
-        this.range = range;
-        this.drawShape = drawShape;
+    private final List<Fixture> sensedFixtures = new ArrayList<>();
+
+    public Sensor() {
     }
 
-    public double getBearing() {
-        return bearing;
-    }
-
-    public double getOrientation() {
-        return orientation;
-    }
-
-    public double getRange() {
-        return range;
-    }
-
-    void addFixtureInField(Fixture fixture) {
-        sensedFixtures.add(fixture);
-    }
-
-    void removeFixtureInField(Fixture fixture) {
-        sensedFixtures.remove(fixture);
-    }
-
-    public SensorReading sense() {
+    public final T sense() {
         if (sensorFixture == null) {
             throw new IllegalStateException("Sensor not attached, cannot sense");
         }
 
-        Transform robotTransform = sensorFixture.getBody().getTransform();
-        Transform.mulToOut(robotTransform, robotRelativeTransform, cachedGlobalTransform);
+        // Invalidate the cached transform
+        cachedSensorTransformValid = false;
 
-        List<SensedObject> sensedObjects = new ArrayList<>();
-        for (Fixture f : sensedFixtures) {
-            SensedObject obj = senseFixture(f, cachedGlobalTransform);
-            if (obj != null) {
-                sensedObjects.add(obj);
-            }
-        }
-
-        return provideReading(sensedObjects);
+        List<Fixture> fixtures = new ArrayList<>(sensedFixtures);
+        return provideReading(fixtures);
     }
 
-    public void attach(RobotObject robot, float distFromCenter) {
+    /**
+     * Get this sensor's global transform. NOTE: this transform is cached. If you change the value
+     * of the returned Transform object very bad things will happen.
+     * @return this sensor's global transform
+     */
+    protected final Transform getSensorTransform() {
+        if (!cachedSensorTransformValid) {
+            Transform robotTransform = sensorFixture.getBody().getTransform();
+            Transform.mulToOut(robotTransform, robotRelativeTransform, cachedSensorTransform);
+            cachedSensorTransformValid = true;
+        }
+        return cachedSensorTransform;
+    }
+
+    /**
+     * Get the fixture's transform relative to this sensor. NOTE: this transform is cached. The same
+     * Transform object is used for every Fixture passed to this method.
+     * @param fixture the fixture
+     * @return the fixture's body's transform relative to this sensor
+     */
+    protected final Transform getFixtureRelativeTransform(Fixture fixture) {
+        Transform objectTransform = fixture.getBody().getTransform();
+        Transform sensorTransform = getSensorTransform();
+
+        Transform.mulTransToOut(sensorTransform, objectTransform, cachedObjectRelativeTransform);
+        return cachedObjectRelativeTransform;
+    }
+
+    public final void attach(RobotObject robot) {
         // Clear existing fixture
         if (sensorFixture != null) {
             sensorFixture.destroy();
@@ -86,80 +94,106 @@ public abstract class Sensor {
             sensedFixtures.clear();
         }
 
+        // Update transform
+        robotRelativeTransform = createTransform(robot);
+
         // Create a fixture definition
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.isSensor = true;
-        fixtureDef.friction = 0f;
 
-        // Calculate position relative to robot
-        float robotRadius = robot.getRadius();
-        float x = (float) (Math.min(distFromCenter, robotRadius) * Math.cos(bearing));
-        float y = (float) (Math.min(distFromCenter, robotRadius) * Math.sin(bearing));
-        Vec2 pos = new Vec2(x, y);
-
-        // Update transform
-        robotRelativeTransform.set(pos, bearing + orientation);
-
-        fixtureDef.shape = createShape(pos);
+        fixtureDef.shape = createShape(robotRelativeTransform);
 
         // Add ourselves as user data so we can be fetched
         fixtureDef.userData = this;
 
         // Attach
-        this.sensorFixture = robot.getBody().createFixture(fixtureDef);
+        sensorFixture = robot.getBody().createFixture(fixtureDef);
 
-        if (drawShape) {
-            portrayal.setRobotRadius(robotRadius);
+        // Create the portrayal
+        portrayal = createPortrayal();
+
+        // Make sure the portrayal is relative to the robot
+        if (portrayal != null) {
+            STRTransform transform = new STRTransform(robotRelativeTransform);
+            portrayal.setLocalTransform(transform);
         }
     }
-
-    protected abstract SensedObject senseFixture(Fixture fixture, Transform sensorTransform);
-
-    protected abstract SensorReading provideReading(List<SensedObject> objects);
-
-    protected abstract Shape createShape(Vec2 pos);
 
     /**
-     * Container class for intermediary sensor readings - contains the object to be sensed and
-     * information about its location.
+     * Create the transform for this sensor relative to the provided robot
+     * @param robot the robot this sensor is attached to
+     * @return the transform relative to the robot
      */
+    protected abstract Transform createTransform(RobotObject robot);
 
-    protected static class SensedObject implements Comparable<SensedObject> {
-        private final PhysicalObject object;
-        private final double spanStart;
-        private final double spanEnd;
-        private final double distance;
+    /**
+     * Create the shape for this sensor relative to the robot's center.
+     * @param transform the shape vertices must be transformed by this transform
+     * @return the shape of this sensor
+     */
+    protected abstract Shape createShape(Transform transform);
 
-        public SensedObject(PhysicalObject object, double dist, double spanStart, double spanEnd) {
-            this.object = object;
-            this.distance = dist;
-            this.spanStart = spanStart;
-            this.spanEnd = spanEnd;
-        }
+    /**
+     * Create the portrayal for this sensor (i.e. it's visualization). The portrayal need not be
+     * translated/rotated/scaled relative to the robot as this is done automatically. You may return
+     * null here if a visualization is not required.
+     * @return the sensor's portrayal, or null if one is not required
+     */
+    protected abstract Portrayal createPortrayal();
 
-        /** Get the object that has been sensed */
-        public PhysicalObject getObject() {
-            return object;
-        }
-
-        /** Get the estimated distance to the object. */
-        public double getDistance() {
-            return distance;
-        }
-
-        /** Get the start of the object's coverage of the field of view */
-        public double getSpanStart() {
-            return spanStart;
-        }
-
-        /** Get the end of the object's coverage of the field of view */
-        public double getSpanEnd() {
-            return spanEnd;
-        }
-
-        @Override
-        public int compareTo(SensedObject o) {
-            return Double.compare(distance, o.distance);
+    public final void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+        if (drawEnabled && portrayal != null) {
+            portrayal.setPaint(getPaint());
+            portrayal.draw(object, graphics, info);
         }
     }
+
+    /** Get the paint for drawing this sensor. */
+    protected Paint getPaint() {
+        return DEFAULT_PAINT;
+    }
+
+    /**
+     * Converts a list of fixtures that have been determined to fall within the sensor's range into
+     * the output of this sensor
+     * @param fixtures the fixtures in the sensor's field
+     * @return the reading of the objects produced by the sensor
+     */
+    protected abstract T provideReading(List<Fixture> fixtures);
+
+    public final Body getBody() {
+        return sensorFixture.getBody();
+    }
+
+    public final Portrayal getPortrayal() {
+        return portrayal;
+    }
+
+    /** Check whether drawing of this sensor is enabled. */
+    public boolean isDrawEnabled() {
+        return drawEnabled;
+    }
+
+    /** Set whether this sensor should be drawn. */
+    public void setDrawEnabled(boolean drawEnabled) {
+        this.drawEnabled = drawEnabled;
+    }
+
+    @Override
+    public void handleBeginContact(Contact contact, Fixture otherFixture) {
+        if (!sensedFixtures.contains(otherFixture)) {
+            sensedFixtures.add(otherFixture);
+        }
+    }
+
+    @Override
+    public void handleEndContact(Contact contact, Fixture otherFixture) {
+        sensedFixtures.remove(otherFixture);
+    }
+
+    @Override
+    public boolean isRelevantObject(Fixture fixture) {
+        return !(fixture.getUserData() instanceof Sensor);
+    }
+
 }

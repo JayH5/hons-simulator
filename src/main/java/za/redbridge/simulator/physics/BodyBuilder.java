@@ -1,6 +1,7 @@
-package za.redbridge.simulator.object;
+package za.redbridge.simulator.physics;
 
 import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Vec2;
@@ -20,11 +21,16 @@ import static za.redbridge.simulator.Utils.toVec2;
  * Created by jamie on 2014/08/06.
  */
 public class BodyBuilder {
+
+    private static final float DEFAULT_ANGULAR_DAMPING = .1f;
+    private static final float DEFAULT_LINEAR_DAMPING = .1f;
+
     private BodyDef bd = new BodyDef();
     private FixtureDef fd = new FixtureDef();
 
     public BodyBuilder() {
-
+        bd.setAngularDamping(DEFAULT_ANGULAR_DAMPING);
+        bd.setLinearDamping(DEFAULT_LINEAR_DAMPING);
     }
 
     public BodyBuilder setBodyType(BodyType type) {
@@ -91,7 +97,7 @@ public class BodyBuilder {
         CircleShape shape = new CircleShape();
         shape.setRadius(radius);
         fd.shape = shape;
-        fd.density = (float) Math.PI * radius * radius / mass;
+        fd.density =  mass / ((float) Math.PI * radius * radius);
         return this;
     }
 
@@ -114,12 +120,23 @@ public class BodyBuilder {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(width / 2, height / 2);
         fd.shape = shape;
-        fd.density = height * width / mass;
+        fd.density = mass / (height * width);
         return this;
     }
 
     public BodyBuilder setRectangular(double width, double height, double mass) {
         return setRectangular((float) width, (float) height, (float) mass);
+    }
+
+    public BodyBuilder setEdge(Vec2 v1, Vec2 v2) {
+        EdgeShape shape = new EdgeShape();
+        shape.set(v1, v2);
+        fd.shape = shape;
+        return this;
+    }
+
+    public BodyBuilder setEdge(Double2D v1, Double2D v2) {
+        return setEdge(toVec2(v1), toVec2(v2));
     }
 
     public BodyBuilder setDensity(float density) {

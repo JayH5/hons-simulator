@@ -1,6 +1,7 @@
 package za.redbridge.simulator.ea;
 
 import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 
 import java.lang.annotation.Target;
@@ -12,6 +13,6 @@ import java.lang.annotation.Target;
 public interface FitnessFunction {
 
     //this isn't particularly flexible atm...originally had an instance of TargetAreaObject as parameter
-    public double calculateFitness (double totalResourceValue);
+    public double calculateFitness (ResourceObject resource);
 
 }

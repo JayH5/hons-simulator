@@ -9,13 +9,12 @@ import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.DefaultFitnessFunction;
-import za.redbridge.simulator.interfaces.ResourceFactory;
-import za.redbridge.simulator.interfaces.RobotFactory;
+import za.redbridge.simulator.factories.ResourceFactory;
+import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.sensor.SensorContactListener;
+import za.redbridge.simulator.physics.SimulationContactListener;
 
 
 import static za.redbridge.simulator.Utils.toDouble2D;
@@ -33,9 +32,9 @@ public class Simulation extends SimState {
     private World physicsWorld;
     private PlacementArea placementArea;
 
-    private final SensorContactListener contactListener = new SensorContactListener();
+    private final SimulationContactListener contactListener = new SimulationContactListener();
 
-    private static final float TIME_STEP = 1f / 60f * 1000f; // 60fps
+    private static final float TIME_STEP = 1f / 10f;
     private static final int VELOCITY_ITERATIONS = 6;
     private static final int POSITION_ITERATIONS = 3;
 
@@ -72,9 +71,10 @@ public class Simulation extends SimState {
         createWalls();
         createTargetArea();
         robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots());
+                .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots(),
+                        config.getTargetAreaPlacement());
         resourceFactory.placeInstances(placementArea.new ForType<>(), physicsWorld,
-                config.getObjectsResources());
+                config.getLargeObjects(), config.getSmallObjects());
 
 
         // Now actually add the objects that have been placed to the world and schedule
@@ -103,25 +103,28 @@ public class Simulation extends SimState {
     private void createWalls() {
         int environmentWidth = config.getEnvironmentWidth();
         int environmentHeight = config.getEnvironmentHeight();
-
         // Left
-        Double2D pos = new Double2D(-1, environmentHeight / 2.0);
-        WallObject wall = new WallObject(physicsWorld, pos, 1, environmentHeight + 2);
+        Double2D pos = new Double2D(0, environmentHeight / 2.0);
+        Double2D v1 = new Double2D(0, -pos.y);
+        Double2D v2 = new Double2D(0, pos.y);
+        WallObject wall = new WallObject(physicsWorld, pos, v1, v2);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Right
-        pos = new Double2D(environmentWidth + 1, environmentHeight / 2.0);
-        wall = new WallObject(physicsWorld, pos, 1, environmentHeight + 2);
+        pos = new Double2D(environmentWidth, environmentHeight / 2.0);
+        wall = new WallObject(physicsWorld, pos, v1, v2);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Top
-        pos = new Double2D(environmentWidth / 2.0, -1);
-        wall = new WallObject(physicsWorld, pos, environmentWidth + 2, 1);
+        pos = new Double2D(environmentWidth / 2.0, 0);
+        v1 = new Double2D(-pos.x, 0);
+        v2 = new Double2D(pos.x, 0);
+        wall = new WallObject(physicsWorld, pos, v1, v2);
         environment.setObjectLocation(wall.getPortrayal(), pos);
 
         // Bottom
-        pos = new Double2D(environmentWidth / 2.0, environmentHeight + 1);
-        wall = new WallObject(physicsWorld, pos, environmentWidth + 2, 1);
+        pos = new Double2D(environmentWidth / 2.0, environmentHeight);
+        wall = new WallObject(physicsWorld, pos, v1, v2);
         environment.setObjectLocation(wall.getPortrayal(), pos);
     }
 
@@ -155,7 +158,7 @@ public class Simulation extends SimState {
 
         //for now just give it the default fitness function
         targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
-                                                            new DefaultFitnessFunction());
+                                                            config.getFitnessFunction());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).

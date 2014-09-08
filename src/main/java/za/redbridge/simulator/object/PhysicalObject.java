@@ -5,11 +5,7 @@ import org.jbox2d.dynamics.BodyType;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.portrayal.Portrayal;
-
-
-import static za.redbridge.simulator.Utils.toDouble2D;
 
 /**
  * Created by jamie on 2014/07/25.
@@ -29,20 +25,19 @@ public class PhysicalObject implements Steppable {
 
         // Make this body trackable
         this.body.setUserData(this);
+
+        // Make sure we're drawn in the right place
+        this.portrayal.setTransform(this.body.getTransform());
     }
 
     @Override
     public void step(SimState simState) {
-        // Nothing to update if we're static
-        if (body.getType() == BodyType.STATIC) {
+        // Nothing to update if we're static or sleeping
+        if (body.getType() == BodyType.STATIC || !body.isAwake()) {
             return;
         }
 
-        Simulation simulation = (Simulation) simState;
-        simulation.getEnvironment().setObjectLocation(portrayal, toDouble2D(body.getPosition()));
-
-        float orientation = body.getAngle();
-        portrayal.setOrientation(orientation);
+        portrayal.setTransform(body.getTransform());
     }
 
     public Body getBody() {

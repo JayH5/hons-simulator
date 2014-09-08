@@ -11,11 +11,12 @@ import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.interfaces.ResourceFactory;
-import za.redbridge.simulator.interfaces.RobotFactory;
-import za.redbridge.simulator.phenotype.SimplePhenotype;
+import za.redbridge.simulator.factories.ResourceFactory;
+import za.redbridge.simulator.factories.RobotFactory;
+import za.redbridge.simulator.phenotype.ChasingPhenotype;
 
 /**
  * Created by jamie on 2014/07/24.
@@ -84,9 +85,12 @@ public class SimulationGUI extends GUIState {
             config = new SimConfig(); // Default
         }
 
-        ResourceFactory resourceFactory = new HalfBigHalfSmallResourceFactory();
-        RobotFactory robotFactory = new HomogeneousRobotFactory(new SimplePhenotype(), 20.0, 2.0,
-                new Color(106,128,200));
+        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
+                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
+                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
+
+        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
+                new Color(0,0,0));
 
         SimulationGUI video =
                 new SimulationGUI(new Simulation(robotFactory, resourceFactory, config));

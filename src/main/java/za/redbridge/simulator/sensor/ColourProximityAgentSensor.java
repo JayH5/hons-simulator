@@ -3,6 +3,7 @@ package za.redbridge.simulator.sensor;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -14,18 +15,18 @@ public class ColourProximityAgentSensor extends AgentSensor {
     private final List<Double> readings = new ArrayList<>(3);
 
     public ColourProximityAgentSensor(float bearing) {
-        super(bearing, 0.0f, 30.0f, true, 0.1f);
+        super(bearing, 0.0f, 30.0f, 0.1f);
         readings.add(0.0);
         readings.add(0.0);
         readings.add(0.0);
     }
 
     public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
-        super(bearing, orientation, range, true, fieldOfView);
+        super(bearing, orientation, range, fieldOfView);
     }
 
     @Override
-    protected SensorReading provideReading(List<SensedObject> objects) {
+    protected SensorReading provideObjectReading(List<SensedObject> objects) {
         if (!objects.isEmpty()) {
             SensedObject closest = objects.get(0);
             double reading = 1 - Math.min(closest.getDistance() / range, 1.0);

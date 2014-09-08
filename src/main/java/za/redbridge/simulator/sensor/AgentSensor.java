@@ -3,66 +3,99 @@ package za.redbridge.simulator.sensor;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.RayCastInput;
 import org.jbox2d.collision.RayCastOutput;
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
-import org.jbox2d.collision.shapes.ShapeType;
+import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.portrayal.ConicSensorPortrayal;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.portrayal.ConePortrayal;
+import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.sensor.sensedobjects.CircleSensedObject;
+import za.redbridge.simulator.sensor.sensedobjects.EdgeSensedObject;
+import za.redbridge.simulator.sensor.sensedobjects.PolygonSensedObject;
+import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 /**
  * Describes a sensor implementation. The actual sensor is implemented in the simulator.
  */
-public abstract class AgentSensor extends Sensor {
-    private static final Paint PAINT = new Color(100, 100, 100, 100);
-    protected float fieldOfView;
-    protected final float fovGradient;
+public abstract class AgentSensor extends Sensor<SensorReading> {
 
-    public AgentSensor(float bearing, float orientation, float range, boolean drawShape, float fieldOfView) {
-        super(bearing, orientation, range, drawShape);
+    protected final float bearing;
+    protected final float orientation;
+    protected final float range;
+    protected final float fieldOfView;
+
+    private final float fovGradient;
+
+    public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        if (fieldOfView <= 0 || fieldOfView >= Math.PI) {
+            throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);
+        }
+
+        if (range <= 0) {
+            throw new IllegalArgumentException("Invalid range value: " + range);
+        }
+
+        this.bearing = bearing;
+        this.orientation = orientation;
+        this.range = range;
         this.fieldOfView = fieldOfView;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
 
-        if (drawShape) {
-            portrayal = new ConicSensorPortrayal(bearing, orientation, range, fieldOfView, PAINT);
-        }
-    }
-
-    public void draw(Graphics2D graphics) {
-        if (drawShape) {
-            portrayal.setPaint(getPaint());
-            portrayal.draw(null, graphics, null);
-        }
-    }
-
-    protected Paint getPaint() {
-        return PAINT;
-    }
-
-    public double getFieldOfView() {
-        return fieldOfView;
+        // Draw by default
+        setDrawEnabled(true);
     }
 
     @Override
-    public Shape createShape(Vec2 pos){
+    protected Transform createTransform(RobotObject robot) {
+        float robotRadius = robot.getRadius();
+
+        float x = (float) (Math.cos(bearing) * robotRadius);
+        float y = (float) (Math.sin(bearing) * robotRadius);
+
+        float angle = bearing + orientation;
+        return new Transform(new Vec2(x, y), new Rot(angle));
+    }
+
+    @Override
+    protected Shape createShape(Transform transform) {
         Vec2[] vertices = new Vec2[3];
-        vertices[0] = pos;
+        vertices[0] = new Vec2();
         float xDiff = (float) (range * Math.cos(fieldOfView / 2));
         float yDiff = (float) (range * Math.sin(fieldOfView / 2));
-        vertices[1] = new Vec2(pos.x + xDiff, pos.y + yDiff);
-        vertices[2] = new Vec2(pos.x + xDiff, pos.y - yDiff);
+        vertices[1] = new Vec2(xDiff, yDiff);
+        vertices[2] = new Vec2(xDiff, -yDiff);
+
+        for (int i = 0; i < 3; i++) {
+            Transform.mulToOut(transform, vertices[i], vertices[i]);
+        }
 
         PolygonShape shape = new PolygonShape();
         shape.set(vertices, 3);
         return shape;
+    }
+
+    @Override
+    protected Portrayal createPortrayal() {
+        return new ConePortrayal(range, fieldOfView, DEFAULT_PAINT);
+    }
+
+    @Override
+    protected SensorReading provideReading(List<Fixture> fixtures) {
+        return provideObjectReading(fixtures.stream()
+                .map(this::senseFixture)
+                .filter(o -> o != null)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -71,71 +104,189 @@ public abstract class AgentSensor extends Sensor {
      * @param fixture the fixture to check
      * @return a {@link SensedObject} reading if the object is in the field, else null
      */
-    protected SensedObject senseFixture(Fixture fixture, Transform sensorTransform) {
-        Transform objectTransform = fixture.getBody().getTransform();
-        Transform objectRelativeTransform = Transform.mulTrans(sensorTransform, objectTransform);
+    private SensedObject senseFixture(Fixture fixture) {
+        Transform objectRelativeTransform = getFixtureRelativeTransform(fixture);
 
-        Shape shape = fixture.getShape();
-        final float objectY0, objectY1, objectDistance;
-        if (shape.getType() == ShapeType.CIRCLE) {
-            objectY0 = objectRelativeTransform.p.y - shape.getRadius();
-            objectY1 = objectRelativeTransform.p.y + shape.getRadius();
-            objectDistance = (float) Math.hypot(objectRelativeTransform.p.x, objectRelativeTransform.p.y);
-        } else if (shape.getType() == ShapeType.POLYGON) {
-            RayCastInput rin = new RayCastInput();
-            rin.maxFraction = 1f;
-            rin.p2.x = range;
-            RayCastOutput rout = new RayCastOutput();
-            shape.raycast(rout, rin, objectRelativeTransform, 0);
+        switch (fixture.getShape().getType()) {
+            case CIRCLE:
+                return senseCircleFixture(fixture, objectRelativeTransform);
+            case POLYGON:
+                return sensePolygonFixture(fixture, objectRelativeTransform);
+            case EDGE:
+                return senseEdgeFixture(fixture, objectRelativeTransform);
+            default:
+                return null;
+        }
+    }
 
-            // If raycast down the middle unsuccessful, try the edges of the field of view
-            if (rout.fraction == 0f) {
-                rin.p2.y = fovGradient * range;
-                shape.raycast(rout, rin, objectRelativeTransform, 0);
-            }
+    protected SensedObject senseCircleFixture(Fixture circleFixture,
+            Transform objectRelativeTransform) {
+        CircleShape circleShape = (CircleShape) circleFixture.getShape();
 
-            if (rout.fraction == 0f) {
-                rin.p2.y = -rin.p2.y;
-                shape.raycast(rout, rin, objectRelativeTransform, 0);
-            }
+        final float x = objectRelativeTransform.p.x;
+        final float y = objectRelativeTransform.p.y;
+        final float radius = circleShape.getRadius();
 
-            if (rout.fraction == 0f) {
-                // Check if sensor is inside or in contact with other object
-                // If not, raycasting hit nothing
-                if (!fixture.testPoint(sensorTransform.p)) {
-                   return null;
-                }
-            }
+        float y0 = y - radius;
+        float y1 = y + radius;
+        float x0 = x - radius;
+        float x1 = x + radius;
 
-            objectDistance = rout.fraction * range;
+        float yMax = fovGradient * x;
+        float yMin = -yMax;
 
-            AABB aabb = new AABB();
-            shape.computeAABB(aabb, objectRelativeTransform, 0);
-            objectY0 = aabb.lowerBound.y;
-            objectY1 = aabb.upperBound.y;
+        // Ensure circle actually within FoV
+        if (yMax < y0 || yMin > y1) {
+            return null;
+        }
+
+        // Clamp circle width to FoV
+        if (y0 < yMin) {
+            x0 = lineCircleIntersection(-fovGradient, 0, x, y, radius);
+            y0 = -fovGradient * x0;
+        }
+        if (y1 > yMax) {
+            x1 = lineCircleIntersection(fovGradient, 0, x, y, radius);
+            y1 = fovGradient * x1;
+        }
+
+        final double distance;
+        if (y < yMin) {
+            distance = Math.hypot(x0, y0);
+        } else if (y > yMax) {
+            distance = Math.hypot(x1, y1);
         } else {
-            // Don't know this shape
-            return null;
+            distance = objectRelativeTransform.p.length() - radius;
         }
 
-        // Boundaries of field of view obey equation y = mx + c
-        // Where: m = (+/-) fovGradient, c = 0
-        // We can get the symmetrical span across the y-axis of the field of view of the sensor for
-        // a distance x from the sensor.
-        double y1 = objectDistance / fovGradient;
-        double y0 = -y1;
+        PhysicalObject physicalObject = (PhysicalObject) circleFixture.getBody().getUserData();
+        return new CircleSensedObject(physicalObject, distance, radius, x, y, x0, y0, x1, y1);
+    }
 
-        // Check if object within field at all
-        if (objectY1 < y0 || objectY0 > y1) {
-            return null;
+    private float lineCircleIntersection(float m, float c, float p, float q, float r) {
+        float A = m * m + 1;
+        float B = 2 * (m * c - m * q - p);
+        float C = q * q - r * r + p * p - 2 * c * q + c * c;
+
+        return (-B + (float) Math.sqrt(B * B - 4 * A * C)) / (2 * A);
+    }
+
+    protected SensedObject sensePolygonFixture(Fixture polygonFixture,
+            Transform objectRelativeTransform) {
+        PolygonShape polygonShape = (PolygonShape) polygonFixture.getShape();
+
+        RayCastInput rin = new RayCastInput();
+        rin.maxFraction = 1f;
+        rin.p2.x = range;
+        RayCastOutput rout = new RayCastOutput();
+        polygonShape.raycast(rout, rin, objectRelativeTransform, 0);
+
+        // If raycast down the middle unsuccessful, try the edges of the field of view
+        if (rout.fraction == 0f) {
+            rin.p2.y = fovGradient * range;
+            polygonShape.raycast(rout, rin, objectRelativeTransform, 0);
         }
 
-        // Clamp span to field of sensor
-        double spanStart = objectY0 > y0 ? objectY0 : y0;
-        double spanEnd = objectY1 < y1 ? objectY1 : y1;
+        if (rout.fraction == 0f) {
+            rin.p2.y = -rin.p2.y;
+            polygonShape.raycast(rout, rin, objectRelativeTransform, 0);
+        }
 
-        PhysicalObject object = (PhysicalObject) fixture.getBody().getUserData();
-        return new SensedObject(object, objectDistance, spanStart, spanEnd);
+        if (rout.fraction == 0f) {
+            // Check if sensor is inside or in contact with other object
+            // If not, raycasting hit nothing
+            if (!polygonFixture.testPoint(getSensorTransform().p)) {
+                return null;
+            }
+        }
+
+        float distance = rout.fraction * range;
+
+        AABB aabb = new AABB();
+        polygonShape.computeAABB(aabb, objectRelativeTransform, 0);
+        float x0 = aabb.lowerBound.x;
+        float y0 = aabb.lowerBound.y;
+
+        if (x0 < 0) {
+            x0 = 0;
+        }
+
+        float yMin = -fovGradient * x0;
+        if (y0 < yMin) {
+            y0 = yMin;
+        }
+
+        float x1 = aabb.upperBound.x;
+        float y1 = aabb.upperBound.y;
+
+        if (x1 > range) {
+            x1 = range;
+        }
+
+        float yMax = fovGradient * x1;
+        if (y1 > yMax) {
+            y1 = yMax;
+        }
+
+        PhysicalObject physicalObject = (PhysicalObject) polygonFixture.getBody().getUserData();
+        return new PolygonSensedObject(physicalObject, distance, x0, y0, x1 - x0, y1 - y0);
+    }
+
+    protected SensedObject senseEdgeFixture(Fixture edgeFixture,
+            Transform objectRelativeTransform) {
+        EdgeShape edgeShape = (EdgeShape) edgeFixture.getShape();
+
+        // Transform ends of edge to space relative to sensor
+        Vec2 v1 = Transform.mul(objectRelativeTransform, edgeShape.m_vertex1);
+        Vec2 v2 = Transform.mul(objectRelativeTransform, edgeShape.m_vertex2);
+
+        // Ensure v2 is above v1
+        if (v2.y < v1.y) {
+            Vec2 temp = v2;
+            v2 = v1;
+            v1 = temp;
+        }
+
+        // Get line equation for edge
+        float m = (v2.y - v1.y) / (v2.x - v1.x);
+        float c = v1.y - m * v1.x;
+
+        // Line-line intersection points
+        float x1 = (-fovGradient - c) / m;
+        float y1 = m * x1 + c;
+        float x2 = (fovGradient - c) / m;
+        float y2 = m * x2 + c;
+
+        if (v1.y > y1) {
+            y1 = v1.y;
+            x1 = v1.x;
+        }
+
+        if (v2.y < y2) {
+            y2 = v2.y;
+            x2 = v2.x;
+        }
+
+        // Get equation for line perpendicular to edge passing through sensor position
+        Vec2 sensorPosition = getSensorTransform().p;
+        float m_ = -1 / m;
+        float c_ = sensorPosition.y + 1 / m * sensorPosition.x;
+
+        // Closest point on infinite edge is at point perpendicular line intersect with edge
+        // line... but edge is not infinite
+        float x = (m - m_) / (c_ - c);
+        final float distance;
+        if (x > x2) {
+            distance = (float) Math.hypot(x2, y2);
+        } else if (x < x1) {
+            distance = (float) Math.hypot(x1, y1);
+        } else {
+            float y = m * x + c;
+            distance = (float) Math.hypot(x, y);
+        }
+
+        PhysicalObject physicalObject = (PhysicalObject) edgeFixture.getBody().getUserData();
+        return new EdgeSensedObject(physicalObject, distance, x1, y1, x2, y2);
     }
 
     /**
@@ -144,6 +295,7 @@ public abstract class AgentSensor extends Sensor {
      * @param objects the objects in the sensor's field, sorted by distance
      * @return the reading of the objects produced by the sensor
      */
-    protected abstract SensorReading provideReading(List<SensedObject> objects);
+    protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
+
 
 }
