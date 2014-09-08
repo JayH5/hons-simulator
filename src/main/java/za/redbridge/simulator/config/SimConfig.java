@@ -1,9 +1,6 @@
 package za.redbridge.simulator.config;
 
-import com.sun.xml.internal.ws.policy.spi.PolicyAssertionValidator;
 import org.yaml.snakeyaml.Yaml;
-import za.redbridge.simulator.ea.DefaultFitnessFunction;
-import za.redbridge.simulator.ea.FitnessFunction;
 
 import java.io.IOException;
 import java.io.InvalidClassException;
@@ -11,6 +8,9 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+
+import za.redbridge.simulator.ea.DefaultFitnessFunction;
+import za.redbridge.simulator.ea.FitnessFunction;
 
 public class SimConfig {
 
