@@ -190,9 +190,11 @@ public class Simulation extends SimState {
      * @param n the number of iterations
      */
     public void runForNIterations(int n) {
+        start();
         for (int i = 0; i < n; i++) {
             schedule.step(this);
         }
+        finish();
     }
 
     //return the score at this point in the simulation
