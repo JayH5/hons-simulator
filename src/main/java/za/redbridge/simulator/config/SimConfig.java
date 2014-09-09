@@ -183,7 +183,8 @@ public class SimConfig extends Config {
             }
         }
 
-        //Resource factory
+
+        //factories
         Map factories = (Map) config.get("factories");
         if (checkFieldPresent(factories, "factories")) {
 
@@ -199,7 +200,9 @@ public class SimConfig extends Config {
                     }
 
                     resFactory = (ResourceFactory) o;
-                    Map resources = (Map) config.get("resourceProperties");
+
+                    //TODO: solve the mystery of the missing resource field
+                    Map resources = (Map) config.get("resources");
                     resFactory.configure(resources);
                 }
                 catch (ClassNotFoundException c) {

@@ -1,13 +1,12 @@
 ---
 objects:
   robots: 6
-resourceProperties:
+resources:
   smallResources: 0
   smallObjectWidth: 0.4
   smallObjectHeight: 0.4
   smallObjectMass: 5.0
   maxSmallObjectPushingBots: 1
-
   largeResources: 1
   largeObjectWidth: 4.0
   largeObjectHeight: 4.0

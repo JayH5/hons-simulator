@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,8 @@ public class MorphologyConfig extends Config {
     private int numSensors;
 
     public MorphologyConfig(String filepath) throws ParseException {
+
+        sensorList = new ArrayList<>();
 
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;

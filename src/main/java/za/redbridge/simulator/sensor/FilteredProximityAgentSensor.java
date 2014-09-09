@@ -8,7 +8,7 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 public class FilteredProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(1);
-    private Set<Class> whitelist = null;
+    private Set<Class> whitelist = new HashSet<>();
 
     public FilteredProximityAgentSensor() {
         super();
@@ -62,6 +62,10 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {
 
         String[] whiteList = null;
+
+        if (map == null) {
+            return;
+        }
 
         if (checkFieldPresent(map, "whiteList")) {
             whiteList = ((String) map.get("whiteList")).split(" ");

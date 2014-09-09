@@ -3,7 +3,7 @@ meta:
 
 1s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList:
+  whiteList: za.redbridge.simulator.object.ResourceObject
   bearing: 51.0
   orientation: 40.0
   fieldOfView: 10.0
@@ -11,6 +11,7 @@ meta:
 
 2s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
+  whiteList: za.redbridge.simulator.object.ResourceObject
   bearing: 102.0
   fieldOfView: 10.0
   orientation: 40.0
@@ -18,6 +19,7 @@ meta:
 
 3s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
+  whiteList: za.redbridge.simulator.object.ResourceObject
   bearing: 154.0
   fieldOfView: 10.0
   orientation: 40.0
@@ -25,6 +27,7 @@ meta:
 
 4s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
+  whiteList: za.redbridge.simulator.object.ResourceObject
   bearing: 206.0
   fieldOfView: 10.0
   orientation: 40.0
@@ -32,6 +35,7 @@ meta:
 
 5s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
+  whiteList: za.redbridge.simulator.object.ResourceObject
   bearing: 258.0
   fieldOfView: 10.0
   orientation: 40.0
@@ -39,6 +43,7 @@ meta:
 
 6s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
+  whiteList: za.redbridge.simulator.object.ResourceObject
   bearing: 310.0
   fieldOfView: 10.0
   orientation: 40.0
