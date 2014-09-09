@@ -135,7 +135,7 @@ public class ResourceObject extends PhysicalObject {
         double dist = getBody().getWorldPoint(getClosestAnchorPoint(robotPosition)).sub(robot.getBody().getPosition()).length();
 
         if (dist > robot.getRadius()*1.5) {
-            System.out.println("Pickup failed: too far away.");
+            //System.out.println("Pickup failed: too far away.");
             return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
         }
 

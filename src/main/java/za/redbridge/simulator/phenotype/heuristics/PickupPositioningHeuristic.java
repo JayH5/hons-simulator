@@ -48,7 +48,7 @@ public class PickupPositioningHeuristic extends Heuristic {
                     .orElse(new Vec2(-4, 0));
 
             if (attachmentResult.y < 0) {
-                System.out.println("Success!");
+                //System.out.println("Success!");
                 schedule.remove(this);
             }
             else if (resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition()).sub(attachedRobot.getBody().getPosition()).length() > resource.getHypot()) {
