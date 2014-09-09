@@ -37,6 +37,15 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     private final float fovGradient;
 
+    public AgentSensor() {
+
+        bearing = 3.14f;
+        orientation = 0.1f;
+        range = 5.0f;
+        fieldOfView = 3.0f;
+        fovGradient = (float) Math.tan(fieldOfView / 2);
+    }
+
     public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
         if (fieldOfView <= 0 || fieldOfView >= Math.PI) {
             throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);

@@ -6,7 +6,7 @@ phenotype:
 
 evolutionaryAlgorithm:
   controllerEA: NEAT
-  fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
+  populationSize: 20
 
 morphology:
   morphologyFileName: sensorlist.yml

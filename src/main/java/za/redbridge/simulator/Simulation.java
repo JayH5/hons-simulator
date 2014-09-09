@@ -40,11 +40,14 @@ public class Simulation extends SimState {
 
     private TargetAreaObject targetArea;
 
+    private RobotFactory robotFactory;
+
     private final SimConfig config;
 
-    public Simulation(SimConfig config) {
+    public Simulation(SimConfig config, RobotFactory robotFactory) {
         super(config.getSimulationSeed());
         this.config = config;
+        this.robotFactory = robotFactory;
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
 

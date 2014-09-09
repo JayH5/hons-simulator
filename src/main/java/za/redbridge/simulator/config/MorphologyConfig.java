@@ -48,7 +48,7 @@ public class MorphologyConfig extends Config {
         //TODO: make reading in sensor objects less hacktastic
         for (int i = 1; i <= numSensors; i++) {
 
-            String id = "" + i;
+            String id = i + "s";
 
             String type = null;
             float bearing, orientation, fieldOfView, range;
@@ -95,7 +95,7 @@ public class MorphologyConfig extends Config {
 
                     try {
                         Class sensorType = Class.forName(type.trim());
-                        Object o = sensorType.getConstructor(Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE).newInstance();
+                        Object o = sensorType.newInstance();
 
                         if (!(o instanceof AgentSensor)) {
                             throw new InvalidClassException("Not Agent Sensor.");
@@ -113,13 +113,13 @@ public class MorphologyConfig extends Config {
                         System.out.println("Invalid specified agent sensor class. " + type);
                         x.printStackTrace();
                         System.exit(-2);
-                    }
+                    }/*
                     catch (NoSuchMethodException n) {
                         n.printStackTrace();
                     }
                     catch (InvocationTargetException inv) {
                         inv.printStackTrace();
-                    }
+                    }*/
                     catch (InstantiationException ins) {
                         ins.printStackTrace();
                     }
@@ -133,7 +133,7 @@ public class MorphologyConfig extends Config {
                 }
             }
             else {
-                throw new ParseException("Error: Sensor not found.", i);
+                throw new ParseException("Error: " + i + " Sensor not found.", i);
             }
 
             sensorList.add(agentSensor);
@@ -142,4 +142,6 @@ public class MorphologyConfig extends Config {
     }
 
     public List<AgentSensor> getSensorList() { return sensorList; }
+
+    public int getNumSensors() { return numSensors; }
 }

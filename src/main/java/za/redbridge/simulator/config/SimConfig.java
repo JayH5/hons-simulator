@@ -79,14 +79,13 @@ public class SimConfig extends Config {
     }
 
     @SuppressWarnings("unchecked")
-    public static SimConfig loadFromFile(String filepath) {
+    public SimConfig(String filepath) {
         Yaml yaml = new Yaml();
-        Map<String, Object> config;
+        Map<String, Object> config = null;
         try (Reader reader = Files.newBufferedReader(Paths.get(filepath))) {
             config = (Map<String, Object>) yaml.load(reader);
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
 
         // This is fairly horrible
@@ -204,11 +203,11 @@ public class SimConfig extends Config {
                     resFactory.configure(resources);
                 }
                 catch (ClassNotFoundException c) {
-                    System.out.println("Invalid class name specified in SimConfig: " + resFactory + ". Using default resource factory.");
+                    System.out.println("Invalid class name specified in SimConfig: " + rFactory + ". Using default resource factory.");
                     c.printStackTrace();
                 }
                 catch (InvalidClassException i) {
-                    System.out.println("Invalid resource factory specified: " + resFactory + ". Using default resource factory.");
+                    System.out.println("Invalid resource factory specified: " + rFactory + ". Using default resource factory.");
                     i.printStackTrace();
                 }
                 catch (InstantiationException ins) {
@@ -225,7 +224,17 @@ public class SimConfig extends Config {
             }
         }
 
-        return new SimConfig(seed, iterations, width, height, placement, thickness, robots, fitness, resFactory, robotFactory);
+
+        this.simulationSeed = seed;
+        this.simulationIterations = iterations;
+        this.environmentWidth = width;
+        this.environmentHeight = height;
+        this.targetAreaPlacement = placement;
+        this.targetAreaThickness = thickness;
+        this.objectsRobots = robots;
+        this.fitnessFunction = fitness;
+        this.resourceFactory = resFactory;
+        this.robotFactoryName = robotFactory;
     }
 
 

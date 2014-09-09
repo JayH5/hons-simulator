@@ -16,5 +16,5 @@ resourceProperties:
 scoring:
   fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
 factories:
-  resourceFactory: za.redbridge.simulator.factories.ConfigurableResourceFactory;
-  robotFactory: za.redbridge.simulator.factories.HomogeneousRobotFactory;
+  resourceFactory: za.redbridge.simulator.factories.ConfigurableResourceFactory
+  robotFactory: za.redbridge.simulator.factories.HomogeneousRobotFactory

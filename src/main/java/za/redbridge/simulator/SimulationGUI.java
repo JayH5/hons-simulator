@@ -80,20 +80,16 @@ public class SimulationGUI extends GUIState {
     public static void main (String[] args) {
         SimConfig config;
         if (args.length > 0) {
-            config = SimConfig.loadFromFile(args[0]);
+            config = new SimConfig(args[0]);
         } else {
             config = new SimConfig(); // Default
         }
-
-        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
-                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
-                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
 
         RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
                 new Color(0,0,0));
 
         SimulationGUI video =
-                new SimulationGUI(new Simulation(robotFactory, resourceFactory, config));
+                new SimulationGUI(new Simulation(config, robotFactory));
 
         //new console which displays this simulation
         Console console = new Console(video);

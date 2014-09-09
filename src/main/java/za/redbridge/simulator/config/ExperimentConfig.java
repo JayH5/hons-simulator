@@ -16,7 +16,7 @@ public class ExperimentConfig extends Config {
 
     private static final long DEFAULT_MAX_EPOCHS = 1000;
     private static final EvolutionaryAlgorithm DEFAULT_CONTROLLER_EA = EvolutionaryAlgorithm.NEAT;
-
+    private static final long DEFAULT_POPULATION_SIZE = 20;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorlist.yml";
 
     public enum EvolutionaryAlgorithm {
@@ -25,6 +25,7 @@ public class ExperimentConfig extends Config {
 
     protected long maxEpochs;
     protected EvolutionaryAlgorithm algorithm;
+    protected long populationSize;
     protected String robotFactory;
     protected String morphologyConfigFile;
 
@@ -47,6 +48,7 @@ public class ExperimentConfig extends Config {
         //default values
         long maxEpochs = DEFAULT_MAX_EPOCHS;
         ExperimentConfig.EvolutionaryAlgorithm controllerEA = DEFAULT_CONTROLLER_EA;
+        long popSize = DEFAULT_POPULATION_SIZE;
         String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
 
         Map control = (Map) config.get("control");
@@ -58,6 +60,7 @@ public class ExperimentConfig extends Config {
             }
         }
 
+        /*
         Map phenotype = (Map) config.get("phenotype");
         if (checkFieldPresent(phenotype, "phenotype")) {
 
@@ -65,12 +68,12 @@ public class ExperimentConfig extends Config {
             if (checkFieldPresent(fact, "phenotype:factory")) {
                 factory = fact;
             }
-        }
+        }*/
 
         Map ea = (Map) config.get("evolutionaryAlgorithm");
         if (checkFieldPresent(ea, "evolutionaryAlgorithm")) {
 
-            String EA = (String) phenotype.get("controllerEA");
+            String EA = (String) ea.get("controllerEA");
             if (checkFieldPresent(EA, "evolutionaryAlgorithm:controllerEA")) {
 
                 if (EA.trim().equals(EvolutionaryAlgorithm.NEAT.name())) {
@@ -81,6 +84,10 @@ public class ExperimentConfig extends Config {
                 }
             }
 
+            Integer pSize = (Integer) ea.get("populationSize");
+            if (checkFieldPresent(EA, "evolutionaryAlgorithm:populationSize")) {
+                popSize = pSize;
+            }
         }
 
         Map morphology = (Map) config.get("morphology");
@@ -94,14 +101,16 @@ public class ExperimentConfig extends Config {
 
         this.maxEpochs = maxEpochs;
         this.algorithm = controllerEA;
+        this.populationSize = popSize;
         this.morphologyConfigFile = morphologyFile;
     }
 
-    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm,
+    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, long populationSize,
                             String robotFactory, String morphologyConfigFile) {
 
         this.maxEpochs = maxEpochs;
         this.algorithm = algorithm;
+        this.populationSize = populationSize;
         this.robotFactory = robotFactory;
         this.morphologyConfigFile = morphologyConfigFile;
     }

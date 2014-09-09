@@ -1,5 +1,6 @@
 package za.redbridge.simulator.phenotype;
 
+import org.encog.neural.neat.NEATNetwork;
 import sim.util.Double2D;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.SensorReading;
@@ -13,10 +14,12 @@ import java.util.Map;
 public class NEATPhenotype implements Phenotype {
 
     private final List<AgentSensor> sensors;
+    private final NEATNetwork controller;
 
+    public NEATPhenotype(List<AgentSensor> sensors, NEATNetwork controller) {
 
-    public NEATPhenotype(List<AgentSensor> sensors) {
         this.sensors = sensors;
+        this.controller = controller;
     }
 
     @Override
@@ -33,6 +36,8 @@ public class NEATPhenotype implements Phenotype {
     public NEATPhenotype clone() {
         return this;
     }
+
+    public NEATNetwork getController() { return controller; }
 
     public void configure(Map<String,Object> phenotypeConfigs) {}
 

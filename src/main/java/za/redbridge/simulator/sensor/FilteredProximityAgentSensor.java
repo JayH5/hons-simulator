@@ -10,6 +10,10 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     private final List<Double> readings = new ArrayList<>(1);
     private Set<Class> whitelist = null;
 
+    public FilteredProximityAgentSensor() {
+        super();
+    }
+
     public FilteredProximityAgentSensor(float bearing, Collection<String> whitelist) {
         super(bearing, 0.0f, 30.0f, 0.1f);
         for(String cs : whitelist){
