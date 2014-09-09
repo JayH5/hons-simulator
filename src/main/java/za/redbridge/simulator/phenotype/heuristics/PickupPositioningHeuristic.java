@@ -44,13 +44,14 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         if (!attachedRobot.isBoundToResource()) {
 
-            Vec2 attachmentResult = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(new Vec2(-4, 0));
+            boolean attachmentSuccess = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
+                    .orElse(false);
 
-            if (attachmentResult.y < 0) {
+            if (attachmentSuccess) {
                 //System.out.println("Success!");
                 schedule.remove(this);
             }
+            //bot is too far away from resource
             else if (resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition()).sub(attachedRobot.getBody().getPosition()).length() > resource.getHypot()) {
 
                 schedule.remove(this);
@@ -74,8 +75,10 @@ public class PickupPositioningHeuristic extends Heuristic {
         Vec2 closestAttachmentPoint = resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition());
         Vec2 robotPosition = attachedRobot.getBody().getPosition();
 
+        //stickySide should never be null, but in case it is return robot position
         if (stickySide == null) {
-            return new Vec2(-8, 0);
+
+            return attachedRobot.getBody().getPosition();
         }
 
         Vec2 position;

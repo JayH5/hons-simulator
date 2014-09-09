@@ -96,21 +96,20 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-    //returns closest attachment point to robot (global) if attachment fails because bot is on wrong side.
-    //otherwise, it returns a vector with a negative x value for other failures, negative y for success.
-    public Vec2 tryPickup(RobotObject robot) {
+    //returns success of attachment
+    public boolean tryPickup(RobotObject robot) {
         if (isCollected) {
-            return new Vec2(-1, 0);
+            return false;
         }
 
         // Check if max number of robots already attached
         if (pushedByMaxRobots()) {
-            return new Vec2(-2, 0);
+            return false;
         }
 
         // Check if robot not already attached or about to be attached
         if (joints.containsKey(robot) || pendingJoints.containsKey(robot)) {
-            return new Vec2(-3, 0);
+            return false;
         }
 
         // Check the side that the robot wants to attach to
@@ -119,7 +118,7 @@ public class ResourceObject extends PhysicalObject {
         Vec2 robotPosition = robotBody.getPosition();
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
-            return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
+            return false;
         }
 
 
@@ -136,7 +135,7 @@ public class ResourceObject extends PhysicalObject {
 
         if (dist > robot.getRadius()*1.5) {
             //System.out.println("Pickup failed: too far away.");
-            return getBody().getWorldPoint(getClosestAnchorPoint(robotPosition));
+            return false;
         }
 
         // Create the joint definition
@@ -160,7 +159,7 @@ public class ResourceObject extends PhysicalObject {
         // Mark the robot as bound
         robot.setBoundToResource(true);
 
-        return new Vec2(0, -1);
+        return true;
     }
 
     public double getHypot() {
