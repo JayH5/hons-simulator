@@ -13,6 +13,7 @@ import java.util.Comparator;
  */
 public abstract class Heuristic implements Comparator<Heuristic>{
 
+    public static final int SLOWDOWN_THRESHOLD = 1;
     protected static final double P2 = Math.PI / 2;
 
     protected RobotObject attachedRobot;
@@ -31,7 +32,13 @@ public abstract class Heuristic implements Comparator<Heuristic>{
     }
 
     protected Double2D wheelDriveFromTargetPoint(Vec2 target){
-        return wheelDriveFromBearing(bearingFromTargetPoint(target));
+        double dist = Math.sqrt(Math.pow(target.x,2) + Math.pow(target.y,2));
+        Double2D drive = wheelDriveFromBearing(bearingFromTargetPoint(target));
+        if(dist < SLOWDOWN_THRESHOLD){
+            return drive.multiply(dist/SLOWDOWN_THRESHOLD);
+        }else{
+            return drive;
+        }
     }
 
     protected Double2D wheelDriveFromBearing(double angle){
