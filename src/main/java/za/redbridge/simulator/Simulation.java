@@ -177,6 +177,18 @@ public class Simulation extends SimState {
         return environment;
     }
 
+    /**
+     * Run the simulation for the number of iterations specified in the config.
+     */
+    public void run() {
+        final int iterations = config.getSimulationIterations();
+        runForNIterations(iterations);
+    }
+
+    /**
+     * Run the simulation for a certain number of iterations.
+     * @param n the number of iterations
+     */
     public void runForNIterations(int n) {
         for (int i = 0; i < n; i++) {
             schedule.step(this);
