@@ -11,7 +11,7 @@ import java.util.Comparator;
 /**
  * Created by racter on 2014/09/01.
  */
-public abstract class Heuristic implements Comparator<Heuristic>{
+public abstract class Heuristic implements Comparator<Heuristic> {
 
     public static final int SLOWDOWN_THRESHOLD = 1;
     protected static final double P2 = Math.PI / 2;
@@ -19,20 +19,15 @@ public abstract class Heuristic implements Comparator<Heuristic>{
     protected RobotObject attachedRobot;
     protected int priority;
 
-    public abstract Double2D step (List<SensorReading> list);
+    public abstract Double2D step(List<SensorReading> list);
 
-    @Override
-    public boolean equals(Object o) {
-
-        if (!(o instanceof Heuristic)) {
-            throw new ClassCastException("Supplied object not member of Heuristic class.");
-        }
-        else
-            return this.getPriority() == ((Heuristic) o).getPriority();
-    }
-
+    /**
+     * Calculate the drive force to get to the target point
+     * @param target local to the agent
+     * @return
+     */
     protected Double2D wheelDriveFromTargetPoint(Vec2 target){
-        double dist = Math.sqrt(Math.pow(target.x,2) + Math.pow(target.y,2));
+        double dist = target.length();
         Double2D drive = wheelDriveFromBearing(bearingFromTargetPoint(target));
         if(dist < SLOWDOWN_THRESHOLD){
             return drive.multiply(dist/SLOWDOWN_THRESHOLD);
