@@ -20,14 +20,12 @@ public class ScoreCalculator implements CalculateScore {
     private SimConfig config;
 
     public ScoreCalculator(ExperimentConfig experimentConfig, SimConfig config) {
-        this.robotFactory = robotFactory;
-        this.resourceFactory = resourceFactory;
         this.config = config;
     }
 
     @Override
     public double calculateScore(MLMethod method) {
-        Simulation currentSimulation = new Simulation(robotFactory, resourceFactory, config);
+        Simulation currentSimulation = new Simulation(config);
         return currentSimulation.getFitness();
     }
 

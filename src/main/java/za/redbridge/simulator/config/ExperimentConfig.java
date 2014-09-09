@@ -1,13 +1,7 @@
 package za.redbridge.simulator.config;
 
 import org.yaml.snakeyaml.Yaml;
-import za.redbridge.simulator.ea.DefaultFitnessFunction;
-import za.redbridge.simulator.ea.FitnessFunction;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.factories.RobotFactory;
-
 import java.io.IOException;
-import java.io.InvalidClassException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,9 +14,9 @@ import java.util.Map;
 //parameters for experiment configuration
 public class ExperimentConfig extends Config {
 
-    private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
     private static final long DEFAULT_MAX_EPOCHS = 1000;
-    private static final String DEFAULT_FACTORY = "za.redbridge.simulator.factories.HomogeneousRobotFactory";
+    private static final EvolutionaryAlgorithm DEFAULT_CONTROLLER_EA = EvolutionaryAlgorithm.NEAT;
+
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorlist.yml";
 
     public enum EvolutionaryAlgorithm {
@@ -31,8 +25,8 @@ public class ExperimentConfig extends Config {
 
     protected long maxEpochs;
     protected EvolutionaryAlgorithm algorithm;
-    protected RobotFactory factory;
-    protected FitnessFunction fitnessFunction;
+    protected String robotFactory;
+    protected String morphologyConfigFile;
 
     public ExperimentConfig() {
         this.maxEpochs = 100;
@@ -42,7 +36,6 @@ public class ExperimentConfig extends Config {
     public ExperimentConfig(String filepath) {
 
         Yaml yaml = new Yaml();
-
         Map<String, Object> config = null;
 
         try (Reader reader = Files.newBufferedReader(Paths.get(filepath))) {
@@ -52,53 +45,73 @@ public class ExperimentConfig extends Config {
         }
 
         //default values
-        FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
+        long maxEpochs = DEFAULT_MAX_EPOCHS;
+        ExperimentConfig.EvolutionaryAlgorithm controllerEA = DEFAULT_CONTROLLER_EA;
+        String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
 
-        // Fitness function
-        Map fitnessFunc = (Map) config.get("scoring");
-        if (checkFieldPresent(fitnessFunc, "scoring")) {
-            String fitnessF = (String) fitnessFunc.get("fitnessFunction");
-            if (checkFieldPresent(fitnessF, "scoring:fitnessFunction")) {
+        Map control = (Map) config.get("control");
+        if (checkFieldPresent(control, "control")) {
 
-                try {
-                    Class f = Class.forName(fitnessF);
-                    Object o = f.newInstance();
-
-                    if (!(o instanceof FitnessFunction)) {
-                        throw new InvalidClassException("");
-                    }
-
-                    fitness = (FitnessFunction) o;
-                }
-                catch (ClassNotFoundException c) {
-                    System.out.println("Invalid class name specified in SimConfig: " + fitnessF + ". Using default fitness function.");
-                    c.printStackTrace();
-                }
-                catch (InvalidClassException i) {
-                    System.out.println("Invalid specified fitness class. " + fitnessF + ". Using default fitness function.");
-                    i.printStackTrace();
-                }
-                catch (InstantiationException ins) {
-                    ins.printStackTrace();
-                }
-                catch (IllegalAccessException ill) {
-                    ill.printStackTrace();
-                }
+            Number epochs = (Number) control.get("maxEpochs");
+            if (checkFieldPresent(epochs, "control:maxEpochs")) {
+                maxEpochs = epochs.longValue();
             }
         }
 
-        throw new RuntimeException("TODO: Read configs from file.");
+        Map phenotype = (Map) config.get("phenotype");
+        if (checkFieldPresent(phenotype, "phenotype")) {
 
+            String fact = (String) phenotype.get("factory");
+            if (checkFieldPresent(fact, "phenotype:factory")) {
+                factory = fact;
+            }
+        }
+
+        Map ea = (Map) config.get("evolutionaryAlgorithm");
+        if (checkFieldPresent(ea, "evolutionaryAlgorithm")) {
+
+            String EA = (String) phenotype.get("controllerEA");
+            if (checkFieldPresent(EA, "evolutionaryAlgorithm:controllerEA")) {
+
+                if (EA.trim().equals(EvolutionaryAlgorithm.NEAT.name())) {
+                    controllerEA = Enum.valueOf(EvolutionaryAlgorithm.class, EA);
+                }
+                else {
+                    System.out.println("Only NEAT is supported in this version: using NEAT algorithm.");
+                }
+            }
+
+        }
+
+        Map morphology = (Map) config.get("morphology");
+        if (checkFieldPresent(morphology, "morphology")) {
+
+            String morphFile = (String) morphology.get("morphologyFileName");
+            if (checkFieldPresent(morphFile, "morphology:morphologyFileName")) {
+                morphologyFile = morphFile;
+            }
+        }
+
+        this.maxEpochs = maxEpochs;
+        this.algorithm = controllerEA;
+        this.morphologyConfigFile = morphologyFile;
     }
 
-    public ExperimentConfig(EvolutionaryAlgorithm algorithm, long maxEpochs) {
-        this.algorithm = algorithm;
+    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm,
+                            String robotFactory, String morphologyConfigFile) {
+
         this.maxEpochs = maxEpochs;
+        this.algorithm = algorithm;
+        this.robotFactory = robotFactory;
+        this.morphologyConfigFile = morphologyConfigFile;
     }
 
     public long getMaxEpochs() { return maxEpochs; }
+
     public EvolutionaryAlgorithm getEvolutionaryAlgorithm() { return algorithm; }
 
+    public String getRobotFactory() { return robotFactory; }
 
+    public String getMorphologyConfigFile() { return morphologyConfigFile; }
 
 }

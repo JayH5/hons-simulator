@@ -2,9 +2,10 @@ control:
   maxEpochs: 100
 
 phenotype:
-  factory: za.redbridge.simulator.factories.HomogeneousRobotFactory
+  robotPhenotype: za.redbridge.simulator.phenotype.NEATPhenotype
 
 evolutionaryAlgorithm:
+  controllerEA: NEAT
   fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
 
 morphology:

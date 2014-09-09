@@ -5,6 +5,7 @@ import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shsu on 2014/09/08.
@@ -30,8 +31,9 @@ public class NEATPhenotype implements Phenotype {
     }
 
     public NEATPhenotype clone() {
-
         return this;
     }
+
+    public void configure(Map<String,Object> phenotypeConfigs) {}
 
 }

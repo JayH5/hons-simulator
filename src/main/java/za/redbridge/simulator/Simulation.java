@@ -40,15 +40,10 @@ public class Simulation extends SimState {
 
     private TargetAreaObject targetArea;
 
-    private final RobotFactory robotFactory;
-    private final ResourceFactory resourceFactory;
     private final SimConfig config;
 
-    public Simulation(RobotFactory robotFactory, ResourceFactory resourceFactory,
-            SimConfig config) {
+    public Simulation(SimConfig config) {
         super(config.getSimulationSeed());
-        this.robotFactory = robotFactory;
-        this.resourceFactory = resourceFactory;
         this.config = config;
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -73,9 +68,7 @@ public class Simulation extends SimState {
         robotFactory
                 .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots(),
                         config.getTargetAreaPlacement());
-        resourceFactory.placeInstances(placementArea.new ForType<>(), physicsWorld,
-                config.getLargeObjects(), config.getSmallObjects());
-
+        config.getResourceFactory().placeInstances(placementArea.new ForType<>(), physicsWorld);
 
         // Now actually add the objects that have been placed to the world and schedule
         for (PhysicalObject object : placementArea.getPlacedObjects()) {

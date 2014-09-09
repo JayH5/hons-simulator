@@ -5,6 +5,7 @@ meta:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
   whiteList:
   bearing: 51.0
+  orientation: 40.0
   fieldOfView: 10.0
   range: 10.0
 
@@ -12,28 +13,33 @@ meta:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
   bearing: 102.0
   fieldOfView: 10.0
+  orientation: 40.0
   range: 10.0
 
 3:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
   bearing: 154.0
   fieldOfView: 10.0
+  orientation: 40.0
   range: 10.0
 
 4:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
   bearing: 206.0
   fieldOfView: 10.0
+  orientation: 40.0
   range: 10.0
 
 5:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
   bearing: 258.0
   fieldOfView: 10.0
+  orientation: 40.0
   range: 10.0
 
 6:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
   bearing: 310.0
   fieldOfView: 10.0
+  orientation: 40.0
   range: 10.0

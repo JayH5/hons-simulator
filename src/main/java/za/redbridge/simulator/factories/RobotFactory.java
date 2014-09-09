@@ -8,8 +8,10 @@ import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RobotFactory {
     void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world, int quantity,
                         SimConfig.Direction targetAreaPlacement);
+
 }

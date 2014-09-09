@@ -11,6 +11,7 @@ import za.redbridge.simulator.sensor.SensorReading;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ChasingPhenotype implements Phenotype {
     private static final int COOLDOWN = 10;
@@ -91,4 +92,7 @@ public class ChasingPhenotype implements Phenotype {
                     && ((ResourceObject) obj).isCollected());
         }
     }
+
+    @Override
+    public void configure(Map<String,Object> phenotypeConfigs) {}
 }
