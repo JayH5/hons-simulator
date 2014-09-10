@@ -104,11 +104,13 @@ public class ResourceObject extends PhysicalObject {
     public boolean tryPickup(RobotObject robot) {
         // Check if already collected or max number of robots already attached
         if (isCollected || pushedByMaxRobots()) {
+            //System.out.println("Pickup failed: is collected.");
             return false;
         }
 
         // Check if robot not already attached or about to be attached
         if (joints.containsKey(robot) || pendingJoints.containsKey(robot)) {
+            //System.out.println("Pickup failed: about to be joined.");
             return false;
         }
 
@@ -118,6 +120,7 @@ public class ResourceObject extends PhysicalObject {
         Vec2 robotPosition = robotBody.getPosition();
         final Side attachSide = getSideClosestToPoint(robotPosition);
         if (stickySide != null && stickySide != attachSide) {
+            //System.out.println("Pickup failed: wrong sticky side.");
             return false;
         }
 

@@ -27,7 +27,6 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
 
     @Override
     public Double2D step(List<SensorReading> list) {
-
         Double2D wheelDrives = null;
         Optional<Vec2> collision = collisionSensor.sense();
 

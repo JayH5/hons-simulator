@@ -81,12 +81,16 @@ public class CollisionSensor extends Sensor<Optional<Vec2>> {
 
     @Override
     public boolean isRelevantObject (Fixture fixture) {
-        return !(fixture.getUserData() instanceof Sensor) &&
+        return (fixture.getBody().getUserData() instanceof ResourceObject &&
+                ((ResourceObject) fixture.getBody().getUserData()).isCollected()) ||
+                (fixture.getBody().getUserData() instanceof ResourceObject &&
+                        ((ResourceObject) fixture.getBody().getUserData()).pushedByMaxRobots()) ||
+
+        !(fixture.getUserData() instanceof Sensor) &&
                 !(fixture.getBody().getUserData() instanceof TargetAreaObject) &&
                 !(fixture.getBody().getUserData() instanceof ResourceObject) &&
                 !(fixture.getBody().getUserData() instanceof RobotObject &&
                         ((RobotObject) fixture.getBody().getUserData()).isBoundToResource());
-
     }
 
     protected static class SensedCollision implements Comparable<SensedCollision> {

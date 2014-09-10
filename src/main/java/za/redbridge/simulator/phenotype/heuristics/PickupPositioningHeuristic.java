@@ -36,12 +36,16 @@ public class PickupPositioningHeuristic extends Heuristic {
 
     public Double2D step(List<SensorReading> list) {
         Vec2 newPosition = nextStep();
-
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
+        if (!sensedResource.isPresent() || resource.isCollected() || resource.pushedByMaxRobots()) {
+            schedule.remove(this);
+            return null;
+        }
+
         if (!attachedRobot.isBoundToResource()) {
-            boolean attachmentSuccess =
-                    sensedResource.map(resource -> resource.tryPickup(attachedRobot)).orElse(false);
+            boolean attachmentSuccess = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
+                    .orElse(false);
 
             if (attachmentSuccess) {
                 schedule.remove(this);
@@ -61,6 +65,7 @@ public class PickupPositioningHeuristic extends Heuristic {
             }
         } else {
             // In case we're still scheduled and the robot has bound to the resource
+            // or the resource has been collected
             schedule.remove(this);
         }
 
