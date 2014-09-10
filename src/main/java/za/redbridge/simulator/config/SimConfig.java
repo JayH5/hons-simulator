@@ -2,6 +2,7 @@ package za.redbridge.simulator.config;
 
 import org.yaml.snakeyaml.Yaml;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
@@ -34,6 +35,10 @@ public class SimConfig {
     private static final double DEFAULT_LARGE_OBJECT_MASS = 15.0;
     private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
 
+    private static final double DEFAULT_ROBOT_MASS = 0.7;
+    private static final double DEFAULT_ROBOT_RADIUS = 0.15;
+    private static final Paint DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
+
     private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
 
     public enum Direction {
@@ -46,19 +51,20 @@ public class SimConfig {
     private final int environmentWidth;
     private final int environmentHeight;
 
-
     private final int objectsRobots;
-    private final int objectsResourcesLarge;
-    private final int objectsResourcesSmall;
+    private final double robotMass;
+    private final double robotRadius;
+    private final Paint robotColour;
 
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
 
+    private final int objectsResourcesSmall;
     private final double smallObjectWidth;
     private final double smallObjectHeight;
     private final double smallObjectMass;
     private final int smallObjectPushingBots;
-
+    private final int objectsResourcesLarge;
     private final double largeObjectWidth;
     private final double largeObjectHeight;
     private final double largeObjectMass;
@@ -70,8 +76,10 @@ public class SimConfig {
     public SimConfig() {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
-                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_OBJECTS_RESOURCES_LARGE, DEFAULT_OBJECTS_RESOURCES_SMALL,
+                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS, DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR,
+                DEFAULT_OBJECTS_RESOURCES_SMALL,
                 DEFAULT_SMALL_OBJECT_WIDTH, DEFAULT_SMALL_OBJECT_HEIGHT, DEFAULT_SMALL_OBJECT_MASS, DEFAULT_SMALL_OBJECT_PUSHING_BOTS,
+                DEFAULT_OBJECTS_RESOURCES_LARGE,
                 DEFAULT_LARGE_OBJECT_WIDTH, DEFAULT_LARGE_OBJECT_HEIGHT, DEFAULT_LARGE_OBJECT_MASS, DEFAULT_LARGE_OBJECT_PUSHING_BOTS,
                 DEFAULT_FITNESS_FUNCTION);
     }
@@ -79,10 +87,12 @@ public class SimConfig {
     public SimConfig(long simulationSeed, int simulationIterations,
                      int environmentWidth, int environmentHeight,
                      Direction targetAreaPlacement, int targetAreaThickness,
-                     int objectsRobots, int objectsResourcesLarge, int objectsResourcesSmall, double smallObjectWidth,
+                     int objectsRobots,  double robotMass, double robotRadius, Paint robotColour,
+                     int objectsResourcesSmall, double smallObjectWidth,
                      double smallObjectHeight, double smallObjectMass, int smallObjectPushingBots,
-                     double largeObjectWidth, double largeObjectHeight, double largeObjectMass,
+                     int objectsResourcesLarge, double largeObjectWidth, double largeObjectHeight, double largeObjectMass,
                      int largeObjectPushingBots, FitnessFunction fitnessFunction) {
+
         this.simulationSeed = simulationSeed;
         this.simulationIterations = simulationIterations;
 
@@ -93,14 +103,17 @@ public class SimConfig {
         this.targetAreaThickness = targetAreaThickness;
 
         this.objectsRobots = objectsRobots;
-        this.objectsResourcesLarge = objectsResourcesLarge;
-        this.objectsResourcesSmall = objectsResourcesSmall;
+        this.robotMass = robotMass;
+        this.robotRadius = robotRadius;
+        this.robotColour = robotColour;
 
+        this.objectsResourcesSmall = objectsResourcesSmall;
         this.smallObjectWidth = smallObjectWidth;
         this.smallObjectHeight = smallObjectHeight;
         this.smallObjectMass = smallObjectMass;
         this.smallObjectPushingBots = smallObjectPushingBots;
 
+        this.objectsResourcesLarge = objectsResourcesLarge;
         this.largeObjectWidth = largeObjectWidth;
         this.largeObjectHeight = largeObjectHeight;
         this.largeObjectMass = largeObjectMass;
@@ -141,6 +154,10 @@ public class SimConfig {
         double largeObjHeight = DEFAULT_LARGE_OBJECT_HEIGHT;
         double largeObjMass = DEFAULT_LARGE_OBJECT_MASS;
         int largeObjPushingBots = DEFAULT_LARGE_OBJECT_PUSHING_BOTS;
+
+        double rMass = DEFAULT_ROBOT_MASS;
+        double rRadius = DEFAULT_ROBOT_RADIUS;
+        Paint robotColour = DEFAULT_ROBOT_COLOUR;
 
         FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
 
@@ -183,26 +200,14 @@ public class SimConfig {
             }
         }
 
-        // Objects
-        Map objects = (Map) config.get("objects");
-        if (checkFieldPresent(objects, "objects")) {
-            Integer robotsField = (Integer) objects.get("robots");
-            if (checkFieldPresent(robotsField, "objects:robots")) {
-                robots = robotsField;
-            }
-            Integer resourcesFieldLarge = (Integer) objects.get("largeResources");
-            if (checkFieldPresent(resourcesFieldLarge, "objects:largeResources")) {
-                resourcesLarge = resourcesFieldLarge;
-            }
-            Integer resourcesFieldSmall = (Integer) objects.get("smallResources");
-            if (checkFieldPresent(resourcesFieldSmall, "objects:smallResources")) {
-                resourcesSmall = resourcesFieldSmall;
-            }
-        }
-
         //Resources
         Map resourceProps = (Map) config.get("resourceProperties");
         if (checkFieldPresent(resourceProps, "resourceProperties")) {
+
+            Integer resourcesFieldSmall = (Integer) resourceProps.get("smallResources");
+            if (checkFieldPresent(resourcesFieldSmall, "resourceProperties:smallResources")) {
+                resourcesSmall = resourcesFieldSmall;
+            }
             Double sObjWidth = (Double) resourceProps.get("smallObjectWidth");
             if (checkFieldPresent(sObjWidth, "resourceProperties:smallObjectWidth")) {
                 smallObjWidth = sObjWidth;
@@ -218,6 +223,10 @@ public class SimConfig {
             Integer sObjPushingBots = (Integer) resourceProps.get("maxSmallObjectPushingBots");
             if (checkFieldPresent(sObjPushingBots, "resourceProperties:maxSmallObjectPushingBots")) {
                 smallObjPushingBots = sObjPushingBots;
+            }
+            Integer resourcesFieldLarge = (Integer) resourceProps.get("largeResources");
+            if (checkFieldPresent(resourcesFieldLarge, "resourceProperties:largeResources")) {
+                resourcesLarge = resourcesFieldLarge;
             }
 
             Double lObjWidth = (Double) resourceProps.get("largeObjectWidth");
@@ -236,6 +245,34 @@ public class SimConfig {
             if (checkFieldPresent(lObjPushingBots, "resourceProperties:maxLargeObjectPushingBots")) {
                 largeObjPushingBots = lObjPushingBots;
             }
+        }
+
+        // Robots
+        Map bots = (Map) config.get("robots");
+        if (checkFieldPresent(bots, "robots")) {
+            Integer robotsField = (Integer) bots.get("numRobots");
+            if (checkFieldPresent(robotsField, "robots:numRobots")) {
+                robots = robotsField;
+            }
+            Double botRadius = (Double) bots.get("radius");
+            if (checkFieldPresent(botRadius, "robots:radius")) {
+                rRadius = botRadius;
+            }
+            Double botMass = (Double) bots.get("mass");
+            if (checkFieldPresent(botMass, "robots:mass")) {
+                rMass = botMass;
+            }
+            String[] rgb = null;
+            String rgbvalues = (String) bots.get("colour");
+            if (checkFieldPresent(rgbvalues, "robots:colour")) {
+
+                rgb = rgbvalues.split(",");
+                Color colour = new Color(Integer.parseInt(rgb[0].trim()), Integer.parseInt(rgb[1].trim()),
+                        Integer.parseInt(rgb[2].trim()));
+
+                robotColour = colour;
+            }
+
         }
 
         // Fitness function
@@ -271,9 +308,9 @@ public class SimConfig {
             }
         }
 
-        return new SimConfig(seed, iterations, width, height, placement, thickness, robots,
-                resourcesLarge, resourcesSmall, smallObjWidth, smallObjHeight, smallObjMass, smallObjPushingBots,
-                largeObjWidth, largeObjHeight, largeObjMass, largeObjPushingBots, fitness);
+        return new SimConfig(seed, iterations, width, height, placement, thickness, robots, rMass, rRadius, robotColour,
+                resourcesSmall, smallObjWidth, smallObjHeight, smallObjMass, smallObjPushingBots,
+                resourcesLarge, largeObjWidth, largeObjHeight, largeObjMass, largeObjPushingBots, fitness);
     }
 
     private static boolean checkFieldPresent(Object field, String name) {
@@ -355,6 +392,12 @@ public class SimConfig {
     public int getLargeObjectPushingBots() {
         return largeObjectPushingBots;
     }
+
+    public Paint getRobotColour() { return robotColour; }
+
+    public double getRobotMass() { return robotMass; }
+
+    public double getRobotRadius() { return robotRadius; }
 
     public FitnessFunction getFitnessFunction() { return fitnessFunction; }
 

@@ -69,10 +69,7 @@ public class PickupHeuristic extends Heuristic {
                     schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
                             attachedRobot, schedule));
                 }
-
             }
-
-
         }
         else {
             wheelDrives = wheelDriveFromBearing(targetAreaBearing());
@@ -88,10 +85,10 @@ public class PickupHeuristic extends Heuristic {
         double targetAreaPosition = -1;
 
         if (targetAreaBearing == SimConfig.Direction.NORTH) {
-            targetAreaPosition = P2*3;
+            targetAreaPosition = P2;
         }
         else if (targetAreaBearing == SimConfig.Direction.SOUTH) {
-            targetAreaPosition = P2;
+            targetAreaPosition = P2*3;
         }
         else if (targetAreaBearing == SimConfig.Direction.EAST) {
             targetAreaPosition = 0;

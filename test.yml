@@ -1,16 +1,19 @@
 ---
-objects:
-  robots: 1
-  largeResources: 20
-  smallResources: 0
 resourceProperties:
+  smallResources: 20
   smallObjectWidth: 0.4
   smallObjectHeight: 0.4
   smallObjectMass: 5.0
   maxSmallObjectPushingBots: 1
+  largeResources: 10
   largeObjectWidth: 1.0
   largeObjectHeight: 1.0
   largeObjectMass: 5.0
   maxLargeObjectPushingBots: 3
 scoring:
   fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
+robots:
+  numRobots: 10
+  mass: 0.7
+  radius: 0.15
+  colour: 0, 0, 0
