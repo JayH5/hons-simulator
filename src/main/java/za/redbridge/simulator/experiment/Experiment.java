@@ -1,5 +1,6 @@
 package za.redbridge.simulator.experiment;
 
+import org.encog.ml.CalculateScore;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.NEATUtil;
@@ -68,9 +69,10 @@ public class Experiment {
             }
 
             //TODO: make this get population size form Experiment configs instead
-            NEATPopulation pop = new NEATPopulation(morphologyConfig.getNumSensors(),2,simulationConfiguration.getObjectsRobots());
+            NEATPopulation pop = new NEATPopulation(morphologyConfig.getNumSensors(),2,1000);
+            pop.reset();
 
-            ScoreCalculator scoreCalculator = new ScoreCalculator(simulationConfiguration, morphologyConfig);
+            CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, morphologyConfig);
 
             final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
