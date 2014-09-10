@@ -14,6 +14,7 @@ import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.phenotype.ChasingPhenotype;
 import za.redbridge.simulator.phenotype.NEATPhenotype;
 
 import java.awt.*;
@@ -43,6 +44,7 @@ public class ScoreCalculator implements CalculateScore {
                 config.getRobotRadius(), config.getRobotColour());
 
         Simulation currentSimulation = new Simulation(config, robotFactory);
+        currentSimulation.run();
 
         return currentSimulation.getFitness();
     }
