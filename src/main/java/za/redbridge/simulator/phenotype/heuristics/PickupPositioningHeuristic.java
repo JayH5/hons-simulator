@@ -35,34 +35,34 @@ public class PickupPositioningHeuristic extends Heuristic {
     }
 
     public Double2D step(List<SensorReading> list) {
-
-        Double2D wheelDrives = null;
-
         Vec2 newPosition = nextStep();
 
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
         if (!attachedRobot.isBoundToResource()) {
-
             boolean attachmentSuccess =
                     sensedResource.map(resource -> resource.tryPickup(attachedRobot)).orElse(false);
 
             if (attachmentSuccess) {
-                //System.out.println("Success!");
                 schedule.remove(this);
-            }
-            //bot is too far away from resource
-            else if (resource.getClosestAnchorPosition(attachedRobot.getBody().getPosition())
-                    .sub(attachedRobot.getBody().getPosition()).length() > resource.getDiagonalLength()) {
-
-                schedule.remove(this);
+            } else {
+                Vec2 robotPosition = attachedRobot.getBody().getPosition();
+                Vec2 anchorPosition = resource.getClosestAnchorPosition(robotPosition);
+                if (anchorPosition != null) {
+                    if (anchorPosition.subLocal(robotPosition).length()
+                            > resource.getDiagonalLength()) {
+                        // Robot too far away from resource
+                        schedule.remove(this);
+                    }
+                } else {
+                    // All anchor points taken
+                    schedule.remove(this);
+                }
             }
         } else {
             // In case we're still scheduled and the robot has bound to the resource
             schedule.remove(this);
         }
-
-        //System.out.println("Wheeldrives " + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).x + "," + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).y);
 
         return wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition));
 
