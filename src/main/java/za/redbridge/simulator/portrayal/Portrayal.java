@@ -5,26 +5,15 @@ import org.jbox2d.common.Transform;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.event.MouseEvent;
 
-import sim.display.GUIState;
-import sim.display.Manipulating2D;
 import sim.portrayal.DrawInfo2D;
-import sim.portrayal.Inspector;
-import sim.portrayal.LocationWrapper;
-import sim.portrayal.SimpleInspector;
-import sim.portrayal.SimplePortrayal2D;
 
 /**
  * Base class for all our portrayal objects.
  *
- * NOTE: Does not implement more specific versions of {@link SimplePortrayal2D#hitObject(Object,
- * DrawInfo2D)} or {@link SimplePortrayal2D#handleMouseEvent(GUIState, Manipulating2D,
- * LocationWrapper, MouseEvent, DrawInfo2D, int)}.
- *
  * Created by jamie on 2014/07/23.
  */
-public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
+public abstract class Portrayal implements Drawable {
 
     protected boolean filled;
     protected Paint paint;
@@ -128,32 +117,6 @@ public abstract class Portrayal extends SimplePortrayal2D implements Drawable {
 
     protected abstract void drawImprecise(Graphics2D graphics, STRTransform transform,
             boolean transformUpdated);
-
-    @Override
-    public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
-        if (wrapper == null) {
-            return null;
-        }
-        return new SimpleInspector(wrapper.getObject(), state, "Properties");
-    }
-
-    @Override
-    public String getName(LocationWrapper wrapper) {
-        if (wrapper == null) {
-            return "";
-        }
-        return String.valueOf(wrapper.getObject());
-    }
-
-    @Override
-    public String getStatus(LocationWrapper wrapper) {
-        return getName(wrapper);
-    }
-
-    @Override
-    public boolean setSelected(LocationWrapper wrapper, boolean selected) {
-        return false;
-    }
 
     public void setChildDrawable(Drawable drawable) {
         this.childDrawable = drawable;

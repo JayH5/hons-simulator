@@ -180,9 +180,9 @@ public class ResourceObject extends PhysicalObject {
             }
         } else {
             if (localPoint.y > 0) {
-                side = Side.BOTTOM;
-            } else {
                 side = Side.TOP;
+            } else {
+                side = Side.BOTTOM;
             }
         }
         return side;
@@ -279,9 +279,9 @@ public class ResourceObject extends PhysicalObject {
             referenceAngle = 0f;
         } else if (stickySide == Side.RIGHT) {
             referenceAngle = (float) Math.PI;
-        } else if (stickySide == Side.TOP) {
-            referenceAngle = (float) Math.PI / 2;
         } else if (stickySide == Side.BOTTOM) {
+            referenceAngle = (float) Math.PI / 2;
+        } else if (stickySide == Side.TOP) {
             referenceAngle = (float) -Math.PI / 2;
         } else {
             throw new IllegalStateException("Sticky side not set yet, cannot get reference angle");
@@ -365,10 +365,10 @@ public class ResourceObject extends PhysicalObject {
 
             float halfWidth = width / 2;
             float halfHeight = height / 2;
-            vertices[0].set(-halfWidth, -halfHeight + dy);
-            vertices[1].set(halfWidth, -halfHeight + dy);
-            vertices[2].set(halfWidth, halfHeight + dy);
-            vertices[3].set(-halfWidth, halfHeight + dy);
+            vertices[0].set(-halfWidth, -halfHeight - dy);
+            vertices[1].set(halfWidth, -halfHeight - dy);
+            vertices[2].set(halfWidth, halfHeight - dy);
+            vertices[3].set(-halfWidth, halfHeight - dy);
         }
     }
 

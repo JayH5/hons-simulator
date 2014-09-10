@@ -15,6 +15,7 @@ import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.physics.SimulationContactListener;
+import za.redbridge.simulator.portrayal.DrawProxy;
 
 
 import static za.redbridge.simulator.Utils.toDouble2D;
@@ -31,6 +32,7 @@ public class Simulation extends SimState {
     private Continuous2D environment;
     private World physicsWorld;
     private PlacementArea placementArea;
+    private DrawProxy drawProxy;
 
     private final SimulationContactListener contactListener = new SimulationContactListener();
 
@@ -59,6 +61,9 @@ public class Simulation extends SimState {
 
         environment =
                 new Continuous2D(1.0, config.getEnvironmentWidth(), config.getEnvironmentHeight());
+        drawProxy = new DrawProxy(environment.getWidth(), environment.getHeight());
+        environment.setObjectLocation(drawProxy, new Double2D());
+
         physicsWorld = new World(new Vec2());
         placementArea = new PlacementArea(environment.getWidth(), environment.getHeight());
         placementArea.setSeed(config.getSimulationSeed());
@@ -79,8 +84,7 @@ public class Simulation extends SimState {
 
         // Now actually add the objects that have been placed to the world and schedule
         for (PhysicalObject object : placementArea.getPlacedObjects()) {
-            environment.setObjectLocation(object.getPortrayal(),
-                    toDouble2D(object.getBody().getPosition()));
+            drawProxy.registerDrawable(object.getPortrayal());
             schedule.scheduleRepeating(object);
         }
 
@@ -108,24 +112,24 @@ public class Simulation extends SimState {
         Double2D v1 = new Double2D(0, -pos.y);
         Double2D v2 = new Double2D(0, pos.y);
         WallObject wall = new WallObject(physicsWorld, pos, v1, v2);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        drawProxy.registerDrawable(wall.getPortrayal());
 
         // Right
         pos = new Double2D(environmentWidth, environmentHeight / 2.0);
         wall = new WallObject(physicsWorld, pos, v1, v2);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        drawProxy.registerDrawable(wall.getPortrayal());
 
         // Top
         pos = new Double2D(environmentWidth / 2.0, 0);
         v1 = new Double2D(-pos.x, 0);
         v2 = new Double2D(pos.x, 0);
         wall = new WallObject(physicsWorld, pos, v1, v2);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        drawProxy.registerDrawable(wall.getPortrayal());
 
         // Bottom
         pos = new Double2D(environmentWidth / 2.0, environmentHeight);
         wall = new WallObject(physicsWorld, pos, v1, v2);
-        environment.setObjectLocation(wall.getPortrayal(), pos);
+        drawProxy.registerDrawable(wall.getPortrayal());
     }
 
     //create target area
@@ -136,11 +140,11 @@ public class Simulation extends SimState {
         final int width, height;
         final Double2D pos;
 
-        if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
+        if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
             width = environmentWidth;
             height = config.getTargetAreaThickness();
             pos = new Double2D(width/2,height/2);
-        } else if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
+        } else if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
             width = environmentWidth;
             height = config.getTargetAreaThickness();
             pos = new Double2D(environmentWidth - width/2, environmentHeight - height/2);
