@@ -9,7 +9,6 @@ dependencies {
   compile 'edu.gmu.mason:mason:18-SNAPSHOT'
   compile 'org.jbox2d:jbox2d-library:2.3.0-BETA'
   compile 'org.yaml:snakeyaml:1.13'
-  compile fileTree("libs")
 }
 
 apply plugin:'application'
