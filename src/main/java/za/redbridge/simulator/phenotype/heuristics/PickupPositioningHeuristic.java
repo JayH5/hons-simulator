@@ -1,16 +1,16 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
 import org.jbox2d.common.Vec2;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.PriorityBlockingQueue;
+
 import sim.util.Double2D;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.SensorReading;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Created by shsu on 2014/09/04.
@@ -44,18 +44,22 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         if (!attachedRobot.isBoundToResource()) {
 
-            boolean attachmentSuccess = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(false);
+            boolean attachmentSuccess =
+                    sensedResource.map(resource -> resource.tryPickup(attachedRobot)).orElse(false);
 
             if (attachmentSuccess) {
                 //System.out.println("Success!");
                 schedule.remove(this);
             }
             //bot is too far away from resource
-            else if (resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition()).sub(attachedRobot.getBody().getPosition()).length() > resource.getHypot()) {
+            else if (resource.getClosestAnchorPosition(attachedRobot.getBody().getPosition())
+                    .sub(attachedRobot.getBody().getPosition()).length() > resource.getDiagonalLength()) {
 
                 schedule.remove(this);
             }
+        } else {
+            // In case we're still scheduled and the robot has bound to the resource
+            schedule.remove(this);
         }
 
         //System.out.println("Wheeldrives " + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).x + "," + wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition)).y);
@@ -68,18 +72,20 @@ public class PickupPositioningHeuristic extends Heuristic {
     private Vec2 nextStep() {
 
         ResourceObject.Side stickySide = resource.getStickySide();
-        ResourceObject.Side robotSide = resource.getSideClosestToPoint(attachedRobot.getBody().getPosition());
-
-        //System.out.println("Pathing from " + robotSide.name() + " to " + stickySide.name() + "...");
-
-        Vec2 closestAttachmentPoint = resource.getClosestAnchorPointWorld(attachedRobot.getBody().getPosition());
-        Vec2 robotPosition = attachedRobot.getBody().getPosition();
-
-        //stickySide should never be null, but in case it is return robot position
+        //stickySide should never be null, but in case it is return robot position (why?)
         if (stickySide == null) {
-
             return attachedRobot.getBody().getPosition();
         }
+
+        Vec2 closestAttachmentPoint =
+                resource.getClosestAnchorPosition(attachedRobot.getBody().getPosition());
+        if (closestAttachmentPoint == null) {
+            return attachedRobot.getBody().getPosition(); // lol just do the same
+        }
+
+        ResourceObject.Side robotSide =
+                resource.getSideClosestToPoint(attachedRobot.getBody().getPosition());
+        Vec2 robotPosition = attachedRobot.getBody().getPosition();
 
         Vec2 position;
         double width = resource.getWidth();

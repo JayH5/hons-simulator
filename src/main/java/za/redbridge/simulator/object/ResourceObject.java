@@ -1,6 +1,5 @@
 package za.redbridge.simulator.object;
 
-import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
@@ -13,7 +12,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -33,7 +31,6 @@ public class ResourceObject extends PhysicalObject {
     private static final boolean DEBUG = true;
 
     public enum Side {
-
         LEFT, RIGHT, TOP, BOTTOM
     }
 
@@ -88,6 +85,7 @@ public class ResourceObject extends PhysicalObject {
         super.step(simState);
 
         if (!pendingJoints.isEmpty()) {
+            // Create all the pending joints and then clear them
             for (Map.Entry<RobotObject, JointDef> entry : pendingJoints.entrySet()) {
                 Joint joint = getBody().getWorld().createJoint(entry.getValue());
                 joints.put(entry.getKey(), joint);
@@ -96,14 +94,16 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-    //returns success of attachment
-    public boolean tryPickup(RobotObject robot) {
-        if (isCollected) {
-            return false;
-        }
 
-        // Check if max number of robots already attached
-        if (pushedByMaxRobots()) {
+    /**
+     * Try join this resource to the provided robot. If successful, a weld joint will be created
+     * between the resource and the robot and the method will return true.
+     * @param robot The robot trying to pick up this resource
+     * @return true if the pickup attempt was successful
+     */
+    public boolean tryPickup(RobotObject robot) {
+        // Check if already collected or max number of robots already attached
+        if (isCollected || pushedByMaxRobots()) {
             return false;
         }
 
@@ -121,68 +121,62 @@ public class ResourceObject extends PhysicalObject {
             return false;
         }
 
-
-        // Set the sticky side
         if (stickySide == null) {
-            stickySide = attachSide;
-            createAnchorPoints();
+            setStickySide(attachSide);
         }
 
-
         //check if the anchor point is too far away from the robot
+        AnchorPoint closestAnchor = getClosestAnchorPoint(robotPosition);
+        double dist = getBody().getWorldPoint(closestAnchor.position).sub(robotPosition).length();
 
-        double dist = getBody().getWorldPoint(getClosestAnchorPoint(robotPosition)).sub(robot.getBody().getPosition()).length();
-
-        if (dist > robot.getRadius()*1.5) {
+        if (dist > robot.getRadius() * 1.5) {
             //System.out.println("Pickup failed: too far away.");
             return false;
         }
 
-        // Create the joint definition
-        WeldJointDef wjd = new WeldJointDef();
-        wjd.bodyA = getBody();
-        wjd.bodyB = robotBody;
+        createPendingWeldJoint(robot, closestAnchor.position);
 
-        wjd.referenceAngle = getReferenceAngle();
-
-        AnchorPoint closestAnchor = getClosestAnchor(robotPosition);
-        wjd.localAnchorA.set(closestAnchor.position);
-
+        // Mark the anchor as taken and the robot as bound to a resource.
         closestAnchor.markTaken();
-
-        wjd.localAnchorB.set(robot.getRadius() + 0.01f, 0f); // Attach to front of robot
-
-        wjd.collideConnected = true;
-
-        pendingJoints.put(robot, wjd);
-
-        // Mark the robot as bound
         robot.setBoundToResource(true);
 
         return true;
     }
 
-    public double getHypot() {
-        return Math.sqrt(width*width + height*height);
+    /**
+     * Creates a weld joint definition between the resource and the robot and adds it to the set of
+     * pending joints to be created.
+     * @param robot The robot to weld to
+     * @param anchorPoint The local point on the resource to create the weld
+     */
+    private void createPendingWeldJoint(RobotObject robot, Vec2 anchorPoint) {
+        WeldJointDef wjd = new WeldJointDef();
+        wjd.bodyA = getBody();
+        wjd.bodyB = robot.getBody();
+        wjd.referenceAngle = getReferenceAngle();
+        wjd.localAnchorA.set(anchorPoint);
+        wjd.localAnchorB.set(robot.getRadius() + 0.01f, 0); // Attach to front of robot
+        wjd.collideConnected = true;
+
+        pendingJoints.put(robot, wjd);
     }
 
-    public Side getStickySide () {
-
-        return stickySide;
-    }
-
-    //in: world
+    /**
+     * Get the side of this resource closest to the given point.
+     * @param point A point in world-space
+     * @return the side closest to the given point
+     */
     public Side getSideClosestToPoint(Vec2 point) {
-        Vec2 relativePoint = Transform.mulTrans(getBody().getTransform(), point);
+        Vec2 localPoint = getBody().getLocalPoint(point);
         final Side side;
-        if (Math.abs(relativePoint.x) > Math.abs(relativePoint.y)) {
-            if (relativePoint.x > 0) {
+        if (Math.abs(localPoint.x) > Math.abs(localPoint.y)) {
+            if (localPoint.x > 0) {
                 side = Side.RIGHT;
             } else {
                 side = Side.LEFT;
             }
         } else {
-            if (relativePoint.y > 0) {
+            if (localPoint.y > 0) {
                 side = Side.BOTTOM;
             } else {
                 side = Side.TOP;
@@ -191,7 +185,20 @@ public class ResourceObject extends PhysicalObject {
         return side;
     }
 
-    private void createAnchorPoints() {
+    /** Get the side that robots can currently attach to. */
+    public Side getStickySide () {
+        return stickySide;
+    }
+
+    /* Initializes the anchor points after the sticky side has been determined */
+    private void setStickySide(Side stickySide) {
+        if (this.stickySide != null) {
+            throw new IllegalStateException("Sticky side already set");
+        }
+
+        this.stickySide = stickySide;
+
+        // Initialize the anchor points
         for (int i = 0; i < pushingRobots; i++) {
             Vec2 position;
             if (stickySide == Side.LEFT || stickySide == Side.RIGHT) {
@@ -209,41 +216,38 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-    //return global coord
-    public Vec2 getClosestAnchorPointWorld(Vec2 position) {
-        return this.getBody().getWorldPoint(getClosestAnchorPoint(position));
+    /**
+     * Get the position of the closest anchor point in world coordinates, or null if all anchor
+     * points have been taken.
+     * @param position A position in world coordinates
+     * @return The position of the closest available anchor point, or null if none is available.
+     */
+    public Vec2 getClosestAnchorPosition(Vec2 position) {
+        AnchorPoint localAnchorPoint = getClosestAnchorPoint(position);
+        if (localAnchorPoint != null) {
+            return getBody().getWorldPoint(localAnchorPoint.position);
+        }
+        return null;
     }
 
-    //in: world out: local
-    private Vec2 getClosestAnchorPoint(Vec2 position) {
-        // Fast path for single robot resource
-        if (pushingRobots == 1) {
-            return anchorPoints[0].position;
+    /**
+     * Get the closest anchor point to a position in world space, or null if none is available.
+     * @param position point in world coordinates
+     * @return an {@link AnchorPoint} object that has not been taken yet, or null if unavailable
+     */
+    private AnchorPoint getClosestAnchorPoint(Vec2 position) {
+        // If sticky side not set yet then anchor points not available
+        if (stickySide == null) {
+            return null;
         }
 
-        // Else iterate through anchor points finding closest one (generally only 2 options)
-        Vec2 closestAnchorPoint = null;
-        float shortestDistance = Float.MAX_VALUE;
-        for (int i = 0; i < pushingRobots; i++) {
-            AnchorPoint anchorPoint = anchorPoints[i];
-            if (anchorPoint.taken) {
-                continue;
-            }
-
-            float distance = getBody().getPosition().sub(position).lengthSquared();
-            if (distance < shortestDistance) {
-                shortestDistance = distance;
-                closestAnchorPoint = anchorPoint.position;
-            }
-        }
-
-        return closestAnchorPoint;
-    }
-
-    private AnchorPoint getClosestAnchor(Vec2 position) {
         // Fast path for single robot resource
         if (pushingRobots == 1) {
-            return anchorPoints[0];
+            if (!anchorPoints[0].taken) {
+                return anchorPoints[0];
+            } else {
+                return null;
+            }
         }
 
         // Else iterate through anchor points finding closest one (generally only 2 options)
@@ -265,6 +269,7 @@ public class ResourceObject extends PhysicalObject {
         return closestAnchorPoint;
     }
 
+    /** Get the reference angle for joints for the current sticky side. */
     private float getReferenceAngle() {
         final float referenceAngle;
         if (stickySide == Side.LEFT) {
@@ -273,35 +278,27 @@ public class ResourceObject extends PhysicalObject {
             referenceAngle = (float) Math.PI;
         } else if (stickySide == Side.TOP) {
             referenceAngle = (float) Math.PI / 2;
-        } else {
+        } else if (stickySide == Side.BOTTOM) {
             referenceAngle = (float) -Math.PI / 2;
+        } else {
+            throw new IllegalStateException("Sticky side not set yet, cannot get reference angle");
         }
         return referenceAngle;
     }
 
     /**
      * Check whether this object has been collected
-     * @return true if the object is in the target area
+     * @return true if the object has been marked as collected (it has passed into the target area)
      */
     public boolean isCollected() {
         return isCollected;
     }
 
-    /**
-     * Mark this object as collected. i.e. mark it as being in the target area
-     */
+    /** Mark this object as collected. i.e. mark it as being in the target area. */
     public void markCollected() {
         this.isCollected = true;
-        breakRobotWeldJoint();
-    }
 
-    public boolean pushedByMaxRobots() {
-        return joints.size() + pendingJoints.size() >= pushingRobots;
-    }
-
-    public int getNumPushingBots() { return joints.size(); }
-
-    private void breakRobotWeldJoint() {
+        // Break all the joints
         for (Map.Entry<RobotObject, Joint> entry: joints.entrySet()) {
             RobotObject robot = entry.getKey();
             robot.setBoundToResource(false);
@@ -310,7 +307,15 @@ public class ResourceObject extends PhysicalObject {
         joints.clear();
     }
 
-    public boolean isPushed() { return !joints.isEmpty(); }
+    /** Check whether this resource already has the max number of robots attached to it. */
+    public boolean pushedByMaxRobots() {
+        return getNumberPushingRobots() >= pushingRobots;
+    }
+
+    /** Get the number of robots currently pushing/attached to this resource. */
+    public int getNumberPushingRobots() {
+        return joints.size() + pendingJoints.size();
+    }
 
     public double getWidth() {
         return width;
@@ -320,6 +325,14 @@ public class ResourceObject extends PhysicalObject {
         return height;
     }
 
+    public double getDiagonalLength() {
+        return Math.hypot(width, height);
+    }
+
+    /*
+     * Container class for points along the sticky edge of the resource where robots can attach to
+     * the resource.
+     */
     private static class AnchorPoint {
         final Vec2 position;
         boolean taken = false;
@@ -333,7 +346,10 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
-
+    /*
+     * Simple portrayal for drawing an additional line along the bottom of the resource to help
+     * determine which way round the resource is.
+     */
     private class DebugPortrayal extends PolygonPortrayal {
 
         public DebugPortrayal(Paint paint, boolean filled) {
