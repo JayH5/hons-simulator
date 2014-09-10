@@ -88,6 +88,7 @@ public class SimulationGUI extends GUIState {
         RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
                 new Color(0,0,0));
 
+
         SimulationGUI video =
                 new SimulationGUI(new Simulation(config, robotFactory));
 

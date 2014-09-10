@@ -29,7 +29,7 @@ public class PickupSensor extends Sensor<Optional<ResourceObject>> {
         this.width = width;
         this.height = height;
         this.bearing = bearing;
-        setDrawEnabled(true);
+        //setDrawEnabled(true);
     }
 
     @Override
@@ -64,6 +64,11 @@ public class PickupSensor extends Sensor<Optional<ResourceObject>> {
 
     @Override
     public boolean isRelevantObject(Fixture otherFixture) {
-        return otherFixture.getBody().getUserData() instanceof ResourceObject;
+        Object userData = otherFixture.getBody().getUserData();
+        if (userData instanceof ResourceObject) {
+            ResourceObject resource = (ResourceObject) userData;
+            return !resource.isCollected() && !resource.pushedByMaxRobots();
+        }
+        return false;
     }
 }

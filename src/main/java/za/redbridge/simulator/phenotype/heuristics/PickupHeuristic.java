@@ -38,30 +38,40 @@ public class PickupHeuristic extends Heuristic {
 
     @Override
     public Double2D step(List<SensorReading> list) {
-
         Double2D wheelDrives = null;
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
+        /*
         if (sensedResource.isPresent() && !attachedRobot.isBoundToResource())
-            System.out.println("sensed resource");
+            System.out.println("sensed resource");*/
+
+        if (!sensedResource.isPresent()) {
+
+            return wheelDrives;
+        }
 
         if (!attachedRobot.isBoundToResource()) {
 
-            Vec2 attachmentResult = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(new Vec2(-4, 0));
+            boolean attachmentSuccess = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
+                    .orElse(false);
 
-            if (attachmentResult.y < 0) {
-                System.out.println("Pickup success!");
+            if (attachmentSuccess) {
                 wheelDrives = wheelDriveFromBearing(targetAreaBearing());
             }
-            else if (attachmentResult.x > 0 && sensedResource.isPresent()) {
-                System.out.println("Pickup failed, pathing to attachment point.");
-                schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
-                        attachedRobot, schedule));
+            else if (sensedResource.isPresent()) {
+                ResourceObject resource = sensedResource.get();
+
+                if (resource.pushedByMaxRobots() || resource.isCollected()) {
+                    return null;
+                }
+                else {
+
+                    schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
+                            attachedRobot, schedule));
+                }
             }
         }
         else {
-
             wheelDrives = wheelDriveFromBearing(targetAreaBearing());
         }
 
@@ -75,10 +85,10 @@ public class PickupHeuristic extends Heuristic {
         double targetAreaPosition = -1;
 
         if (targetAreaBearing == SimConfig.Direction.NORTH) {
-            targetAreaPosition = P2*3;
+            targetAreaPosition = P2;
         }
         else if (targetAreaBearing == SimConfig.Direction.SOUTH) {
-            targetAreaPosition = P2;
+            targetAreaPosition = P2*3;
         }
         else if (targetAreaBearing == SimConfig.Direction.EAST) {
             targetAreaPosition = 0;

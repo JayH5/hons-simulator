@@ -1,10 +1,6 @@
 package za.redbridge.simulator.ea;
 
-import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.object.ResourceObject;
-import za.redbridge.simulator.object.TargetAreaObject;
-
-import java.lang.annotation.Target;
 
 /**
  * Created by shsu on 2014/08/13.

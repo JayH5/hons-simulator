@@ -85,11 +85,13 @@ public class ChasingPhenotype implements Phenotype {
 
         @Override
         public boolean isRelevantObject(Fixture otherFixture) {
+
+            //System.out.println("is relevant?");
             Object obj = otherFixture.getBody().getUserData();
             return super.isRelevantObject(otherFixture)
                     && !(obj instanceof TargetAreaObject)
-                    && !(obj instanceof ResourceObject
-                    && ((ResourceObject) obj).isCollected());
+                    && !(obj instanceof ResourceObject && ((ResourceObject) obj).isCollected())
+                    && !(obj instanceof ResourceObject && ((ResourceObject) obj).pushedByMaxRobots());
         }
     }
 

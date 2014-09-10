@@ -2,6 +2,7 @@ package za.redbridge.simulator.config;
 
 import org.yaml.snakeyaml.Yaml;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
@@ -24,6 +25,24 @@ public class SimConfig extends Config {
     private static final int DEFAULT_TARGET_AREA_THICKNESS = (int)(DEFAULT_ENVIRONMENT_HEIGHT * 0.2);
     private static final Direction DEFAULT_TARGET_AREA_PLACEMENT = Direction.SOUTH;
     private static final int DEFAULT_OBJECTS_ROBOTS = 10;
+    private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
+    private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
+
+    private static final double DEFAULT_SMALL_OBJECT_WIDTH = 0.4;
+    private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4;
+    private static final double DEFAULT_SMALL_OBJECT_MASS = 5.0;
+    private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
+
+    private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6;
+    private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6;
+    private static final double DEFAULT_LARGE_OBJECT_MASS = 15.0;
+    private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
+
+    private static final double DEFAULT_ROBOT_MASS = 0.7;
+    private static final double DEFAULT_ROBOT_RADIUS = 0.15;
+    private static final Paint DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
+
+
     private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
     private static final ResourceFactory DEFAULT_RESOURCE_FACTORY = new HalfBigHalfSmallResourceFactory();
     private static final String DEFAULT_ROBOT_FACTORY = "za.redbridge.simulator.factories.HomogeneousRobotFactory";
@@ -40,6 +59,9 @@ public class SimConfig extends Config {
     private final int environmentHeight;
 
     private final int objectsRobots;
+    private final double robotMass;
+    private final double robotRadius;
+    private final Paint robotColour;
 
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
@@ -53,15 +75,17 @@ public class SimConfig extends Config {
     public SimConfig() {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
-                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS,
+                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS, DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR,
                 DEFAULT_FITNESS_FUNCTION, DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
     }
 
     public SimConfig(long simulationSeed, int simulationIterations,
                      int environmentWidth, int environmentHeight,
                      Direction targetAreaPlacement, int targetAreaThickness,
-                     int objectsRobots, FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
+                     int objectsRobots, double robotMass, double robotRadius, Paint robotColour,
+                     FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
                      String robotFactoryName) {
+
         this.simulationSeed = simulationSeed;
         this.simulationIterations = simulationIterations;
 
@@ -72,6 +96,10 @@ public class SimConfig extends Config {
         this.targetAreaThickness = targetAreaThickness;
 
         this.objectsRobots = objectsRobots;
+        this.robotMass = robotMass;
+        this.robotRadius = robotRadius;
+        this.robotColour = robotColour;
+
         this.fitnessFunction = fitnessFunction;
 
         this.resourceFactory = resourceFactory;
@@ -96,6 +124,10 @@ public class SimConfig extends Config {
         Direction placement = DEFAULT_TARGET_AREA_PLACEMENT;
         int thickness = DEFAULT_TARGET_AREA_THICKNESS;
         int robots = DEFAULT_OBJECTS_ROBOTS;
+
+        double rMass = DEFAULT_ROBOT_MASS;
+        double rRadius = DEFAULT_ROBOT_RADIUS;
+        Paint robotColour = DEFAULT_ROBOT_COLOUR;
 
         FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
 
@@ -141,13 +173,32 @@ public class SimConfig extends Config {
             }
         }
 
-        // Objects
-        Map objects = (Map) config.get("objects");
-        if (checkFieldPresent(objects, "objects")) {
-            Integer robotsField = (Integer) objects.get("robots");
-            if (checkFieldPresent(robotsField, "objects:robots")) {
+        // Robots
+        Map bots = (Map) config.get("robots");
+        if (checkFieldPresent(bots, "robots")) {
+            Integer robotsField = (Integer) bots.get("numRobots");
+            if (checkFieldPresent(robotsField, "robots:numRobots")) {
                 robots = robotsField;
             }
+            Double botRadius = (Double) bots.get("radius");
+            if (checkFieldPresent(botRadius, "robots:radius")) {
+                rRadius = botRadius;
+            }
+            Double botMass = (Double) bots.get("mass");
+            if (checkFieldPresent(botMass, "robots:mass")) {
+                rMass = botMass;
+            }
+            String[] rgb = null;
+            String rgbvalues = (String) bots.get("colour");
+            if (checkFieldPresent(rgbvalues, "robots:colour")) {
+
+                rgb = rgbvalues.split(",");
+                Color colour = new Color(Integer.parseInt(rgb[0].trim()), Integer.parseInt(rgb[1].trim()),
+                        Integer.parseInt(rgb[2].trim()));
+
+                robotColour = colour;
+            }
+
         }
 
         // Fitness function
@@ -183,7 +234,6 @@ public class SimConfig extends Config {
             }
         }
 
-
         //factories
         Map factories = (Map) config.get("factories");
         if (checkFieldPresent(factories, "factories")) {
@@ -202,7 +252,7 @@ public class SimConfig extends Config {
                     resFactory = (ResourceFactory) o;
 
                     //TODO: solve the mystery of the missing resource field
-                    Map resources = (Map) config.get("resources");
+                    Map resources = (Map) config.get("resourceProperties");
                     resFactory.configure(resources);
                 }
                 catch (ClassNotFoundException c) {
@@ -235,6 +285,9 @@ public class SimConfig extends Config {
         this.targetAreaPlacement = placement;
         this.targetAreaThickness = thickness;
         this.objectsRobots = robots;
+        this.robotMass = rMass;
+        this.robotRadius = rRadius;
+        this.robotColour = robotColour;
         this.fitnessFunction = fitness;
         this.resourceFactory = resFactory;
         this.robotFactoryName = robotFactory;
@@ -273,6 +326,12 @@ public class SimConfig extends Config {
     public int getObjectsRobots() {
         return objectsRobots;
     }
+
+    public Paint getRobotColour() { return robotColour; }
+
+    public double getRobotMass() { return robotMass; }
+
+    public double getRobotRadius() { return robotRadius; }
 
     public FitnessFunction getFitnessFunction() { return fitnessFunction; }
 

@@ -39,8 +39,8 @@ public class ScoreCalculator implements CalculateScore {
 
         //TODO: generalise the phenotype instead of hard-coding it
         HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
-                new NEATPhenotype(morphologyConfig.getSensorList(), (NEATNetwork) method), 0.7, 0.15,
-                new Color(0,0,0));
+                new NEATPhenotype(morphologyConfig.getSensorList(), (NEATNetwork) method), config.getRobotMass(),
+                config.getRobotRadius(), config.getRobotColour());
 
         Simulation currentSimulation = new Simulation(config, robotFactory);
 
