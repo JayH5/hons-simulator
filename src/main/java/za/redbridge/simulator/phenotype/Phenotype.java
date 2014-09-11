@@ -2,6 +2,7 @@ package za.redbridge.simulator.phenotype;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.sensor.AgentSensor;
@@ -27,6 +28,8 @@ public interface Phenotype extends Cloneable {
 
     Phenotype clone();
 
+    void configure(Map<String,Object> phenotypeConfigs);
+
     /**
      * Represents a controller that outputs a one vector. For testing.
      */
@@ -47,5 +50,10 @@ public interface Phenotype extends Cloneable {
         public List<AgentSensor> getSensors() {
             return Collections.emptyList();
         }
+
+        @Override
+        public void configure(Map<String,Object> phenotypeConfigs) {}
+
     };
+
 }

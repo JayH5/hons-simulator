@@ -7,22 +7,24 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ColourProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(3);
 
     public ColourProximityAgentSensor(float bearing) {
-        super(bearing, 0.0f, 30.0f, 0.1f);
+        super(bearing, 0.0f, 30.0f, 0.1f, 1);
         readings.add(0.0);
         readings.add(0.0);
         readings.add(0.0);
     }
 
-    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
-        super(bearing, orientation, range, fieldOfView);
+    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
+        super(bearing, orientation, range, fieldOfView, readingSize);
     }
 
     @Override
@@ -56,4 +58,6 @@ public class ColourProximityAgentSensor extends AgentSensor {
         final double offset = 0.5;
         return 1 / (1 + Math.exp(fraction + offset));
     }
+
+    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
 }

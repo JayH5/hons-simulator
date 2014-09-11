@@ -178,6 +178,9 @@ public class ResourceObject extends PhysicalObject {
         }
 
         AnchorPoint closestAnchor = getClosestAnchorPointLocal(robotPositionLocal);
+        if (closestAnchor == null) {
+            return false; // Should not happen but apparently can...
+        }
 
         // Check robot is not unreasonably far away
         if (robotPositionLocal.sub(closestAnchor.getPosition()).length()
@@ -238,8 +241,22 @@ public class ResourceObject extends PhysicalObject {
     }
 
     private Side getSideClosestToPointLocal(Vec2 localPoint) {
+        float halfWidth = (float) (width / 2);
+        float halfHeight = (float) (height / 2);
         final Side side;
-        if (Math.abs(localPoint.x) < Math.abs(localPoint.y)) {
+        if (localPoint.y > -halfHeight && localPoint.y < halfHeight) {
+            if (localPoint.x > 0) {
+                side = Side.RIGHT;
+            } else {
+                side = Side.LEFT;
+            }
+        } else if (localPoint.x > -halfWidth && localPoint.x < halfWidth) {
+            if (localPoint.y > 0) {
+                side = Side.TOP;
+            } else {
+                side = Side.BOTTOM;
+            }
+        } else if (Math.abs(localPoint.x) - halfWidth > Math.abs(localPoint.y) - halfHeight) {
             if (localPoint.x > 0) {
                 side = Side.RIGHT;
             } else {

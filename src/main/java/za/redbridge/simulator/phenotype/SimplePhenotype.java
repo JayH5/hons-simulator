@@ -2,6 +2,7 @@ package za.redbridge.simulator.phenotype;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.sensor.ProximityAgentSensor;
@@ -35,4 +36,7 @@ public class SimplePhenotype implements Phenotype {
     public SimplePhenotype clone() {
         return new SimplePhenotype();
     }
+
+    @Override
+    public void configure(Map<String,Object> phenotypeConfigs) {}
 }

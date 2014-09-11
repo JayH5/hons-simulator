@@ -8,6 +8,7 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
+import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
@@ -42,16 +43,17 @@ public class Simulation extends SimState {
 
     private TargetAreaObject targetArea;
 
-    private final RobotFactory robotFactory;
-    private final ResourceFactory resourceFactory;
-    private final SimConfig config;
+    private RobotFactory robotFactory;
 
-    public Simulation(RobotFactory robotFactory, ResourceFactory resourceFactory,
-            SimConfig config) {
+    private final SimConfig config;
+    private final ExperimentConfig experimentConfig;
+
+    public Simulation(SimConfig config, ExperimentConfig experimentConfig, RobotFactory robotFactory) {
         super(config.getSimulationSeed());
-        this.robotFactory = robotFactory;
-        this.resourceFactory = resourceFactory;
         this.config = config;
+        this.robotFactory = robotFactory;
+        this.experimentConfig = experimentConfig;
+
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
 
@@ -76,11 +78,9 @@ public class Simulation extends SimState {
         createWalls();
         createTargetArea();
         robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots(),
+                .placeInstances(placementArea.new ForType<>(), physicsWorld, experimentConfig.getPopulationSize(),
                         config.getTargetAreaPlacement());
-        resourceFactory.placeInstances(placementArea.new ForType<>(), physicsWorld,
-                config.getLargeObjects(), config.getSmallObjects());
-
+        config.getResourceFactory().placeInstances(placementArea.new ForType<>(), physicsWorld);
 
         // Now actually add the objects that have been placed to the world and schedule
         for (PhysicalObject object : placementArea.getPlacedObjects()) {

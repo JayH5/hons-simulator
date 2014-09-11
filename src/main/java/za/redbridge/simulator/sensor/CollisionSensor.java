@@ -4,6 +4,8 @@ import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
 
+import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
@@ -41,5 +43,19 @@ public class CollisionSensor extends ClosestObjectSensor {
     @Override
     protected Portrayal createPortrayal() {
         return new CirclePortrayal(range, DEFAULT_PAINT, true);
+    }
+
+    @Override
+    protected boolean filterOutObject(PhysicalObject object) {
+        if (object instanceof ResourceObject) {
+            ResourceObject resource = (ResourceObject) object;
+            // Filter out resources that are neither collected nor pushed by max robots
+            return !resource.isCollected() && !resource.pushedByMaxRobots();
+        } else if (object instanceof RobotObject) {
+            RobotObject robot = (RobotObject) object;
+            // Filter out robots bound to resources
+            return robot.isBoundToResource();
+        }
+        return false;
     }
 }

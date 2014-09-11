@@ -46,7 +46,7 @@ public abstract class Heuristic implements Comparable<Heuristic> {
         Double2D drive = wheelDriveForTargetPosition(target);
         if (dist < SLOWDOWN_THRESHOLD) {
             return drive.multiply(dist / SLOWDOWN_THRESHOLD);
-        }else{
+        } else {
             return drive;
         }
     }

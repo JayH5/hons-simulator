@@ -5,27 +5,31 @@ import org.jbox2d.dynamics.World;
 import za.redbridge.simulator.PlacementArea;
 import za.redbridge.simulator.object.ResourceObject;
 
+import java.util.Map;
+
 /**
  * Factory for resources where half the resources are big and half are small
  * Created by jamie on 2014/08/21.
  */
 public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
 
+
+    private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
     private static final double SMALL_OBJECT_WIDTH = 0.4;
     private static final double SMALL_OBJECT_HEIGHT = 0.4;
     private static final double SMALL_OBJECT_MASS = 2.0;
     private static final int SMALL_OBJECT_PUSHING_BOTS = 1;
 
+    private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
     private static final double LARGE_OBJECT_WIDTH = 0.6;
     private static final double LARGE_OBJECT_HEIGHT = 0.6;
     private static final double LARGE_OBJECT_MASS = 5.0;
     private static final int LARGE_OBJECT_PUSHING_BOTS = 2;
 
     @Override
-    public void placeInstances(PlacementArea.ForType<ResourceObject> placementArea, World world,
-                               int quantityLarge, int quantitySmall) {
+    public void placeInstances(PlacementArea.ForType<ResourceObject> placementArea, World world) {
 
-        int quantity = quantityLarge + quantitySmall;
+        int quantity = DEFAULT_OBJECTS_RESOURCES_LARGE + DEFAULT_OBJECTS_RESOURCES_SMALL;
         int small = quantity / 2;
         for (int i = 0; i < small; i++) {
             PlacementArea.Space space =
@@ -50,4 +54,7 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
             placementArea.placeObject(space, resource);
         }
     }
+
+    @Override
+    public void configure(Map<String, Object> resourceConfigs) {}
 }

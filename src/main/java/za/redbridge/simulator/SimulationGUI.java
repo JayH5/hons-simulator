@@ -1,22 +1,13 @@
 package za.redbridge.simulator;
 
-import java.awt.Color;
-
-import javax.swing.JFrame;
-
-import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
-import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.factories.ConfigurableResourceFactory;
-import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.factories.ResourceFactory;
-import za.redbridge.simulator.factories.RobotFactory;
-import za.redbridge.simulator.phenotype.ChasingPhenotype;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by jamie on 2014/07/24.
@@ -75,29 +66,6 @@ public class SimulationGUI extends GUIState {
         displayFrame = null;
 
         display = null;
-    }
-
-    public static void main (String[] args) {
-        SimConfig config;
-        if (args.length > 0) {
-            config = SimConfig.loadFromFile(args[0]);
-        } else {
-            config = new SimConfig(); // Default
-        }
-
-        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
-                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
-                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
-
-        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), config.getRobotMass(), config.getRobotRadius(),
-                config.getRobotColour());
-
-        SimulationGUI video =
-                new SimulationGUI(new Simulation(robotFactory, resourceFactory, config));
-
-        //new console which displays this simulation
-        Console console = new Console(video);
-        console.setVisible(true);
     }
 
 }

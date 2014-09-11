@@ -4,6 +4,8 @@ import org.jbox2d.dynamics.Fixture;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 
 import sim.util.Double2D;
 import za.redbridge.simulator.object.PhysicalObject;
@@ -20,9 +22,11 @@ public class ChasingPhenotype implements Phenotype {
     private final List<AgentSensor> sensors;
 
     public ChasingPhenotype() {
+
         AgentSensor leftSensor = new ChasingSensor((float) (Math.PI / 4), 0f, 1f, 0.2f);
         AgentSensor forwardSensor = new ChasingSensor(0f, 0f, 1f, 0.2f);
         AgentSensor rightSensor = new ChasingSensor((float) -(Math.PI / 4), 0f, 1f, 0.2f);
+
         sensors = new ArrayList<>();
         sensors.add(leftSensor);
         sensors.add(forwardSensor);
@@ -93,4 +97,7 @@ public class ChasingPhenotype implements Phenotype {
             return resourceObject.isCollected();
         }
     }
+
+    @Override
+    public void configure(Map<String,Object> phenotypeConfigs) {}
 }

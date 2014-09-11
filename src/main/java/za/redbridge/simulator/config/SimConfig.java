@@ -12,8 +12,11 @@ import java.util.Map;
 
 import za.redbridge.simulator.ea.DefaultFitnessFunction;
 import za.redbridge.simulator.ea.FitnessFunction;
+import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
+import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.factories.ResourceFactory;
 
-public class SimConfig {
+public class SimConfig extends Config {
 
     private static final long DEFAULT_SIMULATION_SEED = System.currentTimeMillis();
     private static final int DEFAULT_SIMULATION_ITERATIONS = 10000;
@@ -39,7 +42,11 @@ public class SimConfig {
     private static final double DEFAULT_ROBOT_RADIUS = 0.15;
     private static final Paint DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
 
+
     private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
+    private static final ResourceFactory DEFAULT_RESOURCE_FACTORY = new HalfBigHalfSmallResourceFactory();
+    private static final String DEFAULT_ROBOT_FACTORY = "za.redbridge.simulator.factories.HomogeneousRobotFactory";
+    private static final String DEFAULT_PHENOTYPE = "";
 
     public enum Direction {
         NORTH, SOUTH, EAST, WEST
@@ -59,39 +66,25 @@ public class SimConfig {
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
 
-    private final int objectsResourcesSmall;
-    private final double smallObjectWidth;
-    private final double smallObjectHeight;
-    private final double smallObjectMass;
-    private final int smallObjectPushingBots;
-    private final int objectsResourcesLarge;
-    private final double largeObjectWidth;
-    private final double largeObjectHeight;
-    private final double largeObjectMass;
-    private final int largeObjectPushingBots;
-
     private final FitnessFunction fitnessFunction;
+
+    private ResourceFactory resourceFactory;
+    private String robotFactoryName;
 
     //default config
     public SimConfig() {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
                 DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS, DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR,
-                DEFAULT_OBJECTS_RESOURCES_SMALL,
-                DEFAULT_SMALL_OBJECT_WIDTH, DEFAULT_SMALL_OBJECT_HEIGHT, DEFAULT_SMALL_OBJECT_MASS, DEFAULT_SMALL_OBJECT_PUSHING_BOTS,
-                DEFAULT_OBJECTS_RESOURCES_LARGE,
-                DEFAULT_LARGE_OBJECT_WIDTH, DEFAULT_LARGE_OBJECT_HEIGHT, DEFAULT_LARGE_OBJECT_MASS, DEFAULT_LARGE_OBJECT_PUSHING_BOTS,
-                DEFAULT_FITNESS_FUNCTION);
+                DEFAULT_FITNESS_FUNCTION, DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
     }
 
     public SimConfig(long simulationSeed, int simulationIterations,
                      int environmentWidth, int environmentHeight,
                      Direction targetAreaPlacement, int targetAreaThickness,
-                     int objectsRobots,  double robotMass, double robotRadius, Paint robotColour,
-                     int objectsResourcesSmall, double smallObjectWidth,
-                     double smallObjectHeight, double smallObjectMass, int smallObjectPushingBots,
-                     int objectsResourcesLarge, double largeObjectWidth, double largeObjectHeight, double largeObjectMass,
-                     int largeObjectPushingBots, FitnessFunction fitnessFunction) {
+                     int objectsRobots, double robotMass, double robotRadius, Paint robotColour,
+                     FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
+                     String robotFactoryName) {
 
         this.simulationSeed = simulationSeed;
         this.simulationIterations = simulationIterations;
@@ -107,31 +100,20 @@ public class SimConfig {
         this.robotRadius = robotRadius;
         this.robotColour = robotColour;
 
-        this.objectsResourcesSmall = objectsResourcesSmall;
-        this.smallObjectWidth = smallObjectWidth;
-        this.smallObjectHeight = smallObjectHeight;
-        this.smallObjectMass = smallObjectMass;
-        this.smallObjectPushingBots = smallObjectPushingBots;
-
-        this.objectsResourcesLarge = objectsResourcesLarge;
-        this.largeObjectWidth = largeObjectWidth;
-        this.largeObjectHeight = largeObjectHeight;
-        this.largeObjectMass = largeObjectMass;
-        this.largeObjectPushingBots = largeObjectPushingBots;
-
         this.fitnessFunction = fitnessFunction;
 
+        this.resourceFactory = resourceFactory;
+        this.robotFactoryName = robotFactoryName;
     }
 
     @SuppressWarnings("unchecked")
-    public static SimConfig loadFromFile(String filepath) {
+    public SimConfig(String filepath) {
         Yaml yaml = new Yaml();
-        Map<String, Object> config;
+        Map<String, Object> config = null;
         try (Reader reader = Files.newBufferedReader(Paths.get(filepath))) {
             config = (Map<String, Object>) yaml.load(reader);
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
 
         // This is fairly horrible
@@ -142,24 +124,15 @@ public class SimConfig {
         Direction placement = DEFAULT_TARGET_AREA_PLACEMENT;
         int thickness = DEFAULT_TARGET_AREA_THICKNESS;
         int robots = DEFAULT_OBJECTS_ROBOTS;
-        int resourcesLarge = DEFAULT_OBJECTS_RESOURCES_LARGE;
-        int resourcesSmall = DEFAULT_OBJECTS_RESOURCES_SMALL;
-
-        double smallObjWidth = DEFAULT_SMALL_OBJECT_WIDTH;
-        double smallObjHeight = DEFAULT_SMALL_OBJECT_HEIGHT;
-        double smallObjMass = DEFAULT_SMALL_OBJECT_MASS;
-        int smallObjPushingBots = DEFAULT_SMALL_OBJECT_PUSHING_BOTS;
-
-        double largeObjWidth = DEFAULT_LARGE_OBJECT_WIDTH;
-        double largeObjHeight = DEFAULT_LARGE_OBJECT_HEIGHT;
-        double largeObjMass = DEFAULT_LARGE_OBJECT_MASS;
-        int largeObjPushingBots = DEFAULT_LARGE_OBJECT_PUSHING_BOTS;
 
         double rMass = DEFAULT_ROBOT_MASS;
         double rRadius = DEFAULT_ROBOT_RADIUS;
         Paint robotColour = DEFAULT_ROBOT_COLOUR;
 
         FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
+
+        ResourceFactory resFactory = DEFAULT_RESOURCE_FACTORY;
+        String robotFactory = DEFAULT_ROBOT_FACTORY;
 
         // Load simulation
         Map simulation = (Map) config.get("simulation");
@@ -197,53 +170,6 @@ public class SimConfig {
             Integer thicknessField = (Integer) targetArea.get("thickness");
             if (checkFieldPresent(thicknessField, "targetArea:thickness")) {
                 thickness = thicknessField;
-            }
-        }
-
-        //Resources
-        Map resourceProps = (Map) config.get("resourceProperties");
-        if (checkFieldPresent(resourceProps, "resourceProperties")) {
-
-            Integer resourcesFieldSmall = (Integer) resourceProps.get("smallResources");
-            if (checkFieldPresent(resourcesFieldSmall, "resourceProperties:smallResources")) {
-                resourcesSmall = resourcesFieldSmall;
-            }
-            Double sObjWidth = (Double) resourceProps.get("smallObjectWidth");
-            if (checkFieldPresent(sObjWidth, "resourceProperties:smallObjectWidth")) {
-                smallObjWidth = sObjWidth;
-            }
-            Double sObjHeight = (Double) resourceProps.get("smallObjectHeight");
-            if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectHeight")) {
-                smallObjHeight = sObjHeight;
-            }
-            Double sObjMass = (Double) resourceProps.get("smallObjectMass");
-            if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectMass")) {
-                smallObjMass = sObjMass;
-            }
-            Integer sObjPushingBots = (Integer) resourceProps.get("maxSmallObjectPushingBots");
-            if (checkFieldPresent(sObjPushingBots, "resourceProperties:maxSmallObjectPushingBots")) {
-                smallObjPushingBots = sObjPushingBots;
-            }
-            Integer resourcesFieldLarge = (Integer) resourceProps.get("largeResources");
-            if (checkFieldPresent(resourcesFieldLarge, "resourceProperties:largeResources")) {
-                resourcesLarge = resourcesFieldLarge;
-            }
-
-            Double lObjWidth = (Double) resourceProps.get("largeObjectWidth");
-            if (checkFieldPresent(lObjWidth, "resourceProperties:largeObjectWidth")) {
-                largeObjWidth = lObjWidth;
-            }
-            Double lObjHeight = (Double) resourceProps.get("largeObjectHeight");
-            if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectHeight")) {
-                largeObjHeight = lObjHeight;
-            }
-            Double lObjMass = (Double) resourceProps.get("largeObjectMass");
-            if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectMass")) {
-                largeObjMass = lObjMass;
-            }
-            Integer lObjPushingBots = (Integer) resourceProps.get("maxLargeObjectPushingBots");
-            if (checkFieldPresent(lObjPushingBots, "resourceProperties:maxLargeObjectPushingBots")) {
-                largeObjPushingBots = lObjPushingBots;
             }
         }
 
@@ -308,18 +234,66 @@ public class SimConfig {
             }
         }
 
-        return new SimConfig(seed, iterations, width, height, placement, thickness, robots, rMass, rRadius, robotColour,
-                resourcesSmall, smallObjWidth, smallObjHeight, smallObjMass, smallObjPushingBots,
-                resourcesLarge, largeObjWidth, largeObjHeight, largeObjMass, largeObjPushingBots, fitness);
+        //factories
+        Map factories = (Map) config.get("factories");
+        if (checkFieldPresent(factories, "factories")) {
+
+            String rFactory = (String) factories.get("resourceFactory");
+            if (checkFieldPresent(resFactory, "factories:resourceFactory")) {
+
+                try {
+                    Class f = Class.forName(rFactory);
+                    Object o = f.newInstance();
+
+                    if (!(o instanceof ResourceFactory)) {
+                        throw new InvalidClassException("");
+                    }
+
+                    resFactory = (ResourceFactory) o;
+
+                    //TODO: solve the mystery of the missing resource field
+                    Map resources = (Map) config.get("resourceProperties");
+                    resFactory.configure(resources);
+                }
+                catch (ClassNotFoundException c) {
+                    System.out.println("Invalid class name specified in SimConfig: " + rFactory + ". Using default resource factory.");
+                    c.printStackTrace();
+                }
+                catch (InvalidClassException i) {
+                    System.out.println("Invalid resource factory specified: " + rFactory + ". Using default resource factory.");
+                    i.printStackTrace();
+                }
+                catch (InstantiationException ins) {
+                    ins.printStackTrace();
+                }
+                catch (IllegalAccessException ill) {
+                    ill.printStackTrace();
+                }
+            }
+
+            String robFactory = (String) factories.get("robotFactory");
+            if (checkFieldPresent(robFactory, "factories:robotFactory")) {
+                robotFactory = robFactory;
+            }
+        }
+
+
+        this.simulationSeed = seed;
+        this.simulationIterations = iterations;
+        this.environmentWidth = width;
+        this.environmentHeight = height;
+        this.targetAreaPlacement = placement;
+        this.targetAreaThickness = thickness;
+        this.objectsRobots = robots;
+        this.robotMass = rMass;
+        this.robotRadius = rRadius;
+        this.robotColour = robotColour;
+        this.fitnessFunction = fitness;
+        this.resourceFactory = resFactory;
+        this.robotFactoryName = robotFactory;
     }
 
-    private static boolean checkFieldPresent(Object field, String name) {
-        if (field != null) {
-            return true;
-        }
-        System.out.println("Field '" + name + "' not present, using default");
-        return false;
-    }
+
 
     public long getSimulationSeed() {
         return simulationSeed;
@@ -353,46 +327,6 @@ public class SimConfig {
         return objectsRobots;
     }
 
-    public int getLargeObjects() {
-        return objectsResourcesLarge;
-    }
-
-    public int getSmallObjects() {
-        return objectsResourcesSmall;
-    }
-
-    public double getSmallObjectWidth() {
-        return smallObjectWidth;
-    }
-
-    public double getSmallObjectHeight() {
-        return smallObjectHeight;
-    }
-
-    public double getSmallObjectMass() {
-        return smallObjectMass;
-    }
-
-    public int getSmallObjectPushingBots() {
-        return smallObjectPushingBots;
-    }
-
-    public double getLargeObjectWidth() {
-        return largeObjectWidth;
-    }
-
-    public double getLargeObjectHeight() {
-        return largeObjectHeight;
-    }
-
-    public double getLargeObjectMass() {
-        return largeObjectMass;
-    }
-
-    public int getLargeObjectPushingBots() {
-        return largeObjectPushingBots;
-    }
-
     public Paint getRobotColour() { return robotColour; }
 
     public double getRobotMass() { return robotMass; }
@@ -400,5 +334,7 @@ public class SimConfig {
     public double getRobotRadius() { return robotRadius; }
 
     public FitnessFunction getFitnessFunction() { return fitnessFunction; }
+
+    public ResourceFactory getResourceFactory() { return resourceFactory; }
 
 }

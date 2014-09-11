@@ -43,20 +43,6 @@ public abstract class ClosestObjectSensor
                 .min(Comparator.<ClosestObject>naturalOrder());
     }
 
-    @Override
-    protected boolean filterOutObject(PhysicalObject object) {
-        if (object instanceof ResourceObject) {
-            ResourceObject resource = (ResourceObject) object;
-            // Filter out resources that are neither collected not pushed by max robots
-            return !resource.isCollected() && !resource.pushedByMaxRobots();
-        } else if (object instanceof RobotObject) {
-            RobotObject robot = (RobotObject) object;
-            // Filter out robots bound to resources
-            return robot.isBoundToResource();
-        }
-        return false;
-    }
-
     public static class ClosestObject implements Comparable<ClosestObject> {
 
         private final PhysicalObject object;
