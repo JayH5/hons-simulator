@@ -1,24 +1,13 @@
 package za.redbridge.simulator;
 
-import java.awt.Color;
-
-import javax.swing.JFrame;
-
-import org.encog.neural.neat.NEATNetwork;
-import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
-import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.factories.ConfigurableResourceFactory;
-import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.factories.ResourceFactory;
-import za.redbridge.simulator.factories.RobotFactory;
-import za.redbridge.simulator.phenotype.ChasingPhenotype;
-import za.redbridge.simulator.phenotype.NEATPhenotype;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by jamie on 2014/07/24.

@@ -15,8 +15,7 @@ import java.util.Map;
 public class ColourProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(3);
-
-    protected final int readingSize = 1;
+    private static final int readingSize = 1;
 
     public ColourProximityAgentSensor(float bearing) {
         super(bearing, 0.0f, 30.0f, 0.1f);
@@ -62,4 +61,7 @@ public class ColourProximityAgentSensor extends AgentSensor {
     }
 
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
+
+    @Override
+    public int getReadingSize() { return readingSize; }
 }

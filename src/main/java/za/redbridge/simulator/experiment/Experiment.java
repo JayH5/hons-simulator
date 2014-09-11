@@ -22,7 +22,7 @@ import java.text.ParseException;
  */
 public class Experiment {
 
-    //config files for this experiment
+    //config files for this experiment o
 
     @Option (name="--experiment-config", usage="Filename for experiment configuration", metaVar="<experiment config>")
     private String experimentConfig;

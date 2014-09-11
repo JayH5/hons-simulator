@@ -111,10 +111,9 @@ public class MorphologyConfig extends Config {
                     try {
                         Class sensorType = Class.forName(type.trim());
 
-                        Object o = sensorType.getConstructor(Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Integer.TYPE)
+                        Object o = sensorType.getConstructor(Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE)
                                 .newInstance((float) Math.toRadians(bearing), (float) Math.toRadians(orientation),
-                                        (float) Math.toRadians(range), (float) Math.toRadians(fieldOfView),
-                                        readingSize);
+                                        (float) Math.toRadians(range), (float) Math.toRadians(fieldOfView));
 
                         if (!(o instanceof AgentSensor)) {
                             throw new InvalidClassException("Not Agent Sensor.");

@@ -78,6 +78,8 @@ public class ChasingPhenotype implements Phenotype {
 
     private static class ChasingSensor extends ProximityAgentSensor {
 
+        private static final int readingSize = 1;
+
         public ChasingSensor(float bearing) {
             super(bearing);
         }
@@ -96,6 +98,9 @@ public class ChasingPhenotype implements Phenotype {
             ResourceObject resourceObject = (ResourceObject) object;
             return resourceObject.isCollected();
         }
+
+        @Override
+        public int getReadingSize() { return readingSize; }
     }
 
     @Override

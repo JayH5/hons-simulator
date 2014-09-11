@@ -3,7 +3,9 @@ package za.redbridge.simulator.experiment;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import sim.display.GUIState;
+
+import java.text.ParseException;
+import sim.display.Console;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
@@ -12,8 +14,6 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.phenotype.ChasingPhenotype;
 import sim.display.Console;
-
-import java.text.ParseException;
 
 //entry point into simulator
 
@@ -69,7 +69,8 @@ public class Main {
                     new ChasingPhenotype(), simulationConfiguration.getRobotMass(),
                     simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour());
 
-            Simulation simulation = new Simulation(simulationConfiguration, experimentConfiguration, robotFactory);
+            Simulation simulation = new Simulation(simulationConfiguration, robotFactory,
+                    experimentConfiguration.getPopulationSize());
 
             SimulationGUI video =
                     new SimulationGUI(simulation);
@@ -77,7 +78,6 @@ public class Main {
             //new console which displays this simulation
             Console console = new Console(video);
             console.setVisible(true);
-
         }
         else {
 
