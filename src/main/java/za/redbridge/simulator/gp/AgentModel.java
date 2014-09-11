@@ -1,16 +1,26 @@
 package za.redbridge.simulator.gp;
 
+import org.epochx.epox.Literal;
 import org.epochx.epox.Node;
 import org.epochx.epox.Variable;
-import org.epochx.epox.math.AddFunction;
-import org.epochx.epox.math.DivisionProtectedFunction;
-import org.epochx.epox.math.MultiplyFunction;
-import org.epochx.epox.math.SubtractFunction;
+import org.epochx.epox.lang.IfFunction;
+import org.epochx.epox.math.*;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
+import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.ConfigurableResourceFactory;
+import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.factories.ResourceFactory;
+import za.redbridge.simulator.factories.RobotFactory;
+import za.redbridge.simulator.gp.functions.*;
+import za.redbridge.simulator.gp.types.Bearing;
+import za.redbridge.simulator.gp.types.WheelDrive;
+import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,18 +28,54 @@ import java.util.List;
  * Created by xenos on 9/9/14.
  */
 public class AgentModel extends GPModel {
-    List<Node> inputs = new ArrayList<Node>();
-   public AgentModel(List<AgentSensor> sensors){
-       List<Node> syntax = new ArrayList<Node>();
+    private List<AgentSensor> sensors;
+    private final SimConfig config;
+    List<Variable> inputs = new ArrayList<>();
+    protected final static float P2 = (float) Math.PI/2;
+
+   public AgentModel(List<AgentSensor> sensors, SimConfig config){
+       this.sensors = sensors;
+       this.config = config;
+       List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
-           try {
-               inputs.add(new Variable("Sensor input " + i, Class.forName("Double")));
-           }catch(ClassNotFoundException e){}
+           inputs.add(new Variable("S" + i, Double.class));
        }
        syntax.add(new AddFunction());
        syntax.add(new SubtractFunction());
        syntax.add(new DivisionProtectedFunction());
        syntax.add(new MultiplyFunction());
+
+       /*
+       syntax.add(new SineFunction());
+       syntax.add(new CosineFunction());
+       syntax.add(new TangentFunction());
+       syntax.add(new ArcTangentFunction());
+       */
+
+       for(AgentSensor s : sensors){
+           syntax.add(new Literal(new Bearing(s.getOrientation())));
+       }
+
+       syntax.add(new IfFunction());
+       syntax.add(new GreaterThanFunction());
+
+       syntax.add(new Literal(new Bearing(P2)));
+       syntax.add(new Literal(new Bearing(2*P2)));
+       syntax.add(new Literal(new Bearing(3*P2)));
+       syntax.add(new Literal(new Bearing(4*P2)));
+
+       syntax.add(new Literal(0.0));
+       syntax.add(new Literal(1.0));
+       syntax.add(new Literal(2.0));
+       syntax.add(new Literal(3.0));
+
+       syntax.add(new WheelDriveFromFloats());
+       syntax.add(new WheelDriveFromBearing());
+       syntax.add(new WheelDriveFromCoordinate());
+       syntax.add(new CoordinateFromDistanceAndBearing());
+       syntax.add(new RotateCoordinate());
+       syntax.add(new BearingFromCoordinate());
+
        syntax.addAll(inputs);
        setSyntax(syntax);
    }
@@ -37,14 +83,20 @@ public class AgentModel extends GPModel {
     @Override
     public double getFitness(CandidateProgram p){
         GPCandidateProgram program = (GPCandidateProgram) p;
-        return 0.0;
+
+        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
+                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
+                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
+
+        RobotFactory robotFactory = new HomogeneousRobotFactory(new GPPhenotype(sensors, program, inputs), 0.7, 0.15,
+                new Color(0,0,0));
+        Simulation sim = new Simulation(robotFactory, resourceFactory, config);
+        sim.runForNIterations(20000);
+        System.out.println(p);
+        return -sim.getFitness();
     }
 
     public Class getReturnType(){
-        try {
-            return Class.forName("Double2D");
-        }catch(ClassNotFoundException e){
-            throw new RuntimeException("Could not find class Double2D");
-        }
+        return WheelDrive.class;
     }
 }

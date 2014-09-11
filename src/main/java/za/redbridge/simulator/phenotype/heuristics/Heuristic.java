@@ -26,7 +26,7 @@ public abstract class Heuristic implements Comparator<Heuristic> {
      * @param target local to the agent
      * @return
      */
-    protected Double2D wheelDriveFromTargetPoint(Vec2 target){
+    public static Double2D wheelDriveFromTargetPoint(Vec2 target){
         double dist = target.length();
         Double2D drive = wheelDriveFromBearing(bearingFromTargetPoint(target));
         if(dist < SLOWDOWN_THRESHOLD){
@@ -36,7 +36,7 @@ public abstract class Heuristic implements Comparator<Heuristic> {
         }
     }
 
-    protected Double2D wheelDriveFromBearing(double angle){
+    public static Double2D wheelDriveFromBearing(double angle){
         double a, b;
         //4 quadrants
         if(angle <= P2 && angle >= 0.0){
@@ -61,7 +61,7 @@ public abstract class Heuristic implements Comparator<Heuristic> {
         return new Double2D(a, b);
     }
 
-    protected double bearingFromTargetPoint(Vec2 target){
+    public static double bearingFromTargetPoint(Vec2 target){
         double angle = target.x != 0.0 ? Math.atan(target.y / target.x) : P2;
         if(target.x >= 0 && target.y >= 0){
             //first

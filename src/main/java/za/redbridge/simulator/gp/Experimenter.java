@@ -1,5 +1,8 @@
 package za.redbridge.simulator.gp;
 
+import org.epochx.life.Life;
+import org.epochx.stats.StatField;
+import org.epochx.stats.Stats;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ConfigurableResourceFactory;
@@ -26,12 +29,6 @@ public class Experimenter {
             config = new SimConfig(); // Default
         }
 
-        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
-                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
-                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
-
-        RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
-                new Color(0,0,0));
         List<AgentSensor> sensors = new ArrayList<AgentSensor>();
         AgentSensor leftSensor = new ProximityAgentSensor((float) ((7 / 4.0f) * Math.PI), 0f, 1f, 0.2f);
         AgentSensor forwardSensor = new ProximityAgentSensor(0f, 0f, 1f, 0.2f);
@@ -42,8 +39,12 @@ public class Experimenter {
         sensors.add(rightSensor);
 
         //TODO refactor to pass in the factories; we need to use those in getFitness()
-        AgentModel model = new AgentModel(sensors);
+        AgentModel model = new AgentModel(sensors, config);
+        model.setNoGenerations(10000);
+        model.setTerminationFitness(Double.NEGATIVE_INFINITY);
         model.run();
-        Simulation sim = new Simulation(robotFactory, resourceFactory, config);
+        Stats s = Stats.get();
+        System.out.println("Yay");
+        s.print(StatField.ELITE_FITNESS_MIN);
     }
 }

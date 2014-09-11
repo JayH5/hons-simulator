@@ -30,6 +30,7 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 public abstract class AgentSensor extends Sensor<SensorReading> {
 
     protected final float bearing;
+
     protected final float orientation;
     protected final float range;
     protected final float fieldOfView;
@@ -54,6 +55,10 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
         // Draw by default
         setDrawEnabled(true);
+    }
+
+    public float getOrientation() {
+        return orientation;
     }
 
     @Override

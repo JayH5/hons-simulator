@@ -4,6 +4,7 @@ import org.epochx.epox.Node;
 import org.epochx.epox.Variable;
 import org.epochx.gp.representation.GPCandidateProgram;
 import sim.util.Double2D;
+import za.redbridge.simulator.gp.types.WheelDrive;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
@@ -32,15 +33,12 @@ public class GPPhenotype implements Phenotype {
         for(int i = 0; i < list.size(); i++){
             sortedInputs.get(i).setValue(list.get(i).getValues().get(0));
         }
-        return (Double2D) program.evaluate();
+        WheelDrive d = (WheelDrive) program.evaluate();
+        return new Double2D(d.x, d.y);
     }
 
     @Override
     public Phenotype clone() {
-        List<Variable> newVars = new ArrayList<Variable>();
-        for(Variable v: sortedInputs){
-            newVars.add(new Variable(v.getIdentifier(), v.getReturnType()));
-        }
-        return new GPPhenotype((List<AgentSensor>)sensors.clone(), program.clone(), newVars);
+        return new GPPhenotype((List<AgentSensor>)sensors.clone(), program.clone(), sortedInputs);
     }
 }
