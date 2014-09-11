@@ -37,16 +37,21 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     private final float fovGradient;
 
+    //number of float values this sensor outputs at each reading
+    protected final int readingSize;
+
     public AgentSensor() {
 
         bearing = 3.14f;
         orientation = 0.1f;
         range = 5.0f;
         fieldOfView = 3.0f;
+        readingSize = 1;
+
         fovGradient = (float) Math.tan(fieldOfView / 2);
     }
 
-    public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+    public AgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
         if (fieldOfView <= 0 || fieldOfView >= Math.PI) {
             throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);
         }
@@ -59,6 +64,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         this.orientation = orientation;
         this.range = range;
         this.fieldOfView = fieldOfView;
+        this.readingSize = readingSize;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
 
@@ -320,5 +326,23 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
      * parameters.
      */
     public abstract void readAdditionalConfigs(Map<String, Object> map) throws ParseException;
+
+    public int getReadingSize() { return readingSize; }
+
+    @Override
+    public AgentSensor clone() {
+
+        Object o = null;
+
+        try {
+            o = super.clone();
+        }
+        catch (CloneNotSupportedException c) {
+            c.printStackTrace();
+            System.exit(0);
+        }
+
+        return (AgentSensor) o;
+    }
 
 }

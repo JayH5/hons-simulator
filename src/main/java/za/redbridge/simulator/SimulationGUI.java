@@ -85,16 +85,15 @@ public class SimulationGUI extends GUIState {
             config = new SimConfig(); // Default
         }
 
+        /*
         RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
                 new Color(0,0,0));
-
-
         SimulationGUI video =
                 new SimulationGUI(new Simulation(config, robotFactory));
 
         //new console which displays this simulation
         Console console = new Console(video);
-        console.setVisible(true);
+        console.setVisible(true);*/
     }
 
 }

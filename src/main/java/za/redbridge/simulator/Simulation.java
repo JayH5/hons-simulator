@@ -8,6 +8,7 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
+import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
@@ -45,11 +46,14 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
 
     private final SimConfig config;
+    private final ExperimentConfig experimentConfig;
 
-    public Simulation(SimConfig config, RobotFactory robotFactory) {
+    public Simulation(SimConfig config, ExperimentConfig experimentConfig, RobotFactory robotFactory) {
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
+        this.experimentConfig = experimentConfig;
+
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
 
@@ -74,7 +78,7 @@ public class Simulation extends SimState {
         createWalls();
         createTargetArea();
         robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld, config.getObjectsRobots(),
+                .placeInstances(placementArea.new ForType<>(), physicsWorld, experimentConfig.getPopulationSize(),
                         config.getTargetAreaPlacement());
         config.getResourceFactory().placeInstances(placementArea.new ForType<>(), physicsWorld);
 

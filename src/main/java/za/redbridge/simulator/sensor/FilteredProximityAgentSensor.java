@@ -15,7 +15,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     }
 
     public FilteredProximityAgentSensor(float bearing, Collection<String> whitelist) {
-        super(bearing, 0.0f, 30.0f, 0.1f);
+        super(bearing, 0.0f, 30.0f, 0.1f, 1);
         for(String cs : whitelist){
             try {
                 this.whitelist.add(Class.forName(cs));
@@ -23,8 +23,8 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
     }
 
-    public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
-        super(bearing, orientation, range, fieldOfView);
+    public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
+        super(bearing, orientation, range, fieldOfView, readingSize);
     }
 
     @Override

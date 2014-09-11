@@ -16,7 +16,7 @@ public class ExperimentConfig extends Config {
 
     private static final long DEFAULT_MAX_EPOCHS = 1000;
     private static final EvolutionaryAlgorithm DEFAULT_CONTROLLER_EA = EvolutionaryAlgorithm.NEAT;
-    private static final long DEFAULT_POPULATION_SIZE = 20;
+    private static final int DEFAULT_POPULATION_SIZE = 20;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorlist.yml";
 
     public enum EvolutionaryAlgorithm {
@@ -25,7 +25,7 @@ public class ExperimentConfig extends Config {
 
     protected long maxEpochs;
     protected EvolutionaryAlgorithm algorithm;
-    protected long populationSize;
+    protected int populationSize;
     protected String robotFactory;
     protected String morphologyConfigFile;
 
@@ -48,7 +48,7 @@ public class ExperimentConfig extends Config {
         //default values
         long maxEpochs = DEFAULT_MAX_EPOCHS;
         ExperimentConfig.EvolutionaryAlgorithm controllerEA = DEFAULT_CONTROLLER_EA;
-        long popSize = DEFAULT_POPULATION_SIZE;
+        int popSize = DEFAULT_POPULATION_SIZE;
         String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
 
         Map control = (Map) config.get("control");
@@ -105,7 +105,7 @@ public class ExperimentConfig extends Config {
         this.morphologyConfigFile = morphologyFile;
     }
 
-    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, long populationSize,
+    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize,
                             String robotFactory, String morphologyConfigFile) {
 
         this.maxEpochs = maxEpochs;
@@ -118,6 +118,8 @@ public class ExperimentConfig extends Config {
     public long getMaxEpochs() { return maxEpochs; }
 
     public EvolutionaryAlgorithm getEvolutionaryAlgorithm() { return algorithm; }
+
+    public int getPopulationSize() { return populationSize; }
 
     public String getRobotFactory() { return robotFactory; }
 

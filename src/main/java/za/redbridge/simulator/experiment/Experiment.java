@@ -4,6 +4,7 @@ import org.encog.ml.CalculateScore;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.NEATUtil;
+import org.encog.util.simple.EncogUtility;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -69,10 +70,12 @@ public class Experiment {
             }
 
             //TODO: make this get population size form Experiment configs instead
-            NEATPopulation pop = new NEATPopulation(morphologyConfig.getNumSensors(),2,1000);
+            NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
+                    experimentConfiguration.getPopulationSize());
             pop.reset();
 
-            CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, morphologyConfig);
+            CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, experimentConfiguration,
+                    morphologyConfig);
 
             final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
 

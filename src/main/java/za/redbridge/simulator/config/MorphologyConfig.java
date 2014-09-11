@@ -23,6 +23,9 @@ public class MorphologyConfig extends Config {
     private List<AgentSensor> sensorList;
     private int numSensors;
 
+    //total number of readings provided by this morphology
+    private int totalReadingSize;
+
     public MorphologyConfig(String filepath) throws ParseException {
 
         sensorList = new ArrayList<>();
@@ -55,11 +58,20 @@ public class MorphologyConfig extends Config {
 
             String type = null;
             float bearing, orientation, fieldOfView, range;
+            int readingSize;
 
             AgentSensor agentSensor = null;
 
             Map sensor = (Map) config.get(id);
             if (checkFieldPresent(sensor, id)) {
+
+                Integer reads = (Integer) sensor.get("readingSize");
+                if (checkFieldPresent(reads, id + ":readingSize")) {
+                    readingSize = reads;
+                }
+                else {
+                    throw new ParseException("No reading size found for sensor " + id, i);
+                }
 
                 Number bear = (Number) sensor.get("bearing");
                 if (checkFieldPresent(bear, id + ":bearing")) {
@@ -98,7 +110,9 @@ public class MorphologyConfig extends Config {
 
                     try {
                         Class sensorType = Class.forName(type.trim());
-                        Object o = sensorType.newInstance();
+
+                        Object o = sensorType.getConstructor(Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Integer.TYPE)
+                                .newInstance(bearing, orientation, range, fieldOfView, readingSize);
 
                         if (!(o instanceof AgentSensor)) {
                             throw new InvalidClassException("Not Agent Sensor.");
@@ -116,13 +130,14 @@ public class MorphologyConfig extends Config {
                         System.out.println("Invalid specified agent sensor class. " + type);
                         x.printStackTrace();
                         System.exit(-2);
-                    }/*
+                    }
                     catch (NoSuchMethodException n) {
                         n.printStackTrace();
                     }
                     catch (InvocationTargetException inv) {
+                        inv.getCause();
                         inv.printStackTrace();
-                    }*/
+                    }
                     catch (InstantiationException ins) {
                         ins.printStackTrace();
                     }
@@ -142,9 +157,12 @@ public class MorphologyConfig extends Config {
             sensorList.add(agentSensor);
         }
 
+        System.out.println("read " + sensorList.size() + " sensors.");
     }
 
     public List<AgentSensor> getSensorList() { return sensorList; }
+
+    public int getTotalReadingSize() { return totalReadingSize; }
 
     public int getNumSensors() { return numSensors; }
 }

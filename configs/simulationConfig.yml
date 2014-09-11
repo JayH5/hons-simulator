@@ -1,22 +1,24 @@
 ---
+simulation:
+  iterations: 10000
 resourceProperties:
   smallResources: 20
   smallObjectWidth: 0.4
   smallObjectHeight: 0.4
-  smallObjectMass: 5.0
+  smallObjectMass: 2.0
   maxSmallObjectPushingBots: 1
-  largeResources: 1
+  largeResources: 20
   largeObjectWidth: 4.0
   largeObjectHeight: 4.0
-  largeObjectMass: 10.0
+  largeObjectMass: 5.0
   maxLargeObjectPushingBots: 3
 scoring:
-  fitnessFunction: za.redbridge.simulator.ea.CooperativeFitnessFunction
+  fitnessFunction: za.redbridge.simulator.ea.DefaultFitnessFunction
 factories:
   resourceFactory: za.redbridge.simulator.factories.ConfigurableResourceFactory
   robotFactory: za.redbridge.simulator.factories.HomogeneousRobotFactory
 robots:
-  numRobots: 10
+  numRobots: 50
   mass: 0.7
   radius: 0.15
   colour: 0, 0, 0

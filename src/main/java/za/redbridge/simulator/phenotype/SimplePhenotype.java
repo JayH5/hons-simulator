@@ -17,7 +17,7 @@ public class SimplePhenotype implements Phenotype {
     private final List<AgentSensor> sensors;
 
     public SimplePhenotype() {
-        AgentSensor sensor1 = new ProximityAgentSensor(0.0f, 0.0f, 3.0f, 0.1f);
+        AgentSensor sensor1 = new ProximityAgentSensor(0.0f, 0.0f, 3.0f, 0.1f, 1);
         sensors = new ArrayList<>();
         sensors.add(sensor1);
     }
