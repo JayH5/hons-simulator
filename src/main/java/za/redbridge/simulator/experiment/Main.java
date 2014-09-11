@@ -5,7 +5,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.text.ParseException;
-
+import sim.display.Console;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
@@ -71,7 +71,13 @@ public class Main {
             Simulation simulation = new Simulation(simulationConfiguration, experimentConfiguration, robotFactory);
 
 
-            SimulationGUI video = new SimulationGUI(simulation);
+            SimulationGUI video =
+                    new SimulationGUI(simulation);
+
+            //new console which displays this simulation
+            Console console = new Console(video);
+            console.setVisible(true);
+
         }
         else {
 
