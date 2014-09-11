@@ -66,6 +66,9 @@ public class HeuristicPhenotype {
 
         if (wheelDrives == null) {
             wheelDrives = controllerPhenotype.step(list);
+            if(wheelDrives.x == Double.NaN || wheelDrives.y == Double.NaN){
+                throw new RuntimeException("Controller gave NaN wheelDrives!");
+            }
         }
 
         return wheelDrives;

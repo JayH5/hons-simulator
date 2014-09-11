@@ -1,6 +1,10 @@
 package za.redbridge.simulator.gp;
 
+import org.epochx.gp.op.init.GrowInitialiser;
+import org.epochx.life.GenerationAdapter;
+import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
+import org.epochx.life.RunAdapter;
 import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import za.redbridge.simulator.Simulation;
@@ -38,13 +42,25 @@ public class Experimenter {
         sensors.add(forwardSensor);
         sensors.add(rightSensor);
 
-        //TODO refactor to pass in the factories; we need to use those in getFitness()
         AgentModel model = new AgentModel(sensors, config);
-        model.setNoGenerations(10000);
+        model.setNoGenerations(100);
+        model.setMaxInitialDepth(3);
+        model.setMaxDepth(5);
+        model.setPoolSize(75);
+        model.setPopulationSize(100);
+        model.setNoRuns(1);
+        model.setInitialiser(new GrowInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
+        Life.get().addGenerationListener(new GenerationAdapter() {
+            public void onGenerationEnd() {
+                Stats s = Stats.get();
+                s.print(StatField.ELITE_FITNESS_MIN);
+            }
+        });
         model.run();
+        System.out.println("Experiment finished. Best fitness: ");
         Stats s = Stats.get();
-        System.out.println("Yay");
         s.print(StatField.ELITE_FITNESS_MIN);
+        s.print(StatField.GEN_FITTEST_PROGRAM);
     }
 }

@@ -100,7 +100,6 @@ public class Simulation extends SimState {
     @Override
     public void finish() {
         kill();
-        System.out.println("Total Fitness: " + getFitness());
     }
 
     // Walls are simply added to environment since they do not need updating

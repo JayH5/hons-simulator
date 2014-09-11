@@ -8,6 +8,8 @@ import org.epochx.epox.math.*;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
+import org.epochx.stats.StatField;
+import org.epochx.stats.Stats;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ConfigurableResourceFactory;
@@ -40,10 +42,12 @@ public class AgentModel extends GPModel {
        for(int i = 0; i < sensors.size(); i++){
            inputs.add(new Variable("S" + i, Double.class));
        }
+       /*
        syntax.add(new AddFunction());
        syntax.add(new SubtractFunction());
        syntax.add(new DivisionProtectedFunction());
        syntax.add(new MultiplyFunction());
+       */
 
        /*
        syntax.add(new SineFunction());
@@ -66,8 +70,8 @@ public class AgentModel extends GPModel {
 
        syntax.add(new Literal(0.0));
        syntax.add(new Literal(1.0));
-       syntax.add(new Literal(2.0));
-       syntax.add(new Literal(3.0));
+       //syntax.add(new Literal(2.0));
+       //syntax.add(new Literal(3.0));
 
        syntax.add(new WheelDriveFromFloats());
        syntax.add(new WheelDriveFromBearing());
@@ -92,7 +96,7 @@ public class AgentModel extends GPModel {
                 new Color(0,0,0));
         Simulation sim = new Simulation(robotFactory, resourceFactory, config);
         sim.runForNIterations(20000);
-        System.out.println(p);
+        //System.out.println(p);
         return -sim.getFitness();
     }
 

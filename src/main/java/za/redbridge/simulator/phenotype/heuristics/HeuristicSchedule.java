@@ -27,6 +27,9 @@ public class HeuristicSchedule {
         for (Heuristic heuristic : schedule) {
             wheelDrive = heuristic.step(readings);
             if (wheelDrive != null) {
+                if(wheelDrive.x == Double.NaN || wheelDrive.y == Double.NaN){
+                    throw new RuntimeException(heuristic.getClass().getName() + " gave a NaN wheelDrive!");
+                }
                 break;
             }
         }
