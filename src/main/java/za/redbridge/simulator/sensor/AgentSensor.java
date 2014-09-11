@@ -50,7 +50,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         readingSize = 1;
     }
 
-    public AgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
+    public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
         if (fieldOfView <= 0 || fieldOfView >= Math.PI) {
             throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);
         }
@@ -63,7 +63,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         this.orientation = orientation;
         this.range = range;
         this.fieldOfView = fieldOfView;
-        this.readingSize = readingSize;
+        this.readingSize = 1;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
 

@@ -23,9 +23,9 @@ public class ChasingPhenotype implements Phenotype {
 
     public ChasingPhenotype() {
 
-        AgentSensor leftSensor = new ChasingSensor((float) (Math.PI / 4), 0f, 1f, 0.2f, 1);
-        AgentSensor forwardSensor = new ChasingSensor(0f, 0f, 1f, 0.2f, 1);
-        AgentSensor rightSensor = new ChasingSensor((float) -(Math.PI / 4), 0f, 1f, 0.2f, 1);
+        AgentSensor leftSensor = new ChasingSensor((float) (Math.PI / 4), 0f, 1f, 0.2f);
+        AgentSensor forwardSensor = new ChasingSensor(0f, 0f, 1f, 0.2f);
+        AgentSensor rightSensor = new ChasingSensor((float) -(Math.PI / 4), 0f, 1f, 0.2f);
 
         sensors = new ArrayList<>();
         sensors.add(leftSensor);
@@ -82,8 +82,8 @@ public class ChasingPhenotype implements Phenotype {
             super(bearing);
         }
 
-        public ChasingSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
-            super(bearing, orientation, range, fieldOfView, readingSize);
+        public ChasingSensor(float bearing, float orientation, float range, float fieldOfView) {
+            super(bearing, orientation, range, fieldOfView);
         }
 
         @Override
