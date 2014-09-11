@@ -11,8 +11,8 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.phenotype.ChasingPhenotype;
+import sim.display.Console;
 
-import java.io.Console;
 import java.text.ParseException;
 
 //entry point into simulator
@@ -71,8 +71,13 @@ public class Main {
 
             Simulation simulation = new Simulation(simulationConfiguration, experimentConfiguration, robotFactory);
 
+            SimulationGUI video =
+                    new SimulationGUI(simulation);
 
-            SimulationGUI video = new SimulationGUI(simulation);
+            //new console which displays this simulation
+            Console console = new Console(video);
+            console.setVisible(true);
+
         }
         else {
 

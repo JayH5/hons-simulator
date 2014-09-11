@@ -53,15 +53,6 @@ public class ScoreCalculator implements CalculateScore {
                 config.getRobotRadius(), config.getRobotColour());
 
         Simulation simulation = new Simulation(config, experimentConfig, robotFactory);
-
-        /*
-        SimulationGUI video =
-                new SimulationGUI(simulation);
-
-        //new console which displays this simulation
-        Console console = new Console(video);
-        console.setVisible(true);*/
-
         simulation.run();
 
         return simulation.getFitness();
