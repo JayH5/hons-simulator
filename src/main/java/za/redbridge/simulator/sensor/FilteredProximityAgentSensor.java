@@ -9,13 +9,14 @@ public class FilteredProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(1);
     private Set<Class> whitelist = new HashSet<>();
+    private static final int readingSize = 1;
 
     public FilteredProximityAgentSensor() {
         super();
     }
 
     public FilteredProximityAgentSensor(float bearing, Collection<String> whitelist) {
-        super(bearing, 0.0f, 30.0f, 0.1f, 1);
+        super(bearing, 0.0f, 30.0f, 0.1f);
         for(String cs : whitelist){
             try {
                 this.whitelist.add(Class.forName(cs));
@@ -23,8 +24,8 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
     }
 
-    public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
-        super(bearing, orientation, range, fieldOfView, readingSize);
+    public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        super(bearing, orientation, range, fieldOfView);
     }
 
     @Override
@@ -86,4 +87,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
 
     }
+
+    @Override
+    public int getReadingSize() { return readingSize; }
 }
