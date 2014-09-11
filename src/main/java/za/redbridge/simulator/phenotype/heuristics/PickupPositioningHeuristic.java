@@ -3,8 +3,6 @@ package za.redbridge.simulator.phenotype.heuristics;
 import org.jbox2d.common.Vec2;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.object.ResourceObject;
@@ -17,143 +15,113 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class PickupPositioningHeuristic extends Heuristic {
 
-    protected final ResourceObject resource;
     protected final PickupSensor pickupSensor;
-    protected final RobotObject attachedRobot;
-    protected final PriorityBlockingQueue<Heuristic> schedule;
 
-    protected int priority = 2;
-
-    public PickupPositioningHeuristic (ResourceObject resource, PickupSensor pickupSensor,
-                                       RobotObject attachedRobot,
-                                       PriorityBlockingQueue<Heuristic> schedule) {
-
-        this.resource = resource;
-        this.attachedRobot = attachedRobot;
-        this.schedule = schedule;
+    public PickupPositioningHeuristic(HeuristicSchedule schedule, PickupSensor pickupSensor,
+            RobotObject attachedRobot) {
+        super(schedule, attachedRobot);
         this.pickupSensor = pickupSensor;
+
+        setPriority(2);
     }
 
     public Double2D step(List<SensorReading> list) {
-        Vec2 newPosition = nextStep();
-        Optional<ResourceObject> sensedResource = pickupSensor.sense();
-
-        if (!sensedResource.isPresent() || resource.isCollected() || resource.pushedByMaxRobots()) {
-            schedule.remove(this);
+        if (attachedRobot.isBoundToResource()) { // Shouldn't happen
+            removeSelfFromSchedule();
             return null;
         }
 
-        if (!attachedRobot.isBoundToResource()) {
-            boolean attachmentSuccess = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
-                    .orElse(false);
+        ResourceObject resource =
+                pickupSensor.sense().map(o -> (ResourceObject) o.getObject()).orElse(null);
 
-            if (attachmentSuccess) {
-                schedule.remove(this);
-            } else {
-                Vec2 robotPosition = attachedRobot.getBody().getPosition();
-                Vec2 anchorPosition = resource.getClosestAnchorPosition(robotPosition);
-                if (anchorPosition != null) {
-                    if (anchorPosition.subLocal(robotPosition).length()
-                            > resource.getDiagonalLength()) {
-                        // Robot too far away from resource
-                        schedule.remove(this);
-                    }
-                } else {
-                    // All anchor points taken
-                    schedule.remove(this);
-                }
-            }
-        } else {
-            // In case we're still scheduled and the robot has bound to the resource
-            // or the resource has been collected
-            schedule.remove(this);
+        // Check the resource is still present and hasn't been collected by another robot
+        if (resource == null || !resource.canBePickedUp()) {
+            removeSelfFromSchedule();
+            return null;
         }
 
+        // Try pick up the resource
+        if (resource.tryPickup(attachedRobot)) {
+            removeSelfFromSchedule();
+            return null;
+        }
+
+        Vec2 newPosition = nextStep(resource);
         return wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition));
 
     }
 
     //next step (out: world)
-    private Vec2 nextStep() {
-
-        ResourceObject.Side stickySide = resource.getStickySide();
-        //stickySide should never be null, but in case it is return robot position (why?)
-        if (stickySide == null) {
-            return attachedRobot.getBody().getPosition();
-        }
-
-        Vec2 closestAttachmentPoint =
-                resource.getClosestAnchorPosition(attachedRobot.getBody().getPosition());
-        if (closestAttachmentPoint == null) {
-            return attachedRobot.getBody().getPosition(); // lol just do the same
-        }
-
-        ResourceObject.Side robotSide =
-                resource.getSideClosestToPoint(attachedRobot.getBody().getPosition());
+    private Vec2 nextStep(ResourceObject resource) {
         Vec2 robotPosition = attachedRobot.getBody().getPosition();
 
-        Vec2 position;
-        double width = resource.getWidth();
-        double height = resource.getHeight();
+        ResourceObject.Side stickySide = resource.getStickySide();
+        ResourceObject.Side robotSide = resource.getSideClosestToPoint(robotPosition);
 
-        //same side
-        if (stickySide == robotSide) {
-            return straightGuide(robotPosition, closestAttachmentPoint);
-        }
-        //different side
-        else {
-            Vec2 robotPositionLocalToResource = resource.getBody().getLocalPoint(robotPosition);
-
-            float spacing = 0.0f;
-
-            double xDist = Math.abs(closestAttachmentPoint.x - robotPosition.x);
-            double yDist = Math.abs(closestAttachmentPoint.y - robotPosition.y);
-
-            int xDirectionMultiplier = (int)((closestAttachmentPoint.x - robotPosition.x)/xDist)*-1;
-            int yDirectionMultiplier = (int)((closestAttachmentPoint.y - robotPosition.y)/yDist)*-1;
-
-            //anchor point relative to the ResourceObject
-            if (robotSide == ResourceObject.Side.LEFT || robotSide == ResourceObject.Side.RIGHT) {
-
-                float y = (float) height / 2 - yDirectionMultiplier*(robotPositionLocalToResource.y + spacing / 2);
-                float x = robotSide == ResourceObject.Side.LEFT ? (float) -width / 2 : (float) width / 2;
-                position = new Vec2(x,y);
+        // same side or side not yet set
+        if (stickySide == robotSide || stickySide == null) {
+            // Head for the anchor point
+            return calculateTargetPoint(resource);
+        } else { // Different side, navigate to corner
+            final Vec2 corner;
+            float halfWidth = (float) resource.getWidth() / 2;
+            float halfHeight = (float) resource.getHeight() / 2;
+            if (robotSide == ResourceObject.Side.LEFT) {
+                if (stickySide == ResourceObject.Side.TOP) {
+                    // Top left corner
+                    corner = new Vec2(-halfWidth, halfHeight);
+                } else {
+                    // Bottom left corner
+                    corner = new Vec2(-halfWidth, -halfHeight);
+                }
+            } else if (robotSide == ResourceObject.Side.RIGHT) {
+                if (stickySide == ResourceObject.Side.TOP) {
+                    // Top right
+                    corner = new Vec2(halfWidth, halfHeight);
+                } else {
+                    // Bottom right
+                    corner = new Vec2(halfWidth, -halfHeight);
+                }
+            } else if (robotSide == ResourceObject.Side.TOP) {
+                if (stickySide == ResourceObject.Side.LEFT) {
+                    // Top left
+                    corner = new Vec2(-halfWidth, halfHeight);
+                } else {
+                    // Top right
+                    corner = new Vec2(halfWidth, halfHeight);
+                }
+            } else if (robotSide == ResourceObject.Side.BOTTOM) {
+                if (stickySide == ResourceObject.Side.LEFT) {
+                    // Bottom left
+                    corner = new Vec2(-halfWidth, -halfHeight);
+                } else {
+                    // Bottom right
+                    corner = new Vec2(halfWidth, -halfHeight);
+                }
             } else {
-
-                float x = (float) -width / 2 + xDirectionMultiplier*(robotPositionLocalToResource.x + spacing / 2);
-                float y = robotSide == ResourceObject.Side.TOP ? (float) -height / 2 : (float) height / 2;
-                position = new Vec2(x,y);
+                throw new RuntimeException("Robot side not found!");
             }
 
-            return resource.getBody().getWorldPoint(position);
+            // "Pad" the corner by radius x radius
+            float radius = attachedRobot.getRadius();
+            corner.addLocal(Math.copySign(radius, corner.x), Math.copySign(radius, corner.y));
 
+            // Transform relative to resource
+            resource.getBody().getLocalPointToOut(corner, corner);
+
+            return corner;
         }
 
     }
 
-    //next step in straight line along axis of greatest change
-    public Vec2 straightGuide(Vec2 begin, Vec2 end) {
+    private Vec2 calculateTargetPoint(ResourceObject resource) {
+        Vec2 position = attachedRobot.getBody().getPosition();
+        // Get the anchor point and side normal
+        ResourceObject.AnchorPoint anchorPoint = resource.getClosestAnchorPoint(position);
+        Vec2 normal = resource.getNormalToSide(anchorPoint.getSide());
 
-        double xDist = Math.abs(end.x - begin.x);
-        double yDist = Math.abs(end.y - begin.y);
-
-        if (xDist < 0.01 || yDist < 0.01) {
-            return begin;
-        }
-
-        int xDirectionMultiplier = (int)((end.x - begin.x)/xDist);
-        int yDirectionMultiplier = (int)((end.y - begin.y)/yDist);
-
-        Vec2 result;
-
-        if (xDist > yDist) {
-            result = new Vec2 (begin.x+xDirectionMultiplier, begin.y);
-        }
-        else {
-            result = new Vec2 (begin.x, begin.y+yDirectionMultiplier);
-        }
-
-        return result;
+        // Get a distance away from the anchor point
+        return normal.mulLocal(attachedRobot.getRadius()).addLocal(anchorPoint.getPosition());
     }
 
 }

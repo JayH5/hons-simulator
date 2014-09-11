@@ -9,8 +9,8 @@ import org.jbox2d.dynamics.World;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
@@ -118,8 +118,8 @@ public class RobotObject extends PhysicalObject {
         super.step(sim);
 
         List<AgentSensor> sensors = phenotype.getSensors();
-        List<SensorReading> readings = new ArrayList<>(sensors.size());
-        sensors.forEach(sensor -> readings.add(sensor.sense()));
+        List<SensorReading> readings = sensors.stream().map(s -> s.sense())
+                .collect(Collectors.toList());
 
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 

@@ -1,17 +1,17 @@
 package za.redbridge.simulator.phenotype;
 
+import java.util.List;
+
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.phenotype.heuristics.CollisionAvoidanceHeuristic;
-import za.redbridge.simulator.phenotype.heuristics.Heuristic;
+import za.redbridge.simulator.phenotype.heuristics.HeuristicSchedule;
 import za.redbridge.simulator.phenotype.heuristics.PickupHeuristic;
+import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.SensorReading;
-
-import java.util.*;
-import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Created by shsu on 2014/08/27.
@@ -24,24 +24,14 @@ public class HeuristicPhenotype {
     protected final RobotObject attachedRobot;
     protected final SimConfig.Direction targetAreaPlacement;
 
-    protected static final double P2 = Math.PI / 2;
-
-    protected final PriorityBlockingQueue<Heuristic> heuristicList;
-
-    public class HeuristicComparator implements Comparator<Heuristic> {
-        @Override
-        public int compare(Heuristic a, Heuristic b) {
-
-            return a.getPriority() - b.getPriority();
-        }
-    }
+    protected final HeuristicSchedule schedule;
 
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject attachedRobot,
-                              SimConfig.Direction targetAreaPlacement) {
+            SimConfig.Direction targetAreaPlacement) {
 
         // TODO: Make configurable or decide on good defaults
         this.collisionSensor = new CollisionSensor();
-        this.pickupSensor = new PickupSensor(3, 3, 0f);
+        this.pickupSensor = new PickupSensor(0.5f);
         this.controllerPhenotype = controllerPhenotype;
         this.attachedRobot = attachedRobot;
         this.targetAreaPlacement = targetAreaPlacement;
@@ -49,30 +39,30 @@ public class HeuristicPhenotype {
         collisionSensor.attach(attachedRobot);
         pickupSensor.attach(attachedRobot);
 
-        heuristicList = new PriorityBlockingQueue<>(5, new HeuristicComparator());
+        schedule = new HeuristicSchedule();
 
-        heuristicList.add(new PickupHeuristic(pickupSensor, attachedRobot, heuristicList, targetAreaPlacement));
-        heuristicList.add(new CollisionAvoidanceHeuristic(collisionSensor, attachedRobot));
-
+        schedule.addHeuristic(
+                new PickupHeuristic(schedule, pickupSensor, attachedRobot, targetAreaPlacement));
+        schedule.addHeuristic(
+                new CollisionAvoidanceHeuristic(schedule, collisionSensor, attachedRobot));
     }
 
-    public CollisionSensor getCollisionSensor() { return collisionSensor; }
-    public PickupSensor getPickupSensor() { return pickupSensor; }
+    public ClosestObjectSensor getCollisionSensor() {
+        return collisionSensor;
+    }
 
+    public PickupSensor getPickupSensor() {
+        return pickupSensor;
+    }
+
+    @Override
     public HeuristicPhenotype clone() {
         return new HeuristicPhenotype(controllerPhenotype.clone(), attachedRobot,
                 targetAreaPlacement);
     }
 
     public Double2D step(List<SensorReading> list) {
-
-        Iterator<Heuristic> iterator = heuristicList.iterator();
-
-        Double2D wheelDrives = null;
-
-        while (wheelDrives == null && iterator.hasNext()) {
-             wheelDrives = iterator.next().step(list);
-        }
+        Double2D wheelDrives = schedule.step(list);
 
         if (wheelDrives == null) {
             wheelDrives = controllerPhenotype.step(list);

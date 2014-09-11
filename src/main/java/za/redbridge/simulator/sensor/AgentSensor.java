@@ -12,8 +12,7 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
-import java.text.ParseException;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import za.redbridge.simulator.object.PhysicalObject;
@@ -37,21 +36,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     private final float fovGradient;
 
-    //number of float values this sensor outputs at each reading
-    protected final int readingSize;
-
-    public AgentSensor() {
-
-        bearing = 3.14f;
-        orientation = 0.1f;
-        range = 5.0f;
-        fieldOfView = 3.0f;
-        readingSize = 1;
-
-        fovGradient = (float) Math.tan(fieldOfView / 2);
-    }
-
-    public AgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
+    public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
         if (fieldOfView <= 0 || fieldOfView >= Math.PI) {
             throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);
         }
@@ -64,7 +49,6 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         this.orientation = orientation;
         this.range = range;
         this.fieldOfView = fieldOfView;
-        this.readingSize = readingSize;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
 
@@ -175,8 +159,8 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             distance = objectRelativeTransform.p.length() - radius;
         }
 
-        PhysicalObject physicalObject = (PhysicalObject) circleFixture.getBody().getUserData();
-        return new CircleSensedObject(physicalObject, distance, radius, x, y, x0, y0, x1, y1);
+        return new CircleSensedObject(getFixtureObject(circleFixture), distance, radius, x, y, x0,
+                y0, x1, y1);
     }
 
     private float lineCircleIntersection(float m, float c, float p, float q, float r) {
@@ -244,8 +228,8 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             y1 = yMax;
         }
 
-        PhysicalObject physicalObject = (PhysicalObject) polygonFixture.getBody().getUserData();
-        return new PolygonSensedObject(physicalObject, distance, x0, y0, x1 - x0, y1 - y0);
+        return new PolygonSensedObject(getFixtureObject(polygonFixture), distance, x0, y0, x1 - x0,
+                y1 - y0);
     }
 
     protected SensedObject senseEdgeFixture(Fixture edgeFixture,
@@ -301,15 +285,19 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             distance = (float) Math.hypot(x, y);
         }
 
-        PhysicalObject physicalObject = (PhysicalObject) edgeFixture.getBody().getUserData();
-        return new EdgeSensedObject(physicalObject, distance, x1, y1, x2, y2);
+        return new EdgeSensedObject(getFixtureObject(edgeFixture), distance, x1, y1, x2, y2);
     }
 
-    protected static boolean checkFieldPresent(Object field, String name) {
-        if (field != null) {
-            return true;
-        }
-        System.out.println("Field '" + name + "' not present, using default");
+    /**
+     * Decide whether to filter out a given PhysicalObject instance. Since the object may still
+     * enter/leave the field of the sensor, we can't filter it out in
+     * {@link #isRelevantObject(Fixture)} because we still want to receive updates of the object
+     * leaving. We might want to filter out the object here if its state changes and it becomes
+     * irrelevant while we are observing it.
+     * @param object an object in the fixture list
+     * @return true if the object should be ignored
+     */
+    protected boolean filterOutObject(PhysicalObject object) {
         return false;
     }
 
@@ -321,28 +309,5 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
      */
     protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
 
-    /**
-     * Reads the parameters that this sensor needs from a YAML map and configures the sensor object according to these
-     * parameters.
-     */
-    public abstract void readAdditionalConfigs(Map<String, Object> map) throws ParseException;
-
-    public int getReadingSize() { return readingSize; }
-
-    @Override
-    public AgentSensor clone() {
-
-        Object o = null;
-
-        try {
-            o = super.clone();
-        }
-        catch (CloneNotSupportedException c) {
-            c.printStackTrace();
-            System.exit(0);
-        }
-
-        return (AgentSensor) o;
-    }
 
 }

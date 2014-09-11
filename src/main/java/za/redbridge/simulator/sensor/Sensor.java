@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sim.portrayal.DrawInfo2D;
+import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.portrayal.Portrayal;
@@ -52,7 +53,14 @@ public abstract class Sensor<T> implements Collideable {
         // Invalidate the cached transform
         cachedSensorTransformValid = false;
 
-        List<Fixture> fixtures = new ArrayList<>(sensedFixtures);
+        List<Fixture> fixtures = new ArrayList<>(sensedFixtures.size());
+        for (Fixture fixture : sensedFixtures) {
+            PhysicalObject obj = (PhysicalObject) fixture.getBody().getUserData();
+            if (!filterOutObject(obj)) {
+                fixtures.add(fixture);
+            }
+        }
+
         return provideReading(fixtures);
     }
 
@@ -153,6 +161,10 @@ public abstract class Sensor<T> implements Collideable {
         return DEFAULT_PAINT;
     }
 
+    protected boolean filterOutObject(PhysicalObject object) {
+        return false;
+    }
+
     /**
      * Converts a list of fixtures that have been determined to fall within the sensor's range into
      * the output of this sensor
@@ -194,6 +206,10 @@ public abstract class Sensor<T> implements Collideable {
     @Override
     public boolean isRelevantObject(Fixture fixture) {
         return !(fixture.getUserData() instanceof Sensor);
+    }
+
+    protected static PhysicalObject getFixtureObject(Fixture fixture) {
+        return (PhysicalObject) fixture.getBody().getUserData();
     }
 
 }
