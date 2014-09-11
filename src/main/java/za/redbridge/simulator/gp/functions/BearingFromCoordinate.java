@@ -28,7 +28,7 @@ public class BearingFromCoordinate extends Node {
         Object coordinate = getChild(0).evaluate();
         if(coordinate.getClass() == RelativeCoordinate.class){
             RelativeCoordinate c = (RelativeCoordinate) coordinate;
-            float b = (float) Heuristic.bearingFromTargetPoint(new Vec2(c.x, c.y));
+            float b = (float) Math.atan2(c.x, c.y);
             return new Bearing(b);
         }
         else return null;

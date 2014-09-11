@@ -13,7 +13,7 @@ public class WheelDrive extends Vec2 {
     }
 
     public WheelDrive(Bearing bearing){
-        super((float) Heuristic.wheelDriveFromBearing(bearing.getValue()).x, (float) Heuristic.wheelDriveFromBearing(bearing.getValue()).y);
+        super((float) Heuristic.wheelDriveForTargetAngle(bearing.getValue()).x, (float) Heuristic.wheelDriveForTargetAngle(bearing.getValue()).y);
     }
 
     public WheelDrive(RelativeCoordinate c){

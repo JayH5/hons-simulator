@@ -164,8 +164,8 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             distance = objectRelativeTransform.p.length() - radius;
         }
 
-        PhysicalObject physicalObject = (PhysicalObject) circleFixture.getBody().getUserData();
-        return new CircleSensedObject(physicalObject, distance, radius, x, y, x0, y0, x1, y1);
+        return new CircleSensedObject(getFixtureObject(circleFixture), distance, radius, x, y, x0,
+                y0, x1, y1);
     }
 
     private float lineCircleIntersection(float m, float c, float p, float q, float r) {
@@ -233,8 +233,8 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             y1 = yMax;
         }
 
-        PhysicalObject physicalObject = (PhysicalObject) polygonFixture.getBody().getUserData();
-        return new PolygonSensedObject(physicalObject, distance, x0, y0, x1 - x0, y1 - y0);
+        return new PolygonSensedObject(getFixtureObject(polygonFixture), distance, x0, y0, x1 - x0,
+                y1 - y0);
     }
 
     protected SensedObject senseEdgeFixture(Fixture edgeFixture,
@@ -290,8 +290,20 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             distance = (float) Math.hypot(x, y);
         }
 
-        PhysicalObject physicalObject = (PhysicalObject) edgeFixture.getBody().getUserData();
-        return new EdgeSensedObject(physicalObject, distance, x1, y1, x2, y2);
+        return new EdgeSensedObject(getFixtureObject(edgeFixture), distance, x1, y1, x2, y2);
+    }
+
+    /**
+     * Decide whether to filter out a given PhysicalObject instance. Since the object may still
+     * enter/leave the field of the sensor, we can't filter it out in
+     * {@link #isRelevantObject(Fixture)} because we still want to receive updates of the object
+     * leaving. We might want to filter out the object here if its state changes and it becomes
+     * irrelevant while we are observing it.
+     * @param object an object in the fixture list
+     * @return true if the object should be ignored
+     */
+    protected boolean filterOutObject(PhysicalObject object) {
+        return false;
     }
 
     /**
