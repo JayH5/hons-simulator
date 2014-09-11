@@ -71,5 +71,6 @@ public abstract class ClosestObjectSensor
         public int compareTo(ClosestObject o) {
             return Double.compare(distance, o.distance);
         }
+
     }
 }

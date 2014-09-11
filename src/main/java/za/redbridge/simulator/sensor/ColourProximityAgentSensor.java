@@ -24,7 +24,7 @@ public class ColourProximityAgentSensor extends AgentSensor {
         readings.add(0.0);
     }
 
-    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
+    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
         super(bearing, orientation, range, fieldOfView);
     }
 
@@ -64,4 +64,21 @@ public class ColourProximityAgentSensor extends AgentSensor {
 
     @Override
     public int getReadingSize() { return readingSize; }
+
+    @Override
+    public ColourProximityAgentSensor clone() {
+
+        ColourProximityAgentSensor cloned = new ColourProximityAgentSensor(bearing, orientation, range, fieldOfView);
+
+        try {
+            cloned.readAdditionalConfigs(additionalConfigs);
+        }
+        catch (ParseException p) {
+            System.out.println("Clone failed.");
+            p.printStackTrace();
+            System.exit(-1);
+        }
+
+        return cloned;
+    }
 }
