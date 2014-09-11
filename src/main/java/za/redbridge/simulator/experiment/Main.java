@@ -68,7 +68,8 @@ public class Main {
                     new ChasingPhenotype(), simulationConfiguration.getRobotMass(),
                     simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour());
 
-            Simulation simulation = new Simulation(simulationConfiguration, experimentConfiguration, robotFactory);
+            Simulation simulation = new Simulation(simulationConfiguration, robotFactory,
+                    experimentConfiguration.getPopulationSize());
 
 
             SimulationGUI video =

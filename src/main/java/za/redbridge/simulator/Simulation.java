@@ -42,17 +42,15 @@ public class Simulation extends SimState {
     private static final int POSITION_ITERATIONS = 3;
 
     private TargetAreaObject targetArea;
-
     private RobotFactory robotFactory;
-
     private final SimConfig config;
-    private final ExperimentConfig experimentConfig;
+    private final int populationSize;
 
-    public Simulation(SimConfig config, ExperimentConfig experimentConfig, RobotFactory robotFactory) {
+    public Simulation(SimConfig config, RobotFactory robotFactory, int populationSize) {
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
-        this.experimentConfig = experimentConfig;
+        this.populationSize = populationSize;
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -78,7 +76,7 @@ public class Simulation extends SimState {
         createWalls();
         createTargetArea();
         robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld, experimentConfig.getPopulationSize(),
+                .placeInstances(placementArea.new ForType<>(), physicsWorld, populationSize,
                         config.getTargetAreaPlacement());
         config.getResourceFactory().placeInstances(placementArea.new ForType<>(), physicsWorld);
 
