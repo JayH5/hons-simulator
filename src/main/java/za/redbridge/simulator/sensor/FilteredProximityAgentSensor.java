@@ -86,4 +86,9 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
 
     }
+
+    @Override
+    public Object clone(){
+        return new FilteredProximityAgentSensor(bearing, orientation, range, fieldOfView, readingSize);
+    }
 }

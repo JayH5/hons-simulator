@@ -60,4 +60,9 @@ public class ColourProximityAgentSensor extends AgentSensor {
     }
 
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
+
+    @Override
+    public Object clone(){
+        return new ColourProximityAgentSensor(bearing, orientation, range, fieldOfView, readingSize);
+    }
 }

@@ -37,7 +37,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     protected final float range;
     protected final float fieldOfView;
 
-    protected final float readingSize;
+    protected final int readingSize;
 
     private final float fovGradient;
 
@@ -340,8 +340,5 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     }
 
     @Override
-    public AgentSensor clone() {
-        Object o = this.clone();
-        return (AgentSensor) o;
-    }
+    public abstract Object clone();
 }

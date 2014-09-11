@@ -66,9 +66,9 @@ public class Main {
 
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                     new ChasingPhenotype(), simulationConfiguration.getRobotMass(),
-                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour());
+                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(), experimentConfiguration.getPopulationSize());
 
-            Simulation simulation = new Simulation(simulationConfiguration, experimentConfiguration, robotFactory);
+            Simulation simulation = new Simulation(simulationConfiguration, robotFactory);
 
 
             SimulationGUI video =

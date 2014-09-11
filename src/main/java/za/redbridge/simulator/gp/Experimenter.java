@@ -8,6 +8,7 @@ import org.epochx.life.RunAdapter;
 import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
@@ -26,14 +27,7 @@ import java.util.List;
  */
 public class Experimenter {
     public static void main(String[] args){
-        SimConfig config;
-        if (args.length > 0) {
-            config = SimConfig.loadFromFile(args[0]);
-        } else {
-            config = new SimConfig(); // Default
-        }
-
-        List<AgentSensor> sensors = new ArrayList<AgentSensor>();
+        List<AgentSensor> sensors = new ArrayList<>();
         AgentSensor leftSensor = new ProximityAgentSensor((float) ((7 / 4.0f) * Math.PI), 0f, 1f, 0.2f);
         AgentSensor forwardSensor = new ProximityAgentSensor(0f, 0f, 1f, 0.2f);
         AgentSensor rightSensor = new ProximityAgentSensor((float) (Math.PI/4), 0f, 1f, 0.2f);
@@ -42,7 +36,10 @@ public class Experimenter {
         sensors.add(forwardSensor);
         sensors.add(rightSensor);
 
-        AgentModel model = new AgentModel(sensors, config);
+        SimConfig simulationConfiguration = new SimConfig("configs/simulationConfig.yml");
+        ExperimentConfig experimentConfiguration = new ExperimentConfig("configs/experimentConfig.yml");
+
+        AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
         model.setNoGenerations(100);
         model.setMaxInitialDepth(3);
         model.setMaxDepth(5);

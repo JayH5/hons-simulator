@@ -121,6 +121,11 @@ public class RobotObject extends PhysicalObject {
         List<SensorReading> readings = sensors.stream().map(s -> s.sense())
                 .collect(Collectors.toList());
 
+        for(int i = 0; i < readings.size(); i++){
+            if(readings.get(i).getValues().get(0).isNaN()) {
+                System.out.println("LOOOOL");
+            }
+        }
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 
         applyWheelForce(wheelDrives.x, leftWheelPosition);

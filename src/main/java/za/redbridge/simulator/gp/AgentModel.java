@@ -11,6 +11,7 @@ import org.epochx.representation.CandidateProgram;
 import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
@@ -32,12 +33,14 @@ import java.util.List;
 public class AgentModel extends GPModel {
     private List<AgentSensor> sensors;
     private final SimConfig config;
+    private final ExperimentConfig exConfig;
     List<Variable> inputs = new ArrayList<>();
     protected final static float P2 = (float) Math.PI/2;
 
-   public AgentModel(List<AgentSensor> sensors, SimConfig config){
+   public AgentModel(List<AgentSensor> sensors, SimConfig config, ExperimentConfig exConfig){
        this.sensors = sensors;
        this.config = config;
+       this.exConfig = exConfig;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
            inputs.add(new Variable("S" + i, Double.class));
@@ -88,13 +91,10 @@ public class AgentModel extends GPModel {
     public double getFitness(CandidateProgram p){
         GPCandidateProgram program = (GPCandidateProgram) p;
 
-        ResourceFactory resourceFactory = new ConfigurableResourceFactory(config.getSmallObjectWidth(), config.getSmallObjectHeight(),
-                config.getSmallObjectMass(), config.getSmallObjectPushingBots(), config.getLargeObjectWidth(), config.getLargeObjectHeight(),
-                config.getLargeObjectMass(), config.getLargeObjectPushingBots());
-
-        RobotFactory robotFactory = new HomogeneousRobotFactory(new GPPhenotype(sensors, program, inputs), 0.7, 0.15,
-                new Color(0,0,0));
-        Simulation sim = new Simulation(robotFactory, resourceFactory, config);
+        HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
+                new GPPhenotype(sensors, program, inputs), config.getRobotMass(),
+                config.getRobotRadius(), config.getRobotColour(), exConfig.getPopulationSize());
+        Simulation sim = new Simulation(config, robotFactory);
         sim.runForNIterations(20000);
         //System.out.println(p);
         return -sim.getFitness();

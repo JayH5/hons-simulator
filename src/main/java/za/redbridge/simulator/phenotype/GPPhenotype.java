@@ -10,6 +10,7 @@ import za.redbridge.simulator.sensor.SensorReading;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class GPPhenotype implements Phenotype {
     protected List<Variable> sortedInputs;
@@ -39,6 +40,13 @@ public class GPPhenotype implements Phenotype {
 
     @Override
     public Phenotype clone() {
-        return new GPPhenotype((List<AgentSensor>)sensors.clone(), program.clone(), sortedInputs);
+        List<AgentSensor> newSensors = new ArrayList<>();
+        for(AgentSensor s : sensors){
+            newSensors.add((AgentSensor)s.clone());
+        }
+        return new GPPhenotype(newSensors, program.clone(), sortedInputs);
     }
+
+    @Override
+    public void configure(Map<String,Object> config){}
 }
