@@ -75,7 +75,7 @@ public class Experiment {
                     experimentConfiguration.getPopulationSize());
             pop.reset();
 
-            //final ConcurrentSkipListMap<NEATNetwork, >
+            final ConcurrentSkipListMap<NEATNetwork, Double> leaderBoard = new ConcurrentSkipListMap<>();
 
             CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, experimentConfiguration,
                     morphologyConfig);

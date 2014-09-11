@@ -34,12 +34,14 @@ public class ScoreCalculator implements CalculateScore {
     private ExperimentConfig experimentConfig;
 
     //stores fitnesses of population
-    private ConcurrentSkipListMap<NEATNetwork, Double> leaderBoard;
+    private final ConcurrentSkipListMap<NEATNetwork,Double> leaderBoard;
 
-    public ScoreCalculator(SimConfig config, ExperimentConfig experimentConfig, MorphologyConfig morphologyConfig) {
+    public ScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
+                           MorphologyConfig morphologyConfig, ConcurrentSkipListMap<NEATNetwork,Double> leaderBoard) {
         this.config = config;
         this.morphologyConfig = morphologyConfig;
         this.experimentConfig = experimentConfig;
+        this.leaderBoard = leaderBoard;
     }
 
     //MLMethod should be NEATNetwork which we calculate the score for

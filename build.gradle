@@ -10,6 +10,7 @@ dependencies {
   compile 'org.jbox2d:jbox2d-library:2.3.0-BETA'
   compile 'org.yaml:snakeyaml:1.13'
   compile 'args4j:args4j:2.0.29'
+  compile 'org.apache.commons:commons-math3:3.3'
 }
 
 apply plugin:'application'
