@@ -66,6 +66,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         String[] whiteList = null;
 
         if (map == null) {
+            System.out.println("No additional configs found.");
             return;
         }
 
@@ -91,4 +92,23 @@ public class FilteredProximityAgentSensor extends AgentSensor {
 
     @Override
     public int getReadingSize() { return readingSize; }
+
+    @Override
+    public FilteredProximityAgentSensor clone() {
+
+        FilteredProximityAgentSensor cloned = new FilteredProximityAgentSensor(bearing, orientation, range, fieldOfView);
+
+        try {
+            cloned.readAdditionalConfigs(additionalConfigs);
+        }
+        catch (ParseException p) {
+            System.out.println("Clone failed.");
+            p.printStackTrace();
+            System.exit(-1);
+        }
+
+        return cloned;
+    }
+
+
 }

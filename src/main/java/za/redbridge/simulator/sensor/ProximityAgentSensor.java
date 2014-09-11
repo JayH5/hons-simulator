@@ -46,4 +46,20 @@ public class ProximityAgentSensor extends AgentSensor {
     @Override
     public int getReadingSize() { return readingSize; }
 
+    @Override
+    public ProximityAgentSensor clone() {
+
+        ProximityAgentSensor cloned = new ProximityAgentSensor(bearing, orientation, range, fieldOfView);
+
+        try {
+            cloned.readAdditionalConfigs(additionalConfigs);
+        }
+        catch (ParseException p) {
+            System.out.println("Clone failed.");
+            p.printStackTrace();
+            System.exit(-1);
+        }
+
+        return cloned;
+    }
 }

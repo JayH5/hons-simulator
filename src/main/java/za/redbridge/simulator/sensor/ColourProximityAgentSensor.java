@@ -64,4 +64,21 @@ public class ColourProximityAgentSensor extends AgentSensor {
 
     @Override
     public int getReadingSize() { return readingSize; }
+
+    @Override
+    public ColourProximityAgentSensor clone() {
+
+        ColourProximityAgentSensor cloned = new ColourProximityAgentSensor(bearing, orientation, range, fieldOfView);
+
+        try {
+            cloned.readAdditionalConfigs(additionalConfigs);
+        }
+        catch (ParseException p) {
+            System.out.println("Clone failed.");
+            p.printStackTrace();
+            System.exit(-1);
+        }
+
+        return cloned;
+    }
 }

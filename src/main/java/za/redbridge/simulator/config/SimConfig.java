@@ -25,18 +25,6 @@ public class SimConfig extends Config {
     private static final int DEFAULT_TARGET_AREA_THICKNESS = (int)(DEFAULT_ENVIRONMENT_HEIGHT * 0.2);
     private static final Direction DEFAULT_TARGET_AREA_PLACEMENT = Direction.SOUTH;
     private static final int DEFAULT_OBJECTS_ROBOTS = 10;
-    private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
-    private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
-
-    private static final double DEFAULT_SMALL_OBJECT_WIDTH = 0.4;
-    private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4;
-    private static final double DEFAULT_SMALL_OBJECT_MASS = 5.0;
-    private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
-
-    private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6;
-    private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6;
-    private static final double DEFAULT_LARGE_OBJECT_MASS = 15.0;
-    private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
 
     private static final double DEFAULT_ROBOT_MASS = 0.7;
     private static final double DEFAULT_ROBOT_RADIUS = 0.15;
@@ -45,8 +33,8 @@ public class SimConfig extends Config {
 
     private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
     private static final ResourceFactory DEFAULT_RESOURCE_FACTORY = new HalfBigHalfSmallResourceFactory();
-    private static final String DEFAULT_ROBOT_FACTORY = "za.redbridge.simulator.factories.HomogeneousRobotFactory";
-    private static final String DEFAULT_PHENOTYPE = "";
+    private static final String DEFAULT_ROBOT_FACTORY =
+            "za.redbridge.simulator.factories.HomogeneousRobotFactory";
 
     public enum Direction {
         NORTH, SOUTH, EAST, WEST

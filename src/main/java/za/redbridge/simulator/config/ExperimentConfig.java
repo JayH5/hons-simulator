@@ -16,21 +16,23 @@ public class ExperimentConfig extends Config {
 
     private static final long DEFAULT_MAX_EPOCHS = 1000;
     private static final EvolutionaryAlgorithm DEFAULT_CONTROLLER_EA = EvolutionaryAlgorithm.NEAT;
-    private static final int DEFAULT_POPULATION_SIZE = 20;
+    private static final int DEFAULT_POPULATION_SIZE = 15;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
 
     public enum EvolutionaryAlgorithm {
         NEAT, EVOLUTIONARY_STRATEGY, GENETIC_PROGRAMMING;
     }
 
-    protected long maxEpochs;
+    protected final long maxEpochs;
+    protected final int populationSize;
+
     protected EvolutionaryAlgorithm algorithm;
-    protected int populationSize;
     protected String robotFactory;
     protected String morphologyConfigFile;
 
     public ExperimentConfig() {
-        this.maxEpochs = 100;
+        this.maxEpochs = DEFAULT_MAX_EPOCHS;
+        this.populationSize = DEFAULT_POPULATION_SIZE;
         this.algorithm = EvolutionaryAlgorithm.NEAT;
     }
 

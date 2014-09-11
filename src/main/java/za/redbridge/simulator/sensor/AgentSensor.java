@@ -40,6 +40,8 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     private final float fovGradient;
 
+    protected Map<String, Object> additionalConfigs = null;
+
     public AgentSensor() {
 
         bearing = 0.0f;
@@ -333,7 +335,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     }
 
     @Override
-    public abstract Object clone();
+    public abstract AgentSensor clone();
 
     public abstract int getReadingSize();
 }
