@@ -44,7 +44,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     //keeps track of what has been pushed into this place
 
-    public TargetAreaObject(World world, Double2D pos, int width, int height, FitnessFunction fitnessFunction) {
+    public TargetAreaObject(World world, Double2D pos, int width, int height,
+            FitnessFunction fitnessFunction) {
         super(createPortrayal(width, height), createBody(world, pos, width, height));
 
         this.fitnessFunction = fitnessFunction;
