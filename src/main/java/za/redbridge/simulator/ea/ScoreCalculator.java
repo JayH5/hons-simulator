@@ -33,7 +33,7 @@ public class ScoreCalculator implements CalculateScore {
     private MorphologyConfig morphologyConfig;
     private ExperimentConfig experimentConfig;
 
-    //stores strongest 
+    //stores fitnesses of population
     private ConcurrentSkipListMap<NEATNetwork, Double> leaderBoard;
 
     public ScoreCalculator(SimConfig config, ExperimentConfig experimentConfig, MorphologyConfig morphologyConfig) {
@@ -52,7 +52,7 @@ public class ScoreCalculator implements CalculateScore {
                         morphologyConfig.getTotalReadingSize()), config.getRobotMass(),
                 config.getRobotRadius(), config.getRobotColour());
 
-        Simulation simulation = new Simulation(config, experimentConfig, robotFactory);
+        Simulation simulation = new Simulation(config, robotFactory, experimentConfig.getPopulationSize());
         simulation.run();
 
         return simulation.getFitness();

@@ -15,6 +15,7 @@ import za.redbridge.simulator.ea.ScoreCalculator;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 
 import java.text.ParseException;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 //example entry point into simulator
 /**
@@ -73,6 +74,8 @@ public class Experiment {
             NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                     experimentConfiguration.getPopulationSize());
             pop.reset();
+
+            //final ConcurrentSkipListMap<NEATNetwork, >
 
             CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, experimentConfiguration,
                     morphologyConfig);
