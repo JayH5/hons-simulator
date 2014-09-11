@@ -7,7 +7,7 @@ meta:
   readingSize: 1
   bearing: 51.0
   orientation: 40.0
-  fieldOfView: 1.5
+  fieldOfView: 10.0
   range: 10.0
 
 2s:
@@ -15,7 +15,7 @@ meta:
   whiteList: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
   bearing: 102.0
-  fieldOfView: 1.5
+  fieldOfView: 10.0
   orientation: 40.0
   range: 10.0
 
@@ -24,7 +24,7 @@ meta:
   whiteList: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
   bearing: 154.0
-  fieldOfView: 1.5
+  fieldOfView: 10.0
   orientation: 40.0
   range: 10.0
 
@@ -33,7 +33,7 @@ meta:
   whiteList: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
   bearing: 206.0
-  fieldOfView: 1.5
+  fieldOfView: 10.0
   orientation: 40.0
   range: 10.0
 
@@ -42,7 +42,7 @@ meta:
   whiteList: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
   bearing: 258.0
-  fieldOfView: 1.5
+  fieldOfView: 10.0
   orientation: 40.0
   range: 10.0
 
@@ -51,6 +51,6 @@ meta:
   whiteList: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
   bearing: 310.0
-  fieldOfView: 1.5
+  fieldOfView: 10.0
   orientation: 40.0
   range: 10.0

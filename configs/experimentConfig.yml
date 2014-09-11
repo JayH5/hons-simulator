@@ -9,4 +9,4 @@ evolutionaryAlgorithm:
   populationSize: 20
 
 morphology:
-  morphologyFileName: sensorlist.yml
+  morphologyFileName: sensorList.yml

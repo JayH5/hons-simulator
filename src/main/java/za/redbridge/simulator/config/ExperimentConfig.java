@@ -17,7 +17,7 @@ public class ExperimentConfig extends Config {
     private static final long DEFAULT_MAX_EPOCHS = 1000;
     private static final EvolutionaryAlgorithm DEFAULT_CONTROLLER_EA = EvolutionaryAlgorithm.NEAT;
     private static final int DEFAULT_POPULATION_SIZE = 20;
-    private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorlist.yml";
+    private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
 
     public enum EvolutionaryAlgorithm {
         NEAT, EVOLUTIONARY_STRATEGY, GENETIC_PROGRAMMING;
