@@ -34,7 +34,7 @@ public class ScoreCalculator implements CalculateScore {
     private ExperimentConfig experimentConfig;
 
     //stores strongest 
-    private ConcurrentSkipListMap<NEATNetwork, Double>
+    private ConcurrentSkipListMap<NEATNetwork, Double> leaderBoard;
 
     public ScoreCalculator(SimConfig config, ExperimentConfig experimentConfig, MorphologyConfig morphologyConfig) {
         this.config = config;

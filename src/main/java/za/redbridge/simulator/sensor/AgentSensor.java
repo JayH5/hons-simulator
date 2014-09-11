@@ -12,7 +12,9 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import za.redbridge.simulator.object.PhysicalObject;
@@ -34,9 +36,21 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     protected final float range;
     protected final float fieldOfView;
 
+    protected final float readingSize;
+
     private final float fovGradient;
 
-    public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+    public AgentSensor() {
+
+        bearing = 0.0f;
+        orientation = 0.0f;
+        range = 10.0f;
+        fieldOfView = 1.5f;
+        fovGradient = (float) Math.tan(fieldOfView / 2);
+        readingSize = 1;
+    }
+
+    public AgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
         if (fieldOfView <= 0 || fieldOfView >= Math.PI) {
             throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);
         }
@@ -49,6 +63,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         this.orientation = orientation;
         this.range = range;
         this.fieldOfView = fieldOfView;
+        this.readingSize = readingSize;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
 
@@ -309,5 +324,19 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
      */
     protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
 
+    public abstract void readAdditionalConfigs(Map<String, Object> map) throws ParseException;
 
+    protected static boolean checkFieldPresent(Object field, String name) {
+        if (field != null) {
+            return true;
+        }
+        System.out.println("Field '" + name + "' not present, using default");
+        return false;
+    }
+
+    @Override
+    public AgentSensor clone() {
+        Object o = this.clone();
+        return (AgentSensor) o;
+    }
 }

@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import javax.swing.JFrame;
 
+import org.encog.neural.neat.NEATNetwork;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -17,6 +18,7 @@ import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.phenotype.ChasingPhenotype;
+import za.redbridge.simulator.phenotype.NEATPhenotype;
 
 /**
  * Created by jamie on 2014/07/24.
@@ -84,6 +86,20 @@ public class SimulationGUI extends GUIState {
         } else {
             config = new SimConfig(); // Default
         }
+
+        HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
+                new ChasingPhenotype(), config.getRobotMass(),
+                config.getRobotRadius(), config.getRobotColour());
+
+        Simulation simulation = new Simulation(config, experimentConfig, robotFactory);
+
+        /*
+        SimulationGUI video =
+                new SimulationGUI(simulation);
+
+        //new console which displays this simulation
+        Console console = new Console(video);
+        console.setVisible(true);*/
 
         /*
         RobotFactory robotFactory = new HomogeneousRobotFactory(new ChasingPhenotype(), 0.7, 0.15,
