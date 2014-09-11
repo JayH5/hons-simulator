@@ -178,6 +178,9 @@ public class ResourceObject extends PhysicalObject {
         }
 
         AnchorPoint closestAnchor = getClosestAnchorPointLocal(robotPositionLocal);
+        if (closestAnchor == null) {
+            return false; // Should not happen but apparently can...
+        }
 
         // Check robot is not unreasonably far away
         if (robotPositionLocal.sub(closestAnchor.getPosition()).length()
