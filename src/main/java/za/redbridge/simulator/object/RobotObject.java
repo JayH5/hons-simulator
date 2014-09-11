@@ -127,7 +127,8 @@ public class RobotObject extends PhysicalObject {
         applyWheelForce(wheelDrives.y, rightWheelPosition);
 
         if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
-            throw new RuntimeException("Invalid force applied: " + wheelDrives);
+            // TODO
+            //throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
         updateFriction();

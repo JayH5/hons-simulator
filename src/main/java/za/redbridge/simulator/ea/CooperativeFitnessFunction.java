@@ -10,6 +10,6 @@ public class CooperativeFitnessFunction implements FitnessFunction {
     @Override
     public double calculateFitness(ResourceObject resource) {
 
-        return resource.getNumPushingBots();
+        return resource.getNumberPushingRobots();
     }
 }

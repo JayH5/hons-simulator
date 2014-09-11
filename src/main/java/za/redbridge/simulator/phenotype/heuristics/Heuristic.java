@@ -56,7 +56,7 @@ public abstract class Heuristic implements Comparator<Heuristic> {
             a = 1;
             b = (angle - 3*P2) / P2;
         }else{
-            throw new RuntimeException("wheelDriveFromBearing quadrant check failed! " + angle);
+            throw new RuntimeException("wheelDriveFromBearing quadrant check failed. Angle: " + angle);
         }
         return new Double2D(a, b);
     }
@@ -75,7 +75,7 @@ public abstract class Heuristic implements Comparator<Heuristic> {
             //fourth
             angle = 3* P2 + (-angle);
         }else{
-            throw new RuntimeException("bearingFromTargetPoint quadrant check failed!");
+            throw new RuntimeException("bearingFromTargetPoint quadrant check failed. x: " + target.x + ", y: " + target.y);
         }
 
         return angle;

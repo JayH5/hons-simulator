@@ -38,7 +38,6 @@ public class PickupHeuristic extends Heuristic {
 
     @Override
     public Double2D step(List<SensorReading> list) {
-
         Double2D wheelDrives = null;
         Optional<ResourceObject> sensedResource = pickupSensor.sense();
 
@@ -46,27 +45,33 @@ public class PickupHeuristic extends Heuristic {
         if (sensedResource.isPresent() && !attachedRobot.isBoundToResource())
             System.out.println("sensed resource");*/
 
+        if (!sensedResource.isPresent()) {
+
+            return wheelDrives;
+        }
+
         if (!attachedRobot.isBoundToResource()) {
 
             boolean attachmentSuccess = sensedResource.map(resource -> resource.tryPickup(attachedRobot))
                     .orElse(false);
 
             if (attachmentSuccess) {
-                //System.out.println("Pickup success!");
                 wheelDrives = wheelDriveFromBearing(targetAreaBearing());
             }
-            else if (!attachmentSuccess && sensedResource.isPresent()) {
-                //System.out.println("Pickup failed, pathing to attachment point.");
+            else if (sensedResource.isPresent()) {
                 ResourceObject resource = sensedResource.get();
 
-                if (!resource.pushedByMaxRobots() || !resource.isCollected()) {
+                if (resource.pushedByMaxRobots() || resource.isCollected()) {
+                    return null;
+                }
+                else {
+
                     schedule.add(new PickupPositioningHeuristic(sensedResource.get(), pickupSensor,
                             attachedRobot, schedule));
                 }
             }
         }
         else {
-
             wheelDrives = wheelDriveFromBearing(targetAreaBearing());
         }
 
@@ -80,10 +85,10 @@ public class PickupHeuristic extends Heuristic {
         double targetAreaPosition = -1;
 
         if (targetAreaBearing == SimConfig.Direction.NORTH) {
-            targetAreaPosition = P2*3;
+            targetAreaPosition = P2;
         }
         else if (targetAreaBearing == SimConfig.Direction.SOUTH) {
-            targetAreaPosition = P2;
+            targetAreaPosition = P2*3;
         }
         else if (targetAreaBearing == SimConfig.Direction.EAST) {
             targetAreaPosition = 0;
