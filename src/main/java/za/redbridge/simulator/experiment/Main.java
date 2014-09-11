@@ -3,6 +3,17 @@ package za.redbridge.simulator.experiment;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import sim.display.GUIState;
+import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.SimulationGUI;
+import za.redbridge.simulator.config.ExperimentConfig;
+import za.redbridge.simulator.config.MorphologyConfig;
+import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.phenotype.ChasingPhenotype;
+
+import java.io.Console;
+import java.text.ParseException;
 
 //entry point into simulator
 
@@ -16,7 +27,7 @@ public class Main {
     @Option(name="--experiment-config", usage="Filename for experiment configuration", metaVar="<experiment config>")
     private String experimentConfig;
 
-    @Option (name="--simulation-config,", usage="Filename for simulation configuration", metaVar="<simulation config>")
+    @Option (name="--simulation-config", usage="Filename for simulation configuration", metaVar="<simulation config>")
     private String simulationConfig;
 
     @Option (name="--show-visuals", aliases="-v", usage="Show visualisation for simulation")
@@ -35,13 +46,37 @@ public class Main {
             System.exit(1);
         }
 
+        ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
+        SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
+
+        //TODO: work with multiple morphology configs (specifically, filter sensitivities)
+        MorphologyConfig morphologyConfig = null;
+
+        try {
+            morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
+        }
+        catch(ParseException p) {
+            System.out.println("Error parsing morphology file.");
+            p.printStackTrace();
+        }
+
         //if we need to show a visualisation
         if (options.showVisuals()) {
 
-            //UGUGGHGHUHGHGGH
+            //UGUGGHGHUHGHGGH, this is just with chasing phenotype, no ML stuff
+
+            HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
+                    new ChasingPhenotype(), simulationConfiguration.getRobotMass(),
+                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour());
+
+            Simulation simulation = new Simulation(simulationConfiguration, experimentConfiguration, robotFactory);
+
+
+            SimulationGUI video = new SimulationGUI(simulation);
         }
         else {
 
+            //headless option
 
         }
 
