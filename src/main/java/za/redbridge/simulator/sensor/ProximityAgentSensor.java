@@ -15,11 +15,11 @@ public class ProximityAgentSensor extends AgentSensor {
     private final List<Double> readings = new ArrayList<>(1);
 
     public ProximityAgentSensor(float bearing) {
-        this(bearing, 0.0f, 0.4f, 0.1f, 1);
+        this(bearing, 0.0f, 0.4f, 0.1f);
     }
 
-    public ProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
-        super(bearing, orientation, range, fieldOfView, readingSize);
+    public ProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        super(bearing, orientation, range, fieldOfView, 1);
     }
 
     @Override
