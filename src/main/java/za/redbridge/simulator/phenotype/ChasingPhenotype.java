@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 import sim.util.Double2D;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
@@ -21,9 +22,11 @@ public class ChasingPhenotype implements Phenotype {
     private final List<AgentSensor> sensors;
 
     public ChasingPhenotype() {
+
         AgentSensor leftSensor = new ChasingSensor((float) (Math.PI / 4), 0f, 1f, 0.2f, 1);
         AgentSensor forwardSensor = new ChasingSensor(0f, 0f, 1f, 0.2f, 1);
         AgentSensor rightSensor = new ChasingSensor((float) -(Math.PI / 4), 0f, 1f, 0.2f, 1);
+
         sensors = new ArrayList<>();
         sensors.add(leftSensor);
         sensors.add(forwardSensor);
