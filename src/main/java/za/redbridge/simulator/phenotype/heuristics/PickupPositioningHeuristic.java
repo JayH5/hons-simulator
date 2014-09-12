@@ -17,6 +17,8 @@ public class PickupPositioningHeuristic extends Heuristic {
 
     protected final PickupSensor pickupSensor;
 
+    private Vec2 targetPoint = null;
+
     public PickupPositioningHeuristic(HeuristicSchedule schedule, PickupSensor pickupSensor,
             RobotObject attachedRobot) {
         super(schedule, attachedRobot);
@@ -115,6 +117,11 @@ public class PickupPositioningHeuristic extends Heuristic {
     }
 
     private Vec2 calculateTargetPoint(ResourceObject resource) {
+        // Remember where we're headed, don't get stuck choosing sides
+        if (targetPoint != null) {
+            return targetPoint;
+        }
+
         Vec2 position = attachedRobot.getBody().getPosition();
         // Get the anchor point and side normal
         ResourceObject.AnchorPoint anchorPoint = resource.getClosestAnchorPoint(position);
@@ -125,7 +132,9 @@ public class PickupPositioningHeuristic extends Heuristic {
         Vec2 normal = resource.getNormalToSide(anchorPoint.getSide());
 
         // Get a distance away from the anchor point
-        return normal.mulLocal(attachedRobot.getRadius()).addLocal(anchorPoint.getPosition());
+        targetPoint =
+                normal.mulLocal(attachedRobot.getRadius()).addLocal(anchorPoint.getPosition());
+        return targetPoint;
     }
 
 }
