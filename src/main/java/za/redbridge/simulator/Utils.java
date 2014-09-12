@@ -3,6 +3,8 @@ package za.redbridge.simulator;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 
+import java.util.Random;
+
 import ec.util.MersenneTwisterFast;
 import sim.util.Double2D;
 
@@ -13,6 +15,8 @@ public final class Utils {
 
     public static final double TWO_PI = Math.PI * 2;
     public static final double EPSILON = 1e-6;
+
+    public static final Random RANDOM = new Random();
 
     private Utils() {
     }
@@ -89,6 +93,12 @@ public final class Utils {
 
     public static boolean isNearlyZero(double x) {
         return x > -EPSILON && x < EPSILON;
+    }
+
+    public static Vec2 jitter(Vec2 vec, float magnitude) {
+        vec.x += magnitude * RANDOM.nextFloat() - magnitude / 2;
+        vec.y += magnitude * RANDOM.nextFloat() - magnitude / 2;
+        return vec;
     }
 
 }

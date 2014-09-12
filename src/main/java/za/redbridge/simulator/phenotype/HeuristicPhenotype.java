@@ -65,6 +65,7 @@ public class HeuristicPhenotype {
         Double2D wheelDrives = schedule.step(list);
 
         if (wheelDrives == null) {
+            attachedRobot.resetPaintToDefault();
             wheelDrives = controllerPhenotype.step(list);
             if(wheelDrives.x == Double.NaN || wheelDrives.y == Double.NaN){
                 throw new RuntimeException("Controller gave NaN wheelDrives!");

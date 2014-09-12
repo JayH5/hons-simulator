@@ -17,7 +17,7 @@ public class WheelDrive extends Vec2 {
     }
 
     public WheelDrive(RelativeCoordinate c){
-        super((float)Heuristic.wheelDriveFromTargetPoint(c).x, (float)Heuristic.wheelDriveFromTargetPoint(c).y);
+        super((float)Heuristic.wheelDriveForTargetPosition(c).x, (float)Heuristic.wheelDriveForTargetPosition(c).y);
     }
 
     private static float clamp(float f){
