@@ -366,16 +366,33 @@ public class ResourceObject extends PhysicalObject {
     }
 
     /** Mark this object as collected. i.e. mark it as being in the target area. */
-    public void markCollected() {
-        this.isCollected = true;
-
-        // Break all the joints
-        for (Map.Entry<RobotObject, Joint> entry: joints.entrySet()) {
-            RobotObject robot = entry.getKey();
-            robot.setBoundToResource(false);
-            getBody().getWorld().destroyJoint(entry.getValue());
+    public void setCollected(boolean isCollected) {
+        if (isCollected == this.isCollected) {
+            return;
         }
-        joints.clear();
+
+        // Sticky side could be unset if resource "bumped" into target area without robots
+        // creating joints with it
+        if (isCollected && stickySide != null) {
+            // Break all the joints
+            for (Map.Entry<RobotObject, Joint> entry : joints.entrySet()) {
+                RobotObject robot = entry.getKey();
+                robot.setBoundToResource(false);
+                getBody().getWorld().destroyJoint(entry.getValue());
+            }
+            joints.clear();
+
+            // Reset the anchor points
+            AnchorPoint[] anchorPoints = getAnchorPointsForSide(stickySide);
+            for (AnchorPoint anchorPoint : anchorPoints) {
+                anchorPoint.taken = false;
+            }
+
+            // Reset the sticky side
+            stickySide = null;
+        }
+
+        this.isCollected = isCollected;
     }
 
     /** Check whether this resource already has the max number of robots attached to it. */
@@ -415,6 +432,10 @@ public class ResourceObject extends PhysicalObject {
         }
 
         private void markTaken() {
+            if (side != stickySide) {
+                throw new IllegalStateException("Anchor point not on sticky side");
+            }
+
             taken = true;
         }
 

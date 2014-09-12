@@ -80,13 +80,14 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
-                    resource.markCollected();
+                    resource.setCollected(true);
                     resource.getPortrayal().setPaint(Color.CYAN);
                     incrementTotalObjectValue(resource);
                 }
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
                 if (containedObjects.remove(resource)) {
+                    resource.setCollected(false);
                     resource.getPortrayal().setPaint(Color.MAGENTA);
                     decrementTotalObjectValue(resource);
                 }
@@ -135,6 +136,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         if (ALLOW_REMOVAL) {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
             if (containedObjects.remove(resource)) {
+                resource.setCollected(false);
+                resource.getPortrayal().setPaint(Color.MAGENTA);
                 decrementTotalObjectValue(resource);
             }
         }
