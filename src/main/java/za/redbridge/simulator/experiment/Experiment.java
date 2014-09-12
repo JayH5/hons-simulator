@@ -14,6 +14,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.ScoreCalculator;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 
+import java.io.*;
 import java.text.ParseException;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -53,6 +54,8 @@ public class Experiment {
         if (options.showVisuals()) {
 
             //UGUGGHGHUHGHGGH
+            NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
+
         }
         else {
 
@@ -75,8 +78,6 @@ public class Experiment {
                     experimentConfiguration.getPopulationSize());
             pop.reset();
 
-            //final ConcurrentSkipListMap<NEATNetwork, >
-
             CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, experimentConfiguration,
                     morphologyConfig);
 
@@ -85,12 +86,14 @@ public class Experiment {
             int epochs = 0;
 
             do {
+                System.out.println("Epoch #" + train.getIteration());
                 train.iteration();
-                System.out.println("Epoch #" + train.getIteration() + pop.getSpecies().size());
                 epochs++;
             } while(epochs <= experimentConfiguration.getMaxEpochs());
 
             NEATNetwork bestNetwork = (NEATNetwork)train.getCODEC().decode(train.getBestGenome());
+
+            writeNetwork(bestNetwork, "bestNetwork.tmp");
 
         }
 
@@ -100,6 +103,48 @@ public class Experiment {
     private String getExperimentConfig() { return experimentConfig; }
     private String getSimulationConfig() { return simulationConfig; }
     private boolean showVisuals() { return showVisuals; }
+
+    public static void writeNetwork(NEATNetwork network, String filename) {
+
+        try {
+            FileOutputStream fileWriter = new FileOutputStream(filename);
+            ObjectOutputStream objectWriter = new ObjectOutputStream(fileWriter);
+
+            objectWriter.writeObject(network);
+        }
+        catch (FileNotFoundException f) {
+            System.out.println("File not found, aborting.");
+        }
+        catch (IOException e) {
+            System.out.println("Error writing object to file.");
+            e.printStackTrace();
+        }
+    }
+
+    public static NEATNetwork readNetwork(String filename) {
+
+        Object o = null;
+
+        try {
+            FileInputStream fileReader = new FileInputStream(filename);
+            ObjectInputStream objectReader = new ObjectInputStream(fileReader);
+            o = objectReader.readObject();
+        }
+        catch (FileNotFoundException f) {
+            System.out.println("File not found, aborting.");
+            System.exit(0);
+        }
+        catch (IOException e) {
+            System.out.println("Error writing object to file.");
+            e.printStackTrace();
+            System.exit(0);
+        }
+        catch (ClassNotFoundException c) {
+            System.out.println("Class not found.");
+        }
+
+        return (NEATNetwork) o;
+    }
 
 
 }

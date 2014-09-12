@@ -15,7 +15,7 @@ import java.util.Map;
 public class ColourProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(3);
-    private static final int readingSize = 1;
+    private static final int readingSize = 3;
 
     public ColourProximityAgentSensor(float bearing) {
         super(bearing, 0.0f, 30.0f, 0.1f);
