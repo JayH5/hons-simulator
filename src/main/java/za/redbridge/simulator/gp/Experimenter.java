@@ -1,6 +1,7 @@
 package za.redbridge.simulator.gp;
 
 import org.epochx.gp.op.init.GrowInitialiser;
+import org.epochx.gp.op.init.RampedHalfAndHalfInitialiser;
 import org.epochx.life.GenerationAdapter;
 import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
@@ -41,23 +42,26 @@ public class Experimenter {
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
         model.setNoGenerations(100);
-        model.setMaxInitialDepth(3);
-        model.setMaxDepth(5);
-        model.setPoolSize(75);
-        model.setPopulationSize(100);
+        model.setMaxInitialDepth(6);
+        model.setMaxDepth(7);
+        model.setPoolSize(150);
+        model.setPopulationSize(200);
         model.setNoRuns(1);
-        model.setInitialiser(new GrowInitialiser(model));
+        model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
         Life.get().addGenerationListener(new GenerationAdapter() {
             public void onGenerationEnd() {
                 Stats s = Stats.get();
+                System.out.println();
                 s.print(StatField.ELITE_FITNESS_MIN);
+                s.print(StatField.GEN_FITTEST_PROGRAMS);
             }
         });
         model.run();
         System.out.println("Experiment finished. Best fitness: ");
         Stats s = Stats.get();
         s.print(StatField.ELITE_FITNESS_MIN);
-        s.print(StatField.GEN_FITTEST_PROGRAM);
+        System.out.println("Best programs: ");
+        s.print(StatField.GEN_FITTEST_PROGRAMS);
     }
 }

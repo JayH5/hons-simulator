@@ -45,6 +45,7 @@ public class AgentModel extends GPModel {
        for(int i = 0; i < sensors.size(); i++){
            inputs.add(new Variable("S" + i, Double.class));
        }
+
        /*
        syntax.add(new AddFunction());
        syntax.add(new SubtractFunction());
@@ -62,6 +63,7 @@ public class AgentModel extends GPModel {
        for(AgentSensor s : sensors){
            syntax.add(new Literal(new Bearing(s.getOrientation())));
        }
+       syntax.add(new ReadingToDistance(0.4f)); //sensor range
 
        syntax.add(new IfFunction());
        syntax.add(new GreaterThanFunction());
@@ -96,6 +98,7 @@ public class AgentModel extends GPModel {
                 config.getRobotRadius(), config.getRobotColour(), exConfig.getPopulationSize());
         Simulation sim = new Simulation(config, robotFactory);
         sim.runForNIterations(20000);
+        System.out.print('.');
         //System.out.println(p);
         return -sim.getFitness();
     }

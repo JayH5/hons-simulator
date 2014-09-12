@@ -27,4 +27,10 @@ public class Bearing{
     private static float normalizePositiveBearing(float bearing) {
         return (float) (bearing % (2 * Math.PI));
     }
+
+    /*
+    public String toString(){
+        return value +
+    }
+    */
 }
