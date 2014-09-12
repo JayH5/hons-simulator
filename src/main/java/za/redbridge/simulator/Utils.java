@@ -12,6 +12,7 @@ import sim.util.Double2D;
 public final class Utils {
 
     public static final double TWO_PI = Math.PI * 2;
+    public static final double EPSILON = 1e-6;
 
     private Utils() {
     }
@@ -84,6 +85,10 @@ public final class Utils {
             angle += TWO_PI;
         }
         return angle;
+    }
+
+    public static boolean isNearlyZero(double x) {
+        return x > -EPSILON && x < EPSILON;
     }
 
 }
