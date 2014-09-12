@@ -2,6 +2,8 @@ package za.redbridge.simulator.phenotype.heuristics;
 
 import org.jbox2d.common.Vec2;
 
+import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 
 import sim.util.Double2D;
@@ -10,10 +12,14 @@ import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
+import static za.redbridge.simulator.Utils.jitter;
+
 /**
  * Created by shsu on 2014/09/04.
  */
 public class PickupPositioningHeuristic extends Heuristic {
+
+    private static final Paint PAINT = Color.ORANGE;
 
     protected final PickupSensor pickupSensor;
 
@@ -49,8 +55,14 @@ public class PickupPositioningHeuristic extends Heuristic {
         }
 
         Vec2 newPosition = nextStep(resource);
-        return wheelDriveFromTargetPoint(attachedRobot.getBody().getLocalPoint(newPosition));
+        jitter(newPosition, 0.1f);
+        return wheelDriveForTargetPosition(attachedRobot.getBody().getLocalPoint(newPosition));
 
+    }
+
+    @Override
+    Paint getPaint() {
+        return PAINT;
     }
 
     //next step (out: world)
