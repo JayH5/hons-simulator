@@ -19,6 +19,7 @@ import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.gp.functions.*;
 import za.redbridge.simulator.gp.types.Bearing;
+import za.redbridge.simulator.gp.types.ProximityReading;
 import za.redbridge.simulator.gp.types.WheelDrive;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
@@ -43,7 +44,7 @@ public class AgentModel extends GPModel {
        this.exConfig = exConfig;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
-           inputs.add(new Variable("S" + i, Double.class));
+           inputs.add(new Variable("S" + i, ProximityReading.class));
        }
 
        /*
@@ -68,13 +69,13 @@ public class AgentModel extends GPModel {
        syntax.add(new IfFunction());
        syntax.add(new GreaterThanFunction());
 
+       syntax.add(new Literal(new Bearing(0.0f)));
        syntax.add(new Literal(new Bearing(P2)));
        syntax.add(new Literal(new Bearing(2*P2)));
        syntax.add(new Literal(new Bearing(3*P2)));
-       syntax.add(new Literal(new Bearing(4*P2)));
 
-       syntax.add(new Literal(0.0));
-       syntax.add(new Literal(1.0));
+       syntax.add(new Literal(0.0f));
+       syntax.add(new Literal(1.0f));
        //syntax.add(new Literal(2.0));
        //syntax.add(new Literal(3.0));
 
