@@ -2,6 +2,7 @@ package za.redbridge.simulator.phenotype.heuristics;
 
 import org.jbox2d.common.Vec2;
 
+import java.awt.Paint;
 import java.util.List;
 
 import sim.util.Double2D;
@@ -37,19 +38,10 @@ public abstract class Heuristic implements Comparable<Heuristic> {
     abstract Double2D step(List<SensorReading> list);
 
     /**
-     * Calculate the drive force to get to the target point
-     * @param target local to the agent
-     * @return
+     * Paint used to change colour of robot as each heuristic takes over.
+     * @return the paint to colour the agent when the heuristic returns a value
      */
-    protected static Double2D wheelDriveFromTargetPoint(Vec2 target){
-        double dist = target.length();
-        Double2D drive = wheelDriveForTargetPosition(target);
-        if (dist < SLOWDOWN_THRESHOLD) {
-            return drive.multiply(dist / SLOWDOWN_THRESHOLD);
-        } else {
-            return drive;
-        }
-    }
+    abstract Paint getPaint();
 
     /**
      * Get the wheel drive that will steer the agent towards the target position.
@@ -97,7 +89,7 @@ public abstract class Heuristic implements Comparable<Heuristic> {
 
     public void setPriority(int priority) { this.priority = priority; }
 
-    public RobotObject getAttachedRobot() { return attachedRobot; }
+    /* package */ RobotObject getAttachedRobot() { return attachedRobot; }
 
     public double distance (Vec2 start, Vec2 end) {
 

@@ -3,6 +3,8 @@ package za.redbridge.simulator;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 
+import java.util.Random;
+
 import ec.util.MersenneTwisterFast;
 import sim.util.Double2D;
 
@@ -10,6 +12,11 @@ import sim.util.Double2D;
  * Created by jamie on 2014/08/01.
  */
 public final class Utils {
+
+    public static final double TWO_PI = Math.PI * 2;
+    public static final double EPSILON = 1e-6;
+
+    public static final Random RANDOM = new Random();
 
     private Utils() {
     }
@@ -71,6 +78,27 @@ public final class Utils {
         Vec2 upperBound = new Vec2(x + halfWidth, y + halfHeight);
 
         return new AABB(lowerBound, upperBound);
+    }
+
+    /** Wrap an angle between (-PI, PI] */
+    public static double wrapAngle(double angle) {
+        angle %= TWO_PI;
+        if (angle > Math.PI) {
+            angle -= TWO_PI;
+        } else if (angle <= -Math.PI) {
+            angle += TWO_PI;
+        }
+        return angle;
+    }
+
+    public static boolean isNearlyZero(double x) {
+        return x > -EPSILON && x < EPSILON;
+    }
+
+    public static Vec2 jitter(Vec2 vec, float magnitude) {
+        vec.x += magnitude * RANDOM.nextFloat() - magnitude / 2;
+        vec.y += magnitude * RANDOM.nextFloat() - magnitude / 2;
+        return vec;
     }
 
 }

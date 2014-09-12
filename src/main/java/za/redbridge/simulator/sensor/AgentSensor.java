@@ -26,6 +26,8 @@ import za.redbridge.simulator.sensor.sensedobjects.EdgeSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.PolygonSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
+import static za.redbridge.simulator.Utils.isNearlyZero;
+
 /**
  * Describes a sensor implementation. The actual sensor is implemented in the simulator.
  */
@@ -255,49 +257,86 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         Vec2 v1 = Transform.mul(objectRelativeTransform, edgeShape.m_vertex1);
         Vec2 v2 = Transform.mul(objectRelativeTransform, edgeShape.m_vertex2);
 
-        // Ensure v2 is above v1
-        if (v2.y < v1.y) {
-            Vec2 temp = v2;
-            v2 = v1;
-            v1 = temp;
-        }
+        // Check if vertical or horizontal line to prevent division by zero
+        float dy = v2.y - v1.y;
+        float dx = v2.x - v1.x;
+        float x1, y1, x2, y2;
+        final double distance;
+        if (isNearlyZero(dy)) { // Horizontal line (shouldn't happen generally)
+            if (v2.x < v1.x) {
+                Vec2 temp = v2;
+                v2 = v1;
+                v1 = temp;
+            }
 
-        // Get line equation for edge
-        float m = (v2.y - v1.y) / (v2.x - v1.x);
-        float c = v1.y - m * v1.x;
-
-        // Line-line intersection points
-        float x1 = (-fovGradient - c) / m;
-        float y1 = m * x1 + c;
-        float x2 = (fovGradient - c) / m;
-        float y2 = m * x2 + c;
-
-        if (v1.y > y1) {
             y1 = v1.y;
-            x1 = v1.x;
-        }
-
-        if (v2.y < y2) {
             y2 = v2.y;
+            x1 = Math.max(y1 / fovGradient, v1.x);
+            x2 = Math.min((float) Math.sqrt(range * range - y2 * y2), v2.x);
+
+            distance = Math.hypot(x1, y1);
+        } else if (isNearlyZero(dx)) { // Vertical line
+            if (v2.y < v1.y) {
+                Vec2 temp = v2;
+                v2 = v1;
+                v1 = temp;
+            }
+
+            x1 = v1.x;
             x2 = v2.x;
-        }
+            y1 = Math.max(x1 * -fovGradient, v1.y);
+            y2 = Math.min(x2 * fovGradient, v2.y);
 
-        // Get equation for line perpendicular to edge passing through sensor position
-        Vec2 sensorPosition = getSensorTransform().p;
-        float m_ = -1 / m;
-        float c_ = sensorPosition.y + 1 / m * sensorPosition.x;
+            if (y1 > 0) {
+                distance = Math.hypot(x1, y1); // Distance to bottom point
+            } else if (y2 < 0) {
+                distance = Math.hypot(x2, y2); // Distance to top point
+            } else {
+                distance = x1; // Distance straight to line
+            }
+        } else { // Other line - use line equations
+            if (v2.y < v1.y) {
+                Vec2 temp = v2;
+                v2 = v1;
+                v1 = temp;
+            }
 
-        // Closest point on infinite edge is at point perpendicular line intersect with edge
-        // line... but edge is not infinite
-        float x = (m - m_) / (c_ - c);
-        final float distance;
-        if (x > x2) {
-            distance = (float) Math.hypot(x2, y2);
-        } else if (x < x1) {
-            distance = (float) Math.hypot(x1, y1);
-        } else {
-            float y = m * x + c;
-            distance = (float) Math.hypot(x, y);
+            // Get line equation for edge
+            float m = dy / dx;
+            float c = v1.y - m * v1.x;
+
+            // Line-line intersection points
+            x1 = (-fovGradient - c) / m;
+            y1 = m * x1 + c;
+            x2 = (fovGradient - c) / m;
+            y2 = m * x2 + c;
+
+            if (v1.y > y1) {
+                y1 = v1.y;
+                x1 = v1.x;
+            }
+
+            if (v2.y < y2) {
+                y2 = v2.y;
+                x2 = v2.x;
+            }
+
+            // Get equation for line perpendicular to edge passing through sensor position
+            Vec2 sensorPosition = getSensorTransform().p;
+            float m_ = -1 / m;
+            float c_ = sensorPosition.y + 1 / m * sensorPosition.x;
+
+            // Closest point on infinite edge is at point perpendicular line intersect with edge
+            // line... but edge is not infinite
+            float x = (m - m_) / (c_ - c);
+            if (x > x2) {
+                distance = Math.hypot(x2, y2);
+            } else if (x < x1) {
+                distance = Math.hypot(x1, y1);
+            } else {
+                float y = m * x + c;
+                distance = Math.hypot(x, y);
+            }
         }
 
         return new EdgeSensedObject(getFixtureObject(edgeFixture), distance, x1, y1, x2, y2);

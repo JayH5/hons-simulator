@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import sim.util.Double2D;
+import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.SensorReading;
 
 /**
@@ -27,9 +28,12 @@ public class HeuristicSchedule {
         for (Heuristic heuristic : schedule) {
             wheelDrive = heuristic.step(readings);
             if (wheelDrive != null) {
+                // Update the robot's paint
+                heuristic.getAttachedRobot().getPortrayal().setPaint(heuristic.getPaint());
                 break;
             }
         }
+
         return wheelDrive;
     }
 

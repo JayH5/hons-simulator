@@ -56,11 +56,14 @@ public class RobotObject extends PhysicalObject {
 
     private boolean isBoundToResource = false;
 
+    private final Paint defaultPaint;
+
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
                         Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
 
         super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
+        this.defaultPaint = paint;
         heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPlacement);
         initSensors();
 
@@ -123,13 +126,12 @@ public class RobotObject extends PhysicalObject {
 
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 
+        if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
+            throw new RuntimeException("Invalid force applied: " + wheelDrives);
+        }
+
         applyWheelForce(wheelDrives.x, leftWheelPosition);
         applyWheelForce(wheelDrives.y, rightWheelPosition);
-
-        if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
-            // TODO
-            //throw new RuntimeException("Invalid force applied: " + wheelDrives);
-        }
 
         updateFriction();
     }
@@ -182,5 +184,9 @@ public class RobotObject extends PhysicalObject {
 
     public void setBoundToResource(boolean isBoundToResource) {
         this.isBoundToResource = isBoundToResource;
+    }
+
+    public void resetPaintToDefault() {
+        getPortrayal().setPaint(defaultPaint);
     }
 }

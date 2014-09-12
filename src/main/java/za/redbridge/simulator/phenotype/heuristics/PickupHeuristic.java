@@ -1,5 +1,7 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
+import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 
 import sim.util.Double2D;
@@ -9,11 +11,15 @@ import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.SensorReading;
 
+import static za.redbridge.simulator.Utils.wrapAngle;
+
 /**
  * Heuristic for picking up things and carrying them to target area
  * Created by racter on 2014/09/01.
  */
 public class PickupHeuristic extends Heuristic {
+
+    private static final Paint PAINT = Color.GREEN;
 
     protected final PickupSensor pickupSensor;
     protected final SimConfig.Direction targetAreaDirection;
@@ -54,9 +60,14 @@ public class PickupHeuristic extends Heuristic {
         return null;
     }
 
+    @Override
+    Paint getPaint() {
+        return PAINT;
+    }
+
     //target area bearing from robot angle
     protected double targetAreaAngle() {
-        double robotAngle = attachedRobot.getBody().getTransform().q.getAngle();
+        double robotAngle = attachedRobot.getBody().getAngle();
         double targetAreaPosition = -1;
 
         if (targetAreaDirection == SimConfig.Direction.NORTH) {
@@ -69,8 +80,7 @@ public class PickupHeuristic extends Heuristic {
             targetAreaPosition = Math.PI;
         }
 
-        double difference = targetAreaPosition - robotAngle;
-        return difference % (Math.PI * 2);
+        return wrapAngle(targetAreaPosition - robotAngle);
 
     }
 
