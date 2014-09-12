@@ -1,5 +1,7 @@
 package za.redbridge.simulator.gp.types;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by xenos on 9/11/14.
  */
@@ -28,9 +30,8 @@ public class Bearing{
         return (float) (bearing % (2 * Math.PI));
     }
 
-    /*
     public String toString(){
-        return value +
+        DecimalFormat df = new DecimalFormat("#.00");
+        return "Bearing " + df.format(value);
     }
-    */
 }

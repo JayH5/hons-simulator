@@ -44,7 +44,7 @@ public class Experimenter {
         model.setNoGenerations(100);
         model.setMaxInitialDepth(6);
         model.setMaxDepth(7);
-        model.setPoolSize(150);
+        model.setPoolSize(100);
         model.setPopulationSize(200);
         model.setNoRuns(1);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
