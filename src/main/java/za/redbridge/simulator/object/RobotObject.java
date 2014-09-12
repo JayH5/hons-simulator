@@ -128,13 +128,12 @@ public class RobotObject extends PhysicalObject {
         }
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 
+        if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
+            throw new RuntimeException("Invalid force applied: " + wheelDrives);
+        }
+
         applyWheelForce(wheelDrives.x, leftWheelPosition);
         applyWheelForce(wheelDrives.y, rightWheelPosition);
-
-        if (Math.abs(wheelDrives.x) > 1.0 || Math.abs(wheelDrives.y) > 1.0) {
-            // TODO
-            //throw new RuntimeException("Invalid force applied: " + wheelDrives);
-        }
 
         updateFriction();
     }

@@ -42,9 +42,7 @@ public class Simulation extends SimState {
     private static final int POSITION_ITERATIONS = 3;
 
     private TargetAreaObject targetArea;
-
     private RobotFactory robotFactory;
-
     private final SimConfig config;
 
     public Simulation(SimConfig config, RobotFactory robotFactory) {

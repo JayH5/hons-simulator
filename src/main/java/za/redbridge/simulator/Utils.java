@@ -11,6 +11,9 @@ import sim.util.Double2D;
  */
 public final class Utils {
 
+    public static final double TWO_PI = Math.PI * 2;
+    public static final double EPSILON = 1e-6;
+
     private Utils() {
     }
 
@@ -71,6 +74,21 @@ public final class Utils {
         Vec2 upperBound = new Vec2(x + halfWidth, y + halfHeight);
 
         return new AABB(lowerBound, upperBound);
+    }
+
+    /** Wrap an angle between (-PI, PI] */
+    public static double wrapAngle(double angle) {
+        angle %= TWO_PI;
+        if (angle > Math.PI) {
+            angle -= TWO_PI;
+        } else if (angle <= -Math.PI) {
+            angle += TWO_PI;
+        }
+        return angle;
+    }
+
+    public static boolean isNearlyZero(double x) {
+        return x > -EPSILON && x < EPSILON;
     }
 
 }

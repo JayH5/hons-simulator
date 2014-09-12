@@ -15,16 +15,17 @@ import java.util.Map;
 public class ColourProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(3);
+    private static final int readingSize = 1;
 
     public ColourProximityAgentSensor(float bearing) {
-        super(bearing, 0.0f, 30.0f, 0.1f, 1);
+        super(bearing, 0.0f, 30.0f, 0.1f);
         readings.add(0.0);
         readings.add(0.0);
         readings.add(0.0);
     }
 
-    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
-        super(bearing, orientation, range, fieldOfView, readingSize);
+    public ColourProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        super(bearing, orientation, range, fieldOfView);
     }
 
     @Override
@@ -62,7 +63,22 @@ public class ColourProximityAgentSensor extends AgentSensor {
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
 
     @Override
-    public Object clone(){
-        return new ColourProximityAgentSensor(bearing, orientation, range, fieldOfView, readingSize);
+    public int getReadingSize() { return readingSize; }
+
+    @Override
+    public ColourProximityAgentSensor clone() {
+
+        ColourProximityAgentSensor cloned = new ColourProximityAgentSensor(bearing, orientation, range, fieldOfView);
+
+        try {
+            cloned.readAdditionalConfigs(additionalConfigs);
+        }
+        catch (ParseException p) {
+            System.out.println("Clone failed.");
+            p.printStackTrace();
+            System.exit(-1);
+        }
+
+        return cloned;
     }
 }

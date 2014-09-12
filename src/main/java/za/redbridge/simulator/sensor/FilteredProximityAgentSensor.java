@@ -9,13 +9,14 @@ public class FilteredProximityAgentSensor extends AgentSensor {
 
     private final List<Double> readings = new ArrayList<>(1);
     private Set<Class> whitelist = new HashSet<>();
+    private static final int readingSize = 1;
 
     public FilteredProximityAgentSensor() {
         super();
     }
 
     public FilteredProximityAgentSensor(float bearing, Collection<String> whitelist) {
-        super(bearing, 0.0f, 30.0f, 0.1f, 1);
+        super(bearing, 0.0f, 30.0f, 0.1f);
         for(String cs : whitelist){
             try {
                 this.whitelist.add(Class.forName(cs));
@@ -23,8 +24,8 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
     }
 
-    public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView, int readingSize) {
-        super(bearing, orientation, range, fieldOfView, readingSize);
+    public FilteredProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
+        super(bearing, orientation, range, fieldOfView);
     }
 
     @Override
@@ -64,6 +65,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         String[] whiteList = null;
 
         if (map == null) {
+            System.out.println("No additional configs found.");
             return;
         }
 
@@ -88,7 +90,24 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    public Object clone(){
-        return new FilteredProximityAgentSensor(bearing, orientation, range, fieldOfView, readingSize);
+    public int getReadingSize() { return readingSize; }
+
+    @Override
+    public FilteredProximityAgentSensor clone() {
+
+        FilteredProximityAgentSensor cloned = new FilteredProximityAgentSensor(bearing, orientation, range, fieldOfView);
+
+        try {
+            cloned.readAdditionalConfigs(additionalConfigs);
+        }
+        catch (ParseException p) {
+            System.out.println("Clone failed.");
+            p.printStackTrace();
+            System.exit(-1);
+        }
+
+        return cloned;
     }
+
+
 }
