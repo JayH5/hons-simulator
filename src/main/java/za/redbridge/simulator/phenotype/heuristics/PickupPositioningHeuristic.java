@@ -118,6 +118,10 @@ public class PickupPositioningHeuristic extends Heuristic {
         Vec2 position = attachedRobot.getBody().getPosition();
         // Get the anchor point and side normal
         ResourceObject.AnchorPoint anchorPoint = resource.getClosestAnchorPoint(position);
+        if (anchorPoint == null) { // TODO: Shouldn't happen but does on occasion
+            return null;
+        }
+
         Vec2 normal = resource.getNormalToSide(anchorPoint.getSide());
 
         // Get a distance away from the anchor point
