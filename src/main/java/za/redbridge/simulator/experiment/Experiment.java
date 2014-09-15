@@ -73,29 +73,7 @@ public class Experiment {
                 p.printStackTrace();
             }
 
-            //TODO: make this get population size form Experiment configs instead
-            NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
-                    experimentConfiguration.getPopulationSize());
-            pop.reset();
 
-            CalculateScore scoreCalculator = new ScoreCalculator(simulationConfiguration, experimentConfiguration,
-                    morphologyConfig);
-
-            final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
-
-            int epochs = 0;
-
-            do {
-                System.out.println("Epoch #" + train.getIteration());
-                train.iteration();
-                epochs++;
-            } while(epochs <= experimentConfiguration.getMaxEpochs());
-
-            NEATNetwork bestNetwork = (NEATNetwork)train.getCODEC().decode(train.getBestGenome());
-
-            writeNetwork(bestNetwork, "bestNetwork.tmp");
-
-        }
 
 
     }

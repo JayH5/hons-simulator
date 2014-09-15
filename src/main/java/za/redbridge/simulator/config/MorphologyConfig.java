@@ -166,4 +166,8 @@ public class MorphologyConfig extends Config {
     public int getTotalReadingSize() { return totalReadingSize; }
 
     public int getNumSensors() { return numSensors; }
+
+    public List<AgentSensor> getSensors() { return sensorList; }
+
+    public void setSensors(List<AgentSensor> sensorList) { this.sensorList = sensorList; }
 }

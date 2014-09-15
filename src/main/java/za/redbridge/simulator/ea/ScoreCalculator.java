@@ -73,6 +73,7 @@ public class ScoreCalculator implements CalculateScore {
         return score;
     }
 
+
     @Override
     public boolean shouldMinimize() {
         return false;
@@ -81,6 +82,17 @@ public class ScoreCalculator implements CalculateScore {
     @Override
     public boolean requireSingleThreaded() {
         return false;
+    }
+
+    private class SimRun implements Runnable {
+
+        public SimRun() {
+
+        }
+
+        public void run() {
+
+        }
     }
 
 
