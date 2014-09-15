@@ -50,24 +50,38 @@ public class ScoreCalculator implements CalculateScore {
     public double calculateScore(MLMethod method) {
 
         //average the performance of this genotype over a few runs of the simulation (standardise on seeds?)
-        int testRuns = 1;
+        int testRuns = 10;
         double[] performances = new double[testRuns];
+        Thread[] simThreads = new Thread[testRuns];
 
         //TODO: generalise the phenotype instead of hard-coding it
         HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                 new NEATPhenotype(morphologyConfig.getSensorList(), (NEATNetwork) method,
                         morphologyConfig.getTotalReadingSize()), config.getRobotMass(),
-                config.getRobotRadius(), config.getRobotColour());
+                config.getRobotRadius(), config.getRobotColour(), config.getObjectsRobots());
 
         for (int i = 0; i < testRuns; i++) {
-            Simulation simulation = new Simulation(config, robotFactory, config.getObjectsRobots());
-            simulation.run();
 
-            performances[i] = simulation.getFitness();
+            Simulation simulation = new Simulation(config, robotFactory, config.getObjectsRobots());
+            SimRun simulationRunner = new SimRun(simulation, performances, i);
+
+            simThreads[i] = new Thread(simulationRunner);
+            simThreads[i].run();
+        }
+
+        for (int i = 0; i < testRuns; i++) {
+
+            try {
+                simThreads[i].join();
+            }
+            catch (InterruptedException iex) {
+
+                System.out.println("Thread interrupted.");
+                iex.printStackTrace();
+            }
         }
 
         double score = StatUtils.mean(performances);
-
         System.out.println("Score for this genome: " + score);
 
         return score;
@@ -86,12 +100,22 @@ public class ScoreCalculator implements CalculateScore {
 
     private class SimRun implements Runnable {
 
-        public SimRun() {
+        private final Simulation simulation;
+        private final double[] scores;
+        private int ticketNo;
 
+
+        public SimRun(Simulation simulation, double[] scores, int ticketNo) {
+
+            this.simulation = simulation;
+            this.scores = scores;
+            this.ticketNo = ticketNo;
         }
 
         public void run() {
 
+            simulation.run();
+            scores[ticketNo] = simulation.getFitness();
         }
     }
 
