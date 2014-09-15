@@ -17,6 +17,7 @@ import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
 import java.text.ParseException;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -77,8 +78,30 @@ public class Experiment {
 
 
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, 0.3f);
-            complementFactory.generateComplementsForTemplate();
+            final List<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
 
+            Thread[] complementThreads = new Thread[sensitivityComplements.size()];
+
+            for (int i = 0; i < complementThreads.length; i++) {
+
+                complementThreads[i] = new Thread(new TrainComplement(experimentConfiguration,
+                        simulationConfiguration, sensitivityComplements.get(i)));
+
+                complementThreads[i].run();
+            }
+
+            for (int i = 0; i < complementThreads.length; i++) {
+                try {
+                    complementThreads[i].join();
+                }
+                catch (InterruptedException iex) {
+
+                    System.out.println("Thread interrupted.");
+                    iex.printStackTrace();
+                }
+            }
+
+            
         }
 
     }

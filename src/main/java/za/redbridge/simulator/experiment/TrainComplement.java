@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * Created by racter on 2014/09/11.
  */
 //evaluates one sensor sensitivity complement, gets the best performing NEAT network for this complement
-public class TrainComplement {
+public class TrainComplement implements Runnable{
 
     private ExperimentConfig experimentConfig;
     private SimConfig simConfig;
@@ -47,7 +47,7 @@ public class TrainComplement {
         scoreCache = new ConcurrentSkipListSet<>();
     }
 
-    public void train() {
+    public void run() {
 
         //TODO: make this get population size form Experiment configs instead
         NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
