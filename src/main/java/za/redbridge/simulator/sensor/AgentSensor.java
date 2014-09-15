@@ -377,4 +377,6 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     public abstract AgentSensor clone();
 
     public abstract int getReadingSize();
+
+    public abstract Map<String,Object> getAdditionalConfigs();
 }
