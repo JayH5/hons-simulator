@@ -1,5 +1,6 @@
 package za.redbridge.simulator.gp;
 
+import org.epochx.epox.EpoxParser;
 import org.epochx.epox.Literal;
 import org.epochx.epox.Node;
 import org.epochx.epox.Variable;
@@ -35,6 +36,8 @@ public class AgentModel extends GPModel {
     private List<AgentSensor> sensors;
     private final SimConfig config;
     private final ExperimentConfig exConfig;
+    private final EpoxParser parser = new EpoxParser();
+
     List<Variable> inputs = new ArrayList<>();
     protected final static float P2 = (float) Math.PI/2;
 
@@ -88,7 +91,21 @@ public class AgentModel extends GPModel {
 
        syntax.addAll(inputs);
        setSyntax(syntax);
+
+       for(Node n : syntax){
+           if(n.getClass() == Literal.class) parser.declareLiteral(n.toString(), ((Literal)n).getValue());
+           else if(n.getClass() == Variable.class) parser.declareVariable((Variable)n);
+           else parser.declareFunction(n.getIdentifier(), n);
+       }
    }
+
+    public List<Variable> getInputs() {
+        return inputs;
+    }
+
+    public EpoxParser getParser(){
+        return parser;
+    }
 
     @Override
     public double getFitness(CandidateProgram p){
