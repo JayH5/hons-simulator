@@ -111,5 +111,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         return cloned;
     }
 
+    @Override
+    public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 
 }
