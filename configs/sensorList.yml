@@ -32,13 +32,13 @@ meta:
   sensitivity: 0.8
 
 4s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject za.redbridge.simulator.object.RobotObject
+  type: za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor
   readingSize: 1
   bearing: 90.0
   fieldOfView: 10.0
   orientation: 0.0
   range: 10.0
+  sensitivity: 0.8
 
 5s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor

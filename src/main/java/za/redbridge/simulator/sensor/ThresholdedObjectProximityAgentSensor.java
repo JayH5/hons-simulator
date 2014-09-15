@@ -22,6 +22,14 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
     public ThresholdedObjectProximityAgentSensor() {
         super();
+
+        sensitivity = 0;
+        try {
+            sensitiveClass = Class.forName("za.redbridge.simulator.object.ResourceObject");
+        }
+        catch (ClassNotFoundException c) {
+            System.out.println("Class not found.");
+        }
     }
 
     public ThresholdedObjectProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView) {
@@ -123,6 +131,8 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
         return cloned;
     }
+
+    public void setSensitivity(double sensitivity) { this.sensitivity = sensitivity; }
 
     @Override
     public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }

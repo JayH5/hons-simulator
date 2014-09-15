@@ -26,10 +26,10 @@ public class MorphologyConfig extends Config {
     //total number of readings provided by this morphology
     private final int totalReadingSize;
 
-    public MorphologyConfig(List<AgentSensor> sensorList, int numSensors) {
+    public MorphologyConfig(List<AgentSensor> sensorList) {
 
         this.sensorList = sensorList;
-        this.numSensors = numSensors;
+        this.numSensors = sensorList.size();
 
         int readSize = 0;
 
@@ -202,7 +202,7 @@ public class MorphologyConfig extends Config {
             newSensorList.add(sensor.clone());
         }
 
-        return new MorphologyConfig(newSensorList, numSensors);
+        return new MorphologyConfig(newSensorList);
     }
 
 }
