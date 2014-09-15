@@ -76,7 +76,7 @@ public class Simulation extends SimState {
         createWalls();
         createTargetArea();
         robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld, populationSize,
+                .placeInstances(placementArea.new ForType<>(), physicsWorld,
                         config.getTargetAreaPlacement());
         config.getResourceFactory().placeInstances(placementArea.new ForType<>(), physicsWorld);
 
