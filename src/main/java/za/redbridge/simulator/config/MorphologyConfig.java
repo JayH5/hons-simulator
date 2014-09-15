@@ -18,6 +18,8 @@ import java.util.Map;
 /**
  * Created by shsu on 2014/09/08.
  */
+
+//TODO: serialise this
 public class MorphologyConfig extends Config {
 
     private List<AgentSensor> sensorList;
@@ -204,5 +206,4 @@ public class MorphologyConfig extends Config {
 
         return new MorphologyConfig(newSensorList);
     }
-
 }
