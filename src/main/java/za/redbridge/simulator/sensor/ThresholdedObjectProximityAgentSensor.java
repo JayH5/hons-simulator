@@ -50,14 +50,21 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
         }
 
         readings.clear();
-        readings.add(reading);
+
+        //threshold
+        if (reading >= (1-sensitivity)) {
+            readings.add(reading);
+        }
+        else {
+            readings.add(0.0);
+        }
+
         return new SensorReading(readings);
     }
 
     @Override
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {
 
-        String sensitive = null;
         additionalConfigs = map;
 
         if (map == null) {
@@ -65,9 +72,9 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
             return;
         }
 
-        if (checkFieldPresent(map, "sensitiveClass")) {
-            sensitive = (String) map.get(sensitiveClass);
+        String sensitive = (String) map.get("sensitiveClass");
 
+        if (checkFieldPresent(sensitive, "sensitiveClass")) {
                 try {
                     sensitiveClass = Class.forName(sensitive);
                 }
@@ -75,10 +82,23 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
                     System.out.println("Specified sensitive class not found.");
                     System.exit(-1);
                 }
-
         }
         else {
-            throw new ParseException("No additional configs found for ThresholdedObjectProximityAgentSensor.", 0);
+            throw new ParseException("No sensitive class found for ThresholdedObjectProximityAgentSensor.", 0);
+        }
+
+        Number sens = (Number) map.get("sensitivity");
+        if (checkFieldPresent(sens, "sensitivity")) {
+            double sensValue = sens.doubleValue();
+
+            if (sensValue > 1 || sensValue < 0) {
+                throw new ParseException("Sensitivity value for ThresholdedObjectProximityAgentSensor must be between 0 and 1", 0);
+            }
+
+            this.sensitivity = sensValue;
+        }
+        else {
+            throw new ParseException("No sensitivity value found for ThresholdedObjectProximityAgentSensor.", 0);
         }
 
     }
@@ -103,4 +123,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
         return cloned;
     }
+
+    @Override
+    public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 }

@@ -369,7 +369,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         if (field != null) {
             return true;
         }
-        System.out.println("Field '" + name + "' not present, using default");
+        System.out.println("Field '" + name + "' not present.");
         return false;
     }
 
