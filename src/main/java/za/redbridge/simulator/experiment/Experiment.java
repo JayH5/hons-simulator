@@ -13,6 +13,7 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.ScoreCalculator;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
+import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
 import java.text.ParseException;
@@ -75,7 +76,8 @@ public class Experiment {
             final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
 
 
-
+            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, 0.3f);
+            complementFactory.generateComplementsForTemplate();
 
         }
 

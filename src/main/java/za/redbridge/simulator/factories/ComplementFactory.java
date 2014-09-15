@@ -52,18 +52,39 @@ public class ComplementFactory {
 
         double[] sensitivities = new double[numConfigurableSensors];
 
-        generateAndConfigure(sensitivities, morphologyList);
+        generateAndConfigure(sensitivities, 0, 0, morphologyList);
+
+        System.out.println("Generated " + morphologyList.size() + " morphologies.");
 
         return morphologyList;
     }
 
-    public void generateAndConfigure (double[] sensitivities, ArrayList<MorphologyConfig> morphologyList) {
+    public void generateAndConfigure (double[] sensitivities, int index, float valueAtIndex,
+                                      ArrayList<MorphologyConfig> morphologyList) {
+
+        int ix = index;
+        float vix = valueAtIndex;
+
+        if (index >= sensitivities.length-1 && valueAtIndex+resolution > 1) {
+            return;
+        }
+        else if (valueAtIndex+resolution > 1) {
+            index++;
+            vix = 0;
+        }
+
+        sensitivities[ix] = vix;
 
         for (int i = 0; i < sensitivities.length; i++) {
 
-            for (int j = 0; j < (int) (1/resolution); j++) {
+            if (i == index) {
+                continue;
+            }
 
-                sensitivities[i] += resolution;
+            for (float j = 0; j < (int)(1/resolution); j++) {
+
+                sensitivities[i] = resolution*j;
+                printArray(sensitivities);
 
                 ArrayList<AgentSensor> newSensors = new ArrayList<>();
                 int counter = 0;
@@ -84,9 +105,19 @@ public class ComplementFactory {
                 }
 
                 morphologyList.add(new MorphologyConfig(newSensors));
-
-                generateAndConfigure(sensitivities, morphologyList);
             }
+
         }
+
+        generateAndConfigure(sensitivities, ix, vix+resolution, morphologyList);
+
+    }
+
+    void printArray(double[] array) {
+
+        for (int i = 0; i < array.length; i++) {
+            System.out.print(array[i] + " ");
+        }
+        System.out.println();
     }
 }
