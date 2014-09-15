@@ -7,10 +7,9 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 public class FilteredProximityAgentSensor extends AgentSensor {
 
-    private final List<Double> readings = new ArrayList<>(1);
-    private Set<Class> whitelist = new HashSet<>();
-    private static final int readingSize = 1;
-
+    protected final List<Double> readings = new ArrayList<>(1);
+    protected final Set<Class> whitelist = new HashSet<>();
+    protected static final int readingSize = 1;
 
     public FilteredProximityAgentSensor() {
         super();
@@ -61,9 +60,11 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
     }
 
+    @Override
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {
 
         String[] whiteList = null;
+        additionalConfigs = map;
 
         if (map == null) {
             System.out.println("No additional configs found.");

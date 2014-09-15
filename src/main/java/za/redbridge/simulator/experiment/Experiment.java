@@ -16,6 +16,7 @@ import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 
 import java.io.*;
 import java.text.ParseException;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 //example entry point into simulator
@@ -36,7 +37,6 @@ public class Experiment {
     private boolean showVisuals = false;
 
     public static void main (String[] args) {
-
 
         Experiment options = new Experiment();
         CmdLineParser parser = new CmdLineParser(options);
@@ -67,14 +67,17 @@ public class Experiment {
 
             try {
                 morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
-            }
-            catch(ParseException p) {
+            } catch (ParseException p) {
                 System.out.println("Error parsing morphology file.");
                 p.printStackTrace();
             }
 
+            final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
 
 
+
+
+        }
 
     }
 

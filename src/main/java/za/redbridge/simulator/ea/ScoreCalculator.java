@@ -13,6 +13,7 @@ import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.config.ExperimentConfig;
+import za.redbridge.simulator.experiment.ComparableNEATNetwork;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
@@ -22,6 +23,7 @@ import za.redbridge.simulator.phenotype.NEATPhenotype;
 
 import java.awt.*;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Created by shsu on 2014/08/13.
@@ -35,14 +37,14 @@ public class ScoreCalculator implements CalculateScore {
     private ExperimentConfig experimentConfig;
 
     //stores fitnesses of population
-    private final ConcurrentSkipListMap<NEATNetwork,Double> leaderBoard;
+    private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
 
     public ScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
-                           MorphologyConfig morphologyConfig, ConcurrentSkipListMap<NEATNetwork,Double> leaderBoard) {
+                           MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache) {
         this.config = config;
         this.morphologyConfig = morphologyConfig;
         this.experimentConfig = experimentConfig;
-        this.leaderBoard = leaderBoard;
+        this.scoreCache = scoreCache;
     }
 
     //MLMethod should be NEATNetwork which we calculate the score for
@@ -50,7 +52,7 @@ public class ScoreCalculator implements CalculateScore {
     public double calculateScore(MLMethod method) {
 
         //average the performance of this genotype over a few runs of the simulation (standardise on seeds?)
-        int testRuns = 10;
+        int testRuns = experimentConfig.getRunsPerGenome();
         double[] performances = new double[testRuns];
         Thread[] simThreads = new Thread[testRuns];
 
@@ -82,6 +84,9 @@ public class ScoreCalculator implements CalculateScore {
         }
 
         double score = StatUtils.mean(performances);
+
+        scoreCache.add(new ComparableNEATNetwork((NEATNetwork) method, score));
+
         System.out.println("Score for this genome: " + score);
 
         return score;
