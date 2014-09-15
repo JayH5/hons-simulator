@@ -21,14 +21,30 @@ import java.util.Map;
 public class MorphologyConfig extends Config {
 
     private List<AgentSensor> sensorList;
-    private int numSensors;
+    private final int numSensors;
 
     //total number of readings provided by this morphology
-    private int totalReadingSize;
+    private final int totalReadingSize;
+
+    public MorphologyConfig(List<AgentSensor> sensorList, int numSensors) {
+
+        this.sensorList = sensorList;
+        this.numSensors = numSensors;
+
+        int readSize = 0;
+
+        for (AgentSensor sensor: sensorList) {
+            readSize += sensor.getReadingSize();
+        }
+
+        totalReadingSize = readSize;
+    }
 
     public MorphologyConfig(String filepath) throws ParseException {
 
         sensorList = new ArrayList<>();
+        int sensors = 0;
+        int totReadingSize = 0;
 
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;
@@ -44,7 +60,7 @@ public class MorphologyConfig extends Config {
             Number noSensors = (Number) meta.get("numSensors");
             if (checkFieldPresent(noSensors, "meta:numSensors")) {
                 noSensors = noSensors.intValue();
-                numSensors = noSensors.intValue();
+                sensors = noSensors.intValue();
             }
             else {
                 throw new ParseException("Error: Number of sensors not found.", 0);
@@ -52,7 +68,7 @@ public class MorphologyConfig extends Config {
         }
 
         //TODO: make reading in sensor objects less hacktastic
-        for (int i = 1; i <= numSensors; i++) {
+        for (int i = 1; i <= sensors; i++) {
 
             String id = i + "s";
 
@@ -121,6 +137,8 @@ public class MorphologyConfig extends Config {
 
                         agentSensor = (AgentSensor) o;
                         agentSensor.readAdditionalConfigs(sensor);
+
+                        readingSize += agentSensor.getReadingSize();
                     }
                     catch (ClassNotFoundException c) {
                         System.out.println("AgentSensor Class not found for " + type);
@@ -158,6 +176,9 @@ public class MorphologyConfig extends Config {
             sensorList.add(agentSensor);
         }
 
+        numSensors = sensors;
+        totalReadingSize = totReadingSize;
+
         System.out.println("read " + sensorList.size() + " sensors.");
     }
 
@@ -170,4 +191,18 @@ public class MorphologyConfig extends Config {
     public List<AgentSensor> getSensors() { return sensorList; }
 
     public void setSensors(List<AgentSensor> sensorList) { this.sensorList = sensorList; }
+
+    @Override
+    public MorphologyConfig clone() {
+
+        List<AgentSensor> newSensorList = new ArrayList<>();
+
+        for (AgentSensor sensor: sensorList) {
+
+            newSensorList.add(sensor.clone());
+        }
+
+        return new MorphologyConfig(newSensorList, numSensors);
+    }
+
 }
