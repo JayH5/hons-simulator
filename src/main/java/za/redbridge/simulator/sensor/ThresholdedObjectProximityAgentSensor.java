@@ -134,6 +134,8 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
     public void setSensitivity(double sensitivity) { this.sensitivity = sensitivity; }
 
+    public double getSensitivity() { return sensitivity; }
+
     @Override
     public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 }

@@ -1,6 +1,7 @@
 package za.redbridge.simulator.factories;
 
 import za.redbridge.simulator.config.MorphologyConfig;
+import za.redbridge.simulator.ea.SensitivityGenome;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
@@ -59,18 +60,41 @@ public class ComplementFactory {
         return morphologyList;
     }
 
+    public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {
+
+        ArrayList<AgentSensor> newSensors = new ArrayList<>();
+        int counter = 0;
+        for (AgentSensor sensor : template.getSensorList()) {
+            AgentSensor clone = sensor.clone();
+
+            if (clone instanceof ThresholdedObjectProximityAgentSensor) {
+
+                ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                counter++;
+            } else if (clone instanceof ThresholdedProximityAgentSensor) {
+
+                ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                counter++;
+            }
+            newSensors.add(clone);
+        }
+
+        return new MorphologyConfig(newSensors);
+    }
+
     public void generateAndConfigure (double[] sensitivities, int index, float valueAtIndex,
                                       ArrayList<MorphologyConfig> morphologyList) {
 
         int ix = index;
         float vix = valueAtIndex;
 
-        if (index >= sensitivities.length-1 && valueAtIndex+resolution > 1) {
-            return;
-        }
-        else if (valueAtIndex+resolution > 1) {
+        if (valueAtIndex+resolution > 1) {
             index++;
             vix = 0;
+        }
+
+        if (index > sensitivities.length-1) {
+            return;
         }
 
         sensitivities[ix] = vix;
@@ -80,33 +104,30 @@ public class ComplementFactory {
             if (i == index) {
                 continue;
             }
+                for (float j = 0; j < (int) (1 / resolution); j++) {
 
-            for (float j = 0; j < (int)(1/resolution); j++) {
+                    sensitivities[i] = resolution * j;
+                    printArray(sensitivities);
 
-                sensitivities[i] = resolution*j;
-                printArray(sensitivities);
+                    ArrayList<AgentSensor> newSensors = new ArrayList<>();
+                    int counter = 0;
+                    for (AgentSensor sensor : template.getSensorList()) {
+                        AgentSensor clone = sensor.clone();
 
-                ArrayList<AgentSensor> newSensors = new ArrayList<>();
-                int counter = 0;
-                for (AgentSensor sensor: template.getSensorList()) {
-                    AgentSensor clone = sensor.clone();
+                        if (clone instanceof ThresholdedObjectProximityAgentSensor) {
 
-                    if (clone instanceof ThresholdedObjectProximityAgentSensor) {
+                            ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                            counter++;
+                        } else if (clone instanceof ThresholdedProximityAgentSensor) {
 
-                        ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                        counter++;
+                            ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                            counter++;
+                        }
+                        newSensors.add(clone);
                     }
-                    else if (clone instanceof ThresholdedProximityAgentSensor) {
 
-                        ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                        counter++;
-                    }
-                    newSensors.add(clone);
+                    morphologyList.add(new MorphologyConfig(newSensors));
                 }
-
-                morphologyList.add(new MorphologyConfig(newSensors));
-            }
-
         }
 
         generateAndConfigure(sensitivities, ix, vix+resolution, morphologyList);

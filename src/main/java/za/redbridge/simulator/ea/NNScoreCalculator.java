@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
  */
 
 //
-public class ScoreCalculator implements CalculateScore {
+public class NNScoreCalculator implements CalculateScore {
 
     private SimConfig config;
     private MorphologyConfig morphologyConfig;
@@ -39,8 +39,8 @@ public class ScoreCalculator implements CalculateScore {
     //stores fitnesses of population
     private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
 
-    public ScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
-                           MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache) {
+    public NNScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
+                             MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache) {
         this.config = config;
         this.morphologyConfig = morphologyConfig;
         this.experimentConfig = experimentConfig;

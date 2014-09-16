@@ -1,23 +1,15 @@
 package za.redbridge.simulator.experiment;
 
-import org.encog.ml.CalculateScore;
 import org.encog.neural.neat.NEATNetwork;
-import org.encog.neural.neat.NEATPopulation;
-import org.encog.neural.neat.NEATUtil;
-import org.encog.util.simple.EncogUtility;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.ScoreCalculator;
-import org.encog.ml.ea.train.EvolutionaryAlgorithm;
-import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
 import java.text.ParseException;
-import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -64,6 +56,7 @@ public class Experiment {
             ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
             SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
 
+
             //TODO: work with multiple morphology configs (specifically, filter sensitivities)
             MorphologyConfig morphologyConfig = null;
 
@@ -76,6 +69,7 @@ public class Experiment {
 
             final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
 
+               /*
 
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, 0.3f);
             final List<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
@@ -99,8 +93,13 @@ public class Experiment {
                     System.out.println("Thread interrupted.");
                     iex.printStackTrace();
                 }
-            }
+            }*/
 
+
+            /*
+            TrainController train = new TrainController(experimentConfiguration, simulationConfiguration, morphologyConfig);
+
+            train.run();*/
 
         }
 

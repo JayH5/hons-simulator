@@ -83,4 +83,6 @@ public class ThresholdedProximityAgentSensor extends ProximityAgentSensor {
     }
 
     public void setSensitivity(double sensitivity) { this.sensitivity = sensitivity; }
+
+    public double getSensitivity() { return sensitivity; }
 }

@@ -3,6 +3,8 @@ package za.redbridge.simulator.config;
 import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
 import za.redbridge.simulator.sensor.AgentSensor;
+import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
+import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
 import java.io.IOException;
 import java.io.InvalidClassException;
@@ -205,5 +207,47 @@ public class MorphologyConfig extends Config {
         }
 
         return new MorphologyConfig(newSensorList);
+    }
+
+    public int getNumAdjustableSensitivities() {
+
+        int counter = 0;
+
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof ThresholdedObjectProximityAgentSensor || sensor instanceof ThresholdedProximityAgentSensor) {
+                counter++;
+            }
+        }
+
+        return counter;
+    }
+
+    public double[] getSensitivities() {
+
+        int counter = 0;
+
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof ThresholdedObjectProximityAgentSensor || sensor instanceof ThresholdedProximityAgentSensor) {
+                counter++;
+            }
+        }
+
+        double[] output = new double[counter];
+
+        int index = 0;
+
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof ThresholdedObjectProximityAgentSensor) {
+                output[index] = ((ThresholdedObjectProximityAgentSensor) sensor).getSensitivity();
+            }
+            else if (sensor instanceof ThresholdedProximityAgentSensor) {
+                output[index] = ((ThresholdedObjectProximityAgentSensor) sensor).getSensitivity();
+            }
+        }
+
+        return output;
     }
 }

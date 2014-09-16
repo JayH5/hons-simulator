@@ -1,41 +1,40 @@
 package za.redbridge.simulator.experiment;
 
 import org.encog.ml.CalculateScore;
+import org.encog.ml.ea.population.BasicPopulation;
+import org.encog.ml.ea.population.Population;
+import org.encog.ml.ea.species.BasicSpecies;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
+import org.encog.ml.ea.train.basic.TrainEA;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.NEATUtil;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.ScoreCalculator;
+import za.redbridge.simulator.ea.ComplementScoreCalculator;
+import za.redbridge.simulator.ea.NNScoreCalculator;
+import za.redbridge.simulator.ea.SensitivityGenome;
+import za.redbridge.simulator.factories.SensitivityGenomeFactory;
 
-import javax.swing.*;
-import java.text.ParseException;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
- * Created by racter on 2014/09/11.
+ * Created by shsu on 2014/09/16.
  */
-//evaluates one sensor sensitivity complement, gets the best performing NEAT network for this complement
-public class TrainComplement implements Runnable{
+public class TrainComplement {
 
     private ExperimentConfig experimentConfig;
     private SimConfig simConfig;
     private MorphologyConfig morphologyConfig;
 
     //stores fittest network of each epoch
-    private final TreeMap<ComparableNEATNetwork,Integer> leaderBoard;
+    private final TreeMap<ComparableMorphology,Integer> leaderBoard;
 
     //stores scores for each neural network during epochs
-    private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
-
-    //the best-performing network for this complement
-    private NEATNetwork bestNetwork;
+    private final ConcurrentSkipListSet<ComparableMorphology> scoreCache;
 
     public TrainComplement(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig) {
@@ -50,14 +49,12 @@ public class TrainComplement implements Runnable{
     public void run() {
 
         //TODO: make this get population size form Experiment configs instead
-        NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
-                experimentConfig.getPopulationSize());
-        pop.reset();
+        Population pop = initPopulation(experimentConfig.getPopulationSize());
 
-        CalculateScore scoreCalculator = new ScoreCalculator(simConfig, experimentConfig,
+        CalculateScore scoreCalculator = new ComplementScoreCalculator(simConfig, experimentConfig,
                 morphologyConfig, scoreCache);
 
-        final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
+        TrainEA train = new TrainEA(pop, scoreCalculator);
 
         int epochs = 0;
 
@@ -74,7 +71,31 @@ public class TrainComplement implements Runnable{
 
     }
 
-    public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
+    public MorphologyConfig getBestMorphology() { return leaderBoard.lastEntry().getKey().getMorphology(); }
 
-    public Map.Entry<ComparableNEATNetwork,Integer> getHighestEntry() { return leaderBoard.lastEntry(); }
+    public Map.Entry<ComparableMorphology,Integer> getHighestEntry() { return leaderBoard.lastEntry(); }
+
+    private Population initPopulation(int populationSize)
+    {
+        Population result = new BasicPopulation(populationSize, null);
+
+        BasicSpecies defaultSpecies = new BasicSpecies();
+
+        defaultSpecies.setPopulation(result);
+
+        SensitivityGenomeFactory factory = new SensitivityGenomeFactory(morphologyConfig);
+
+        for (int i = 0; i < populationSize; i++) {
+            final SensitivityGenome genome = factory.randomGenome();
+            defaultSpecies.getMembers().add(genome);
+        }
+
+        result.setGenomeFactory(factory);
+        result.getSpecies().add(defaultSpecies);
+
+        return result;
+    }
+
+
+
 }
