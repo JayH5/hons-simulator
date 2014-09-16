@@ -6,6 +6,8 @@ import org.encog.ml.ea.population.Population;
 import org.encog.ml.ea.species.BasicSpecies;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.ml.ea.train.basic.TrainEA;
+import org.encog.ml.genetic.crossover.SpliceNoRepeat;
+import org.encog.ml.genetic.mutate.MutateShuffle;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.NEATUtil;
@@ -24,7 +26,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 /**
  * Created by shsu on 2014/09/16.
  */
-public class TrainComplement {
+//gets the best performing complement/controller combination for this morphology
+public class TrainComplement implements Runnable {
 
     private ExperimentConfig experimentConfig;
     private SimConfig simConfig;
@@ -42,6 +45,7 @@ public class TrainComplement {
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
+
         leaderBoard = new TreeMap<>();
         scoreCache = new ConcurrentSkipListSet<>();
     }
@@ -51,20 +55,25 @@ public class TrainComplement {
         //TODO: make this get population size form Experiment configs instead
         Population pop = initPopulation(experimentConfig.getPopulationSize());
 
+        System.out.println("populationsize " + pop.getPopulationSize());
+
         CalculateScore scoreCalculator = new ComplementScoreCalculator(simConfig, experimentConfig,
                 morphologyConfig, scoreCache);
 
-        TrainEA train = new TrainEA(pop, scoreCalculator);
+        TrainEA GA = new TrainEA(pop, scoreCalculator);
+
+        GA.addOperation(0.9, new SpliceNoRepeat(morphologyConfig.getNumAdjustableSensitivities() / 3));
+        GA.addOperation(0.1, new MutateShuffle());
 
         int epochs = 0;
 
         do {
-            System.out.println("Epoch #" + train.getIteration());
-            train.iteration();
+            System.out.println("Complement Trainer Epoch #" + GA.getIteration());
+            GA.iteration();
             epochs++;
 
             //get the highest-performing network in this epoch, store it in leaderBoard
-            leaderBoard.put(scoreCache.last(), train.getIteration());
+            leaderBoard.put(scoreCache.last(), GA.getIteration());
             scoreCache.clear();
 
         } while(epochs <= experimentConfig.getMaxEpochs());
@@ -78,9 +87,7 @@ public class TrainComplement {
     private Population initPopulation(int populationSize)
     {
         Population result = new BasicPopulation(populationSize, null);
-
         BasicSpecies defaultSpecies = new BasicSpecies();
-
         defaultSpecies.setPopulation(result);
 
         SensitivityGenomeFactory factory = new SensitivityGenomeFactory(morphologyConfig);

@@ -7,11 +7,15 @@ import org.kohsuke.args4j.Option;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 //example entry point into simulator
 /**
@@ -29,6 +33,9 @@ public class Experiment {
 
     @Option (name="--show-visuals", aliases="-v", usage="Show visualisation for simulation")
     private boolean showVisuals = false;
+
+    @Option (name="--evolve-complements", aliases="-e", usage="Evolve sensor sensitivity complements using a Genetic Algorithm")
+    private boolean evolveComplements = false;
 
     public static void main (String[] args) {
 
@@ -56,7 +63,6 @@ public class Experiment {
             ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
             SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
 
-
             //TODO: work with multiple morphology configs (specifically, filter sensitivities)
             MorphologyConfig morphologyConfig = null;
 
@@ -68,38 +74,45 @@ public class Experiment {
             }
 
             final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
-
-               /*
-
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, 0.3f);
-            final List<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
 
-            Thread[] complementThreads = new Thread[sensitivityComplements.size()];
+            //Evolve complements instead of generating them
+            if (options.evolveComplements()) {
 
-            for (int i = 0; i < complementThreads.length; i++) {
+                TrainComplement complementGA = new TrainComplement(experimentConfiguration, simulationConfiguration,
+                        morphologyConfig);
 
-                complementThreads[i] = new Thread(new TrainComplement(experimentConfiguration,
-                        simulationConfiguration, sensitivityComplements.get(i)));
+                complementGA.run();
 
-                complementThreads[i].run();
             }
+            else {
 
-            for (int i = 0; i < complementThreads.length; i++) {
-                try {
-                    complementThreads[i].join();
+                final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
+                Thread[] complementThreads = new Thread[sensitivityComplements.size()];
+
+                int i = 0;
+                for (MorphologyConfig complement: sensitivityComplements) {
+
+                    complementThreads[i] = new Thread(new TrainController(experimentConfiguration,
+                            simulationConfiguration, complement));
+
+                    complementThreads[i].run();
+                    i++;
                 }
-                catch (InterruptedException iex) {
 
-                    System.out.println("Thread interrupted.");
-                    iex.printStackTrace();
+                for (int j = 0; j < complementThreads.length; j++) {
+
+                    try {
+                        complementThreads[j].join();
+                    }
+                    catch (InterruptedException iex) {
+
+                        System.out.println("Thread interrupted.");
+                        iex.printStackTrace();
+                    }
                 }
-            }*/
 
-
-            /*
-            TrainController train = new TrainController(experimentConfiguration, simulationConfiguration, morphologyConfig);
-
-            train.run();*/
+            }
 
         }
 
@@ -108,6 +121,7 @@ public class Experiment {
     private String getExperimentConfig() { return experimentConfig; }
     private String getSimulationConfig() { return simulationConfig; }
     private boolean showVisuals() { return showVisuals; }
+    private boolean evolveComplements() { return evolveComplements; }
 
     public static void writeNetwork(NEATNetwork network, String filename) {
 

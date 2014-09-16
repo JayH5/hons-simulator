@@ -7,7 +7,9 @@ import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by shsu on 2014/09/15.
@@ -34,28 +36,24 @@ public class ComplementFactory {
         this.resolution = resolution;
     }
 
-    public List<MorphologyConfig> generateComplementsForTemplate() {
+    public Set<MorphologyConfig> generateComplementsForTemplate() {
 
-        ArrayList<MorphologyConfig> morphologyList = new ArrayList<>();
+        Set<MorphologyConfig> morphologyList = new HashSet<>();
 
-        int numConfigurableSensors = 0;
-
-        for (AgentSensor sensor: template.getSensorList()) {
-
-            if (sensor instanceof ThresholdedObjectProximityAgentSensor
-                    || sensor instanceof ThresholdedProximityAgentSensor) {
-                numConfigurableSensors++;
-            }
-        }
+        int numConfigurableSensors = template.getNumAdjustableSensitivities();
 
         int numMorphologies = (int) Math.pow(Math.ceil(1 / resolution), numConfigurableSensors);
-        System.out.println("Generating " + numMorphologies + " morphologies.");
+        System.out.println("Generating " + numMorphologies + " complements.");
 
         double[] sensitivities = new double[numConfigurableSensors];
 
-        generateAndConfigure(sensitivities, 0, 0, morphologyList);
+        generateAndConfigure(sensitivities, 0, morphologyList);
 
-        System.out.println("Generated " + morphologyList.size() + " morphologies.");
+        System.out.println("Generated " + morphologyList.size() + " complements.");
+
+        for (MorphologyConfig config: morphologyList) {
+            printArray(config.getSensitivities());
+        }
 
         return morphologyList;
     }
@@ -64,6 +62,7 @@ public class ComplementFactory {
 
         ArrayList<AgentSensor> newSensors = new ArrayList<>();
         int counter = 0;
+
         for (AgentSensor sensor : template.getSensorList()) {
             AgentSensor clone = sensor.clone();
 
@@ -76,62 +75,31 @@ public class ComplementFactory {
                 ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
                 counter++;
             }
+
             newSensors.add(clone);
         }
 
         return new MorphologyConfig(newSensors);
     }
 
-    public void generateAndConfigure (double[] sensitivities, int index, float valueAtIndex,
-                                      ArrayList<MorphologyConfig> morphologyList) {
+    public void generateAndConfigure (double[] sensitivities, int currentIndex,
+                                      Set<MorphologyConfig> morphologyList) {
 
-        int ix = index;
-        float vix = valueAtIndex;
-
-        if (valueAtIndex+resolution > 1) {
-            index++;
-            vix = 0;
-        }
-
-        if (index > sensitivities.length-1) {
+        if (currentIndex > sensitivities.length-1) {
             return;
         }
 
-        sensitivities[ix] = vix;
+        for (float j = 0; j < (int) (1 / resolution) + 1; j++) {
 
-        for (int i = 0; i < sensitivities.length; i++) {
+            sensitivities[currentIndex] = resolution * j;
 
-            if (i == index) {
-                continue;
-            }
-                for (float j = 0; j < (int) (1 / resolution); j++) {
+            //System.out.print("current index: " + currentIndex + " ");
+            //printArray(sensitivities);
 
-                    sensitivities[i] = resolution * j;
-                    printArray(sensitivities);
+            morphologyList.add(MorphologyFromSensitivities(template, sensitivities));
 
-                    ArrayList<AgentSensor> newSensors = new ArrayList<>();
-                    int counter = 0;
-                    for (AgentSensor sensor : template.getSensorList()) {
-                        AgentSensor clone = sensor.clone();
-
-                        if (clone instanceof ThresholdedObjectProximityAgentSensor) {
-
-                            ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                            counter++;
-                        } else if (clone instanceof ThresholdedProximityAgentSensor) {
-
-                            ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                            counter++;
-                        }
-                        newSensors.add(clone);
-                    }
-
-                    morphologyList.add(new MorphologyConfig(newSensors));
-                }
+            generateAndConfigure(sensitivities, currentIndex+1, morphologyList);
         }
-
-        generateAndConfigure(sensitivities, ix, vix+resolution, morphologyList);
-
     }
 
     void printArray(double[] array) {

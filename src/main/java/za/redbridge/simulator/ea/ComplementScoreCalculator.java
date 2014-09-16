@@ -23,10 +23,10 @@ public class ComplementScoreCalculator implements CalculateScore {
     private SimConfig simConfig;
     private MorphologyConfig morphologyConfig;
 
-    //stores fittest network of each epoch
+    //stores fittest morphology of each epoch
     private final TreeMap<ComparableMorphology,Integer> leaderBoard;
 
-    //stores scores for each neural network during epochs
+    //stores scores for each morphology during epochs
     private final ConcurrentSkipListSet<ComparableMorphology> scoreCache;
 
     public ComplementScoreCalculator(SimConfig simConfig, ExperimentConfig experimentConfig,
@@ -44,15 +44,16 @@ public class ComplementScoreCalculator implements CalculateScore {
     public double calculateScore(MLMethod method) {
 
         SensitivityGenome sensitivityGenome = (SensitivityGenome) method;
-
         MorphologyConfig morphology =
                 ComplementFactory.MorphologyFromSensitivities(morphologyConfig, sensitivityGenome.getData());
 
         TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology);
 
-        complementTrainer.run();
+        System.out.println("running complementscorecalculator");
 
+        complementTrainer.run();
         double score = complementTrainer.getHighestEntry().getValue();
+        System.out.println("score is " + score);
         return score;
     }
 

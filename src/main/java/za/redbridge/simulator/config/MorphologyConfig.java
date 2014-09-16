@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -197,6 +198,22 @@ public class MorphologyConfig extends Config {
     public void setSensors(List<AgentSensor> sensorList) { this.sensorList = sensorList; }
 
     @Override
+    public int hashCode() {
+
+        return Arrays.hashCode(getSensitivities());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o instanceof MorphologyConfig) {
+            return Arrays.equals(getSensitivities(), ((MorphologyConfig) o).getSensitivities());
+        }
+
+        return false;
+    }
+
+    @Override
     public MorphologyConfig clone() {
 
         List<AgentSensor> newSensorList = new ArrayList<>();
@@ -225,16 +242,7 @@ public class MorphologyConfig extends Config {
 
     public double[] getSensitivities() {
 
-        int counter = 0;
-
-        for (AgentSensor sensor : sensorList) {
-
-            if (sensor instanceof ThresholdedObjectProximityAgentSensor || sensor instanceof ThresholdedProximityAgentSensor) {
-                counter++;
-            }
-        }
-
-        double[] output = new double[counter];
+        double[] output = new double[getNumAdjustableSensitivities()];
 
         int index = 0;
 
@@ -242,9 +250,11 @@ public class MorphologyConfig extends Config {
 
             if (sensor instanceof ThresholdedObjectProximityAgentSensor) {
                 output[index] = ((ThresholdedObjectProximityAgentSensor) sensor).getSensitivity();
+                index++;
             }
             else if (sensor instanceof ThresholdedProximityAgentSensor) {
-                output[index] = ((ThresholdedObjectProximityAgentSensor) sensor).getSensitivity();
+                output[index] = ((ThresholdedProximityAgentSensor) sensor).getSensitivity();
+                index++;
             }
         }
 

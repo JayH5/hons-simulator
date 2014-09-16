@@ -66,9 +66,9 @@ public class ThresholdedProximityAgentSensor extends ProximityAgentSensor {
     public int getReadingSize() { return readingSize; }
 
     @Override
-    public ProximityAgentSensor clone() {
+    public ThresholdedProximityAgentSensor clone() {
 
-        ProximityAgentSensor cloned = new ProximityAgentSensor(bearing, orientation, range, fieldOfView);
+        ThresholdedProximityAgentSensor cloned = new ThresholdedProximityAgentSensor(bearing, orientation, range, fieldOfView);
 
         try {
             cloned.readAdditionalConfigs(additionalConfigs);
