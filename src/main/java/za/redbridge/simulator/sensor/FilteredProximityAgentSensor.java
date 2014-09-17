@@ -60,9 +60,11 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         }
     }
 
+    @Override
     public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {
 
         String[] whiteList = null;
+        additionalConfigs = map;
 
         if (map == null) {
             System.out.println("No additional configs found.");
@@ -109,5 +111,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
         return cloned;
     }
 
+    @Override
+    public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 
 }

@@ -14,18 +14,20 @@ public class HomogeneousRobotFactory implements RobotFactory {
     protected double radius;
     protected Paint paint;
     protected Phenotype phenotype;
+    protected int numRobots;
 
-    public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint) {
+    public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint, int numRobots) {
         this.phenotype = phenotype;
         this.mass = mass;
         this.radius = radius;
         this.paint = paint;
+        this.numRobots = numRobots;
     }
 
     @Override
     public void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world,
-            int quantity, SimConfig.Direction targetAreaPlacement) {
-        for (int i = 0; i < quantity; i++) {
+                               SimConfig.Direction targetAreaPlacement) {
+        for (int i = 0; i < numRobots; i++) {
             PlacementArea.Space space = placementArea.getRandomSpace(radius);
 
             Phenotype phenotype = this.phenotype.clone();
@@ -36,4 +38,8 @@ public class HomogeneousRobotFactory implements RobotFactory {
             placementArea.placeObject(space, robot);
         }
     }
+
+    public void setNumRobots(int numRobots) { this.numRobots = numRobots; }
+
+    public int getNumRobots() { return numRobots; }
 }

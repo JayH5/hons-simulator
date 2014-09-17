@@ -238,8 +238,6 @@ public class SimConfig extends Config {
                     }
 
                     resFactory = (ResourceFactory) o;
-
-                    //TODO: solve the mystery of the missing resource field
                     Map resources = (Map) config.get("resourceProperties");
                     resFactory.configure(resources);
                 }

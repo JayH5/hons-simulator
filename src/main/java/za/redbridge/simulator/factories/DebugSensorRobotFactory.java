@@ -17,18 +17,20 @@ public class DebugSensorRobotFactory implements RobotFactory {
     protected Paint paint;
     protected Phenotype phenotype;
     protected HeuristicPhenotype heuristicPhenotype;
+    protected int numRobots;
 
     public DebugSensorRobotFactory(Phenotype phenotype,
-                                   double mass, double radius, Paint paint) {
+                                   double mass, double radius, Paint paint, int numRobots) {
         this.phenotype = phenotype;
         this.mass = mass;
         this.radius = radius;
         this.paint = paint;
+        this.numRobots = numRobots;
     }
 
     @Override
     public void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world,
-            int quantity, SimConfig.Direction targetAreaPlacement) {
+                               SimConfig.Direction targetAreaPlacement) {
         PlacementArea.Space space =
                 placementArea.getSpaceAtPosition(radius, new Double2D(50, 50));
         RobotObject r1 =
@@ -40,4 +42,8 @@ public class DebugSensorRobotFactory implements RobotFactory {
                 new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype.clone(), targetAreaPlacement);
         placementArea.placeObject(space, r2);
     }
+
+    public void setNumRobots(int numRobots) { this.numRobots = numRobots; }
+
+    public int getNumRobots() { return numRobots; }
 }

@@ -18,6 +18,7 @@ public class ExperimentConfig extends Config {
     private static final EvolutionaryAlgorithm DEFAULT_CONTROLLER_EA = EvolutionaryAlgorithm.NEAT;
     private static final int DEFAULT_POPULATION_SIZE = 15;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
+    private static final int DEFAULT_RUNS_PER_GENOME = 1;
 
     public enum EvolutionaryAlgorithm {
         NEAT, EVOLUTIONARY_STRATEGY, GENETIC_PROGRAMMING;
@@ -25,15 +26,18 @@ public class ExperimentConfig extends Config {
 
     protected final long maxEpochs;
     protected final int populationSize;
+    protected final int runsPerGenome;
 
     protected EvolutionaryAlgorithm algorithm;
     protected String robotFactory;
     protected String morphologyConfigFile;
 
+
     public ExperimentConfig() {
         this.maxEpochs = DEFAULT_MAX_EPOCHS;
         this.populationSize = DEFAULT_POPULATION_SIZE;
         this.algorithm = EvolutionaryAlgorithm.NEAT;
+        this.runsPerGenome = DEFAULT_RUNS_PER_GENOME;
     }
 
     public ExperimentConfig(String filepath) {
@@ -52,6 +56,7 @@ public class ExperimentConfig extends Config {
         ExperimentConfig.EvolutionaryAlgorithm controllerEA = DEFAULT_CONTROLLER_EA;
         int popSize = DEFAULT_POPULATION_SIZE;
         String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
+        int runsPerG = DEFAULT_RUNS_PER_GENOME;
 
         Map control = (Map) config.get("control");
         if (checkFieldPresent(control, "control")) {
@@ -59,6 +64,10 @@ public class ExperimentConfig extends Config {
             Number epochs = (Number) control.get("maxEpochs");
             if (checkFieldPresent(epochs, "control:maxEpochs")) {
                 maxEpochs = epochs.longValue();
+            }
+            Integer runsPG = (Integer) control.get("runsPerGenome");
+            if (checkFieldPresent(runsPG, "control:runsPerGenome")) {
+                runsPerG = runsPG;
             }
         }
 
@@ -104,10 +113,12 @@ public class ExperimentConfig extends Config {
         this.maxEpochs = maxEpochs;
         this.algorithm = controllerEA;
         this.populationSize = popSize;
+
         this.morphologyConfigFile = morphologyFile;
+        this.runsPerGenome = runsPerG;
     }
 
-    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize,
+    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int runsPerGenome,
                             String robotFactory, String morphologyConfigFile) {
 
         this.maxEpochs = maxEpochs;
@@ -115,6 +126,7 @@ public class ExperimentConfig extends Config {
         this.populationSize = populationSize;
         this.robotFactory = robotFactory;
         this.morphologyConfigFile = morphologyConfigFile;
+        this.runsPerGenome = runsPerGenome;
     }
 
     public long getMaxEpochs() { return maxEpochs; }
@@ -126,5 +138,7 @@ public class ExperimentConfig extends Config {
     public String getRobotFactory() { return robotFactory; }
 
     public String getMorphologyConfigFile() { return morphologyConfigFile; }
+
+    public int getRunsPerGenome() { return runsPerGenome; }
 
 }

@@ -41,7 +41,8 @@ public class ProximityAgentSensor extends AgentSensor {
         return 1 / (1 + Math.exp(fraction + offset));
     }
 
-    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
+    @Override
+    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException { additionalConfigs = map; }
 
     @Override
     public int getReadingSize() { return readingSize; }
@@ -62,4 +63,7 @@ public class ProximityAgentSensor extends AgentSensor {
 
         return cloned;
     }
+
+    @Override
+    public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 }
