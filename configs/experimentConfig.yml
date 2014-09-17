@@ -10,5 +10,8 @@ evolutionaryAlgorithm:
   populationSize: 100
   GAPopulationSize: 50
 
+complements:
+  generatorResolution: 0.3
+
 morphology:
   morphologyFileName: sensorList.yml

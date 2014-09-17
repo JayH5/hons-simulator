@@ -48,10 +48,11 @@ public class ComplementScoreCalculator implements CalculateScore {
                 MorphologyConfig.MorphologyFromSensitivities(morphologyConfig, sensitivityGenome.getData());
 
         TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology);
-
         complementTrainer.run();
+
         double score = complementTrainer.getHighestEntry().getValue();
         System.out.println("Top score for this sensor sensitivity complement is " + score);
+
         return score;
     }
 

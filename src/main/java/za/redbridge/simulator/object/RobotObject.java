@@ -73,6 +73,7 @@ public class RobotObject extends PhysicalObject {
     }
 
     private void initSensors() {
+
         for (AgentSensor sensor : phenotype.getSensors()) {
             sensor.attach(this);
         }

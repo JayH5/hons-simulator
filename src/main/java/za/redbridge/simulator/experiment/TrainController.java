@@ -1,5 +1,7 @@
 package za.redbridge.simulator.experiment;
 
+import org.apache.commons.math3.stat.StatUtils;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.neural.neat.NEATNetwork;
@@ -52,6 +54,8 @@ public class TrainController implements Runnable{
         //TODO: make this get population size form Experiment configs instead
         NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
+
+        pop.setNEATActivationFunction(new ActivationTANH());
         pop.reset();
 
         CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
@@ -59,14 +63,15 @@ public class TrainController implements Runnable{
 
         final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
-        System.out.println("Activation function: " + pop.getActivationFunctions().getClass().getName());
-
         int epochs = 1;
 
         do {
             System.out.println("Controller Trainer Epoch #" + train.getIteration());
             train.iteration();
             epochs++;
+
+            System.out.println("Average performance of controllers in this epoch scored: " + getEpochMeanScore());
+            System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
 
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
@@ -79,6 +84,20 @@ public class TrainController implements Runnable{
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
 
     public Map.Entry<ComparableNEATNetwork,Integer> getHighestEntry() { return leaderBoard.lastEntry(); }
+
+    private synchronized double getEpochMeanScore() {
+
+        double[] scores = new double[scoreCache.size()];
+        int counter = 0;
+
+        for (ComparableNEATNetwork network: scoreCache) {
+
+            scores[counter] = network.getScore();
+            counter++;
+        }
+
+        return StatUtils.mean(scores);
+    }
 
 
 }

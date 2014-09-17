@@ -60,11 +60,9 @@ public class NEATPhenotype implements Phenotype {
 
         List<AgentSensor> sensorList = new ArrayList<>();
 
-        for (AgentSensor s: sensorList) {
+        for (AgentSensor s: sensors) {
             sensorList.add(s.clone());
         }
-
-        //todo: clone the controller???
 
         return new NEATPhenotype(sensorList, controller, totalInputCount);
     }

@@ -47,14 +47,14 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
     @Override
     protected SensorReading provideObjectReading(List<SensedObject> objects) {
-        for(SensedObject o : objects){
-            if(!(o.getObject().getClass().equals(sensitiveClass))){
-                objects.remove(o);
-            }
-        }
+
         double reading = 0.0;
-        if (!objects.isEmpty()) {
-            reading = 1 - Math.min(objects.get(0).getDistance() / range, 1.0);
+
+        for(SensedObject o : objects){
+            if(o.getObject().getClass().equals(sensitiveClass)){
+                reading = 1 - Math.min(o.getDistance() / range, 1.0);
+                break;
+            }
         }
 
         readings.clear();

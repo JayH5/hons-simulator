@@ -55,7 +55,7 @@ public class MorphologyConfig extends Config {
 
         sensorList = new ArrayList<>();
         int sensors = 0;
-        int totReadingSize = 0;
+        int readingSize = 0;
 
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;
@@ -85,20 +85,12 @@ public class MorphologyConfig extends Config {
 
             String type = null;
             float bearing, orientation, fieldOfView, range;
-            int readingSize;
+
 
             AgentSensor agentSensor = null;
 
             Map sensor = (Map) config.get(id);
             if (checkFieldPresent(sensor, id)) {
-
-                Integer reads = (Integer) sensor.get("readingSize");
-                if (checkFieldPresent(reads, id + ":readingSize")) {
-                    readingSize = reads;
-                }
-                else {
-                    throw new ParseException("No reading size found for sensor " + id, i);
-                }
 
                 Number bear = (Number) sensor.get("bearing");
                 if (checkFieldPresent(bear, id + ":bearing")) {
@@ -140,7 +132,7 @@ public class MorphologyConfig extends Config {
 
                         Object o = sensorType.getConstructor(Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE)
                                 .newInstance((float) Math.toRadians(bearing), (float) Math.toRadians(orientation),
-                                        (float) Math.toRadians(range), (float) Math.toRadians(fieldOfView));
+                                        range, (float) Math.toRadians(fieldOfView));
 
                         if (!(o instanceof AgentSensor)) {
                             throw new InvalidClassException("Not Agent Sensor.");
@@ -188,7 +180,7 @@ public class MorphologyConfig extends Config {
         }
 
         numSensors = sensors;
-        totalReadingSize = totReadingSize;
+        totalReadingSize = readingSize;
 
         System.out.println("read " + sensorList.size() + " sensors.");
 

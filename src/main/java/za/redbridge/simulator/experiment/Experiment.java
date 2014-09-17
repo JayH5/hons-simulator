@@ -73,9 +73,10 @@ public class Experiment {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-
+//new NEATPhenotype(morphologyConfig.getSensorList(), bestNetwork, morphologyConfig.getTotalReadingSize())
             //UGUGGHGHUHGHGGH
             NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
+
 
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                     new NEATPhenotype(morphologyConfig.getSensorList(), bestNetwork, morphologyConfig.getTotalReadingSize()),
@@ -96,7 +97,7 @@ public class Experiment {
         else {
 
             final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
-            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, 0.3f);
+            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, experimentConfiguration.getComplementGeneratorResolution());
 
             //Evolve complements instead of generating them
             if (options.evolveComplements()) {
@@ -105,7 +106,6 @@ public class Experiment {
                         morphologyConfig);
 
                 complementGA.run();
-
             }
             else {
 

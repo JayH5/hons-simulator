@@ -47,11 +47,7 @@ public class TrainComplement implements Runnable {
 
     public void run() {
 
-        //TODO: make this get population size form Experiment configs instead
         Population pop = initPopulation(experimentConfig.getGAPopulationSize());
-
-        System.out.println("populationsize " + pop.getPopulationSize());
-
         CalculateScore scoreCalculator = new ComplementScoreCalculator(simConfig, experimentConfig,
                 morphologyConfig, scoreCache);
 
