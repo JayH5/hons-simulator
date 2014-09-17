@@ -17,12 +17,12 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
 
     private static final double DEFAULT_SMALL_OBJECT_WIDTH = 0.4;
     private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4;
-    private static final double DEFAULT_SMALL_OBJECT_MASS = 5.0;
+    private static final double DEFAULT_SMALL_OBJECT_MASS = 1.0;
     private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
 
     private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6;
     private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6;
-    private static final double DEFAULT_LARGE_OBJECT_MASS = 15.0;
+    private static final double DEFAULT_LARGE_OBJECT_MASS = 2.0;
     private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
 
     private int numSmallObjects;
