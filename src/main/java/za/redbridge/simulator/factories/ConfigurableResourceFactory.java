@@ -99,28 +99,24 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
     @Override
     public void configure(Map<String, Object> resourceConfigs) {
 
-        //Resources
-        Map resourceProps = (Map) resourceConfigs.get("resourceProperties");
-        if (checkFieldPresent(resourceProps, "resourceProperties")) {
-
             //small resources
             Integer resourcesFieldSmall = (Integer) resourceConfigs.get("smallResources");
             if (checkFieldPresent(resourcesFieldSmall, "resourceConfigs:smallResources")) {
                 numSmallObjects = resourcesFieldSmall;
             }
-            Double sObjWidth = (Double) resourceProps.get("smallObjectWidth");
+            Double sObjWidth = (Double) resourceConfigs.get("smallObjectWidth");
             if (checkFieldPresent(sObjWidth, "resourceProperties:smallObjectWidth")) {
                 smallObjectWidth = sObjWidth;
             }
-            Double sObjHeight = (Double) resourceProps.get("smallObjectHeight");
+            Double sObjHeight = (Double) resourceConfigs.get("smallObjectHeight");
             if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectHeight")) {
                 smallObjectHeight = sObjHeight;
             }
-            Double sObjMass = (Double) resourceProps.get("smallObjectMass");
+            Double sObjMass = (Double) resourceConfigs.get("smallObjectMass");
             if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectMass")) {
                 smallObjectMass = sObjMass;
             }
-            Integer sObjPushingBots = (Integer) resourceProps.get("maxSmallObjectPushingBots");
+            Integer sObjPushingBots = (Integer) resourceConfigs.get("maxSmallObjectPushingBots");
             if (checkFieldPresent(sObjPushingBots, "resourceProperties:maxSmallObjectPushingBots")) {
                 smallObjectPushingBots = sObjPushingBots;
             }
@@ -130,23 +126,22 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
             if (checkFieldPresent(resourcesFieldLarge, "resourceConfigs:largeResources")) {
                 numLargeObjects = resourcesFieldLarge;
             }
-            Double lObjWidth = (Double) resourceProps.get("largeObjectWidth");
+            Double lObjWidth = (Double) resourceConfigs.get("largeObjectWidth");
             if (checkFieldPresent(lObjWidth, "resourceProperties:largeObjectWidth")) {
                 largeObjectWidth = lObjWidth;
             }
-            Double lObjHeight = (Double) resourceProps.get("largeObjectHeight");
+            Double lObjHeight = (Double) resourceConfigs.get("largeObjectHeight");
             if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectHeight")) {
                 largeObjectHeight = lObjHeight;
             }
-            Double lObjMass = (Double) resourceProps.get("largeObjectMass");
+            Double lObjMass = (Double) resourceConfigs.get("largeObjectMass");
             if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectMass")) {
                 largeObjectMass = lObjMass;
             }
-            Integer lObjPushingBots = (Integer) resourceProps.get("maxLargeObjectPushingBots");
+            Integer lObjPushingBots = (Integer) resourceConfigs.get("maxLargeObjectPushingBots");
             if (checkFieldPresent(lObjPushingBots, "resourceProperties:maxLargeObjectPushingBots")) {
                 largeObjectPushingBots = lObjPushingBots;
             }
-        }
     }
 
 }

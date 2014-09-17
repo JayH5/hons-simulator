@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -268,16 +270,21 @@ public class MorphologyConfig extends Config {
 
     public void dumpMorphology() {
 
-        if (yamlCache == null) {
-            System.out.println("Malformed morphology object.");
+        Map<String,Object> yamlDump = new HashMap<>();
+        yamlDump.put("meta", numSensors);
+
+        int sensorID = 1;
+        for (AgentSensor sensor: sensorList) {
+
+            Map<String,Object> sensorMap = sensor.getAdditionalConfigs();
+            sensorMap.put(sensorID+"s", sensorMap);
+            sensorID++;
         }
-        else {
 
             Yaml yaml = new Yaml();
             StringWriter writer = new StringWriter();
             yaml.dump(yamlCache, writer);
             System.out.println(writer.toString());
-        }
     }
 
     public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {
@@ -303,4 +310,5 @@ public class MorphologyConfig extends Config {
 
         return new MorphologyConfig(newSensors);
     }
+
 }
