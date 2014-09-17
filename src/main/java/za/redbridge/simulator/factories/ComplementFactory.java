@@ -58,29 +58,7 @@ public class ComplementFactory {
         return morphologyList;
     }
 
-    public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {
 
-        ArrayList<AgentSensor> newSensors = new ArrayList<>();
-        int counter = 0;
-
-        for (AgentSensor sensor : template.getSensorList()) {
-            AgentSensor clone = sensor.clone();
-
-            if (clone instanceof ThresholdedObjectProximityAgentSensor) {
-
-                ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                counter++;
-            } else if (clone instanceof ThresholdedProximityAgentSensor) {
-
-                ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                counter++;
-            }
-
-            newSensors.add(clone);
-        }
-
-        return new MorphologyConfig(newSensors);
-    }
 
     public void generateAndConfigure (double[] sensitivities, int currentIndex,
                                       Set<MorphologyConfig> morphologyList) {
@@ -96,7 +74,7 @@ public class ComplementFactory {
             //System.out.print("current index: " + currentIndex + " ");
             //printArray(sensitivities);
 
-            morphologyList.add(MorphologyFromSensitivities(template, sensitivities));
+            morphologyList.add(MorphologyConfig.MorphologyFromSensitivities(template, sensitivities));
 
             generateAndConfigure(sensitivities, currentIndex+1, morphologyList);
         }

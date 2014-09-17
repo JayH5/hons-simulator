@@ -236,7 +236,6 @@ public class MorphologyConfig extends Config {
     public int getNumAdjustableSensitivities() {
 
         int counter = 0;
-
         for (AgentSensor sensor : sensorList) {
 
             if (sensor instanceof ThresholdedObjectProximityAgentSensor || sensor instanceof ThresholdedProximityAgentSensor) {
@@ -250,7 +249,6 @@ public class MorphologyConfig extends Config {
     public double[] getSensitivities() {
 
         double[] output = new double[getNumAdjustableSensitivities()];
-
         int index = 0;
 
         for (AgentSensor sensor : sensorList) {
@@ -280,5 +278,29 @@ public class MorphologyConfig extends Config {
             yaml.dump(yamlCache, writer);
             System.out.println(writer.toString());
         }
+    }
+
+    public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {
+
+        ArrayList<AgentSensor> newSensors = new ArrayList<>();
+        int counter = 0;
+
+        for (AgentSensor sensor : template.getSensorList()) {
+            AgentSensor clone = sensor.clone();
+
+            if (clone instanceof ThresholdedObjectProximityAgentSensor) {
+
+                ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                counter++;
+            } else if (clone instanceof ThresholdedProximityAgentSensor) {
+
+                ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                counter++;
+            }
+
+            newSensors.add(clone);
+        }
+
+        return new MorphologyConfig(newSensors);
     }
 }
