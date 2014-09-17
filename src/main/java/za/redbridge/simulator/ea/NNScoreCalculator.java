@@ -64,7 +64,7 @@ public class NNScoreCalculator implements CalculateScore {
 
         for (int i = 0; i < testRuns; i++) {
 
-            Simulation simulation = new Simulation(config, robotFactory, config.getObjectsRobots());
+            Simulation simulation = new Simulation(config, robotFactory);
             SimRun simulationRunner = new SimRun(simulation, performances, i);
 
             simThreads[i] = new Thread(simulationRunner);
