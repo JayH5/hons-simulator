@@ -7,6 +7,7 @@ import za.redbridge.simulator.sensor.AgentSensor;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,6 +26,8 @@ public class MorphologyConfig extends Config {
 
     //total number of readings provided by this morphology
     private final int totalReadingSize;
+
+    private Map<String,Object> yamlCache;
 
     public MorphologyConfig(List<AgentSensor> sensorList, int numSensors) {
 
@@ -180,6 +183,9 @@ public class MorphologyConfig extends Config {
         totalReadingSize = totReadingSize;
 
         System.out.println("read " + sensorList.size() + " sensors.");
+
+        yamlCache = config;
+
     }
 
     public List<AgentSensor> getSensorList() { return sensorList; }
@@ -201,4 +207,17 @@ public class MorphologyConfig extends Config {
         return new MorphologyConfig(newSensorList, numSensors);
     }
 
+    public void dumpMorphology() {
+
+        if (yamlCache == null) {
+            System.out.println("Malformed morphology object.");
+        }
+        else {
+
+            Yaml yaml = new Yaml();
+            StringWriter writer = new StringWriter();
+            yaml.dump(yamlCache, writer);
+            System.out.println(writer.toString());
+        }
+    }
 }
