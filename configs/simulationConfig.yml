@@ -18,7 +18,7 @@ factories:
   resourceFactory: za.redbridge.simulator.factories.ConfigurableResourceFactory
   robotFactory: za.redbridge.simulator.factories.HomogeneousRobotFactory
 robots:
-  numRobots: 15
+  numRobots: 20
   mass: 0.7
   radius: 0.15
   colour: 0, 0, 0

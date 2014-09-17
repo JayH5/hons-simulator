@@ -8,6 +8,7 @@ phenotype:
 evolutionaryAlgorithm:
   controllerEA: NEAT
   populationSize: 100
+  GAPopulationSize: 50
 
 morphology:
   morphologyFileName: sensorList.yml
