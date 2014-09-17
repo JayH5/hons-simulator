@@ -49,11 +49,9 @@ public class ComplementScoreCalculator implements CalculateScore {
 
         TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology);
 
-        System.out.println("running complementscorecalculator");
-
         complementTrainer.run();
         double score = complementTrainer.getHighestEntry().getValue();
-        System.out.println("score is " + score);
+        System.out.println("Top score for this sensor sensitivity complement is " + score);
         return score;
     }
 

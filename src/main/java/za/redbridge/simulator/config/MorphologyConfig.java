@@ -260,4 +260,5 @@ public class MorphologyConfig extends Config {
 
         return output;
     }
+
 }

@@ -87,7 +87,7 @@ public class NNScoreCalculator implements CalculateScore {
 
         scoreCache.add(new ComparableNEATNetwork((NEATNetwork) method, score));
 
-        System.out.println("Score for this genome: " + score);
+        System.out.println("Score for this controller genome: " + score);
 
         return score;
     }
