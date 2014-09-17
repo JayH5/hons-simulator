@@ -59,6 +59,8 @@ public class TrainController implements Runnable{
 
         final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
+        System.out.println("Activation function: " + pop.getActivationFunctions().getClass().getName());
+
         int epochs = 1;
 
         do {

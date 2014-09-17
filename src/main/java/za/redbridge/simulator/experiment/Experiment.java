@@ -4,12 +4,19 @@ import org.encog.neural.neat.NEATNetwork;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import sim.display.*;
+import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ComplementFactory;
+import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.phenotype.ChasingPhenotype;
+import za.redbridge.simulator.phenotype.NEATPhenotype;
 
 import java.io.*;
+import java.io.Console;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Set;
@@ -51,27 +58,43 @@ public class Experiment {
             System.exit(1);
         }
 
+        ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
+        SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
+
+        //TODO: work with multiple morphology configs (specifically, filter sensitivities)
+        MorphologyConfig morphologyConfig = null;
+
+        try {
+            morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
+        } catch (ParseException p) {
+            System.out.println("Error parsing morphology file.");
+            p.printStackTrace();
+        }
+
         //if we need to show a visualisation
         if (options.showVisuals()) {
 
             //UGUGGHGHUHGHGGH
             NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
 
+            HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
+                    new NEATPhenotype(morphologyConfig.getSensorList(), bestNetwork, morphologyConfig.getTotalReadingSize()),
+                    simulationConfiguration.getRobotMass(),
+                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(),
+                    simulationConfiguration.getObjectsRobots());
+
+            Simulation simulation = new Simulation(simulationConfiguration, robotFactory,
+                    experimentConfiguration.getPopulationSize());
+
+            SimulationGUI video =
+                    new SimulationGUI(simulation);
+
+            //new console which displays this simulation
+            sim.display.Console console = new sim.display.Console(video);
+            console.setVisible(true);
+
         }
         else {
-
-            ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
-            SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
-
-            //TODO: work with multiple morphology configs (specifically, filter sensitivities)
-            MorphologyConfig morphologyConfig = null;
-
-            try {
-                morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
-            } catch (ParseException p) {
-                System.out.println("Error parsing morphology file.");
-                p.printStackTrace();
-            }
 
             final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, 0.3f);

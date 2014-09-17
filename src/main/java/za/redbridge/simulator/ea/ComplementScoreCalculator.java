@@ -45,7 +45,7 @@ public class ComplementScoreCalculator implements CalculateScore {
 
         SensitivityGenome sensitivityGenome = (SensitivityGenome) method;
         MorphologyConfig morphology =
-                ComplementFactory.MorphologyFromSensitivities(morphologyConfig, sensitivityGenome.getData());
+                MorphologyConfig.MorphologyFromSensitivities(morphologyConfig, sensitivityGenome.getData());
 
         TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology);
 
