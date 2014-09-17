@@ -8,7 +8,7 @@ meta:
   bearing: 51.0
   orientation: 40.0
   fieldOfView: 10.0
-  range: 10.0
+  range: 1.0
 
 2s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
@@ -17,7 +17,7 @@ meta:
   bearing: 102.0
   fieldOfView: 10.0
   orientation: 40.0
-  range: 10.0
+  range: 1.0
 
 3s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
@@ -26,7 +26,7 @@ meta:
   bearing: 154.0
   fieldOfView: 10.0
   orientation: 40.0
-  range: 10.0
+  range: 1.0
 
 4s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
@@ -35,7 +35,7 @@ meta:
   bearing: 206.0
   fieldOfView: 10.0
   orientation: 40.0
-  range: 10.0
+  range: 1.0
 
 5s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
@@ -44,7 +44,7 @@ meta:
   bearing: 258.0
   fieldOfView: 10.0
   orientation: 40.0
-  range: 10.0
+  range: 1.0
 
 6s:
   type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
@@ -53,4 +53,4 @@ meta:
   bearing: 310.0
   fieldOfView: 10.0
   orientation: 40.0
-  range: 10.0
+  range: 1.0
