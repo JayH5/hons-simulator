@@ -224,6 +224,7 @@ public class MorphologyConfig extends Config implements Serializable {
         return new MorphologyConfig(newSensorList);
     }
 
+
     public int getNumAdjustableSensitivities() {
 
         int counter = 0;
@@ -288,6 +289,7 @@ public class MorphologyConfig extends Config implements Serializable {
             e.printStackTrace();
             System.exit(-1);
         }
+
     }
 
     public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {

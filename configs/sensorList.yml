@@ -21,6 +21,7 @@ meta:
   range: 1.0
   sensitivity: 0.8
 
+
 3s:
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
   sensitiveClass: za.redbridge.simulator.object.TargetAreaObject
@@ -31,13 +32,13 @@ meta:
   range: 1.0
   sensitivity: 0.8
 
+
 4s:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
   bearing: 45.0
   fieldOfView: 10.0
   orientation: 0.0
-  range: 1.0
 
 5s:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
@@ -45,7 +46,6 @@ meta:
   bearing: 275.0
   fieldOfView: 10.0
   orientation: 0.0
-  range: 1.0
 
 6s:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
@@ -53,4 +53,4 @@ meta:
   bearing: 180.0
   fieldOfView: 10.0
   orientation: 0.0
-  range: 1.0
+

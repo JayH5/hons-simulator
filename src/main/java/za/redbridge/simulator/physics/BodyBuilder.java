@@ -10,6 +10,7 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.joints.TopDownFrictionJointDef;
 
 import sim.util.Double2D;
 
@@ -25,8 +26,11 @@ public class BodyBuilder {
     private static final float DEFAULT_ANGULAR_DAMPING = .1f;
     private static final float DEFAULT_LINEAR_DAMPING = .1f;
 
-    private BodyDef bd = new BodyDef();
-    private FixtureDef fd = new FixtureDef();
+    private final BodyDef bd = new BodyDef();
+    private final FixtureDef fd = new FixtureDef();
+
+    private boolean groundFriction = false;
+    private float kineticCOF;
 
     public BodyBuilder() {
         bd.setAngularDamping(DEFAULT_ANGULAR_DAMPING);
@@ -159,9 +163,22 @@ public class BodyBuilder {
         return this;
     }
 
+    public BodyBuilder setGroundFriction(float kineticCOF) {
+        this.kineticCOF = kineticCOF;
+        groundFriction = true;
+        return this;
+    }
+
     public Body build(World world) {
         Body body = world.createBody(bd);
         body.createFixture(fd);
+
+        if (groundFriction) {
+            TopDownFrictionJointDef jd = new TopDownFrictionJointDef();
+            jd.initialize(body, kineticCOF, 10f); // TODO: Angular friction
+            world.createJoint(jd);
+        }
+
         return body;
     }
 
