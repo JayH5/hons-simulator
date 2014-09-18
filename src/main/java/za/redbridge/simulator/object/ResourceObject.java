@@ -84,8 +84,9 @@ public class ResourceObject extends PhysicalObject {
         return bb.setBodyType(BodyType.DYNAMIC)
                 .setPosition(position)
                 .setRectangular(width, height, mass)
-                .setFriction(2.9f)
+                .setFriction(0.3f)
                 .setRestitution(0.4f)
+                .setGroundFriction(0.3f)
                 .build(world);
     }
 
