@@ -129,7 +129,7 @@ public class RobotObject extends PhysicalObject {
 
         for(int i = 0; i < readings.size(); i++){
             if(readings.get(i).getValues().get(0).isNaN()) {
-                System.out.println("LOOOOL");
+                throw new RuntimeException("Received NaN from sensor " + sensors.get(i).getClass().getName());
             }
         }
         Double2D wheelDrives = heuristicPhenotype.step(readings);
