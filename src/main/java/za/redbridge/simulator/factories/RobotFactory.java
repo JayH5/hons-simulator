@@ -14,4 +14,7 @@ public interface RobotFactory {
     void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world,
                         SimConfig.Direction targetAreaPlacement);
 
+    int getNumRobots();
+    void setNumRobots(int numRobots);
+
 }

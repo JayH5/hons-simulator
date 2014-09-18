@@ -4,14 +4,13 @@ import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
 import za.redbridge.simulator.sensor.AgentSensor;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,15 +19,33 @@ import java.util.Map;
  */
 public class MorphologyConfig extends Config {
 
-    private List<AgentSensor> sensorList;
-    private int numSensors;
+    private final List<AgentSensor> sensorList;
+    private final int numSensors;
 
     //total number of readings provided by this morphology
-    private int totalReadingSize;
+    private final int totalReadingSize;
+
+    private Map<String,Object> yamlCache;
+
+    public MorphologyConfig(List<AgentSensor> sensorList, int numSensors) {
+
+        this.sensorList = sensorList;
+        this.numSensors = numSensors;
+
+        int readSize = 0;
+
+        for (AgentSensor sensor: sensorList) {
+            readSize += sensor.getReadingSize();
+        }
+
+        totalReadingSize = readSize;
+    }
 
     public MorphologyConfig(String filepath) throws ParseException {
 
         sensorList = new ArrayList<>();
+        int sensors = 0;
+        int totReadingSize = 0;
 
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;
@@ -44,7 +61,7 @@ public class MorphologyConfig extends Config {
             Number noSensors = (Number) meta.get("numSensors");
             if (checkFieldPresent(noSensors, "meta:numSensors")) {
                 noSensors = noSensors.intValue();
-                numSensors = noSensors.intValue();
+                sensors = noSensors.intValue();
             }
             else {
                 throw new ParseException("Error: Number of sensors not found.", 0);
@@ -52,7 +69,7 @@ public class MorphologyConfig extends Config {
         }
 
         //TODO: make reading in sensor objects less hacktastic
-        for (int i = 1; i <= numSensors; i++) {
+        for (int i = 1; i <= sensors; i++) {
 
             String id = i + "s";
 
@@ -113,7 +130,7 @@ public class MorphologyConfig extends Config {
 
                         Object o = sensorType.getConstructor(Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE)
                                 .newInstance((float) Math.toRadians(bearing), (float) Math.toRadians(orientation),
-                                        (float) Math.toRadians(range), (float) Math.toRadians(fieldOfView));
+                                        range, (float) Math.toRadians(fieldOfView));
 
                         if (!(o instanceof AgentSensor)) {
                             throw new InvalidClassException("Not Agent Sensor.");
@@ -121,6 +138,8 @@ public class MorphologyConfig extends Config {
 
                         agentSensor = (AgentSensor) o;
                         agentSensor.readAdditionalConfigs(sensor);
+
+                        readingSize += agentSensor.getReadingSize();
                     }
                     catch (ClassNotFoundException c) {
                         System.out.println("AgentSensor Class not found for " + type);
@@ -158,7 +177,13 @@ public class MorphologyConfig extends Config {
             sensorList.add(agentSensor);
         }
 
+        numSensors = sensors;
+        totalReadingSize = totReadingSize;
+
         System.out.println("read " + sensorList.size() + " sensors.");
+
+        yamlCache = config;
+
     }
 
     public List<AgentSensor> getSensorList() { return sensorList; }
@@ -166,4 +191,51 @@ public class MorphologyConfig extends Config {
     public int getTotalReadingSize() { return totalReadingSize; }
 
     public int getNumSensors() { return numSensors; }
+
+    @Override
+    public MorphologyConfig clone() {
+
+        List<AgentSensor> newSensorList = new ArrayList<>();
+
+        for (AgentSensor sensor: sensorList) {
+
+            newSensorList.add(sensor.clone());
+        }
+
+        return new MorphologyConfig(newSensorList, numSensors);
+    }
+
+    public void dumpMorphology(String filename) {
+
+        Map<String,Object> yamlDump = new HashMap<>();
+        Map<String,Object> meta = new HashMap<>();
+        meta.put("numSensors", new Integer(sensorList.size()));
+        yamlDump.put("meta", meta);
+
+        int sensorID = 1;
+        for (AgentSensor sensor: sensorList) {
+
+            Map<String,Object> sensorMap = sensor.getAdditionalConfigs();
+            yamlDump.put(sensorID+"s", sensorMap);
+            sensorID++;
+        }
+
+        Yaml yaml = new Yaml();
+        StringWriter stringWriter = new StringWriter();
+        FileWriter fileWriter = null;
+
+        try {
+            fileWriter = new FileWriter(filename);
+            yaml.dump(yamlDump, stringWriter);
+            fileWriter.write(stringWriter.toString());
+            System.out.println(stringWriter.toString());
+            fileWriter.close();
+        }
+        catch (IOException e) {
+            System.out.println("Error dumping morphology.");
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
 }

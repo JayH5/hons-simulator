@@ -112,7 +112,7 @@ public class Main {
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                     new GPPhenotype(sensors, cand, model.getInputs()), simulationConfiguration.getRobotMass(),
-                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(), experimentConfiguration.getPopulationSize());
+                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(), simulationConfiguration.getObjectsRobots());
 
             Simulation simulation = new Simulation(simulationConfiguration, robotFactory);
             SimulationGUI video = new SimulationGUI(simulation);

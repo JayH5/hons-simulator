@@ -35,14 +35,17 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class RobotObject extends PhysicalObject {
 
-    //how much force a wheel exerts when driven at full power, in newtons
-    private static final double WHEEL_POWER = 0.15;
+    private static final double ENGINE_TORQUE = 0.0675;
+
+    private static final double WHEEL_RADIUS = 0.03;
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
 
     private static final float MAX_LATERAL_IMPULSE = 1.0f;
 
     private static final float GROUND_TRACTION = 0.8f;
+    private static final float VELOCITY_RAMPDOWN_START = 0.1f;
+    private static final float VELOCITY_RAMPDOWN_END = 0.2f;
 
     private final Phenotype phenotype;
     private final HeuristicPhenotype heuristicPhenotype;
@@ -135,18 +138,29 @@ public class RobotObject extends PhysicalObject {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
-        applyWheelForce(wheelDrives.x, leftWheelPosition);
-        applyWheelForce(wheelDrives.y, rightWheelPosition);
+        applyWheelDrives(wheelDrives, leftWheelPosition, rightWheelPosition);
 
         updateFriction();
     }
 
-    private void applyWheelForce(double wheelDrive, Vec2 wheelPosition) {
+    private void applyWheelDrives(Double2D wheelDrives, Vec2 leftWheelPosition, Vec2 rightWheelPosition){
+        double totalWheelDrive = Math.abs(wheelDrives.x) + Math.abs(wheelDrives.y);
+        applyWheelDrive(2.0*(wheelDrives.x/totalWheelDrive), leftWheelPosition);
+        applyWheelDrive(2.0*(wheelDrives.y/totalWheelDrive), rightWheelPosition);
+    }
+
+    private void applyWheelDrive(double wheelDrive, Vec2 wheelPosition) {
         final Transform bodyTransform = getBody().getTransform();
 
         // Calculate the force due to the wheel
-        float magnitude = (float) (wheelDrive * WHEEL_POWER);
-        wheelForce.set(magnitude, 0f);
+        Vec2 velocity = getBody().getLinearVelocity();
+        double velAngle = Math.atan2(velocity.y, velocity.x);
+        double velocityInTargetDirection = velocity.length() * Math.cos(velAngle);
+
+        //if the robot velocity is in the opposite direction of wheel drive direction, our torque output is not constrained
+        if(Math.signum(velocityInTargetDirection) != Math.signum(wheelDrive)) velocityInTargetDirection = 0.0;
+        double magnitude = (wheelDrive*torqueAtVelocity(velocityInTargetDirection))/WHEEL_RADIUS;
+        wheelForce.set((float)magnitude, 0f);
         Rot.mulToOut(bodyTransform.q, wheelForce, wheelForce);
 
         // Calculate position of force
@@ -154,6 +168,16 @@ public class RobotObject extends PhysicalObject {
 
         // Apply force
         getBody().applyForce(wheelForce, wheelForcePosition);
+    }
+
+    /**
+     * @param velocity The robot velocity in the direction of the intended wheel travel. So, only positive values.
+     * @return The torque applied to the wheels by the engine at the given velocity.
+     */
+    private double torqueAtVelocity(double velocity){
+        if(velocity < VELOCITY_RAMPDOWN_START) return ENGINE_TORQUE;
+        else if(velocity > VELOCITY_RAMPDOWN_END) return 0;
+        else return ENGINE_TORQUE * (1.0 - ((velocity - VELOCITY_RAMPDOWN_START)/(VELOCITY_RAMPDOWN_END - VELOCITY_RAMPDOWN_START)));
     }
 
     /**
