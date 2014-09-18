@@ -93,15 +93,15 @@ public class Experiment {
 
         } else {
 
-            final ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyScores = new ConcurrentSkipListMap<>();
-            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, experimentConfiguration.getComplementGeneratorResolution());
-
             try {
                 morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
             } catch (ParseException p) {
                 System.out.println("Error parsing morphology file.");
                 p.printStackTrace();
             }
+
+            final ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyScores = new ConcurrentSkipListMap<>();
+            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, experimentConfiguration.getComplementGeneratorResolution());
 
             //Evolve complements instead of generating them
             if (options.evolveComplements()) {
