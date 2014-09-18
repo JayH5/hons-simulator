@@ -4,10 +4,7 @@ import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
 import za.redbridge.simulator.sensor.AgentSensor;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.Reader;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -208,7 +205,7 @@ public class MorphologyConfig extends Config {
         return new MorphologyConfig(newSensorList, numSensors);
     }
 
-    public void dumpMorphology() {
+    public void dumpMorphology(String filename) {
 
         Map<String,Object> yamlDump = new HashMap<>();
         yamlDump.put("meta", numSensors);
@@ -221,10 +218,22 @@ public class MorphologyConfig extends Config {
             sensorID++;
         }
 
-            Yaml yaml = new Yaml();
-            StringWriter writer = new StringWriter();
-            yaml.dump(yamlCache, writer);
-            System.out.println(writer.toString());
+        Yaml yaml = new Yaml();
+        StringWriter stringWriter = new StringWriter();
+        FileWriter fileWriter = null;
+
+        try {
+            fileWriter = new FileWriter(filename);
+            yaml.dump(yamlCache, stringWriter);
+            fileWriter.write(stringWriter.toString());
+            System.out.println(stringWriter.toString());
+            fileWriter.close();
+        }
+        catch (IOException e) {
+            System.out.println("Error dumping morphology.");
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
 }
