@@ -35,9 +35,10 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class RobotObject extends PhysicalObject {
 
-    private static final double ENGINE_TORQUE = 0.0675;
-
     private static final double WHEEL_RADIUS = 0.03;
+
+    private static final double ENGINE_TORQUE = (2 / 2) * WHEEL_RADIUS;
+
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
 
