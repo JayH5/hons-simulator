@@ -11,6 +11,7 @@ import za.redbridge.simulator.experiment.TrainController;
 import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
@@ -29,13 +30,16 @@ public class ComplementScoreCalculator implements CalculateScore {
     //stores scores for each morphology during epochs
     private final ConcurrentSkipListSet<ComparableMorphology> scoreCache;
 
+    private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyScores;
+
     public ComplementScoreCalculator(SimConfig simConfig, ExperimentConfig experimentConfig,
                                      MorphologyConfig morphologyConfig,
-                                     ConcurrentSkipListSet<ComparableMorphology> scoreCache) {
+                                     ConcurrentSkipListSet<ComparableMorphology> scoreCache, ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyScores) {
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
         this.experimentConfig = experimentConfig;
         this.scoreCache = scoreCache;
+        this.morphologyScores = morphologyScores;
 
         leaderBoard = new TreeMap<>();
     }
@@ -47,7 +51,7 @@ public class ComplementScoreCalculator implements CalculateScore {
         MorphologyConfig morphology =
                 MorphologyConfig.MorphologyFromSensitivities(morphologyConfig, sensitivityGenome.getData());
 
-        TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology);
+        TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology, morphologyScores);
         complementTrainer.run();
 
         double score = complementTrainer.getHighestEntry().getValue();

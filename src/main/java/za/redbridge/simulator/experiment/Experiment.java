@@ -19,6 +19,7 @@ import java.io.*;
 import java.io.Console;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -73,13 +74,13 @@ public class Experiment {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-//new NEATPhenotype(morphologyConfig.getSensorList(), bestNetwork, morphologyConfig.getTotalReadingSize())
             //UGUGGHGHUHGHGGH
             NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
+            MorphologyConfig bestMorphology = readMorphology("bestMorphology.tmp");
 
-
+            //TODO make sure MorphologyConfig is fully serializable
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
-                    new NEATPhenotype(morphologyConfig.getSensorList(), bestNetwork, morphologyConfig.getTotalReadingSize()),
+                    new NEATPhenotype(bestMorphology.getSensorList(), bestNetwork, bestMorphology.getTotalReadingSize()),
                     simulationConfiguration.getRobotMass(),
                     simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(),
                     simulationConfiguration.getObjectsRobots());
@@ -96,16 +97,18 @@ public class Experiment {
         }
         else {
 
-            final ConcurrentSkipListMap<MorphologyConfig,TreeMap<ComparableNEATNetwork,Integer> > morphologyScores;
+            final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyScores = new ConcurrentSkipListMap<>();
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, experimentConfiguration.getComplementGeneratorResolution());
 
             //Evolve complements instead of generating them
             if (options.evolveComplements()) {
 
                 TrainComplement complementGA = new TrainComplement(experimentConfiguration, simulationConfiguration,
-                        morphologyConfig);
+                        morphologyConfig, morphologyScores);
 
                 complementGA.run();
+
+
             }
             else {
 
@@ -116,7 +119,7 @@ public class Experiment {
                 for (MorphologyConfig complement: sensitivityComplements) {
 
                     complementThreads[i] = new Thread(new TrainController(experimentConfiguration,
-                            simulationConfiguration, complement));
+                            simulationConfiguration, complement, morphologyScores));
 
                     complementThreads[i].run();
                     i++;
@@ -133,11 +136,15 @@ public class Experiment {
                         iex.printStackTrace();
                     }
                 }
-
             }
 
-        }
+            Map.Entry<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> topCombo = morphologyScores.lastEntry();
+            NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
+            MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
 
+            writeNetwork(bestNetwork, "bestNetwork.tmp");
+            writeMorphology(bestMorphology, "bestMorphology.tmp");
+        }
     }
 
     private String getExperimentConfig() { return experimentConfig; }
@@ -157,7 +164,7 @@ public class Experiment {
             System.out.println("File not found, aborting.");
         }
         catch (IOException e) {
-            System.out.println("Error writing object to file.");
+            System.out.println("Error writing network to file.");
             e.printStackTrace();
         }
     }
@@ -176,7 +183,7 @@ public class Experiment {
             System.exit(0);
         }
         catch (IOException e) {
-            System.out.println("Error writing object to file.");
+            System.out.println("Error reading network from file.");
             e.printStackTrace();
             System.exit(0);
         }
@@ -187,5 +194,46 @@ public class Experiment {
         return (NEATNetwork) o;
     }
 
+    public static void writeMorphology(MorphologyConfig morphology, String filename) {
+
+        try {
+            FileOutputStream fileWriter = new FileOutputStream(filename);
+            ObjectOutputStream objectWriter = new ObjectOutputStream(fileWriter);
+
+            objectWriter.writeObject(morphology);
+        }
+        catch (FileNotFoundException f) {
+            System.out.println("File not found, aborting.");
+        }
+        catch (IOException e) {
+            System.out.println("Error writing morphology to file.");
+            e.printStackTrace();
+        }
+    }
+
+    public static MorphologyConfig readMorphology(String filename) {
+
+        Object o = null;
+
+        try {
+            FileInputStream fileReader = new FileInputStream(filename);
+            ObjectInputStream objectReader = new ObjectInputStream(fileReader);
+            o = objectReader.readObject();
+        }
+        catch (FileNotFoundException f) {
+            System.out.println("File not found, aborting.");
+            System.exit(0);
+        }
+        catch (IOException e) {
+            System.out.println("Error reading morphology from file.");
+            e.printStackTrace();
+            System.exit(0);
+        }
+        catch (ClassNotFoundException c) {
+            System.out.println("Class not found.");
+        }
+
+        return (MorphologyConfig) o;
+    }
 
 }

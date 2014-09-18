@@ -6,10 +6,7 @@ import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.Reader;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,7 +23,7 @@ import java.util.Map;
  */
 
 //TODO: serialise this
-public class MorphologyConfig extends Config {
+public class MorphologyConfig extends Config implements Serializable {
 
     private List<AgentSensor> sensorList;
     private final int numSensors;

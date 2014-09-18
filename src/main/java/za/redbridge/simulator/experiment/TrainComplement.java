@@ -16,6 +16,7 @@ import za.redbridge.simulator.factories.SensitivityGenomeFactory;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
@@ -28,18 +29,22 @@ public class TrainComplement implements Runnable {
     private SimConfig simConfig;
     private MorphologyConfig morphologyConfig;
 
-    //stores fittest network of each epoch
+    //stores fittest complement of each epoch
     private final TreeMap<ComparableMorphology,Integer> leaderBoard;
 
-    //stores scores for each neural network during epochs
+    private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyScores;
+
+    //stores scores for each morphology during epochs
     private final ConcurrentSkipListSet<ComparableMorphology> scoreCache;
 
     public TrainComplement(ExperimentConfig experimentConfig, SimConfig simConfig,
-                           MorphologyConfig morphologyConfig) {
+                           MorphologyConfig morphologyConfig,
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyScores) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
+        this.morphologyScores = morphologyScores;
 
         leaderBoard = new TreeMap<>();
         scoreCache = new ConcurrentSkipListSet<>();
@@ -49,7 +54,7 @@ public class TrainComplement implements Runnable {
 
         Population pop = initPopulation(experimentConfig.getGAPopulationSize());
         CalculateScore scoreCalculator = new ComplementScoreCalculator(simConfig, experimentConfig,
-                morphologyConfig, scoreCache);
+                morphologyConfig, scoreCache, morphologyScores);
 
         TrainEA GA = new TrainEA(pop, scoreCalculator);
 

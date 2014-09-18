@@ -18,12 +18,13 @@ import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Created by racter on 2014/09/11.
  */
-//evaluates one sensor sensitivity complement, gets the best performing NEAT network for this complement
+//evaluates one sensor sensitivity complement, trains and gets the best performing NEAT network for this complement
 public class TrainController implements Runnable{
 
     private ExperimentConfig experimentConfig;
@@ -36,17 +37,21 @@ public class TrainController implements Runnable{
     //stores scores for each neural network during epochs
     private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
 
+    private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard;
+
     //the best-performing network for this complement
     private NEATNetwork bestNetwork;
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
-                           MorphologyConfig morphologyConfig) {
+                           MorphologyConfig morphologyConfig,
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
         leaderBoard = new TreeMap<>();
         scoreCache = new ConcurrentSkipListSet<>();
+        this.morphologyLeaderboard = morphologyLeaderboard;
     }
 
     public void run() {
@@ -79,6 +84,7 @@ public class TrainController implements Runnable{
 
         } while(epochs <= experimentConfig.getMaxEpochs());
 
+        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
