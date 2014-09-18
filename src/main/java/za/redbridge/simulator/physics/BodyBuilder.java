@@ -175,7 +175,7 @@ public class BodyBuilder {
 
         if (groundFriction) {
             TopDownFrictionJointDef jd = new TopDownFrictionJointDef();
-            jd.initialize(body, kineticCOF, 2f); // TODO: Angular friction
+            jd.initialize(body, kineticCOF, 10f); // TODO: Angular friction
             world.createJoint(jd);
         }
 
