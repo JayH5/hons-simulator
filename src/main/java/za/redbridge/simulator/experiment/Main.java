@@ -87,10 +87,10 @@ public class Main {
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
         model.setNoGenerations(100);
-        model.setMaxInitialDepth(6);
+        model.setMaxInitialDepth(5);
         model.setMaxDepth(7);
-        model.setPoolSize(100);
-        model.setPopulationSize(200);
+        model.setPoolSize(25);
+        model.setPopulationSize(50);
         model.setNoRuns(1);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
@@ -108,7 +108,8 @@ public class Main {
             String oldBuggy = "IF(GT(IF(GT(1.0 0.0) READINGTODISTANCE(S2) READINGTODISTANCE(S0)) IF(GT(0.0 0.0) READINGTODISTANCE(S1) READINGTODISTANCE(S1))) IF(IF(GT(0.0 1.0) GT(0.0 1.0) GT(IF(GT(0.0 1.0) READINGTODISTANCE(S2) READINGTODISTANCE(S2)) 1.0)) IF(GT(1.0 1.0) WHEELDRIVEFROMFLOATS(IF(GT(0.0 1.0) READINGTODISTANCE(S2) READINGTODISTANCE(S2)) 1.0) WHEELDRIVEFROMFLOATS(1.0 0.0)) WHEELDRIVEFROMFLOATS(READINGTODISTANCE(S1) 1.0)) WHEELDRIVEFROMFLOATS(IF(GT(0.0 1.0) READINGTODISTANCE(S2) READINGTODISTANCE(S2)) IF(GT(0.0 0.0) READINGTODISTANCE(S1) READINGTODISTANCE(S0))))";
             String newMaybeFixed = "WHEELDRIVEFROMFLOATS(IF(GT(READINGTODISTANCE(S1) READINGTODISTANCE(S0)) IF(GT(0.0 0.0) READINGTODISTANCE(S2) READINGTODISTANCE(S1)) IF(GT(1.0 1.0) READINGTODISTANCE(S2) READINGTODISTANCE(S1))) IF(IF(GT(1.0 0.0) GT(0.0 0.0) GT(1.0 0.0)) IF(GT(1.0 0.0) READINGTODISTANCE(S0) READINGTODISTANCE(S2)) IF(GT(0.0 0.0) READINGTODISTANCE(S0) READINGTODISTANCE(S0))))";
             String badass = "WHEELDRIVEFROMFLOATS(IF(GT(READINGTODISTANCE(S2) 0.0) IF(IF(GT(1.0 1.0) GT(1.0 1.0) GT(0.0 1.0)) IF(GT(1.0 0.0) READINGTODISTANCE(S0) READINGTODISTANCE(S1)) IF(GT(1.0 0.0) READINGTODISTANCE(S2) READINGTODISTANCE(S1))) IF(IF(GT(1.0 1.0) GT(0.0 1.0) GT(0.0 0.0)) IF(GT(1.0 1.0) READINGTODISTANCE(S2) READINGTODISTANCE(S2)) IF(GT(1.0 0.0) READINGTODISTANCE(S2) READINGTODISTANCE(S0)))) IF(IF(GT(READINGTODISTANCE(S2) READINGTODISTANCE(S0)) GT(1.0 0.0) GT(READINGTODISTANCE(S0) READINGTODISTANCE(S2))) IF(IF(GT(1.0 1.0) GT(1.0 1.0) GT(0.0 0.0)) IF(GT(1.0 0.0) READINGTODISTANCE(S2) READINGTODISTANCE(S0)) IF(GT(0.0 1.0) READINGTODISTANCE(S1) 0.0)) IF(GT(READINGTODISTANCE(S1) READINGTODISTANCE(S2)) IF(GT(READINGTODISTANCE(S0) 0.0) READINGTODISTANCE(S2) READINGTODISTANCE(S2)) IF(GT(0.0 0.0) READINGTODISTANCE(S0) READINGTODISTANCE(S0)))))";
-            Node root = model.getParser().parse(badass);
+            String rofl = "IF(GT(1.0 1.0) WHEELDRIVEFROMCOORD(COORDINATEFROMDISTANCEANDBEARING(1.0 B.00)) WHEELDRIVEFROMCOORD(COORDINATEFROMDISTANCEANDBEARING(0.0 B3.14)))";
+            Node root = model.getParser().parse(rofl);
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                     new GPPhenotype(sensors, cand, model.getInputs()), simulationConfiguration.getRobotMass(),
@@ -122,7 +123,6 @@ public class Main {
             console.setVisible(true);
         }
         else {
-
             //headless option
             model.run();
             System.out.println("Experiment finished. Best fitness: ");

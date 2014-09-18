@@ -32,6 +32,6 @@ public class Bearing{
 
     public String toString(){
         DecimalFormat df = new DecimalFormat("#.00");
-        return "Bearing " + df.format(value);
+        return "B" + df.format(value);
     }
 }
