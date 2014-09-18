@@ -1,17 +1,17 @@
 control:
-  maxEpochs: 1
-  runsPerGenome: 1
+  maxEpochs: 20
+  runsPerGenome: 5
 
 phenotype:
   robotPhenotype: za.redbridge.simulator.phenotype.NEATPhenotype
 
 evolutionaryAlgorithm:
   controllerEA: NEAT
-  populationSize: 5
+  populationSize: 50
   GAPopulationSize: 50
 
 complements:
-  generatorResolution: 1.0
+  generatorResolution: 0.3
 
 morphology:
   morphologyFileName: sensorList.yml
