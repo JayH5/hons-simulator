@@ -133,10 +133,15 @@ public class RobotObject extends PhysicalObject {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
-        applyWheelDrive(wheelDrives.x, leftWheelPosition);
-        applyWheelDrive(wheelDrives.y, rightWheelPosition);
+        applyWheelDrives(wheelDrives, leftWheelPosition, rightWheelPosition);
 
         updateFriction();
+    }
+
+    private void applyWheelDrives(Double2D wheelDrives, Vec2 leftWheelPosition, Vec2 rightWheelPosition){
+        double totalWheelDrive = wheelDrives.x + wheelDrives.y;
+        applyWheelDrive(wheelDrives.x/totalWheelDrive, leftWheelPosition);
+        applyWheelDrive(wheelDrives.y/totalWheelDrive, rightWheelPosition);
     }
 
     private void applyWheelDrive(double wheelDrive, Vec2 wheelPosition) {
