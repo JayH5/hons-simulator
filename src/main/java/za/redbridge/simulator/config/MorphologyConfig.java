@@ -257,7 +257,7 @@ public class MorphologyConfig extends Config implements Serializable {
         return output;
     }
 
-    public void dumpMorphology() {
+    public void dumpMorphology(String filename) {
 
         Map<String,Object> yamlDump = new HashMap<>();
         yamlDump.put("meta", numSensors);
@@ -270,10 +270,22 @@ public class MorphologyConfig extends Config implements Serializable {
             sensorID++;
         }
 
-            Yaml yaml = new Yaml();
-            StringWriter writer = new StringWriter();
-            yaml.dump(yamlCache, writer);
-            System.out.println(writer.toString());
+        Yaml yaml = new Yaml();
+        StringWriter stringWriter = new StringWriter();
+        FileWriter fileWriter = null;
+
+        try {
+            fileWriter = new FileWriter(filename);
+            yaml.dump(yamlCache, stringWriter);
+            fileWriter.write(stringWriter.toString());
+            System.out.println(stringWriter.toString());
+            fileWriter.close();
+        }
+        catch (IOException e) {
+            System.out.println("Error dumping morphology.");
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {

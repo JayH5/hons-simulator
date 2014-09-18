@@ -33,27 +33,26 @@ public class Experiment {
 
     //config files for this experiment o
 
-    @Option (name="--experiment-config", usage="Filename for experiment configuration", metaVar="<experiment config>")
+    @Option(name = "--experiment-config", usage = "Filename for experiment configuration", metaVar = "<experiment config>")
     private String experimentConfig;
 
-    @Option (name="--simulation-config", usage="Filename for simulation configuration", metaVar="<simulation config>")
+    @Option(name = "--simulation-config", usage = "Filename for simulation configuration", metaVar = "<simulation config>")
     private String simulationConfig;
 
-    @Option (name="--show-visuals", aliases="-v", usage="Show visualisation for simulation")
+    @Option(name = "--show-visuals", aliases = "-v", usage = "Show visualisation for simulation")
     private boolean showVisuals = false;
 
-    @Option (name="--evolve-complements", aliases="-e", usage="Evolve sensor sensitivity complements using a Genetic Algorithm")
+    @Option(name = "--evolve-complements", aliases = "-e", usage = "Evolve sensor sensitivity complements using a Genetic Algorithm")
     private boolean evolveComplements = false;
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
 
         Experiment options = new Experiment();
         CmdLineParser parser = new CmdLineParser(options);
 
         try {
             parser.parseArgument(args);
-        }
-        catch (CmdLineException c) {
+        } catch (CmdLineException c) {
             System.out.println("Error parsing command-line arguments.");
             c.printStackTrace();
             System.exit(1);
@@ -65,22 +64,20 @@ public class Experiment {
         //TODO: work with multiple morphology configs (specifically, filter sensitivities)
         MorphologyConfig morphologyConfig = null;
 
-        try {
-            morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
-        } catch (ParseException p) {
-            System.out.println("Error parsing morphology file.");
-            p.printStackTrace();
-        }
-
         //if we need to show a visualisation
         if (options.showVisuals()) {
-            //UGUGGHGHUHGHGGH
-            NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
-            MorphologyConfig bestMorphology = readMorphology("bestMorphology.tmp");
 
-            //TODO make sure MorphologyConfig is fully serializable
+            NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
+
+            try {
+                morphologyConfig = new MorphologyConfig("bestMorphology.yml");
+            } catch (ParseException p) {
+                System.out.println("Error parsing morphology file.");
+                p.printStackTrace();
+            }
+
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
-                    new NEATPhenotype(bestMorphology.getSensorList(), bestNetwork, bestMorphology.getTotalReadingSize()),
+                    new NEATPhenotype(morphologyConfig.getSensorList(), bestNetwork, morphologyConfig.getTotalReadingSize()),
                     simulationConfiguration.getRobotMass(),
                     simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(),
                     simulationConfiguration.getObjectsRobots());
@@ -94,11 +91,17 @@ public class Experiment {
             sim.display.Console console = new sim.display.Console(video);
             console.setVisible(true);
 
-        }
-        else {
+        } else {
 
-            final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyScores = new ConcurrentSkipListMap<>();
+            final ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyScores = new ConcurrentSkipListMap<>();
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, experimentConfiguration.getComplementGeneratorResolution());
+
+            try {
+                morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
+            } catch (ParseException p) {
+                System.out.println("Error parsing morphology file.");
+                p.printStackTrace();
+            }
 
             //Evolve complements instead of generating them
             if (options.evolveComplements()) {
@@ -109,14 +112,13 @@ public class Experiment {
                 complementGA.run();
 
 
-            }
-            else {
+            } else {
 
                 final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
                 Thread[] complementThreads = new Thread[sensitivityComplements.size()];
 
                 int i = 0;
-                for (MorphologyConfig complement: sensitivityComplements) {
+                for (MorphologyConfig complement : sensitivityComplements) {
 
                     complementThreads[i] = new Thread(new TrainController(experimentConfiguration,
                             simulationConfiguration, complement, morphologyScores));
@@ -129,8 +131,7 @@ public class Experiment {
 
                     try {
                         complementThreads[j].join();
-                    }
-                    catch (InterruptedException iex) {
+                    } catch (InterruptedException iex) {
 
                         System.out.println("Thread interrupted.");
                         iex.printStackTrace();
@@ -138,19 +139,30 @@ public class Experiment {
                 }
             }
 
-            Map.Entry<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> topCombo = morphologyScores.lastEntry();
+            Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
             NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
             MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
 
             writeNetwork(bestNetwork, "bestNetwork.tmp");
-            writeMorphology(bestMorphology, "bestMorphology.tmp");
+            bestMorphology.dumpMorphology("bestMorphology.yml");
         }
     }
 
-    private String getExperimentConfig() { return experimentConfig; }
-    private String getSimulationConfig() { return simulationConfig; }
-    private boolean showVisuals() { return showVisuals; }
-    private boolean evolveComplements() { return evolveComplements; }
+    private String getExperimentConfig() {
+        return experimentConfig;
+    }
+
+    private String getSimulationConfig() {
+        return simulationConfig;
+    }
+
+    private boolean showVisuals() {
+        return showVisuals;
+    }
+
+    private boolean evolveComplements() {
+        return evolveComplements;
+    }
 
     public static void writeNetwork(NEATNetwork network, String filename) {
 
@@ -159,11 +171,9 @@ public class Experiment {
             ObjectOutputStream objectWriter = new ObjectOutputStream(fileWriter);
 
             objectWriter.writeObject(network);
-        }
-        catch (FileNotFoundException f) {
+        } catch (FileNotFoundException f) {
             System.out.println("File not found, aborting.");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error writing network to file.");
             e.printStackTrace();
         }
@@ -177,63 +187,17 @@ public class Experiment {
             FileInputStream fileReader = new FileInputStream(filename);
             ObjectInputStream objectReader = new ObjectInputStream(fileReader);
             o = objectReader.readObject();
-        }
-        catch (FileNotFoundException f) {
+        } catch (FileNotFoundException f) {
             System.out.println("File not found, aborting.");
             System.exit(0);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error reading network from file.");
             e.printStackTrace();
             System.exit(0);
-        }
-        catch (ClassNotFoundException c) {
+        } catch (ClassNotFoundException c) {
             System.out.println("Class not found.");
         }
 
         return (NEATNetwork) o;
     }
-
-    public static void writeMorphology(MorphologyConfig morphology, String filename) {
-
-        try {
-            FileOutputStream fileWriter = new FileOutputStream(filename);
-            ObjectOutputStream objectWriter = new ObjectOutputStream(fileWriter);
-
-            objectWriter.writeObject(morphology);
-        }
-        catch (FileNotFoundException f) {
-            System.out.println("File not found, aborting.");
-        }
-        catch (IOException e) {
-            System.out.println("Error writing morphology to file.");
-            e.printStackTrace();
-        }
-    }
-
-    public static MorphologyConfig readMorphology(String filename) {
-
-        Object o = null;
-
-        try {
-            FileInputStream fileReader = new FileInputStream(filename);
-            ObjectInputStream objectReader = new ObjectInputStream(fileReader);
-            o = objectReader.readObject();
-        }
-        catch (FileNotFoundException f) {
-            System.out.println("File not found, aborting.");
-            System.exit(0);
-        }
-        catch (IOException e) {
-            System.out.println("Error reading morphology from file.");
-            e.printStackTrace();
-            System.exit(0);
-        }
-        catch (ClassNotFoundException c) {
-            System.out.println("Class not found.");
-        }
-
-        return (MorphologyConfig) o;
-    }
-
 }
