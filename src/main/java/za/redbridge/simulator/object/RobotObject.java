@@ -139,7 +139,7 @@ public class RobotObject extends PhysicalObject {
     }
 
     private void applyWheelDrives(Double2D wheelDrives, Vec2 leftWheelPosition, Vec2 rightWheelPosition){
-        double totalWheelDrive = wheelDrives.x + wheelDrives.y;
+        double totalWheelDrive = Math.abs(wheelDrives.x) + Math.abs(wheelDrives.y);
         applyWheelDrive(wheelDrives.x/totalWheelDrive, leftWheelPosition);
         applyWheelDrive(wheelDrives.y/totalWheelDrive, rightWheelPosition);
     }
