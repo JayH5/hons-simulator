@@ -208,13 +208,15 @@ public class MorphologyConfig extends Config {
     public void dumpMorphology(String filename) {
 
         Map<String,Object> yamlDump = new HashMap<>();
-        yamlDump.put("meta", numSensors);
+        Map<String,Object> meta = new HashMap<>();
+        meta.put("numSensors", new Integer(sensorList.size()));
+        yamlDump.put("meta", meta);
 
         int sensorID = 1;
         for (AgentSensor sensor: sensorList) {
 
             Map<String,Object> sensorMap = sensor.getAdditionalConfigs();
-            sensorMap.put(sensorID+"s", sensorMap);
+            yamlDump.put(sensorID+"s", sensorMap);
             sensorID++;
         }
 
@@ -224,7 +226,7 @@ public class MorphologyConfig extends Config {
 
         try {
             fileWriter = new FileWriter(filename);
-            yaml.dump(yamlCache, stringWriter);
+            yaml.dump(yamlDump, stringWriter);
             fileWriter.write(stringWriter.toString());
             System.out.println(stringWriter.toString());
             fileWriter.close();
