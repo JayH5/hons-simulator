@@ -39,12 +39,15 @@ public class TrainController implements Runnable{
 
     private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard;
 
+    private final boolean threadSubruns;
+
     //the best-performing network for this complement
     private NEATNetwork bestNetwork;
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard) {
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
+                           boolean threadSubruns) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
@@ -52,6 +55,7 @@ public class TrainController implements Runnable{
         leaderBoard = new TreeMap<>();
         scoreCache = new ConcurrentSkipListSet<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
+        this.threadSubruns = threadSubruns;
     }
 
     public void run() {
@@ -64,7 +68,7 @@ public class TrainController implements Runnable{
         pop.reset();
 
         CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
-                morphologyConfig, scoreCache);
+                morphologyConfig, scoreCache, threadSubruns);
 
         final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
@@ -86,7 +90,7 @@ public class TrainController implements Runnable{
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        Experiment.writeNetwork(leaderBoard.lastKey().getNetwork(), "bestNetwork.tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "bestNetwork.tmp");
         morphologyConfig.dumpMorphology("bestMorphology.tmp");
     }
 
@@ -107,6 +111,4 @@ public class TrainController implements Runnable{
 
         return StatUtils.mean(scores);
     }
-
-
 }

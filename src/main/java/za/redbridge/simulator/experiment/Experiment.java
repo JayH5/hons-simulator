@@ -67,7 +67,7 @@ public class Experiment {
         //if we need to show a visualisation
         if (options.showVisuals()) {
 
-            NEATNetwork bestNetwork = readNetwork("bestNetwork.tmp");
+            NEATNetwork bestNetwork = IOUtils.readNetwork("bestNetwork.tmp");
 
             try {
                 morphologyConfig = new MorphologyConfig("bestMorphology.yml");
@@ -100,51 +100,11 @@ public class Experiment {
                 p.printStackTrace();
             }
 
-            final ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyScores = new ConcurrentSkipListMap<>();
-            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig, experimentConfiguration.getComplementGeneratorResolution());
+            MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
+                    morphologyConfig, options.evolveComplements, true, true);
 
-            //Evolve complements instead of generating them
-            if (options.evolveComplements()) {
+            masterExperimentController.start();
 
-                TrainComplement complementGA = new TrainComplement(experimentConfiguration, simulationConfiguration,
-                        morphologyConfig, morphologyScores);
-
-                complementGA.run();
-
-
-            } else {
-
-                final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
-                Thread[] complementThreads = new Thread[sensitivityComplements.size()];
-
-                int i = 0;
-                for (MorphologyConfig complement : sensitivityComplements) {
-
-                    complementThreads[i] = new Thread(new TrainController(experimentConfiguration,
-                            simulationConfiguration, complement, morphologyScores));
-
-                    complementThreads[i].run();
-                    i++;
-                }
-
-                for (int j = 0; j < complementThreads.length; j++) {
-
-                    try {
-                        complementThreads[j].join();
-                    } catch (InterruptedException iex) {
-
-                        System.out.println("Thread interrupted.");
-                        iex.printStackTrace();
-                    }
-                }
-            }
-
-            Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
-            NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
-            MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
-
-            writeNetwork(bestNetwork, "bestNetwork.tmp");
-            bestMorphology.dumpMorphology("bestMorphology.yml");
         }
     }
 
@@ -164,40 +124,5 @@ public class Experiment {
         return evolveComplements;
     }
 
-    public static void writeNetwork(NEATNetwork network, String filename) {
 
-        try {
-            FileOutputStream fileWriter = new FileOutputStream(filename);
-            ObjectOutputStream objectWriter = new ObjectOutputStream(fileWriter);
-
-            objectWriter.writeObject(network);
-        } catch (FileNotFoundException f) {
-            System.out.println("File not found, aborting.");
-        } catch (IOException e) {
-            System.out.println("Error writing network to file.");
-            e.printStackTrace();
-        }
-    }
-
-    public static NEATNetwork readNetwork(String filename) {
-
-        Object o = null;
-
-        try {
-            FileInputStream fileReader = new FileInputStream(filename);
-            ObjectInputStream objectReader = new ObjectInputStream(fileReader);
-            o = objectReader.readObject();
-        } catch (FileNotFoundException f) {
-            System.out.println("File not found, aborting.");
-            System.exit(0);
-        } catch (IOException e) {
-            System.out.println("Error reading network from file.");
-            e.printStackTrace();
-            System.exit(0);
-        } catch (ClassNotFoundException c) {
-            System.out.println("Class not found.");
-        }
-
-        return (NEATNetwork) o;
-    }
 }

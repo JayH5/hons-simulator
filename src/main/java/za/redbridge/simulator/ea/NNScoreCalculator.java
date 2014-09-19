@@ -38,13 +38,16 @@ public class NNScoreCalculator implements CalculateScore {
 
     //stores fitnesses of population
     private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
+    private final boolean threadSubruns;
 
     public NNScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
-                             MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache) {
+                             MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache,
+                             boolean threadSubruns) {
         this.config = config;
         this.morphologyConfig = morphologyConfig;
         this.experimentConfig = experimentConfig;
         this.scoreCache = scoreCache;
+        this.threadSubruns = threadSubruns;
     }
 
     //MLMethod should be NEATNetwork which we calculate the score for
@@ -54,39 +57,47 @@ public class NNScoreCalculator implements CalculateScore {
         //average the performance of this genotype over a few runs of the simulation (standardise on seeds?)
         int testRuns = experimentConfig.getRunsPerGenome();
         double[] performances = new double[testRuns];
-        Thread[] simThreads = new Thread[testRuns];
-
-        //TODO: generalise the phenotype instead of hard-coding it
         HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                 new NEATPhenotype(morphologyConfig.getSensorList(), (NEATNetwork) method,
                         morphologyConfig.getTotalReadingSize()), config.getRobotMass(),
                 config.getRobotRadius(), config.getRobotColour(), config.getObjectsRobots());
 
-        for (int i = 0; i < testRuns; i++) {
+        if (threadSubruns) {
 
-            Simulation simulation = new Simulation(config, robotFactory);
-            SimRun simulationRunner = new SimRun(simulation, performances, i);
+            Thread[] simThreads = new Thread[testRuns];
 
-            simThreads[i] = new Thread(simulationRunner);
-            simThreads[i].run();
-        }
+            for (int i = 0; i < testRuns; i++) {
 
-        for (int i = 0; i < testRuns; i++) {
+                Simulation simulation = new Simulation(config, robotFactory);
+                SimRun simulationRunner = new SimRun(simulation, performances, i);
 
-            try {
-                simThreads[i].join();
+                simThreads[i] = new Thread(simulationRunner);
+                simThreads[i].run();
             }
-            catch (InterruptedException iex) {
+            for (int i = 0; i < testRuns; i++) {
 
-                System.out.println("Thread interrupted.");
-                iex.printStackTrace();
+                try {
+                    simThreads[i].join();
+                } catch (InterruptedException iex) {
+
+                    System.out.println("Thread interrupted.");
+                    iex.printStackTrace();
+                }
+            }
+        }
+        else {
+
+            for (int i = 0; i < testRuns; i++) {
+
+                Simulation simulation = new Simulation(config, robotFactory);
+                simulation.run();
+
+                performances[i] = simulation.getFitness();
             }
         }
 
         double score = StatUtils.mean(performances);
-
         System.out.println("Score for this NEAT controller: " + score);
-
         scoreCache.add(new ComparableNEATNetwork((NEATNetwork) method, score));
 
         return score;
