@@ -91,7 +91,7 @@ public class Main {
         model.setMaxInitialDepth(6);
         model.setMaxDepth(7);
         //model.setPoolSize(100);
-        model.setPopulationSize(50);
+        model.setPopulationSize(200);
         model.setProgramSelector(new FitnessProportionateSelector(model));
         model.setNoRuns(1);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
