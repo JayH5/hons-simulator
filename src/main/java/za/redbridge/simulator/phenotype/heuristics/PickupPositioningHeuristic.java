@@ -56,8 +56,11 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         Vec2 newPosition = nextStep(resource);
         jitter(newPosition, 0.1f);
-        return wheelDriveForTargetPosition(attachedRobot.getBody().getLocalPoint(newPosition));
 
+        if (newPosition != null) {
+            return wheelDriveForTargetPosition(attachedRobot.getBody().getLocalPoint(newPosition));
+        }
+        return null;
     }
 
     @Override
