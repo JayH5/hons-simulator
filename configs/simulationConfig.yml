@@ -5,12 +5,12 @@ resourceProperties:
   smallResources: 20
   smallObjectWidth: 0.4
   smallObjectHeight: 0.4
-  smallObjectMass: 0.125
+  smallObjectMass: 1.0
   maxSmallObjectPushingBots: 1
   largeResources: 20
   largeObjectWidth: 0.6
   largeObjectHeight: 0.6
-  largeObjectMass: 0.25
+  largeObjectMass: 3.0
   maxLargeObjectPushingBots: 2
 scoring:
   fitnessFunction: za.redbridge.simulator.ea.DefaultFitnessFunction
