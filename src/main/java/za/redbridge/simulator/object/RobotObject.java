@@ -37,7 +37,7 @@ public class RobotObject extends PhysicalObject {
 
     private static final double WHEEL_RADIUS = 0.03;
 
-    private static final double ENGINE_TORQUE = (2 / 2) * WHEEL_RADIUS;
+    private static final double ENGINE_TORQUE = (5 / 2) * WHEEL_RADIUS;
 
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
@@ -45,8 +45,8 @@ public class RobotObject extends PhysicalObject {
     private static final float MAX_LATERAL_IMPULSE = 1.0f;
 
     private static final float GROUND_TRACTION = 0.8f;
-    private static final float VELOCITY_RAMPDOWN_START = 0.1f;
-    private static final float VELOCITY_RAMPDOWN_END = 0.2f;
+    private static final float VELOCITY_RAMPDOWN_START = 0.2f;
+    private static final float VELOCITY_RAMPDOWN_END = 0.5f;
 
     private final Phenotype phenotype;
     private final HeuristicPhenotype heuristicPhenotype;
@@ -152,12 +152,14 @@ public class RobotObject extends PhysicalObject {
 
         // Calculate the force due to the wheel
         Vec2 velocity = getBody().getLinearVelocity();
+        Rot bodyRotation = new Rot(getBody().getAngle());
+        Rot.mulToOut(bodyRotation, velocity, velocity);
         double velAngle = Math.atan2(velocity.y, velocity.x);
         double velocityInTargetDirection = velocity.length() * Math.cos(velAngle);
 
         //if the robot velocity is in the opposite direction of wheel drive direction, our torque output is not constrained
         if(Math.signum(velocityInTargetDirection) != Math.signum(wheelDrive)) velocityInTargetDirection = 0.0;
-        double magnitude = (wheelDrive*torqueAtVelocity(velocityInTargetDirection))/WHEEL_RADIUS;
+        double magnitude = (wheelDrive*torqueAtVelocity(Math.abs(velocityInTargetDirection)))/WHEEL_RADIUS;
         wheelForce.set((float)magnitude, 0f);
         Rot.mulToOut(bodyTransform.q, wheelForce, wheelForce);
 
