@@ -14,4 +14,4 @@ complements:
   generatorResolution: 0.3
 
 morphology:
-  morphologyFileName: sensorList.yml
+  morphologyFileName: configs/sensorList.yml

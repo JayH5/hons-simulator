@@ -26,3 +26,8 @@ install {
     pom.groupId = 'za.redbridge.simulator'
   }
 }
+run {
+    if (project.hasProperty("appArgs")){
+        args Eval.me(appArgs)
+    }
+}

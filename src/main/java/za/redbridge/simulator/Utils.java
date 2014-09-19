@@ -96,9 +96,13 @@ public final class Utils {
     }
 
     public static Vec2 jitter(Vec2 vec, float magnitude) {
-        vec.x += magnitude * RANDOM.nextFloat() - magnitude / 2;
-        vec.y += magnitude * RANDOM.nextFloat() - magnitude / 2;
-        return vec;
+
+        if (vec != null) {
+            vec.x += magnitude * RANDOM.nextFloat() - magnitude / 2;
+            vec.y += magnitude * RANDOM.nextFloat() - magnitude / 2;
+            return vec;
+        }
+        return null;
     }
 
 }
