@@ -72,7 +72,8 @@ public class Experiment {
             try {
                 morphologyConfig = new MorphologyConfig("bestMorphology.yml");
             } catch (ParseException p) {
-                System.out.println("Error parsing morphology file.");
+                System.out.println("Error parsin" +
+                        "g morphology file.");
                 p.printStackTrace();
             }
 
@@ -123,6 +124,7 @@ public class Experiment {
     private boolean evolveComplements() {
         return evolveComplements;
     }
+
 
 
 }

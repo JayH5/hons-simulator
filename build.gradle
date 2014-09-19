@@ -16,7 +16,7 @@ dependencies {
 }
 
 apply plugin:'application'
-mainClassName = "za.redbridge.simulator.SimulationGUI"
+mainClassName = "za.redbridge.simulator.experiment.Experiment"
 
 apply plugin: 'maven'
 install {

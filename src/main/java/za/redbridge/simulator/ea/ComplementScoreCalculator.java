@@ -7,6 +7,7 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.experiment.ComparableMorphology;
 import za.redbridge.simulator.experiment.ComparableNEATNetwork;
+import za.redbridge.simulator.experiment.TrainComplement;
 import za.redbridge.simulator.experiment.TrainController;
 import za.redbridge.simulator.factories.ComplementFactory;
 
@@ -51,7 +52,7 @@ public class ComplementScoreCalculator implements CalculateScore {
         MorphologyConfig morphology =
                 MorphologyConfig.MorphologyFromSensitivities(morphologyConfig, sensitivityGenome.getData());
 
-        TrainController complementTrainer = new TrainController(experimentConfig, simConfig, morphology, morphologyScores);
+        TrainComplement complementTrainer = new TrainComplement(experimentConfig, simConfig, morphology, morphologyScores);
         complementTrainer.run();
 
         double score = complementTrainer.getHighestEntry().getValue();

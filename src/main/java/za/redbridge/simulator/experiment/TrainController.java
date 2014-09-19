@@ -82,6 +82,10 @@ public class TrainController implements Runnable{
             System.out.println("Average performance of controllers in this epoch scored: " + getEpochMeanScore());
             System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
 
+            long time = System.currentTimeMillis();
+            IOUtils.writeNetwork(scoreCache.last().getNetwork(), "bestNetwork" + time + ".tmp");
+            morphologyConfig.dumpMorphology("bestMorphology" + time + ".tmp");
+
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             scoreCache.clear();
