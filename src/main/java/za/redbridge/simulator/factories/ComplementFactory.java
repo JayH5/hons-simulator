@@ -54,7 +54,7 @@ public class ComplementFactory {
             return;
         }
 
-        for (float j = 0; j < (int) (1 / resolution) + 1; j++) {
+        for (float j = 1; j < (int) (1 / resolution) + 1; j++) {
 
             sensitivities[currentIndex] = resolution * j;
             morphologyList.add(MorphologyConfig.MorphologyFromSensitivities(template, sensitivities));

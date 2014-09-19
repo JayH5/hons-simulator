@@ -84,6 +84,9 @@ public class NNScoreCalculator implements CalculateScore {
         }
 
         double score = StatUtils.mean(performances);
+
+        System.out.println("Score for this NEAT controller: " + score);
+
         scoreCache.add(new ComparableNEATNetwork((NEATNetwork) method, score));
 
         return score;

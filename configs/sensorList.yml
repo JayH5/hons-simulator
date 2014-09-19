@@ -38,6 +38,7 @@ meta:
   readingSize: 1
   bearing: 45.0
   fieldOfView: 10.0
+  range: 1.0
   orientation: 0.0
 
 5s:
@@ -45,6 +46,7 @@ meta:
   readingSize: 1
   bearing: 275.0
   fieldOfView: 10.0
+  range: 1.0
   orientation: 0.0
 
 6s:
@@ -52,5 +54,6 @@ meta:
   readingSize: 1
   bearing: 180.0
   fieldOfView: 10.0
+  range: 1.0
   orientation: 0.0
 

@@ -85,6 +85,9 @@ public class TrainController implements Runnable{
         } while(epochs <= experimentConfig.getMaxEpochs());
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
+
+        Experiment.writeNetwork(leaderBoard.lastKey().getNetwork(), "bestNetwork.tmp");
+        morphologyConfig.dumpMorphology("bestMorphology.tmp");
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
