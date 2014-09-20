@@ -1,7 +1,14 @@
 package za.redbridge.simulator.sensor;
 
+import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.object.TargetAreaObject;
+import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.portrayal.ConePortrayal;
+import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +26,8 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
     protected double sensitivity;
 
     protected Class sensitiveClass;
+
+    protected Color paint;
 
     public ThresholdedObjectProximityAgentSensor() {
         super();
@@ -43,6 +52,48 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
                 this.sensitiveClass = Class.forName(sensitiveClassName);
             }catch(ClassNotFoundException e){}
 
+    }
+
+    protected void setPaint () {
+
+        int red = 0; 
+        int blue = 0;
+        int green = 0;
+
+        float value = 1f-((float) sensitivity);
+        int alpha = (int) (value*255f);
+
+        String className = sensitiveClass.getName();
+
+        if (className.equals("za.redbridge.simulator.object.RobotObject")) {
+            blue = 34;
+            green = 255;
+        }
+        else if (className.equals("za.redbridge.simulator.object.ResourceObject")) {
+
+            red = 255;
+            blue = 208;
+        }
+        else if (className.equals("za.redbridge.simulator.object.TargetAreaObject")) {
+
+            red = 69;
+            blue = 138;
+        }
+        else if (className.equals("za.redbridge.simulator.object.WallObject")) {
+
+            red = 69;
+            blue = 0;
+            green = 138;
+        }
+        paint = new Color(red, blue, green, alpha);
+    }
+
+    @Override
+    protected Paint getPaint() {
+        if (paint == null)
+            setPaint();
+
+        return paint;
     }
 
     @Override
@@ -109,6 +160,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
             throw new ParseException("No sensitivity value found for ThresholdedObjectProximityAgentSensor.", 0);
         }
 
+        this.setPaint();
     }
 
     @Override
@@ -138,4 +190,5 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
     @Override
     public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
+
 }

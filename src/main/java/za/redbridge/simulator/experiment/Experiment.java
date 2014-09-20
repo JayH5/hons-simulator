@@ -67,13 +67,12 @@ public class Experiment {
         //if we need to show a visualisation
         if (options.showVisuals()) {
 
-            NEATNetwork bestNetwork = IOUtils.readNetwork("bestNetwork.tmp");
+            NEATNetwork bestNetwork = IOUtils.readNetwork("bestNetwork1411210899781.tmp");
 
             try {
-                morphologyConfig = new MorphologyConfig("bestMorphology.yml");
+                morphologyConfig = new MorphologyConfig("bestMorphology1411210899781.tmp");
             } catch (ParseException p) {
-                System.out.println("Error parsin" +
-                        "g morphology file.");
+                System.out.println("Error parsing morphology file.");
                 p.printStackTrace();
             }
 

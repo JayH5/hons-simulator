@@ -12,6 +12,7 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;

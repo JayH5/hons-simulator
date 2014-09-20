@@ -1,9 +1,0 @@
-:compileJava UP-TO-DATE
-:processResources UP-TO-DATE
-:classes UP-TO-DATE
-:run
-Field 'simulation:seed' not present, using default
-Field 'environment' not present, using default
-Field 'targetArea' not present, using default
-read 6 sensors.
-Controller Trainer Epoch #0
