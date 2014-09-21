@@ -9,15 +9,10 @@ import org.epochx.epox.math.*;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
-import org.epochx.stats.StatField;
-import org.epochx.stats.Stats;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.factories.ResourceFactory;
-import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.gp.functions.*;
 import za.redbridge.simulator.gp.types.Bearing;
 import za.redbridge.simulator.gp.types.ProximityReading;
@@ -25,7 +20,6 @@ import za.redbridge.simulator.gp.types.WheelDrive;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +27,8 @@ import java.util.List;
  * Created by xenos on 9/9/14.
  */
 public class AgentModel extends GPModel {
+    //number of simulations run per phenotype evaluation
+    public static int numSims;
     private List<AgentSensor> sensors;
     private final SimConfig config;
     private final ExperimentConfig exConfig;
@@ -45,6 +41,7 @@ public class AgentModel extends GPModel {
        this.sensors = sensors;
        this.config = config;
        this.exConfig = exConfig;
+       this.numSims = 3;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
            inputs.add(new Variable("S" + i, ProximityReading.class));
@@ -109,6 +106,19 @@ public class AgentModel extends GPModel {
 
     @Override
     public double getFitness(CandidateProgram p){
+        List<Double>results = new ArrayList<>(numSims);
+        for(int i = 0; i < numSims; i++){
+            results.add(resultForOneSim(p));
+        }
+        double total = 0.0;
+        for(Double d : results){
+            total += d;
+        }
+        return total/ numSims;
+    }
+
+    protected double resultForOneSim(CandidateProgram p){
+        config.setSimulationSeed(System.currentTimeMillis());
         GPCandidateProgram program = (GPCandidateProgram) p;
 
         HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
@@ -117,7 +127,6 @@ public class AgentModel extends GPModel {
         Simulation sim = new Simulation(config, robotFactory);
         sim.runForNIterations(20000);
         System.out.print('.');
-        //System.out.println(p);
         return -sim.getFitness();
     }
 
