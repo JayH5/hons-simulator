@@ -70,7 +70,7 @@ public class TrainController implements Runnable{
         CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
                 morphologyConfig, scoreCache, threadSubruns);
 
-        final EvolutionaryAlgorithm train = NEATUtil.constructNEATTrainer(pop, scoreCalculator);
+        final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
         int epochs = 1;
 
