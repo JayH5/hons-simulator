@@ -92,9 +92,10 @@ public class Main {
         model.setMaxInitialDepth(6);
         model.setMaxDepth(7);
         model.setPopulationSize(200);
-        model.setPoolSize(model.getPopulationSize()/3);
+        model.setPoolSize(model.getPopulationSize()/2);
         model.setProgramSelector(new FitnessProportionateSelector(model));
         model.setNoRuns(1);
+        model.setNoElites(0);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
         class GenerationTrackingListener implements GenerationListener{
@@ -106,7 +107,7 @@ public class Main {
                 Stats s = Stats.get();
                 System.out.println();
                 Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
-                System.out.println("Generation " + counter+1 + ", " + elapsed.toString());
+                System.out.println("Generation " + (counter+1) + ", " + elapsed.toString());
                 s.print(StatField.ELITE_FITNESS_MIN);
                 s.print(StatField.GEN_FITTEST_PROGRAM);
                 counter++;
