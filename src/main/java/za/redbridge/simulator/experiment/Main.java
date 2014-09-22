@@ -106,10 +106,15 @@ public class Main {
                 if(startTime == null) startTime = System.currentTimeMillis();
                 Stats s = Stats.get();
                 System.out.println();
-                Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
-                s.print(StatField.GEN_FITNESS_MIN);
+                System.out.println("Generation " + (counter+1));
+                Double min = (Double)s.getStat(StatField.GEN_FITNESS_MIN);
+                Double avg = (Double)s.getStat(StatField.GEN_FITNESS_AVE);
+                System.out.println(); //newline after the dots
+                System.out.println("Fitness: " + min);
+                System.out.println("Avg: " + avg);
                 s.print(StatField.GEN_FITTEST_PROGRAM);
-                System.out.println("Generation " + (counter+1) + ", " + elapsed.toString());
+                Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
+                System.out.println("Elapsed: " + elapsed.toString());
                 counter++;
             }
             @Override
