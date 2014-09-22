@@ -25,7 +25,9 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
     protected static final int readingSize = 1;
     protected double sensitivity;
 
-    protected Class sensitiveClass;
+    protected String sensitiveClass;
+    
+    protected Class senseClass;
 
     protected Color paint;
 
@@ -34,7 +36,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
         sensitivity = 0;
         try {
-            sensitiveClass = Class.forName("za.redbridge.simulator.object.ResourceObject");
+            senseClass = Class.forName("za.redbridge.simulator.object.ResourceObject");
         }
         catch (ClassNotFoundException c) {
             System.out.println("Class not found.");
@@ -49,7 +51,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
         super(bearing, 0.0f, 30.0f, 0.1f);
 
             try {
-                this.sensitiveClass = Class.forName(sensitiveClassName);
+                this.senseClass = Class.forName(sensitiveClassName);
             }catch(ClassNotFoundException e){}
 
     }
@@ -63,7 +65,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
         float value = 1f-((float) sensitivity);
         int alpha = (int) (value*255f);
 
-        String className = sensitiveClass.getName();
+        String className = senseClass.getName();
 
         if (className.equals("za.redbridge.simulator.object.RobotObject")) {
             blue = 34;
@@ -102,7 +104,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
         double reading = 0.0;
 
         for(SensedObject o : objects){
-            if(o.getObject().getClass().equals(sensitiveClass)){
+            if(o.getObject().getClass().equals(senseClass)){
                 reading = 1 - Math.min(o.getDistance() / range, 1.0);
                 break;
             }
@@ -134,7 +136,8 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
         if (checkFieldPresent(sensitive, "sensitiveClass")) {
                 try {
-                    sensitiveClass = Class.forName(sensitive);
+                    senseClass = Class.forName(sensitive);
+                    sensitiveClass = sensitive;
                 }
                 catch (ClassNotFoundException c) {
                     System.out.println("Specified sensitive class not found.");

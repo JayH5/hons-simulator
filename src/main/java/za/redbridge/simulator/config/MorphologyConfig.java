@@ -312,7 +312,6 @@ public class MorphologyConfig extends Config implements Serializable {
                 catch (NoSuchFieldException n) {
                     //System.out.println("No such field: " + entry.getKey() + " " + sensorID);
                 }
-
             }
 
             yamlDump.put(sensorID+"s", thisMap);
