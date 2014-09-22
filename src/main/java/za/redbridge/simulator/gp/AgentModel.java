@@ -22,13 +22,15 @@ import za.redbridge.simulator.sensor.AgentSensor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Created by xenos on 9/9/14.
  */
 public class AgentModel extends GPModel {
     //number of simulations run per phenotype evaluation
-    public static int numSims;
+    protected static int numSims;
+    protected static int numSteps;
     private List<AgentSensor> sensors;
     private final SimConfig config;
     private final ExperimentConfig exConfig;
@@ -42,6 +44,7 @@ public class AgentModel extends GPModel {
        this.config = config;
        this.exConfig = exConfig;
        this.numSims = 3;
+       this.numSteps = 20000;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
            inputs.add(new Variable("S" + i, ProximityReading.class));
@@ -106,15 +109,11 @@ public class AgentModel extends GPModel {
 
     @Override
     public double getFitness(CandidateProgram p){
-        List<Double>results = new ArrayList<>(numSims);
-        for(int i = 0; i < numSims; i++){
-            results.add(resultForOneSim(p));
-        }
-        double total = 0.0;
-        for(Double d : results){
-            total += d;
-        }
-        return total/ numSims;
+        double total = IntStream.range(0, numSims)
+                .parallel()
+                .mapToDouble(i -> resultForOneSim(p))
+                .sum();
+        return total / numSims;
     }
 
     protected double resultForOneSim(CandidateProgram p){
@@ -125,7 +124,7 @@ public class AgentModel extends GPModel {
                 new GPPhenotype(sensors, program, inputs), config.getRobotMass(),
                 config.getRobotRadius(), config.getRobotColour(), exConfig.getPopulationSize());
         Simulation sim = new Simulation(config, robotFactory);
-        sim.runForNIterations(20000);
+        sim.runForNIterations(numSteps);
         System.out.print('.');
         return -sim.getFitness();
     }

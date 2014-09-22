@@ -11,7 +11,14 @@ dependencies {
   compile 'org.yaml:snakeyaml:1.13'
   compile 'args4j:args4j:2.0.29'
   compile 'commons-lang:commons-lang:2.6'
-  compile fileTree("libs")
+  compile 'org.antlr:antlr:3.1.3'
+  compile 'org.apache.bsf:bsf-engines:3.0-beta3'
+  compile 'bsh:bsh:2.0b4'
+  compile 'commons-logging:commons-logging-api:1.1'
+  compile 'org.codehaus.groovy:groovy:1.6.3'
+  compile 'org.jruby:jruby:1.5.0'
+  compile 'rhino:js:1.7R2'
+  compile 'pnuts:pnuts:1.2'
 }
 
 apply plugin:'application'

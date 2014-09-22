@@ -4,6 +4,7 @@ import org.epochx.epox.Node;
 import org.epochx.gp.op.init.RampedHalfAndHalfInitialiser;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.life.GenerationAdapter;
+import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
 import org.epochx.op.selection.FitnessProportionateSelector;
 import org.epochx.stats.StatField;
@@ -90,20 +91,30 @@ public class Main {
         model.setNoGenerations(100);
         model.setMaxInitialDepth(6);
         model.setMaxDepth(7);
-        model.setPopulationSize(200);
+        model.setPopulationSize(100);
         model.setPoolSize(model.getPopulationSize()/3);
         model.setProgramSelector(new FitnessProportionateSelector(model));
         model.setNoRuns(1);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
-        Life.get().addGenerationListener(new GenerationAdapter() {
+        class SkipOneListener implements GenerationListener{
+            private boolean skip = true;
+            @Override
             public void onGenerationEnd() {
+                if(skip){
+                    skip = false;
+                    return;
+                }
+
                 Stats s = Stats.get();
                 System.out.println();
                 s.print(StatField.ELITE_FITNESS_MIN);
-                s.print(StatField.GEN_FITTEST_PROGRAMS);
+                s.print(StatField.GEN_FITTEST_PROGRAM);
             }
-        });
+            @Override
+            public void onGenerationStart(){}
+        }
+        Life.get().addGenerationListener(new SkipOneListener());
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
@@ -131,6 +142,7 @@ public class Main {
             console.setVisible(true);
         }
         else {
+            System.out.println("Commencing experiment");
             //headless option
             model.run();
             System.out.println("Experiment finished. Best fitness: ");
