@@ -106,7 +106,7 @@ public class Main {
                 Stats s = Stats.get();
                 System.out.println();
                 Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
-                System.out.println("Generation " + counter + ", " + elapsed.toString());
+                System.out.println("Generation " + counter+1 + ", " + elapsed.toString());
                 s.print(StatField.ELITE_FITNESS_MIN);
                 s.print(StatField.GEN_FITTEST_PROGRAM);
                 counter++;
