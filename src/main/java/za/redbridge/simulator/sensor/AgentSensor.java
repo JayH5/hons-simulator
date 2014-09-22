@@ -381,8 +381,11 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     public abstract Map<String,Object> getAdditionalConfigs();
 
+
     public float getBearing() { return bearing; }
     public float getOrientation() { return orientation; }
     public float getRange() { return range; }
     public float getFieldOfView() { return fieldOfView; }
+
+
 }
