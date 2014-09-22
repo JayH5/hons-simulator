@@ -86,7 +86,7 @@ public class ResourceObject extends PhysicalObject {
                 .setRectangular(width, height, mass)
                 .setFriction(0.3f)
                 .setRestitution(0.4f)
-                .setGroundFriction(0.3f)
+                .setGroundFriction(0.3f, 10f)
                 .build(world);
     }
 

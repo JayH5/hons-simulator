@@ -31,6 +31,7 @@ public class BodyBuilder {
 
     private boolean groundFriction = false;
     private float kineticCOF;
+    private float torqueFriction;
 
     public BodyBuilder() {
         bd.setAngularDamping(DEFAULT_ANGULAR_DAMPING);
@@ -163,8 +164,9 @@ public class BodyBuilder {
         return this;
     }
 
-    public BodyBuilder setGroundFriction(float kineticCOF) {
+    public BodyBuilder setGroundFriction(float kineticCOF, float torqueFriction) {
         this.kineticCOF = kineticCOF;
+        this.torqueFriction = torqueFriction;
         groundFriction = true;
         return this;
     }
@@ -175,7 +177,7 @@ public class BodyBuilder {
 
         if (groundFriction) {
             TopDownFrictionJointDef jd = new TopDownFrictionJointDef();
-            jd.initialize(body, kineticCOF, 10f); // TODO: Angular friction
+            jd.initialize(body, kineticCOF, torqueFriction); // TODO: Angular friction
             world.createJoint(jd);
         }
 
