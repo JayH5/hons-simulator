@@ -29,8 +29,8 @@ import java.util.stream.IntStream;
  */
 public class AgentModel extends GPModel {
     //number of simulations run per phenotype evaluation
-    protected static int numSims;
-    protected static int numSteps;
+    protected int numSims;
+    protected int numSteps;
     private List<AgentSensor> sensors;
     private final SimConfig config;
     private final ExperimentConfig exConfig;
