@@ -17,7 +17,7 @@ import java.util.Set;
 //generates MorphologyConfig objects and varies sensitivities - will overwrite templates
 public class ComplementFactory {
 
-    private MorphologyConfig template;
+    private final MorphologyConfig template;
     private float resolution;
 
     public ComplementFactory(MorphologyConfig template, float resolution) {
@@ -62,7 +62,7 @@ public class ComplementFactory {
         }
     }
 
-    void printArray(double[] array) {
+    public static void printArray(double[] array) {
 
         for (int i = 0; i < array.length; i++) {
             System.out.print(array[i] + " ");

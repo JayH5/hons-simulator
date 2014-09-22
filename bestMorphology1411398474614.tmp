@@ -1,0 +1,12 @@
+3s: {type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor, sensitiveClass: za.redbridge.simulator.object.WallObject,
+  readingSize: 1, bearing: 355.0, fieldOfView: 5.0, orientation: 0.0, range: 5.0,
+  sensitivity: 1.0}
+2s: {type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor, sensitiveClass: za.redbridge.simulator.object.ResourceObject,
+  readingSize: 1, bearing: 0.0, fieldOfView: 5.0, orientation: 0.0, range: 5.0, sensitivity: 1.0}
+1s: {type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor, sensitiveClass: za.redbridge.simulator.object.RobotObject,
+  readingSize: 1, bearing: 5.0, orientation: 0.0, fieldOfView: 5.0, range: 5.0, sensitivity: 1.0}
+meta: {numSensors: 5}
+5s: {type: za.redbridge.simulator.sensor.ProximityAgentSensor, readingSize: 1, bearing: 315.0,
+  fieldOfView: 5.0, range: 5.0, orientation: 0.0}
+4s: {type: za.redbridge.simulator.sensor.ProximityAgentSensor, readingSize: 1, bearing: 45.0,
+  fieldOfView: 5.0, range: 5.0, orientation: 0.0}

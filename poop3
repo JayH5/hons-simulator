@@ -13,7 +13,7 @@
   readingSize: 1
   fieldOfView: 0.08726646
   range: 5.0
-  sensitivity: 0.5
+  sensitivity: 1.0
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
   sensitiveClass: !!java.lang.Class {}
 1s:
@@ -22,7 +22,7 @@
   readingSize: 1
   fieldOfView: 0.08726646
   range: 5.0
-  sensitivity: 0.5
+  sensitivity: 1.0
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
   sensitiveClass: !!java.lang.Class {}
 meta: {numSensors: 5}

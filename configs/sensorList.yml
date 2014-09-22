@@ -1,5 +1,5 @@
 meta:
-  numSensors: 6
+  numSensors: 5
 
 1s:
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
@@ -44,15 +44,7 @@ meta:
 5s:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
-  bearing: 275.0
-  fieldOfView: 5.0
-  range: 5.0
-  orientation: 0.0
-
-6s:
-  type: za.redbridge.simulator.sensor.ProximityAgentSensor
-  readingSize: 1
-  bearing: 180.0
+  bearing: 315.0
   fieldOfView: 5.0
   range: 5.0
   orientation: 0.0

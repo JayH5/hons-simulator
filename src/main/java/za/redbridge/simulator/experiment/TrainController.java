@@ -11,6 +11,7 @@ import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.NNScoreCalculator;
+import za.redbridge.simulator.factories.ComplementFactory;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
@@ -85,7 +86,6 @@ public class TrainController implements Runnable{
             long time = System.currentTimeMillis();
             IOUtils.writeNetwork(scoreCache.last().getNetwork(), "bestNetwork" + time + ".tmp");
             morphologyConfig.dumpMorphology("bestMorphology" + time + ".tmp");
-
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             scoreCache.clear();
@@ -97,6 +97,9 @@ public class TrainController implements Runnable{
 
         IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/bestNetwork.tmp");
         morphologyConfig.dumpMorphology("results/bestMorphology.tmp");
+
+        System.out.print("shouldprint");
+        ComplementFactory.printArray(morphologyConfig.getSensitivities());
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }

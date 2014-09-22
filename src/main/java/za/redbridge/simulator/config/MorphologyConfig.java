@@ -2,11 +2,13 @@ package za.redbridge.simulator.config;
 
 import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
+import za.redbridge.simulator.factories.ComplementFactory;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -284,7 +286,36 @@ public class MorphologyConfig extends Config implements Serializable {
         for (AgentSensor sensor: sensorList) {
 
             Map<String,Object> sensorMap = sensor.getAdditionalConfigs();
-            yamlDump.put(sensorID+"s", sensorMap);
+            Map<String,Object> thisMap = new HashMap<>();
+
+            thisMap.put("type", sensor.getClass().getName());
+            thisMap.put("readingSize", sensor.getReadingSize());
+            thisMap.put("bearing", sensor.getBearing());
+            thisMap.put("orientation", sensor.getOrientation());
+            thisMap.put("fieldOfView", sensor.getFieldOfView());
+            thisMap.put("range", sensor.getRange());
+
+            for (Map.Entry<String,Object> entry: sensorMap.entrySet()) {
+
+                try {
+                    Field field = sensor.getClass().getDeclaredField(entry.getKey());
+
+                    try {
+
+                        field.setAccessible(true);
+                        thisMap.put(entry.getKey(), field.get(sensor));
+                    }
+                    catch(IllegalAccessException i) {
+                        System.out.println("Illegal access of field " + entry.getKey());
+                    }
+                }
+                catch (NoSuchFieldException n) {
+                    //System.out.println("No such field: " + entry.getKey() + " " + sensorID);
+                }
+
+            }
+
+            yamlDump.put(sensorID+"s", thisMap);
             sensorID++;
         }
 
@@ -296,7 +327,7 @@ public class MorphologyConfig extends Config implements Serializable {
             fileWriter = new FileWriter(filename);
             yaml.dump(yamlDump, stringWriter);
             fileWriter.write(stringWriter.toString());
-            System.out.println(stringWriter.toString());
+            //System.out.println(stringWriter.toString());
             fileWriter.close();
         }
         catch (IOException e) {
@@ -304,10 +335,9 @@ public class MorphologyConfig extends Config implements Serializable {
             e.printStackTrace();
             System.exit(-1);
         }
-
     }
 
-    public static MorphologyConfig MorphologyFromSensitivities (MorphologyConfig template, double[] sensitivities) {
+    public static MorphologyConfig MorphologyFromSensitivities (final MorphologyConfig template, double[] sensitivities) {
 
         ArrayList<AgentSensor> newSensors = new ArrayList<>();
         int counter = 0;
