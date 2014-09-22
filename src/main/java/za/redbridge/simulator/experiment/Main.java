@@ -3,7 +3,6 @@ package za.redbridge.simulator.experiment;
 import org.epochx.epox.Node;
 import org.epochx.gp.op.init.RampedHalfAndHalfInitialiser;
 import org.epochx.gp.representation.GPCandidateProgram;
-import org.epochx.life.GenerationAdapter;
 import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
 import org.epochx.op.selection.FitnessProportionateSelector;
@@ -98,7 +97,7 @@ public class Main {
         model.setNoRuns(1);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
-        class SkipOneListener implements GenerationListener{
+        class GenerationTrackingListener implements GenerationListener{
             private int counter = 0;
             private Long startTime = null;
             @Override
@@ -115,7 +114,7 @@ public class Main {
             @Override
             public void onGenerationStart(){}
         }
-        Life.get().addGenerationListener(new SkipOneListener());
+        Life.get().addGenerationListener(new GenerationTrackingListener());
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
