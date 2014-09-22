@@ -48,7 +48,7 @@ public class MorphologyConfig extends Config implements Serializable {
         totalReadingSize = readSize;
     }
 
-    public MorphologyConfig(String filepath) throws ParseException {
+    public MorphologyConfig(String filepath) {
 
         sensorList = new ArrayList<>();
         int sensors = 0;
@@ -71,7 +71,8 @@ public class MorphologyConfig extends Config implements Serializable {
                 sensors = noSensors.intValue();
             }
             else {
-                throw new ParseException("Error: Number of sensors not found.", 0);
+                System.out.println("Error: Number of sensors not found.");
+                System.exit(-1);
             }
         }
 
@@ -81,7 +82,7 @@ public class MorphologyConfig extends Config implements Serializable {
             String id = i + "s";
 
             String type = null;
-            float bearing, orientation, fieldOfView, range;
+            float bearing = 0, orientation = 0, fieldOfView = 0, range = 0;
 
 
             AgentSensor agentSensor = null;
@@ -94,7 +95,8 @@ public class MorphologyConfig extends Config implements Serializable {
                     bearing = bear.floatValue();
                 }
                 else {
-                    throw new ParseException("No bearing found for sensor " + id, i);
+                    System.out.println("No bearing found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 Number orient = (Number) sensor.get("orientation");
@@ -102,7 +104,8 @@ public class MorphologyConfig extends Config implements Serializable {
                     orientation = orient.floatValue();
                 }
                 else {
-                    throw new ParseException("No orientation found for sensor " + id, i);
+                    System.out.println("No orientation found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 Number fov = (Number) sensor.get("fieldOfView");
@@ -110,7 +113,8 @@ public class MorphologyConfig extends Config implements Serializable {
                     fieldOfView = fov.floatValue();
                 }
                 else {
-                    throw new ParseException("No field of view found for sensor " + id, i);
+                    System.out.println("No field of view found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 Number ran = (Number) sensor.get("range");
@@ -118,7 +122,8 @@ public class MorphologyConfig extends Config implements Serializable {
                     range = ran.floatValue();
                 }
                 else {
-                    throw new ParseException("No sensor range found for sensor " + id, i);
+                    System.out.println("No sensor range found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 type = (String) sensor.get("type");
@@ -152,25 +157,35 @@ public class MorphologyConfig extends Config implements Serializable {
                     }
                     catch (NoSuchMethodException n) {
                         n.printStackTrace();
+                        System.exit(-1);
                     }
                     catch (InvocationTargetException inv) {
                         inv.getCause();
                         inv.printStackTrace();
+                        System.exit(-1);
                     }
                     catch (InstantiationException ins) {
                         ins.printStackTrace();
+                        System.exit(-1);
                     }
                     catch (IllegalAccessException ill) {
                         ill.printStackTrace();
+                        System.exit(-1);
+                    }
+                    catch (ParseException p) {
+                        p.printStackTrace();
+                        System.exit(-1);
                     }
 
                 }
                 else {
-                    throw new ParseException("Error: No sensor type found. ", i);
+                    System.out.println("Error: No sensor type found. ");
+                    System.exit(-1);
                 }
             }
             else {
-                throw new ParseException("Error: " + i + " Sensor not found.", i);
+                System.out.println("Error: " + i + " Sensor not found.");
+                System.exit(-1);
             }
 
             sensorList.add(agentSensor);

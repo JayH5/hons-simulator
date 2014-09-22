@@ -91,11 +91,12 @@ public class TrainController implements Runnable{
             scoreCache.clear();
 
         } while(epochs <= experimentConfig.getMaxEpochs());
+        train.finishTraining();
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "bestNetwork.tmp");
-        morphologyConfig.dumpMorphology("bestMorphology.tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/bestNetwork.tmp");
+        morphologyConfig.dumpMorphology("results/bestMorphology.tmp");
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }

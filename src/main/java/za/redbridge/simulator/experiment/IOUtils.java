@@ -33,7 +33,7 @@ public class IOUtils {
             ObjectInputStream objectReader = new ObjectInputStream(fileReader);
             o = objectReader.readObject();
         } catch (FileNotFoundException f) {
-            System.out.println("File not found, aborting.");
+            System.out.println("File " + filename + " not found; aborting.");
             System.exit(0);
         } catch (IOException e) {
             System.out.println("Error reading network from file.");

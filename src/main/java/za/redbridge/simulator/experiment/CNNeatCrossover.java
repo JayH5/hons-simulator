@@ -63,7 +63,7 @@ public class CNNeatCrossover extends NEATCrossover {
                 // if mom and dad are the same fitness and have the same number
                 // of genes,
                 // then randomly pick mom or dad as the most fit.
-                if (Math.random() > 0) {
+                if (Math.random() > 0.5) {
                     return mom;
                 } else {
                     return dad;

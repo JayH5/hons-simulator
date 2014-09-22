@@ -109,7 +109,6 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
         }
 
         readings.clear();
-
         //threshold
         if (reading >= (1-sensitivity)) {
             readings.add(reading);

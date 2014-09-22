@@ -5,9 +5,9 @@ meta:
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
   sensitiveClass: za.redbridge.simulator.object.RobotObject
   readingSize: 1
-  bearing: 0.0
+  bearing: 5.0
   orientation: 0.0
-  fieldOfView: 10.0
+  fieldOfView: 5.0
   range: 5.0
   sensitivity: 0.8
 
@@ -15,8 +15,8 @@ meta:
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
   sensitiveClass: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
-  bearing: 5.0
-  fieldOfView: 10.0
+  bearing: 0.0
+  fieldOfView: 5.0
   orientation: 0.0
   range: 5.0
   sensitivity: 0.8
@@ -24,10 +24,10 @@ meta:
 
 3s:
   type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
-  sensitiveClass: za.redbridge.simulator.object.TargetAreaObject
+  sensitiveClass: za.redbridge.simulator.object.WallObject
   readingSize: 1
   bearing: 355.0
-  fieldOfView: 10.0
+  fieldOfView: 5.0
   orientation: 0.0
   range: 5.0
   sensitivity: 0.8
@@ -37,7 +37,7 @@ meta:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
   bearing: 45.0
-  fieldOfView: 10.0
+  fieldOfView: 5.0
   range: 5.0
   orientation: 0.0
 
@@ -45,7 +45,7 @@ meta:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
   bearing: 275.0
-  fieldOfView: 10.0
+  fieldOfView: 5.0
   range: 5.0
   orientation: 0.0
 
@@ -53,7 +53,7 @@ meta:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
   bearing: 180.0
-  fieldOfView: 10.0
+  fieldOfView: 5.0
   range: 5.0
   orientation: 0.0
 

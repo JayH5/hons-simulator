@@ -27,13 +27,7 @@ public class SimulationFactory {
 
         MorphologyConfig morphologyConfig = null;
 
-        try {
-            morphologyConfig = new MorphologyConfig(experimentConfig.getMorphologyConfigFile());
-        }
-        catch(ParseException p) {
-            System.out.println("Error parsing morphology file.");
-            p.printStackTrace();
-        }
+        morphologyConfig = new MorphologyConfig(experimentConfig.getMorphologyConfigFile());
 
         return morphologyConfig.getSensorList();
     }

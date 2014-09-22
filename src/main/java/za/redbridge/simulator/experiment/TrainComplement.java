@@ -58,13 +58,15 @@ public class TrainComplement implements Runnable {
 
         TrainEA GA = new TrainEA(pop, scoreCalculator);
 
+        GA.setThreadCount(4);
+
         GA.addOperation(0.9, new SpliceNoRepeat(morphologyConfig.getNumAdjustableSensitivities() / 3));
         GA.addOperation(0.1, new MutateShuffle());
 
         int epochs = 0;
 
         do {
-            System.out.println("Complement Trainer Epoch #" + GA.getIteration());
+            //System.out.println("Complement Trainer Epoch #" + GA.getIteration());
             GA.iteration();
             epochs++;
 
@@ -74,6 +76,7 @@ public class TrainComplement implements Runnable {
 
         } while(epochs <= experimentConfig.getMaxEpochs());
 
+        GA.finishTraining();
     }
 
     public MorphologyConfig getBestMorphology() { return leaderBoard.lastEntry().getKey().getMorphology(); }
