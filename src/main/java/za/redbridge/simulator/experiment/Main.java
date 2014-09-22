@@ -16,6 +16,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,25 +92,25 @@ public class Main {
         model.setNoGenerations(100);
         model.setMaxInitialDepth(6);
         model.setMaxDepth(7);
-        model.setPopulationSize(100);
+        model.setPopulationSize(200);
         model.setPoolSize(model.getPopulationSize()/3);
         model.setProgramSelector(new FitnessProportionateSelector(model));
         model.setNoRuns(1);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
         class SkipOneListener implements GenerationListener{
-            private boolean skip = true;
+            private int counter = 0;
+            private Long startTime = null;
             @Override
             public void onGenerationEnd() {
-                if(skip){
-                    skip = false;
-                    return;
-                }
-
+                if(startTime == null) startTime = System.currentTimeMillis();
                 Stats s = Stats.get();
                 System.out.println();
+                Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
+                System.out.println("Generation " + counter + ", " + elapsed.toString());
                 s.print(StatField.ELITE_FITNESS_MIN);
                 s.print(StatField.GEN_FITTEST_PROGRAM);
+                counter++;
             }
             @Override
             public void onGenerationStart(){}
