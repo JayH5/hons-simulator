@@ -89,14 +89,16 @@ public class Main {
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
         model.setNoGenerations(100);
-        model.setMaxInitialDepth(6);
+        model.setMaxInitialDepth(3);
         model.setMaxDepth(7);
         model.setPopulationSize(200);
-        model.setPoolSize(model.getPopulationSize()/2);
+        model.setPoolSize(model.getPopulationSize() / 2);
         model.setProgramSelector(new FitnessProportionateSelector(model));
         model.setNoRuns(1);
-        model.setNoElites(0);
+        model.setNoElites((int)(model.getPopulationSize()*0.5));
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
+        model.setMutationProbability(0.1);
+        model.setCrossoverProbability(0.9);
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
         class GenerationTrackingListener implements GenerationListener{
             private int counter = 0;
