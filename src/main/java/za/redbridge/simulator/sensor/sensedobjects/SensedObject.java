@@ -10,9 +10,9 @@ import za.redbridge.simulator.object.PhysicalObject;
 public abstract class SensedObject<T extends Shape> implements Comparable<SensedObject> {
 
     protected final PhysicalObject object;
-    protected final double distance;
+    protected final float distance;
 
-    public SensedObject(PhysicalObject object, double distance) {
+    public SensedObject(PhysicalObject object, float distance) {
         this.object = object;
         this.distance = distance;
     }
@@ -23,7 +23,7 @@ public abstract class SensedObject<T extends Shape> implements Comparable<Sensed
     }
 
     /** Get the estimated minimum distance to the object. */
-    public double getDistance() {
+    public float getDistance() {
         return distance;
     }
 
@@ -32,6 +32,6 @@ public abstract class SensedObject<T extends Shape> implements Comparable<Sensed
 
     @Override
     public int compareTo(SensedObject o) {
-        return Double.compare(distance, o.distance);
+        return Float.compare(distance, o.distance);
     }
 }
