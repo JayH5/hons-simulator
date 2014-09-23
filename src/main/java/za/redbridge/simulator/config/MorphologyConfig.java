@@ -290,9 +290,9 @@ public class MorphologyConfig extends Config implements Serializable {
 
             thisMap.put("type", sensor.getClass().getName());
             thisMap.put("readingSize", sensor.getReadingSize());
-            thisMap.put("bearing", Math.toRadians(sensor.getBearing()));
-            thisMap.put("orientation", Math.toRadians(sensor.getOrientation()));
-            thisMap.put("fieldOfView", Math.toRadians(sensor.getFieldOfView()));
+            thisMap.put("bearing", Math.toDegrees(sensor.getBearing()));
+            thisMap.put("orientation", Math.toDegrees(sensor.getOrientation()));
+            thisMap.put("fieldOfView", Math.toDegrees(sensor.getFieldOfView()));
             thisMap.put("range", sensor.getRange());
 
             for (Map.Entry<String,Object> entry: sensorMap.entrySet()) {
