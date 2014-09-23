@@ -1,6 +1,5 @@
 package za.redbridge.simulator.object;
 
-import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -9,8 +8,8 @@ import org.jbox2d.dynamics.World;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
@@ -35,9 +34,9 @@ import za.redbridge.simulator.sensor.SensorReading;
  */
 public class RobotObject extends PhysicalObject {
 
-    private static final double WHEEL_RADIUS = 0.03;
+    private static final float WHEEL_RADIUS = 0.03f;
 
-    private static final double ENGINE_TORQUE = (5 / 2) * WHEEL_RADIUS;
+    private static final float ENGINE_TORQUE = (5 / 2f) * WHEEL_RADIUS;
 
     // The fraction of the robot's radius the wheels are away from the center
     private static final double WHEEL_DISTANCE = 0.75;
@@ -127,8 +126,8 @@ public class RobotObject extends PhysicalObject {
         super.step(sim);
 
         List<AgentSensor> sensors = phenotype.getSensors();
-        List<SensorReading> readings = sensors.stream().map(s -> s.sense())
-                .collect(Collectors.toList());
+        List<SensorReading> readings = new ArrayList<>(sensors.size());
+        sensors.forEach(s -> readings.add(s.sense()));
 
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 
@@ -136,50 +135,50 @@ public class RobotObject extends PhysicalObject {
             throw new RuntimeException("Invalid force applied: " + wheelDrives);
         }
 
-        applyWheelDrives(wheelDrives, leftWheelPosition, rightWheelPosition);
+        applyWheelDrive((float) wheelDrives.x, leftWheelPosition);
+        applyWheelDrive((float) wheelDrives.y, rightWheelPosition);
 
         updateFriction();
     }
 
-    private void applyWheelDrives(Double2D wheelDrives, Vec2 leftWheelPosition, Vec2 rightWheelPosition){
-        double totalWheelDrive = Math.abs(wheelDrives.x) + Math.abs(wheelDrives.y);
-        double left = totalWheelDrive == 0.0 ? 0.0 : wheelDrives.x/totalWheelDrive;
-        double right = totalWheelDrive == 0.0 ? 0.0 : wheelDrives.y/totalWheelDrive;
-        applyWheelDrive(2.0*(left), leftWheelPosition);
-        applyWheelDrive(2.0*(right), rightWheelPosition);
-    }
-
-    private void applyWheelDrive(double wheelDrive, Vec2 wheelPosition) {
-        final Transform bodyTransform = getBody().getTransform();
+    private void applyWheelDrive(float wheelDrive, Vec2 wheelPosition) {
+        final Body body = getBody();
 
         // Calculate the force due to the wheel
-        Vec2 velocity = getBody().getLinearVelocity();
-        Rot bodyRotation = new Rot(getBody().getAngle());
-        Rot.mulToOut(bodyRotation, velocity, velocity);
-        double velAngle = Math.atan2(velocity.y, velocity.x);
-        double velocityInTargetDirection = velocity.length() * Math.cos(velAngle);
+        Vec2 velocity = body.getLinearVelocity();//body.getWorldVector(body.getLinearVelocity());
+        float speed = velocity.length();
+        float velocityInWheelDirection = speed * velocity.x / speed;
 
-        //if the robot velocity is in the opposite direction of wheel drive direction, our torque output is not constrained
-        if(Math.signum(velocityInTargetDirection) != Math.signum(wheelDrive)) velocityInTargetDirection = 0.0;
-        double magnitude = (wheelDrive*torqueAtVelocity(Math.abs(velocityInTargetDirection)))/WHEEL_RADIUS;
-        wheelForce.set((float)magnitude, 0f);
-        Rot.mulToOut(bodyTransform.q, wheelForce, wheelForce);
+        // if the robot velocity is in the opposite direction of wheel drive direction, our torque
+        // output is not constrained
+        if (Math.signum(velocityInWheelDirection) != Math.signum(wheelDrive)) {
+            velocityInWheelDirection = 0.0f;
+        }
+        float magnitude = (wheelDrive * torqueAtVelocity(velocityInWheelDirection)) / WHEEL_RADIUS;
+        wheelForce.set(magnitude, 0f);
+        body.getWorldVectorToOut(wheelForce, wheelForce);
 
         // Calculate position of force
-        Transform.mulToOut(bodyTransform, wheelPosition, wheelForcePosition);
+        body.getWorldPointToOut(wheelPosition, wheelForcePosition);
 
         // Apply force
-        getBody().applyForce(wheelForce, wheelForcePosition);
+        body.applyForce(wheelForce, wheelForcePosition);
     }
 
     /**
-     * @param velocity The robot velocity in the direction of the intended wheel travel. So, only positive values.
+     * @param velocity The robot velocity in the direction of the intended wheel travel.
      * @return The torque applied to the wheels by the engine at the given velocity.
      */
-    private double torqueAtVelocity(double velocity){
-        if(velocity < VELOCITY_RAMPDOWN_START) return ENGINE_TORQUE;
-        else if(velocity > VELOCITY_RAMPDOWN_END) return 0;
-        else return ENGINE_TORQUE * (1.0 - ((velocity - VELOCITY_RAMPDOWN_START)/(VELOCITY_RAMPDOWN_END - VELOCITY_RAMPDOWN_START)));
+    private float torqueAtVelocity(float velocity) {
+        velocity = Math.abs(velocity);
+        if (velocity < VELOCITY_RAMPDOWN_START) {
+            return ENGINE_TORQUE;
+        } else if (velocity > VELOCITY_RAMPDOWN_END) {
+            return 0;
+        } else {
+            return ENGINE_TORQUE * (1.0f - ((velocity - VELOCITY_RAMPDOWN_START)
+                    / (VELOCITY_RAMPDOWN_END - VELOCITY_RAMPDOWN_START)));
+        }
     }
 
     /**

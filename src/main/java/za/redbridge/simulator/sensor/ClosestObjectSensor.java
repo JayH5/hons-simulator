@@ -5,13 +5,10 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.object.ResourceObject;
-import za.redbridge.simulator.object.RobotObject;
 
 
 /**
@@ -39,8 +36,18 @@ public abstract class ClosestObjectSensor
 
     @Override
     protected Optional<ClosestObject> provideReading(List<Fixture> fixtures) {
-        return fixtures.stream().map(this::senseFixture)
-                .min(Comparator.<ClosestObject>naturalOrder());
+        // Find the closest object
+        ClosestObject closestObject = null;
+        double closestDistance = Double.MAX_VALUE;
+        for (Fixture fixture : fixtures) {
+            ClosestObject object = senseFixture(fixture);
+            double distance = object.getDistance();
+            if (distance < closestDistance) {
+                closestObject = object;
+                closestDistance = distance;
+            }
+        }
+        return Optional.ofNullable(closestObject);
     }
 
     public static class ClosestObject implements Comparable<ClosestObject> {

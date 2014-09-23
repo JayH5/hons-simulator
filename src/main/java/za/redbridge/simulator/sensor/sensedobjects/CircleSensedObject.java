@@ -21,7 +21,7 @@ public class CircleSensedObject extends SensedObject<Arc2D> {
 
     private Arc2D shape;
 
-    public CircleSensedObject(PhysicalObject object, double distance, float radius,
+    public CircleSensedObject(PhysicalObject object, float distance, float radius,
             float x, float y, float x0, float y0, float x1, float y1) {
         super(object, distance);
         this.radius = radius;

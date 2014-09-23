@@ -7,6 +7,7 @@ import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
@@ -14,9 +15,10 @@ import org.jbox2d.dynamics.Fixture;
 
 import java.awt.*;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
@@ -26,6 +28,7 @@ import za.redbridge.simulator.sensor.sensedobjects.CircleSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.EdgeSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.PolygonSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
+
 
 import static za.redbridge.simulator.Utils.isNearlyZero;
 
@@ -38,8 +41,6 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     protected final float orientation;
     protected final float range;
     protected final float fieldOfView;
-
-    private static final int readingSize = 1;
 
     private final float fovGradient;
 
@@ -110,10 +111,17 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     @Override
     protected SensorReading provideReading(List<Fixture> fixtures) {
-        return provideObjectReading(fixtures.stream()
-                .map(this::senseFixture)
-                .filter(o -> o != null)
-                .collect(Collectors.toList()));
+        List<SensedObject> objects = new ArrayList<>(fixtures.size());
+        for (Fixture fixture : fixtures) {
+            SensedObject object = senseFixture(fixture);
+            if (object != null) {
+                objects.add(object);
+            }
+        }
+
+        // Sort objects with closest first
+        Collections.sort(objects);
+        return provideObjectReading(objects);
     }
 
     /**
@@ -168,11 +176,11 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             y1 = fovGradient * x1;
         }
 
-        final double distance;
+        final float distance;
         if (y < yMin) {
-            distance = Math.hypot(x0, y0);
+            distance = (float) Math.hypot(x0, y0);
         } else if (y > yMax) {
-            distance = Math.hypot(x1, y1);
+            distance = (float) Math.hypot(x1, y1);
         } else {
             distance = objectRelativeTransform.p.length() - radius;
         }
@@ -186,7 +194,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         float B = 2 * (m * c - m * q - p);
         float C = q * q - r * r + p * p - 2 * c * q + c * c;
 
-        return (-B + (float) Math.sqrt(B * B - 4 * A * C)) / (2 * A);
+        return (-B + MathUtils.sqrt(B * B - 4 * A * C)) / (2 * A);
     }
 
     protected SensedObject sensePolygonFixture(Fixture polygonFixture,
@@ -262,7 +270,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         float dy = v2.y - v1.y;
         float dx = v2.x - v1.x;
         float x1, y1, x2, y2;
-        final double distance;
+        final float distance;
         if (isNearlyZero(dy)) { // Horizontal line (shouldn't happen generally)
             if (v2.x < v1.x) {
                 Vec2 temp = v2;
@@ -273,9 +281,9 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             y1 = v1.y;
             y2 = v2.y;
             x1 = Math.max(y1 / fovGradient, v1.x);
-            x2 = Math.min((float) Math.sqrt(range * range - y2 * y2), v2.x);
+            x2 = Math.min(MathUtils.sqrt(range * range - y2 * y2), v2.x);
 
-            distance = Math.hypot(x1, y1);
+            distance = (float) Math.hypot(x1, y1);
         } else if (isNearlyZero(dx)) { // Vertical line
             if (v2.y < v1.y) {
                 Vec2 temp = v2;
@@ -289,9 +297,9 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             y2 = Math.min(x2 * fovGradient, v2.y);
 
             if (y1 > 0) {
-                distance = Math.hypot(x1, y1); // Distance to bottom point
+                distance = (float) Math.hypot(x1, y1); // Distance to bottom point
             } else if (y2 < 0) {
-                distance = Math.hypot(x2, y2); // Distance to top point
+                distance = (float) Math.hypot(x2, y2); // Distance to top point
             } else {
                 distance = x1; // Distance straight to line
             }
@@ -331,12 +339,12 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
             // line... but edge is not infinite
             float x = (m - m_) / (c_ - c);
             if (x > x2) {
-                distance = Math.hypot(x2, y2);
+                distance = (float) Math.hypot(x2, y2);
             } else if (x < x1) {
-                distance = Math.hypot(x1, y1);
+                distance = (float) Math.hypot(x1, y1);
             } else {
                 float y = m * x + c;
-                distance = Math.hypot(x, y);
+                distance = (float) Math.hypot(x, y);
             }
         }
 
@@ -359,7 +367,7 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     /**
      * Converts a list of objects that have been determined to fall within the sensor's range into
      * an actual {@link SensorReading} instance.
-     * @param objects the objects in the sensor's field, sorted by distance
+     * @param objects the objects in the sensor's field, *sorted by distance*
      * @return the reading of the objects produced by the sensor
      */
     protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
