@@ -9,7 +9,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
-import za.redbridge.simulator.sensor.SensorReading;
+
 
 import static za.redbridge.simulator.Utils.wrapAngle;
 
@@ -34,7 +34,7 @@ public class PickupHeuristic extends Heuristic {
     }
 
     @Override
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
         // Go for the target area if we've managed to attach to a resource
         if (attachedRobot.isBoundToResource()) {
             return wheelDriveForTargetAngle(targetAreaAngle());

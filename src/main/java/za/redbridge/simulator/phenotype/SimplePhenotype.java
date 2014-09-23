@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.sensor.ProximityAgentSensor;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.SensorReading;
+import za.redbridge.simulator.sensor.ProximityAgentSensor;
 
 /**
  * Created by jamie on 2014/08/05.
@@ -28,7 +27,7 @@ public class SimplePhenotype implements Phenotype {
     }
 
     @Override
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
         return new Double2D(1.0f, 0.2f);
     }
 

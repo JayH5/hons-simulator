@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Created by jamie on 2014/09/10.
@@ -17,7 +15,7 @@ public class HeuristicSchedule {
     private final List<Heuristic> addList = new ArrayList<>();
     private final List<Heuristic> removeList = new ArrayList<>();
 
-    public Double2D step(List<SensorReading> readings) {
+    public Double2D step(List<List<Double>> readings) {
         schedule.addAll(addList);
         addList.clear();
 

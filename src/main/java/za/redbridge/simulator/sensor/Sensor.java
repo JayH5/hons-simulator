@@ -22,6 +22,7 @@ import za.redbridge.simulator.portrayal.STRTransform;
 
 /**
  * The base class for all sensors that attach to a RobotObject.
+ * NOTE: Sensors do not detect other sensors.
  *
  * Created by xenos on 8/22/14.
  * @param <T> the type that this Sensor returns from the {@link #sense()} method
@@ -193,6 +194,10 @@ public abstract class Sensor<T> implements Collideable {
 
     @Override
     public void handleBeginContact(Contact contact, Fixture otherFixture) {
+        if (otherFixture.getUserData() instanceof Fixture) {
+            return;
+        }
+
         if (!sensedFixtures.contains(otherFixture)) {
             sensedFixtures.add(otherFixture);
         }
@@ -200,12 +205,16 @@ public abstract class Sensor<T> implements Collideable {
 
     @Override
     public void handleEndContact(Contact contact, Fixture otherFixture) {
+        if (otherFixture.getUserData() instanceof Sensor) {
+            return;
+        }
+
         sensedFixtures.remove(otherFixture);
     }
 
     @Override
-    public boolean isRelevantObject(Fixture fixture) {
-        return !(fixture.getUserData() instanceof Sensor);
+    public boolean isRelevantObject(PhysicalObject object) {
+        return true;
     }
 
     protected static PhysicalObject getFixtureObject(Fixture fixture) {

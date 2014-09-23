@@ -5,13 +5,11 @@ import java.util.List;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.phenotype.heuristics.CollisionAvoidanceHeuristic;
 import za.redbridge.simulator.phenotype.heuristics.HeuristicSchedule;
 import za.redbridge.simulator.phenotype.heuristics.PickupHeuristic;
 import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
-import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Created by shsu on 2014/08/27.
@@ -61,7 +59,7 @@ public class HeuristicPhenotype {
                 targetAreaPlacement);
     }
 
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
         Double2D wheelDrives = schedule.step(list);
 
         if (wheelDrives == null) {
