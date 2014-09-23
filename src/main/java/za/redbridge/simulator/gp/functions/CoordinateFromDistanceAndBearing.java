@@ -23,7 +23,7 @@ public class CoordinateFromDistanceAndBearing extends Node {
         return "COORDINATEFROMDISTANCEANDBEARING";
     }
 
-    public Object evaluate(){
+    public RelativeCoordinate evaluate(){
         Object distance = getChild(0).evaluate();
         Object bearing = getChild(1).evaluate();
         if(TypeUtils.isNumericType(distance.getClass()) && bearing.getClass() == Bearing.class){

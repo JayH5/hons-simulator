@@ -24,7 +24,7 @@ public class BearingFromCoordinate extends Node {
         return "BEARINGFROMCOORDINATE";
     }
 
-    public Object evaluate(){
+    public Bearing evaluate(){
         Object coordinate = getChild(0).evaluate();
         if(coordinate.getClass() == RelativeCoordinate.class){
             RelativeCoordinate c = (RelativeCoordinate) coordinate;

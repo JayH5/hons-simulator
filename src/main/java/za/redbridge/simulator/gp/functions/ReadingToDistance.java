@@ -26,7 +26,7 @@ public class ReadingToDistance extends Node {
         return "READINGTODISTANCE";
     }
 
-    public Object evaluate(){
+    public Float evaluate(){
         Object reading = getChild(0).evaluate();
         if(reading.getClass() == ProximityReading.class) {
             float c = ((ProximityReading)reading).getValue();
@@ -42,5 +42,26 @@ public class ReadingToDistance extends Node {
         } else{
             return null;
         }
+    }
+
+    @Override
+    public ReadingToDistance clone(){
+        final ReadingToDistance clone = (ReadingToDistance) super.clone();
+        clone.range = range;
+        return clone;
+    }
+
+    @Override
+    public ReadingToDistance newInstance() {
+        return clone();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof ReadingToDistance)) {
+            return false;
+        }
+
+        return ((ReadingToDistance) obj).range == range;
     }
 }

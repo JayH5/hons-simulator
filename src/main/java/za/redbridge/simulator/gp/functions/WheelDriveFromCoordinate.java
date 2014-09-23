@@ -24,7 +24,7 @@ public class WheelDriveFromCoordinate extends Node {
         return "WHEELDRIVEFROMCOORD";
     }
 
-    public Object evaluate(){
+    public WheelDrive evaluate(){
         Object coord = getChild(0).evaluate();
         if(coord.getClass() == RelativeCoordinate.class){
             return new WheelDrive((RelativeCoordinate) coord);

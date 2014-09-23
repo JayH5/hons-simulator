@@ -24,7 +24,7 @@ public class RotateCoordinate extends Node {
         return "ROTATECOORDINATE";
     }
 
-    public Object evaluate(){
+    public RelativeCoordinate evaluate(){
         Object coordinate = getChild(0).evaluate();
         Object bearing = getChild(1).evaluate();
         if(coordinate.getClass() == RelativeCoordinate.class && bearing.getClass() == Bearing.class){

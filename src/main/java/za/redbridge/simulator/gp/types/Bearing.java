@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 /**
  * Created by xenos on 9/11/14.
  */
-public class Bearing{
+public class Bearing implements Cloneable{
 
     protected float value;
 
@@ -33,5 +33,9 @@ public class Bearing{
     public String toString(){
         DecimalFormat df = new DecimalFormat("#.00");
         return "B" + df.format(value);
+    }
+
+    public Bearing clone(){
+        return new Bearing(value);
     }
 }

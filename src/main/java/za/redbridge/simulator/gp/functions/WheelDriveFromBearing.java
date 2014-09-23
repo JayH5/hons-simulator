@@ -23,7 +23,7 @@ public class WheelDriveFromBearing extends Node {
         return "WHEELDRIVEFROMBEARING";
     }
 
-    public Object evaluate(){
+    public WheelDrive evaluate(){
         Object bearing = getChild(0).evaluate();
         if(bearing.getClass() == Bearing.class){
             return new WheelDrive((Bearing) bearing);

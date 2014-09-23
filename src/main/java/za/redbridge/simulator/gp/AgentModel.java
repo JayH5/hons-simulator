@@ -21,7 +21,9 @@ import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
@@ -88,6 +90,10 @@ public class AgentModel extends GPModel {
        syntax.add(new CoordinateFromDistanceAndBearing());
        syntax.add(new RotateCoordinate());
        syntax.add(new BearingFromCoordinate());
+       syntax.add(new RandomBearing());
+       Map<Node,Map<String,Object>> state = new HashMap<>();
+       syntax.add(new LoadBearing(state));
+       syntax.add(new SaveBearing(state));
 
        syntax.addAll(inputs);
        setSyntax(syntax);

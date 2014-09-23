@@ -21,7 +21,7 @@ public class WheelDriveFromFloats extends Node {
         return "WHEELDRIVEFROMFLOATS";
     }
 
-    public Object evaluate(){
+    public WheelDrive evaluate(){
         Object x = getChild(0).evaluate();
         Object y = getChild(1).evaluate();
         if(TypeUtils.isNumericType(x.getClass()) && TypeUtils.isNumericType(y.getClass())){
