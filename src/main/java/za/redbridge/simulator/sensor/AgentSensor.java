@@ -78,6 +78,10 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
         return orientation;
     }
 
+    public float getBearing() {
+        return bearing;
+    }
+
     @Override
     protected Transform createTransform(RobotObject robot) {
         float robotRadius = robot.getRadius();

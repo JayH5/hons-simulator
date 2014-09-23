@@ -67,7 +67,7 @@ public class AgentModel extends GPModel {
        */
 
        for(AgentSensor s : sensors){
-           syntax.add(new Literal(new Bearing(s.getOrientation())));
+           syntax.add(new Literal(new Bearing(s.getBearing())));
        }
        syntax.add(new ReadingToDistance(0.4f)); //sensor range
 
