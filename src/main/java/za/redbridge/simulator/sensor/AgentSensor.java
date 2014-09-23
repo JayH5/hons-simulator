@@ -35,7 +35,7 @@ import static za.redbridge.simulator.Utils.isNearlyZero;
 /**
  * Describes a sensor implementation. The actual sensor is implemented in the simulator.
  */
-public abstract class AgentSensor extends Sensor<SensorReading> {
+public abstract class AgentSensor extends Sensor<List<Double>> {
 
     protected final float bearing;
     protected final float orientation;
@@ -46,8 +46,11 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     protected Map<String, Object> additionalConfigs = null;
 
-    public AgentSensor() {
+    private final List<SensedObject> sensedObjects = new ArrayList<>();
+    private final List<Double> readings = new ArrayList<>();
+    private final List<Double> unmodifiableReadings = Collections.unmodifiableList(readings);
 
+    public AgentSensor() {
         bearing = 0.0f;
         orientation = 0.0f;
         range = 10.0f;
@@ -110,18 +113,38 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     }
 
     @Override
-    protected SensorReading provideReading(List<Fixture> fixtures) {
-        List<SensedObject> objects = new ArrayList<>(fixtures.size());
+    protected List<Double> provideReading(List<Fixture> fixtures) {
+        final List<SensedObject> sensedObjects = this.sensedObjects;
+        sensedObjects.clear();
+
+        // Sense each fixture and filter out those that can't be sensed
         for (Fixture fixture : fixtures) {
             SensedObject object = senseFixture(fixture);
             if (object != null) {
-                objects.add(object);
+                sensedObjects.add(object);
             }
         }
 
-        // Sort objects with closest first
-        Collections.sort(objects);
-        return provideObjectReading(objects);
+        // Sort objects (closest first)
+        Collections.sort(sensedObjects);
+
+        // Clear the previous readings
+        final List<Double> readings = this.readings;
+        readings.clear();
+
+        // Convert to an actual reading in a subclass
+        provideObjectReading(sensedObjects, readings);
+
+        // Return an unmodifiable view of the readings produced
+        return unmodifiableReadings;
+    }
+
+    /**
+     * Get the previous readings recorded by this sensor.
+     * @return An unmodifiable list of the previous readings of this sensor
+     */
+    public List<Double> getPreviousReadings() {
+        return unmodifiableReadings;
     }
 
     /**
@@ -354,9 +377,9 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
     /**
      * Decide whether to filter out a given PhysicalObject instance. Since the object may still
      * enter/leave the field of the sensor, we can't filter it out in
-     * {@link #isRelevantObject(Fixture)} because we still want to receive updates of the object
-     * leaving. We might want to filter out the object here if its state changes and it becomes
-     * irrelevant while we are observing it.
+     * {@link #isRelevantObject(PhysicalObject)} because we still want to receive updates of the
+     * object leaving. We might want to filter out the object here if its state changes and it
+     * becomes irrelevant while we are observing it.
      * @param object an object in the fixture list
      * @return true if the object should be ignored
      */
@@ -366,11 +389,12 @@ public abstract class AgentSensor extends Sensor<SensorReading> {
 
     /**
      * Converts a list of objects that have been determined to fall within the sensor's range into
-     * an actual {@link SensorReading} instance.
+     * a list of readings in the range [0.0, 1.0].
      * @param objects the objects in the sensor's field, *sorted by distance*
-     * @return the reading of the objects produced by the sensor
+     * @param output the output vector for this sensor. Write the sensor output to this list (which
+     *               should be empty).
      */
-    protected abstract SensorReading provideObjectReading(List<SensedObject> objects);
+    protected abstract void provideObjectReading(List<SensedObject> objects, List<Double> output);
 
     public abstract void readAdditionalConfigs(Map<String, Object> map) throws ParseException;
 

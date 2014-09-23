@@ -10,7 +10,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
-import za.redbridge.simulator.sensor.SensorReading;
+
 
 import static za.redbridge.simulator.Utils.jitter;
 
@@ -33,7 +33,7 @@ public class PickupPositioningHeuristic extends Heuristic {
         setPriority(2);
     }
 
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
         if (attachedRobot.isBoundToResource()) { // Shouldn't happen
             removeSelfFromSchedule();
             return null;

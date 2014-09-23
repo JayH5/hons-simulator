@@ -7,7 +7,6 @@ import java.util.List;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Created by racter on 2014/09/01.
@@ -35,7 +34,7 @@ public abstract class Heuristic implements Comparable<Heuristic> {
         schedule.removeHeuristic(this);
     }
 
-    abstract Double2D step(List<SensorReading> list);
+    abstract Double2D step(List<List<Double>> list);
 
     /**
      * Paint used to change colour of robot as each heuristic takes over.

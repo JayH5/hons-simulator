@@ -144,8 +144,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     }
 
     @Override
-    public boolean isRelevantObject(Fixture otherFixture) {
-        return otherFixture.getBody().getUserData() instanceof ResourceObject;
+    public boolean isRelevantObject(PhysicalObject object) {
+        return object instanceof ResourceObject;
     }
 
 }

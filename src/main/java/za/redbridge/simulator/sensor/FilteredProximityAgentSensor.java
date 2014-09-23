@@ -1,15 +1,18 @@
 package za.redbridge.simulator.sensor;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 public class FilteredProximityAgentSensor extends AgentSensor {
 
-    protected final List<Double> readings = new ArrayList<>(1);
-    protected final Set<Class> whitelist = new HashSet<>();
-    protected static final int readingSize = 1;
+    private Set<Class> whitelist = new HashSet<>();
+    private static final int readingSize = 1;
 
     public FilteredProximityAgentSensor() {
         super();
@@ -29,7 +32,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    protected SensorReading provideObjectReading(List<SensedObject> objects) {
+    protected void provideObjectReading(List<SensedObject> objects, List<Double> output) {
         for(SensedObject o : objects){
             if(!whitelist.contains(o.getObject().getClass())){
                 objects.remove(o);
@@ -40,9 +43,7 @@ public class FilteredProximityAgentSensor extends AgentSensor {
             reading = 1 - Math.min(objects.get(0).getDistance() / range, 1.0);
         }
 
-        readings.clear();
-        readings.add(reading);
-        return new SensorReading(readings);
+        output.add(reading);
     }
 
     protected double readingCurve(double fraction) {
@@ -97,7 +98,8 @@ public class FilteredProximityAgentSensor extends AgentSensor {
     @Override
     public FilteredProximityAgentSensor clone() {
 
-        FilteredProximityAgentSensor cloned = new FilteredProximityAgentSensor(bearing, orientation, range, fieldOfView);
+        FilteredProximityAgentSensor cloned =
+                new FilteredProximityAgentSensor(bearing, orientation, range, fieldOfView);
 
         try {
             cloned.readAdditionalConfigs(additionalConfigs);

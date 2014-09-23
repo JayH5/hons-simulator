@@ -9,7 +9,6 @@ import sim.util.Double2D;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
-import za.redbridge.simulator.sensor.SensorReading;
 
 
 import static za.redbridge.simulator.Utils.jitter;
@@ -32,7 +31,7 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
     }
 
     @Override
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
         Optional<ClosestObjectSensor.ClosestObject> collision = collisionSensor.sense();
 
         Double2D wheelDrives = collision.map(o -> o.getVectorToObject())

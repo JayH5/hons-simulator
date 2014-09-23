@@ -3,7 +3,6 @@ package za.redbridge.simulator.sensor;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
-import org.jbox2d.dynamics.Fixture;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
@@ -49,7 +48,7 @@ public class PickupSensor extends ClosestObjectSensor {
     }
 
     @Override
-    public boolean isRelevantObject(Fixture otherFixture) {
-        return otherFixture.getBody().getUserData() instanceof ResourceObject;
+    public boolean isRelevantObject(PhysicalObject object) {
+        return object instanceof ResourceObject;
     }
 }

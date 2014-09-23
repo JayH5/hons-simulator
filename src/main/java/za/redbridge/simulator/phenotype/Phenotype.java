@@ -6,7 +6,6 @@ import java.util.Map;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Interface to the agent.
@@ -24,7 +23,7 @@ public interface Phenotype extends Cloneable {
      * @param list the current environment state
      * @return The vector for driving the actuators
      */
-    Double2D step(List<SensorReading> list);
+    Double2D step(List<List<Double>> list);
 
     Phenotype clone();
 
@@ -37,7 +36,7 @@ public interface Phenotype extends Cloneable {
         private final Double2D one = new Double2D(1.0, 1.0);
 
         @Override
-        public Double2D step(List<SensorReading> l) {
+        public Double2D step(List<List<Double>> l) {
             return one;
         }
 

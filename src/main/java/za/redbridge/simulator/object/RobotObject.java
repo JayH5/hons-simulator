@@ -23,7 +23,6 @@ import za.redbridge.simulator.portrayal.Drawable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.Sensor;
-import za.redbridge.simulator.sensor.SensorReading;
 
 /**
  * Object that represents a finished agent in the environment, including controller and all physical attributes.
@@ -126,7 +125,7 @@ public class RobotObject extends PhysicalObject {
         super.step(sim);
 
         List<AgentSensor> sensors = phenotype.getSensors();
-        List<SensorReading> readings = new ArrayList<>(sensors.size());
+        List<List<Double>> readings = new ArrayList<>(sensors.size());
         sensors.forEach(s -> readings.add(s.sense()));
 
         Double2D wheelDrives = heuristicPhenotype.step(readings);
