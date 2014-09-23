@@ -63,7 +63,6 @@ public class MasterExperimentController {
                 int i = 0;
                 for (MorphologyConfig complement : sensitivityComplements) {
 
-                    ComplementFactory.printArray(complement.getSensitivities());
                     complementThreads[i] = new Thread(new TrainController(experimentConfig,
                             simulationConfig, complement, morphologyScores, threadNNSubruns));
 

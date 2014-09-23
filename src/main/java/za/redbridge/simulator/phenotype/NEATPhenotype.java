@@ -53,7 +53,7 @@ public class NEATPhenotype implements Phenotype {
         BasicNeuralData inputData = new BasicNeuralData(inputs);
         MLData output = controller.compute(inputData);
 
-        return new Double2D(output.getData(0),output.getData(1));
+        return new Double2D(output.getData(0)*2-1,output.getData(1)*2-1);
     }
 
     public NEATPhenotype clone() {

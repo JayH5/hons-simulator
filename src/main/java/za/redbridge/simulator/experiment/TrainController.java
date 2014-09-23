@@ -1,6 +1,7 @@
 package za.redbridge.simulator.experiment;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.encog.engine.network.activation.ActivationSteepenedSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
@@ -65,7 +66,7 @@ public class TrainController implements Runnable{
         NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
 
-        pop.setNEATActivationFunction(new ActivationTANH());
+        //pop.setNEATActivationFunction(new AmplifiedSigmoid());
         pop.reset();
 
         CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
@@ -76,6 +77,9 @@ public class TrainController implements Runnable{
         int epochs = 1;
 
         do {
+
+            long start = System.currentTimeMillis();
+
             System.out.println("Controller Trainer Epoch #" + train.getIteration());
             train.iteration();
             epochs++;
@@ -89,6 +93,10 @@ public class TrainController implements Runnable{
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             scoreCache.clear();
+
+            long duration = (System.currentTimeMillis() - start)/1000;
+
+            System.out.println("Epoch took " + duration + " seconds.");
 
         } while(epochs <= experimentConfig.getMaxEpochs());
         train.finishTraining();
