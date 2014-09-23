@@ -21,7 +21,6 @@ import java.util.Map;
 //Object types are analogous to colours
 public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
 
-    protected final List<Double> readings = new ArrayList<>(1);
     protected static final int readingSize = 1;
     protected double sensitivity;
 
@@ -99,7 +98,7 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    protected SensorReading provideObjectReading(List<SensedObject> objects) {
+    protected void provideObjectReading(List<SensedObject> objects, List<Double> output) {
 
         double reading = 0.0;
 
@@ -110,16 +109,13 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
             }
         }
 
-        readings.clear();
         //threshold
         if (reading >= (1-sensitivity)) {
-            readings.add(reading);
+            output.add(reading);
         }
         else {
-            readings.add(0.0);
+            output.add(0.0);
         }
-
-        return new SensorReading(readings);
     }
 
     @Override

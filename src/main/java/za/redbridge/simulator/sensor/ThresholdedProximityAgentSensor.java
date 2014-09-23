@@ -12,7 +12,6 @@ import java.util.Map;
  */
 public class ThresholdedProximityAgentSensor extends ProximityAgentSensor {
 
-    private final List<Double> readings = new ArrayList<>(1);
     private static final int readingSize = 1;
     private double sensitivity;
 
@@ -23,22 +22,18 @@ public class ThresholdedProximityAgentSensor extends ProximityAgentSensor {
     }
 
     @Override
-    protected SensorReading provideObjectReading(List<SensedObject> objects) {
+    protected void provideObjectReading(List<SensedObject> objects, List<Double> output) {
         double reading = 0.0;
         if (!objects.isEmpty()) {
             reading = 1 - Math.min(objects.get(0).getDistance() / range, 1.0);
         }
 
-        readings.clear();
-
         if (reading >= (1 - sensitivity)) {
-            readings.add(reading);
+           output.add(reading);
         }
         else {
-            readings.add(0.0);
+            output.add(0.0);
         }
-
-        return new SensorReading(readings);
     }
 
     @Override

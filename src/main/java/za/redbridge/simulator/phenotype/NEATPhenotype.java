@@ -1,15 +1,10 @@
 package za.redbridge.simulator.phenotype;
 
 import org.encog.ml.data.MLData;
-import org.encog.neural.data.NeuralDataSet;
 import org.encog.neural.data.basic.BasicNeuralData;
-import org.encog.neural.data.basic.BasicNeuralDataSet;
 import org.encog.neural.neat.NEATNetwork;
-import org.encog.util.simple.EncogUtility;
 import sim.util.Double2D;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.SensorReading;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +32,13 @@ public class NEATPhenotype implements Phenotype {
     }
 
     @Override
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
 
         double[] inputs = new double[totalInputCount];
         int counter = 0;
 
-        for (SensorReading reading: list) {
-            for (Double value: reading.getValues()) {
+        for (List<Double> reading: list) {
+            for (Double value: reading) {
 
                 inputs[counter] = value;
                 counter++;
