@@ -35,6 +35,10 @@ public class STRTransform {
         this.transform.set(transform);
     }
 
+    public Transform getTransform() {
+        return transform;
+    }
+
     public void setScale(float sx, float sy) {
         this.scaleX = sx;
         this.scaleY = sy;

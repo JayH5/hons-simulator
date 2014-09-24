@@ -16,17 +16,11 @@ import za.redbridge.simulator.portrayal.Portrayal;
  */
 public class CollisionSensor extends ClosestObjectSensor {
 
-    private static final float DEFAULT_RANGE = 0.15f + 0.4f; //make sure this is > robot radius
-
     private final float range;
 
     public CollisionSensor(float range) {
         this.range = range;
         //setDrawEnabled(true);
-    }
-
-    public CollisionSensor() {
-        this(DEFAULT_RANGE);
     }
 
     @Override
