@@ -9,7 +9,6 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
-import za.redbridge.simulator.sensor.Sensor;
 
 
 import static za.redbridge.simulator.Utils.wrapAngle;
@@ -25,9 +24,9 @@ public class PickupHeuristic extends Heuristic {
     protected final PickupSensor pickupSensor;
     protected final SimConfig.Direction targetAreaDirection;
 
-    public PickupHeuristic(PickupSensor pickupSensor, RobotObject robot,
-            SimConfig.Direction targetAreaDirection) {
-        super(robot);
+    public PickupHeuristic(HeuristicSchedule schedule, PickupSensor pickupSensor,
+            RobotObject attachedRobot, SimConfig.Direction targetAreaDirection) {
+        super(schedule, attachedRobot);
         this.pickupSensor = pickupSensor;
         this.targetAreaDirection = targetAreaDirection;
 
@@ -37,7 +36,7 @@ public class PickupHeuristic extends Heuristic {
     @Override
     public Double2D step(List<List<Double>> list) {
         // Go for the target area if we've managed to attach to a resource
-        if (robot.isBoundToResource()) {
+        if (attachedRobot.isBoundToResource()) {
             return wheelDriveForTargetAngle(targetAreaAngle());
         }
 
@@ -49,12 +48,13 @@ public class PickupHeuristic extends Heuristic {
         }
 
         // Try pick it up
-        if (resource.tryPickup(robot)) {
+        if (resource.tryPickup(attachedRobot)) {
             // Success! Head for the target zone
             return wheelDriveForTargetAngle(targetAreaAngle());
         } else {
             // Couldn't pick it up, add a heuristic to navigate to the resource
-            getSchedule().addHeuristic(new PickupPositioningHeuristic(pickupSensor, robot));
+            getSchedule().addHeuristic(
+                    new PickupPositioningHeuristic(getSchedule(), pickupSensor, attachedRobot));
         }
 
         return null;
@@ -65,14 +65,9 @@ public class PickupHeuristic extends Heuristic {
         return PAINT;
     }
 
-    @Override
-    public Sensor getSensor() {
-        return pickupSensor;
-    }
-
     //target area bearing from robot angle
     protected double targetAreaAngle() {
-        double robotAngle = robot.getBody().getAngle();
+        double robotAngle = attachedRobot.getBody().getAngle();
         double targetAreaPosition = -1;
 
         if (targetAreaDirection == SimConfig.Direction.NORTH) {

@@ -9,7 +9,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
-import za.redbridge.simulator.sensor.Sensor;
+
 
 import static za.redbridge.simulator.Utils.jitter;
 
@@ -22,8 +22,9 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
 
     protected final CollisionSensor collisionSensor;
 
-    public CollisionAvoidanceHeuristic(CollisionSensor collisionSensor, RobotObject robot) {
-        super(robot);
+    public CollisionAvoidanceHeuristic(HeuristicSchedule schedule, CollisionSensor collisionSensor,
+            RobotObject attachedRobot) {
+        super(schedule, attachedRobot);
         this.collisionSensor = collisionSensor;
 
         setPriority(4);
@@ -33,19 +34,16 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
     public Double2D step(List<List<Double>> list) {
         Optional<ClosestObjectSensor.ClosestObject> collision = collisionSensor.sense();
 
-        return collision.map(o -> o.getVectorToObject())
+        Double2D wheelDrives = collision.map(o -> o.getVectorToObject())
                 .map(o -> wheelDriveForTargetPosition(jitter(o.negate(), 0.2f)))
                 .orElse(null);
+
+        return wheelDrives;
     }
 
     @Override
     Paint getPaint() {
         return PAINT;
-    }
-
-    @Override
-    public Sensor getSensor() {
-        return collisionSensor;
     }
 
 }

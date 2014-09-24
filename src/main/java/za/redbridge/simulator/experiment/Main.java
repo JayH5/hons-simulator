@@ -1,11 +1,21 @@
 package za.redbridge.simulator.experiment;
 
+import net.neoremind.sshxcute.core.ConnBean;
+import net.neoremind.sshxcute.core.SSHExec;
+import net.neoremind.sshxcute.exception.TaskExecFailException;
+import net.neoremind.sshxcute.task.CustomTask;
+import net.neoremind.sshxcute.task.impl.ExecCommand;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.ComplementFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 //example entry point into simulator
 /**
@@ -30,6 +40,9 @@ public class Main {
     @Option(name = "--controller", aliases = "-nn", usage = "The neural network file name for visualisation")
     private String nnDump;
 
+    @Option(name = "--multihost", aliases = "-p", usage = "Test complement list on multiple hosts provided in text file")
+    private String hosts;
+
     @Option(name = "--evolve-complements", aliases = "-e", usage = "Evolve sensor sensitivity complements using a Genetic Algorithm")
     private boolean evolveComplements = false;
 
@@ -49,21 +62,30 @@ public class Main {
         ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
         SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
 
-        //TODO: work with multiple morphology configs (specifically, filter sensitivities)
-        //if we need to show a visualisation
-        if (options.showVisuals()) {
+        if (options.hosts != null) {
+            //TODO: work with multiple morphology configs (specifically, filter sensitivities)
+            //if we need to show a visualisation
+            if (options.showVisuals()) {
 
-            SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration,options.getNnDump(), options.getMorphologyDump());
-            simulationVisual.run();
+                SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration, options.nnDump, options.morphologyDump);
+                simulationVisual.run();
 
-        } else {
+            } else {
 
-            MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
+                MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
 
-            MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
-                    morphologyConfig, options.evolveComplements, true, true);
+                MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
+                        morphologyConfig, options.evolveComplements, true, true);
 
-            masterExperimentController.start();
+                masterExperimentController.start();
+
+            }
+        }
+        else {
+
+
+
+
 
         }
     }

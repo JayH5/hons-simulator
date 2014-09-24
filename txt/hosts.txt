@@ -1,0 +1,6 @@
+model name : Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz 137.158.60.195
+model name : Pentium(R) Dual-Core CPU E5200 @ 2.50GHz 137.158.60.204
+model name : Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz 137.158.60.205
+model name : Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz 137.158.60.214
+model name : Intel(R) Core(TM) i7-3820 CPU @ 3.60GHz 137.158.60.220
+model name : Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz 137.158.60.222

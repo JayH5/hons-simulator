@@ -27,8 +27,6 @@ public abstract class Portrayal implements Drawable {
     private STRTransform effectiveLocalTransform;
     private boolean hasLocalTransform = false;
 
-    private boolean enabled = true;
-
     public Portrayal() {
         this(Color.BLACK, true);
     }
@@ -54,14 +52,6 @@ public abstract class Portrayal implements Drawable {
         this.filled = filled;
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
     @Override
     public void setTransform(Transform transform) {
         this.transform.setTransform(transform);
@@ -74,10 +64,6 @@ public abstract class Portrayal implements Drawable {
 
     @Override
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
-        if (!enabled) {
-            return;
-        }
-
         Graphics2D g = (Graphics2D) graphics.create(); // glPushMatrix()
 
         g.setPaint(paint);
@@ -134,9 +120,6 @@ public abstract class Portrayal implements Drawable {
 
     public void setChildDrawable(Drawable drawable) {
         this.childDrawable = drawable;
-        if (childDrawable != null) {
-            childDrawable.setTransform(transform.getTransform());
-        }
     }
 
     public void setLocalTransform(STRTransform localTransform) {

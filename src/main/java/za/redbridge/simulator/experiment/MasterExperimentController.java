@@ -7,6 +7,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -40,15 +41,72 @@ public class MasterExperimentController {
         this.threadNNSubruns = threadNNSubruns;
     }
 
+    public void evolveComplements() {
+
+        TrainComplement complementGA = new TrainComplement(experimentConfig, simulationConfig,
+                templateMorphology, morphologyScores);
+
+        complementGA.run();
+    }
+
+    public void testComplements(String outputDir, Set<MorphologyConfig> sensitivityComplements) {
+
+        if (threadComplementTraining) {
+            Thread[] complementThreads = new Thread[sensitivityComplements.size()];
+
+            int i = 0;
+            for (MorphologyConfig complement : sensitivityComplements) {
+
+                complementThreads[i] = new Thread(new TrainController(experimentConfig,
+                        simulationConfig, complement, morphologyScores, threadNNSubruns));
+
+                complementThreads[i].run();
+                i++;
+            }
+
+            for (int j = 0; j < complementThreads.length; j++) {
+
+                try {
+                    complementThreads[j].join();
+                } catch (InterruptedException iex) {
+
+                    System.out.println("Thread interrupted.");
+                    iex.printStackTrace();
+                }
+            }
+        }
+        else {
+
+            TrainController[] complementTrainers = new TrainController[sensitivityComplements.size()];
+
+            int i = 0;
+            for (MorphologyConfig complement : sensitivityComplements) {
+
+                complementTrainers[i] = new TrainController(experimentConfig,
+                        simulationConfig, complement, morphologyScores, threadNNSubruns);
+
+                complementTrainers[i].run();
+                i++;
+            }
+
+    }
+
+    Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
+    NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
+    MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
+
+    IOUtils.writeNetwork(bestNetwork, outputDir + "bestNetwork.tmp");
+    bestMorphology.dumpMorphology(outputDir + "bestMorphology.yml");
+
+    }
+
+
+
     public void start() {
 
         //Evolve complements instead of generating them
         if (evolveComplements) {
-
-            TrainComplement complementGA = new TrainComplement(experimentConfig, simulationConfig,
-                    templateMorphology, morphologyScores);
-
-            complementGA.run();
+            evolveComplements();
         }
         else {
 
@@ -56,53 +114,7 @@ public class MasterExperimentController {
                     experimentConfig.getComplementGeneratorResolution());
 
             final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
-
-            if (threadComplementTraining) {
-                Thread[] complementThreads = new Thread[sensitivityComplements.size()];
-
-                int i = 0;
-                for (MorphologyConfig complement : sensitivityComplements) {
-
-                    complementThreads[i] = new Thread(new TrainController(experimentConfig,
-                            simulationConfig, complement, morphologyScores, threadNNSubruns));
-
-                    complementThreads[i].run();
-                    i++;
-                }
-
-                for (int j = 0; j < complementThreads.length; j++) {
-
-                    try {
-                        complementThreads[j].join();
-                    } catch (InterruptedException iex) {
-
-                        System.out.println("Thread interrupted.");
-                        iex.printStackTrace();
-                    }
-                }
-            }
-            else {
-
-                TrainController[] complementTrainers = new TrainController[sensitivityComplements.size()];
-
-                int i = 0;
-                for (MorphologyConfig complement : sensitivityComplements) {
-
-                    complementTrainers[i] = new TrainController(experimentConfig,
-                            simulationConfig, complement, morphologyScores, threadNNSubruns);
-
-                    complementTrainers[i].run();
-                    i++;
-                }
-            }
-
+            testComplements("results",sensitivityComplements);
         }
-
-        Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
-        NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
-        MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
-
-        IOUtils.writeNetwork(bestNetwork, "bestNetwork.tmp");
-        bestMorphology.dumpMorphology("bestMorphology.yml");
     }
 }

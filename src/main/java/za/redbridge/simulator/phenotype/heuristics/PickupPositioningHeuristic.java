@@ -10,7 +10,6 @@ import sim.util.Double2D;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.PickupSensor;
-import za.redbridge.simulator.sensor.Sensor;
 
 
 import static za.redbridge.simulator.Utils.jitter;
@@ -26,16 +25,16 @@ public class PickupPositioningHeuristic extends Heuristic {
 
     private Vec2 targetPoint = null;
 
-    public PickupPositioningHeuristic(PickupSensor pickupSensor, RobotObject robot) {
-        super(robot);
+    public PickupPositioningHeuristic(HeuristicSchedule schedule, PickupSensor pickupSensor,
+            RobotObject attachedRobot) {
+        super(schedule, attachedRobot);
         this.pickupSensor = pickupSensor;
 
         setPriority(2);
     }
 
-    @Override
     public Double2D step(List<List<Double>> list) {
-        if (robot.isBoundToResource()) { // Shouldn't happen
+        if (attachedRobot.isBoundToResource()) { // Shouldn't happen
             removeSelfFromSchedule();
             return null;
         }
@@ -50,7 +49,7 @@ public class PickupPositioningHeuristic extends Heuristic {
         }
 
         // Try pick up the resource
-        if (resource.tryPickup(robot)) {
+        if (resource.tryPickup(attachedRobot)) {
             removeSelfFromSchedule();
             return null;
         }
@@ -59,7 +58,7 @@ public class PickupPositioningHeuristic extends Heuristic {
         jitter(newPosition, 0.1f);
 
         if (newPosition != null) {
-            return wheelDriveForTargetPosition(robot.getBody().getLocalPoint(newPosition));
+            return wheelDriveForTargetPosition(attachedRobot.getBody().getLocalPoint(newPosition));
         }
         return null;
     }
@@ -69,14 +68,9 @@ public class PickupPositioningHeuristic extends Heuristic {
         return PAINT;
     }
 
-    @Override
-    public Sensor getSensor() {
-        return pickupSensor;
-    }
-
     //next step (out: world)
     private Vec2 nextStep(ResourceObject resource) {
-        Vec2 robotPosition = robot.getBody().getPosition();
+        Vec2 robotPosition = attachedRobot.getBody().getPosition();
 
         ResourceObject.Side stickySide = resource.getStickySide();
         ResourceObject.Side robotSide = resource.getSideClosestToPoint(robotPosition);
@@ -126,7 +120,7 @@ public class PickupPositioningHeuristic extends Heuristic {
             }
 
             // "Pad" the corner by radius x radius
-            float radius = robot.getRadius();
+            float radius = attachedRobot.getRadius();
             corner.addLocal(Math.copySign(radius, corner.x), Math.copySign(radius, corner.y));
 
             // Transform relative to resource
@@ -143,7 +137,7 @@ public class PickupPositioningHeuristic extends Heuristic {
             return targetPoint;
         }
 
-        Vec2 position = robot.getBody().getPosition();
+        Vec2 position = attachedRobot.getBody().getPosition();
         // Get the anchor point and side normal
         ResourceObject.AnchorPoint anchorPoint = resource.getClosestAnchorPoint(position);
         if (anchorPoint == null) { // TODO: Shouldn't happen but does on occasion
@@ -154,7 +148,7 @@ public class PickupPositioningHeuristic extends Heuristic {
 
         // Get a distance away from the anchor point
         targetPoint =
-                normal.mulLocal(robot.getRadius()).addLocal(anchorPoint.getPosition());
+                normal.mulLocal(attachedRobot.getRadius()).addLocal(anchorPoint.getPosition());
         return targetPoint;
     }
 

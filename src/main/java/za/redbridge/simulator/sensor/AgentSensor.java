@@ -73,6 +73,9 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
         this.fieldOfView = fieldOfView;
 
         fovGradient = (float) Math.tan(fieldOfView / 2);
+
+        // Draw by default
+        setDrawEnabled(true);
     }
 
     @Override

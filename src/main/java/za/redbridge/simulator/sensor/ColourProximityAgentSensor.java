@@ -13,11 +13,7 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 public class ColourProximityAgentSensor extends AgentSensor {
 
-<<<<<<< HEAD
-    private static final int readingSize = 1;
-=======
     private static final int readingSize = 3;
->>>>>>> faf74ef03895fdeab7826edd1d8c0a9735fcf613
 
     public ColourProximityAgentSensor(float bearing) {
         this(bearing, 0.0f, 30.0f, 0.1f);

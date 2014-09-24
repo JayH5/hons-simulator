@@ -20,6 +20,7 @@ public class PickupSensor extends ClosestObjectSensor {
 
     public PickupSensor(float radius) {
         this.radius = radius;
+        setDrawEnabled(true);
     }
 
     @Override

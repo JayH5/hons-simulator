@@ -8,10 +8,12 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
+import sim.portrayal.DrawInfo2D;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.physics.Collideable;
@@ -27,6 +29,8 @@ import za.redbridge.simulator.portrayal.STRTransform;
  */
 public abstract class Sensor<T> implements Collideable {
     protected static final Paint DEFAULT_PAINT = new Color(100, 100, 100, 100);
+
+    private boolean drawEnabled = false;
 
     private Portrayal portrayal;
     private Fixture sensorFixture;
@@ -45,11 +49,6 @@ public abstract class Sensor<T> implements Collideable {
     public final T sense() {
         if (sensorFixture == null) {
             throw new IllegalStateException("Sensor not attached, cannot sense");
-        }
-
-        // Update the paint of the portrayal
-        if (portrayal != null) {
-            portrayal.setPaint(getPaint());
         }
 
         // Invalidate the cached transform
@@ -151,6 +150,13 @@ public abstract class Sensor<T> implements Collideable {
      */
     protected abstract Portrayal createPortrayal();
 
+    public final void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+        if (drawEnabled && portrayal != null) {
+            portrayal.setPaint(getPaint());
+            portrayal.draw(object, graphics, info);
+        }
+    }
+
     /** Get the paint for drawing this sensor. */
     protected Paint getPaint() {
         return DEFAULT_PAINT;
@@ -174,6 +180,16 @@ public abstract class Sensor<T> implements Collideable {
 
     public final Portrayal getPortrayal() {
         return portrayal;
+    }
+
+    /** Check whether drawing of this sensor is enabled. */
+    public boolean isDrawEnabled() {
+        return drawEnabled;
+    }
+
+    /** Set whether this sensor should be drawn. */
+    public void setDrawEnabled(boolean drawEnabled) {
+        this.drawEnabled = drawEnabled;
     }
 
     @Override

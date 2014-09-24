@@ -22,6 +22,7 @@ import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Drawable;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
+import za.redbridge.simulator.sensor.Sensor;
 
 /**
  * Object that represents a finished agent in the environment, including controller and all physical attributes.
@@ -60,12 +61,11 @@ public class RobotObject extends PhysicalObject {
     private final Paint defaultPaint;
 
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
-            Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
-        super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
+                        Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
 
+        super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
         this.phenotype = phenotype;
         this.defaultPaint = paint;
-
         heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPlacement);
         initSensors();
 
@@ -83,24 +83,20 @@ public class RobotObject extends PhysicalObject {
         getPortrayal().setChildDrawable(new Drawable() {
             @Override
             public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
-                heuristicPhenotype.draw(object, graphics, info);
-                for (AgentSensor sensor : phenotype.getSensors()) {
-                    Portrayal portrayal = sensor.getPortrayal();
-                    if (portrayal != null) {
-                        portrayal.draw(object, graphics, info);
-                    }
+                for (Sensor sensor : phenotype.getSensors()) {
+                    sensor.draw(object, graphics, info);
                 }
+                heuristicPhenotype.getCollisionSensor().draw(object, graphics, info);
+                heuristicPhenotype.getPickupSensor().draw(object, graphics, info);
             }
 
             @Override
             public void setTransform(Transform transform) {
-                heuristicPhenotype.setTransform(transform);
-                for (AgentSensor sensor : phenotype.getSensors()) {
-                    Portrayal portrayal = sensor.getPortrayal();
-                    if (portrayal != null) {
-                        portrayal.setTransform(transform);
-                    }
+                for (Sensor sensor : phenotype.getSensors()) {
+                    sensor.getPortrayal().setTransform(transform);
                 }
+                heuristicPhenotype.getCollisionSensor().getPortrayal().setTransform(transform);
+                heuristicPhenotype.getPickupSensor().getPortrayal().setTransform(transform);
             }
         });
     }
