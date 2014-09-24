@@ -194,7 +194,7 @@ public abstract class Sensor<T> implements Collideable {
 
     @Override
     public void handleBeginContact(Contact contact, Fixture otherFixture) {
-        if (otherFixture.getUserData() instanceof Fixture) {
+        if (otherFixture.getUserData() instanceof Sensor) {
             return;
         }
 
