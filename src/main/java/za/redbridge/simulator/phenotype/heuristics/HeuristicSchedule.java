@@ -17,9 +17,11 @@ public class HeuristicSchedule {
 
     public Double2D step(List<List<Double>> readings) {
         schedule.addAll(addList);
+        addList.forEach(h -> h.setSchedule(this));
         addList.clear();
 
         schedule.removeAll(removeList);
+        removeList.forEach(h -> h.setSchedule(null));
         removeList.clear();
 
         Double2D wheelDrive = null;
@@ -27,7 +29,7 @@ public class HeuristicSchedule {
             wheelDrive = heuristic.step(readings);
             if (wheelDrive != null) {
                 // Update the robot's paint
-                heuristic.getAttachedRobot().getPortrayal().setPaint(heuristic.getPaint());
+                heuristic.getRobot().getPortrayal().setPaint(heuristic.getPaint());
                 break;
             }
         }
