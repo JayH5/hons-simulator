@@ -13,6 +13,7 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -398,7 +399,7 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
         if (field != null) {
             return true;
         }
-        System.out.println("Field '" + name + "' not present, using default");
+        System.out.println("Field '" + name + "' not present.");
         return false;
     }
 
@@ -409,19 +410,11 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
 
     public abstract Map<String,Object> getAdditionalConfigs();
 
-    public float getBearing() {
-        return bearing;
-    }
 
-    public float getOrientation() {
-        return orientation;
-    }
+    public float getBearing() { return bearing; }
+    public float getOrientation() { return orientation; }
+    public float getRange() { return range; }
+    public float getFieldOfView() { return fieldOfView; }
 
-    public float getRange() {
-        return range;
-    }
 
-    public float getFieldOfView() {
-        return fieldOfView;
-    }
 }

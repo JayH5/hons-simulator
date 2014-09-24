@@ -2,7 +2,10 @@ package za.redbridge.simulator.config;
 
 import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
+import za.redbridge.simulator.factories.ComplementFactory;
 import za.redbridge.simulator.sensor.AgentSensor;
+import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
+import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -11,16 +14,20 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by shsu on 2014/09/08.
  */
-public class MorphologyConfig extends Config {
 
-    private final List<AgentSensor> sensorList;
+//TODO: serialise this
+public class MorphologyConfig extends Config implements Serializable {
+
+    private List<AgentSensor> sensorList;
     private final int numSensors;
 
     //total number of readings provided by this morphology
@@ -28,10 +35,11 @@ public class MorphologyConfig extends Config {
 
     private Map<String,Object> yamlCache;
 
-    public MorphologyConfig(List<AgentSensor> sensorList, int numSensors) {
+
+    public MorphologyConfig(List<AgentSensor> sensorList) {
 
         this.sensorList = sensorList;
-        this.numSensors = numSensors;
+        this.numSensors = sensorList.size();
 
         int readSize = 0;
 
@@ -42,11 +50,11 @@ public class MorphologyConfig extends Config {
         totalReadingSize = readSize;
     }
 
-    public MorphologyConfig(String filepath) throws ParseException {
+    public MorphologyConfig(String filepath) {
 
         sensorList = new ArrayList<>();
         int sensors = 0;
-        int totReadingSize = 0;
+        int readingSize = 0;
 
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;
@@ -65,7 +73,8 @@ public class MorphologyConfig extends Config {
                 sensors = noSensors.intValue();
             }
             else {
-                throw new ParseException("Error: Number of sensors not found.", 0);
+                System.out.println("Error: Number of sensors not found.");
+                System.exit(-1);
             }
         }
 
@@ -75,28 +84,21 @@ public class MorphologyConfig extends Config {
             String id = i + "s";
 
             String type = null;
-            float bearing, orientation, fieldOfView, range;
-            int readingSize;
+            float bearing = 0, orientation = 0, fieldOfView = 0, range = 0;
+
 
             AgentSensor agentSensor = null;
 
             Map sensor = (Map) config.get(id);
             if (checkFieldPresent(sensor, id)) {
 
-                Integer reads = (Integer) sensor.get("readingSize");
-                if (checkFieldPresent(reads, id + ":readingSize")) {
-                    readingSize = reads;
-                }
-                else {
-                    throw new ParseException("No reading size found for sensor " + id, i);
-                }
-
                 Number bear = (Number) sensor.get("bearing");
                 if (checkFieldPresent(bear, id + ":bearing")) {
                     bearing = bear.floatValue();
                 }
                 else {
-                    throw new ParseException("No bearing found for sensor " + id, i);
+                    System.out.println("No bearing found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 Number orient = (Number) sensor.get("orientation");
@@ -104,7 +106,8 @@ public class MorphologyConfig extends Config {
                     orientation = orient.floatValue();
                 }
                 else {
-                    throw new ParseException("No orientation found for sensor " + id, i);
+                    System.out.println("No orientation found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 Number fov = (Number) sensor.get("fieldOfView");
@@ -112,7 +115,8 @@ public class MorphologyConfig extends Config {
                     fieldOfView = fov.floatValue();
                 }
                 else {
-                    throw new ParseException("No field of view found for sensor " + id, i);
+                    System.out.println("No field of view found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 Number ran = (Number) sensor.get("range");
@@ -120,7 +124,8 @@ public class MorphologyConfig extends Config {
                     range = ran.floatValue();
                 }
                 else {
-                    throw new ParseException("No sensor range found for sensor " + id, i);
+                    System.out.println("No sensor range found for sensor " + id);
+                    System.exit(-1);
                 }
 
                 type = (String) sensor.get("type");
@@ -154,32 +159,42 @@ public class MorphologyConfig extends Config {
                     }
                     catch (NoSuchMethodException n) {
                         n.printStackTrace();
+                        System.exit(-1);
                     }
                     catch (InvocationTargetException inv) {
                         inv.getCause();
                         inv.printStackTrace();
+                        System.exit(-1);
                     }
                     catch (InstantiationException ins) {
                         ins.printStackTrace();
+                        System.exit(-1);
                     }
                     catch (IllegalAccessException ill) {
                         ill.printStackTrace();
+                        System.exit(-1);
+                    }
+                    catch (ParseException p) {
+                        p.printStackTrace();
+                        System.exit(-1);
                     }
 
                 }
                 else {
-                    throw new ParseException("Error: No sensor type found. ", i);
+                    System.out.println("Error: No sensor type found. ");
+                    System.exit(-1);
                 }
             }
             else {
-                throw new ParseException("Error: " + i + " Sensor not found.", i);
+                System.out.println("Error: " + i + " Sensor not found.");
+                System.exit(-1);
             }
 
             sensorList.add(agentSensor);
         }
 
         numSensors = sensors;
-        totalReadingSize = totReadingSize;
+        totalReadingSize = readingSize;
 
         System.out.println("read " + sensorList.size() + " sensors.");
 
@@ -193,6 +208,26 @@ public class MorphologyConfig extends Config {
 
     public int getNumSensors() { return numSensors; }
 
+    public List<AgentSensor> getSensors() { return sensorList; }
+
+    public void setSensors(List<AgentSensor> sensorList) { this.sensorList = sensorList; }
+
+    @Override
+    public int hashCode() {
+
+        return Arrays.hashCode(getSensitivities());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o instanceof MorphologyConfig) {
+            return Arrays.equals(getSensitivities(), ((MorphologyConfig) o).getSensitivities());
+        }
+
+        return false;
+    }
+
     @Override
     public MorphologyConfig clone() {
 
@@ -203,7 +238,41 @@ public class MorphologyConfig extends Config {
             newSensorList.add(sensor.clone());
         }
 
-        return new MorphologyConfig(newSensorList, numSensors);
+        return new MorphologyConfig(newSensorList);
+    }
+
+
+    public int getNumAdjustableSensitivities() {
+
+        int counter = 0;
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof ThresholdedObjectProximityAgentSensor || sensor instanceof ThresholdedProximityAgentSensor) {
+                counter++;
+            }
+        }
+
+        return counter;
+    }
+
+    public double[] getSensitivities() {
+
+        double[] output = new double[getNumAdjustableSensitivities()];
+        int index = 0;
+
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof ThresholdedObjectProximityAgentSensor) {
+                output[index] = ((ThresholdedObjectProximityAgentSensor) sensor).getSensitivity();
+                index++;
+            }
+            else if (sensor instanceof ThresholdedProximityAgentSensor) {
+                output[index] = ((ThresholdedProximityAgentSensor) sensor).getSensitivity();
+                index++;
+            }
+        }
+
+        return output;
     }
 
     public void dumpMorphology(String filename) {
@@ -265,6 +334,30 @@ public class MorphologyConfig extends Config {
             e.printStackTrace();
             System.exit(-1);
         }
+    }
+
+    public static MorphologyConfig MorphologyFromSensitivities (final MorphologyConfig template, double[] sensitivities) {
+
+        ArrayList<AgentSensor> newSensors = new ArrayList<>();
+        int counter = 0;
+
+        for (AgentSensor sensor : template.getSensorList()) {
+            AgentSensor clone = sensor.clone();
+
+            if (clone instanceof ThresholdedObjectProximityAgentSensor) {
+
+                ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                counter++;
+            } else if (clone instanceof ThresholdedProximityAgentSensor) {
+
+                ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
+                counter++;
+            }
+
+            newSensors.add(clone);
+        }
+
+        return new MorphologyConfig(newSensors);
     }
 
 }

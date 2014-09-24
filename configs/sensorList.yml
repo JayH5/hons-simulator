@@ -1,56 +1,51 @@
 meta:
-  numSensors: 6
+  numSensors: 5
 
 1s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject
+  type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
+  sensitiveClass: za.redbridge.simulator.object.RobotObject
   readingSize: 1
-  bearing: 51.0
-  orientation: 40.0
-  fieldOfView: 10.0
-  range: 1.0
+  bearing: 5.0
+  orientation: 0.0
+  fieldOfView: 5.0
+  range: 5.0
+  sensitivity: 0.8
 
 2s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject
+  type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
+  sensitiveClass: za.redbridge.simulator.object.ResourceObject
   readingSize: 1
-  bearing: 102.0
-  fieldOfView: 10.0
-  orientation: 40.0
-  range: 1.0
+  bearing: 0.0
+  fieldOfView: 5.0
+  orientation: 0.0
+  range: 5.0
+  sensitivity: 0.8
+
 
 3s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject
+  type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
+  sensitiveClass: za.redbridge.simulator.object.WallObject
   readingSize: 1
-  bearing: 154.0
-  fieldOfView: 10.0
-  orientation: 40.0
-  range: 1.0
+  bearing: 355.0
+  fieldOfView: 5.0
+  orientation: 0.0
+  range: 5.0
+  sensitivity: 0.8
+
 
 4s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject
+  type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
-  bearing: 206.0
-  fieldOfView: 10.0
-  orientation: 40.0
-  range: 1.0
+  bearing: 45.0
+  fieldOfView: 5.0
+  range: 5.0
+  orientation: 0.0
 
 5s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject
+  type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
-  bearing: 258.0
-  fieldOfView: 10.0
-  orientation: 40.0
-  range: 1.0
+  bearing: 315.0
+  fieldOfView: 5.0
+  range: 5.0
+  orientation: 0.0
 
-6s:
-  type: za.redbridge.simulator.sensor.FilteredProximityAgentSensor
-  whiteList: za.redbridge.simulator.object.ResourceObject
-  readingSize: 1
-  bearing: 310.0
-  fieldOfView: 10.0
-  orientation: 40.0
-  range: 1.0

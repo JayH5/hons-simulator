@@ -19,6 +19,8 @@ public class ExperimentConfig extends Config {
     private static final int DEFAULT_POPULATION_SIZE = 15;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
     private static final int DEFAULT_RUNS_PER_GENOME = 1;
+    private static final int DEFAULT_GA_POPULATION_SIZE = 50;
+    private static final float DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION = 0.3f;
 
     public enum EvolutionaryAlgorithm {
         NEAT, EVOLUTIONARY_STRATEGY, GENETIC_PROGRAMMING;
@@ -27,17 +29,20 @@ public class ExperimentConfig extends Config {
     protected final long maxEpochs;
     protected final int populationSize;
     protected final int runsPerGenome;
+    protected final int GAPopulationSize;
+    protected final float complementGeneratorResolution;
 
     protected EvolutionaryAlgorithm algorithm;
     protected String robotFactory;
     protected String morphologyConfigFile;
-
 
     public ExperimentConfig() {
         this.maxEpochs = DEFAULT_MAX_EPOCHS;
         this.populationSize = DEFAULT_POPULATION_SIZE;
         this.algorithm = EvolutionaryAlgorithm.NEAT;
         this.runsPerGenome = DEFAULT_RUNS_PER_GENOME;
+        this.GAPopulationSize = DEFAULT_GA_POPULATION_SIZE;
+        this.complementGeneratorResolution = DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION;
     }
 
     public ExperimentConfig(String filepath) {
@@ -57,6 +62,8 @@ public class ExperimentConfig extends Config {
         int popSize = DEFAULT_POPULATION_SIZE;
         String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
         int runsPerG = DEFAULT_RUNS_PER_GENOME;
+        int GApopSize = DEFAULT_GA_POPULATION_SIZE;
+        float compRes = DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION;
 
         Map control = (Map) config.get("control");
         if (checkFieldPresent(control, "control")) {
@@ -99,6 +106,11 @@ public class ExperimentConfig extends Config {
             if (checkFieldPresent(EA, "evolutionaryAlgorithm:populationSize")) {
                 popSize = pSize;
             }
+
+            Integer gapSize = (Integer) ea.get("GAPopulationSize");
+            if (checkFieldPresent(EA, "evolutionaryAlgorithm:GAPopulationSize")) {
+                GApopSize = gapSize;
+            }
         }
 
         Map morphology = (Map) config.get("morphology");
@@ -110,16 +122,27 @@ public class ExperimentConfig extends Config {
             }
         }
 
+        Map complements = (Map) config.get("complements");
+        if (checkFieldPresent(complements, "complements")) {
+
+            Number cres = (Number) complements.get("generatorResolution");
+            if (checkFieldPresent(cres, "complements:generatorResolution")) {
+                compRes = cres.floatValue();
+            }
+        }
+
         this.maxEpochs = maxEpochs;
         this.algorithm = controllerEA;
         this.populationSize = popSize;
-
         this.morphologyConfigFile = morphologyFile;
         this.runsPerGenome = runsPerG;
+        this.GAPopulationSize = GApopSize;
+        this.complementGeneratorResolution = compRes;
     }
 
-    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int runsPerGenome,
-                            String robotFactory, String morphologyConfigFile) {
+    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int GAPopulationSize,
+                            int runsPerGenome,
+                            String robotFactory, String morphologyConfigFile, float complementGeneratorResolution) {
 
         this.maxEpochs = maxEpochs;
         this.algorithm = algorithm;
@@ -127,6 +150,8 @@ public class ExperimentConfig extends Config {
         this.robotFactory = robotFactory;
         this.morphologyConfigFile = morphologyConfigFile;
         this.runsPerGenome = runsPerGenome;
+        this.GAPopulationSize = GAPopulationSize;
+        this.complementGeneratorResolution = complementGeneratorResolution;
     }
 
     public long getMaxEpochs() { return maxEpochs; }
@@ -140,5 +165,9 @@ public class ExperimentConfig extends Config {
     public String getMorphologyConfigFile() { return morphologyConfigFile; }
 
     public int getRunsPerGenome() { return runsPerGenome; }
+
+    public int getGAPopulationSize() { return GAPopulationSize; }
+
+    public float getComplementGeneratorResolution() { return complementGeneratorResolution; }
 
 }

@@ -11,7 +11,6 @@ import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.CollisionSensor;
 import za.redbridge.simulator.sensor.Sensor;
 
-
 import static za.redbridge.simulator.Utils.jitter;
 
 /**
