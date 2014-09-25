@@ -23,6 +23,8 @@ import static za.redbridge.simulator.Utils.toVec2;
  */
 public class BodyBuilder {
 
+    private static final float ACCELERATION_GRAVITY = 9.81f;
+
     private static final float DEFAULT_ANGULAR_DAMPING = .1f;
     private static final float DEFAULT_LINEAR_DAMPING = .1f;
 
@@ -30,8 +32,10 @@ public class BodyBuilder {
     private final FixtureDef fd = new FixtureDef();
 
     private boolean groundFriction = false;
+    private float staticCOF;
     private float kineticCOF;
-    private float torqueFriction;
+    private float staticFrictionTorque;
+    private float kineticFrictionTorque;
 
     public BodyBuilder() {
         bd.setAngularDamping(DEFAULT_ANGULAR_DAMPING);
@@ -164,9 +168,12 @@ public class BodyBuilder {
         return this;
     }
 
-    public BodyBuilder setGroundFriction(float kineticCOF, float torqueFriction) {
+    public BodyBuilder setGroundFriction(float staticCOF, float kineticCOF,
+            float staticFrictionTorque, float kineticFrictionTorque) {
+        this.staticCOF = staticCOF;
         this.kineticCOF = kineticCOF;
-        this.torqueFriction = torqueFriction;
+        this.staticFrictionTorque = staticFrictionTorque;
+        this.kineticFrictionTorque = kineticFrictionTorque;
         groundFriction = true;
         return this;
     }
@@ -177,7 +184,13 @@ public class BodyBuilder {
 
         if (groundFriction) {
             TopDownFrictionJointDef jd = new TopDownFrictionJointDef();
-            jd.initialize(body, kineticCOF, torqueFriction); // TODO: Angular friction
+
+            // TODO: calculate torque friction based on mass and shape
+            float normalForce = body.getMass() * ACCELERATION_GRAVITY;
+            float staticFrictionForce = normalForce * staticCOF;
+            float kineticFrictionForce = normalForce * kineticCOF;
+            jd.initialize(body, staticFrictionForce, kineticFrictionForce, staticFrictionTorque,
+                    kineticFrictionTorque);
             world.createJoint(jd);
         }
 
