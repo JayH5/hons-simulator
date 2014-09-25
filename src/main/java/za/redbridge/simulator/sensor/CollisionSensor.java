@@ -3,7 +3,6 @@ package za.redbridge.simulator.sensor;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
-import org.jbox2d.dynamics.Fixture;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
@@ -17,17 +16,11 @@ import za.redbridge.simulator.portrayal.Portrayal;
  */
 public class CollisionSensor extends ClosestObjectSensor {
 
-    private static final float DEFAULT_RANGE = 0.15f + 0.4f; //make sure this is > robot radius
-
     private final float range;
 
     public CollisionSensor(float range) {
         this.range = range;
         //setDrawEnabled(true);
-    }
-
-    public CollisionSensor() {
-        this(DEFAULT_RANGE);
     }
 
     @Override
@@ -62,8 +55,7 @@ public class CollisionSensor extends ClosestObjectSensor {
     }
 
     @Override
-    public boolean isRelevantObject(Fixture otherFixture) {
-        return super.isRelevantObject(otherFixture)
-                && !(otherFixture.getBody().getUserData() instanceof TargetAreaObject);
+    public boolean isRelevantObject(PhysicalObject object) {
+        return !(object instanceof TargetAreaObject);
     }
 }

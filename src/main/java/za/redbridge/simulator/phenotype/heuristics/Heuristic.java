@@ -1,5 +1,6 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
+import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 
 import java.awt.Paint;
@@ -7,24 +8,22 @@ import java.util.List;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.sensor.SensorReading;
+import za.redbridge.simulator.sensor.Sensor;
 
 /**
  * Created by racter on 2014/09/01.
  */
 public abstract class Heuristic implements Comparable<Heuristic> {
 
-    public static final int SLOWDOWN_THRESHOLD = 1;
     protected static final double HALF_PI = Math.PI / 2;
 
-    protected final RobotObject attachedRobot;
+    protected final RobotObject robot;
     private int priority;
 
-    private final HeuristicSchedule schedule;
+    private HeuristicSchedule schedule;
 
-    public Heuristic(HeuristicSchedule schedule, RobotObject robot) {
-        this.schedule = schedule;
-        this.attachedRobot = robot;
+    public Heuristic(RobotObject robot) {
+        this.robot = robot;
     }
 
     protected HeuristicSchedule getSchedule() {
@@ -35,7 +34,7 @@ public abstract class Heuristic implements Comparable<Heuristic> {
         schedule.removeHeuristic(this);
     }
 
-    abstract Double2D step(List<SensorReading> list);
+    abstract Double2D step(List<List<Double>> list);
 
     /**
      * Paint used to change colour of robot as each heuristic takes over.
@@ -44,12 +43,17 @@ public abstract class Heuristic implements Comparable<Heuristic> {
     abstract Paint getPaint();
 
     /**
+     * Get the sensor for this heuristic. May return null if no sensor is used.
+     */
+    public abstract Sensor getSensor();
+
+    /**
      * Get the wheel drive that will steer the agent towards the target position.
      * @param targetPosition The position of the target in local coordinates
      * @return the heuristic wheel drive
      */
     public static Double2D wheelDriveForTargetPosition(Vec2 targetPosition) {
-        return wheelDriveForTargetAngle(Math.atan2(targetPosition.y, targetPosition.x));
+        return wheelDriveForTargetAngle(MathUtils.atan2(targetPosition.y, targetPosition.x));
     }
 
     /**
@@ -85,18 +89,20 @@ public abstract class Heuristic implements Comparable<Heuristic> {
         return new Double2D(left, right);
     }
 
-    public int getPriority() { return priority; }
+    public int getPriority() {
+        return priority;
+    }
 
-    public void setPriority(int priority) { this.priority = priority; }
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
 
-    /* package */ RobotObject getAttachedRobot() { return attachedRobot; }
+    /* package */ RobotObject getRobot() {
+        return robot;
+    }
 
-    public double distance (Vec2 start, Vec2 end) {
-
-        double xDiff = (end.x - start.x);
-        double yDiff = (end.y - start.y);
-
-        return Math.sqrt((xDiff*xDiff) - (yDiff*yDiff));
+    /* package */ void setSchedule(HeuristicSchedule schedule) {
+        this.schedule = schedule;
     }
 
     @Override

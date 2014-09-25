@@ -19,7 +19,8 @@ public class PolygonSensedObject extends SensedObject<Rectangle2D> {
 
     private Rectangle2D shape;
 
-    public PolygonSensedObject(PhysicalObject object, double distance, float x, float y, float w, float h) {
+    public PolygonSensedObject(PhysicalObject object, float distance, float x, float y, float w,
+            float h) {
         super(object, distance);
 
         this.x = x;

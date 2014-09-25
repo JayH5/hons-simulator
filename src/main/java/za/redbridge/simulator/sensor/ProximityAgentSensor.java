@@ -1,7 +1,6 @@
 package za.redbridge.simulator.sensor;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +11,6 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
  */
 public class ProximityAgentSensor extends AgentSensor {
 
-    private final List<Double> readings = new ArrayList<>(1);
     private static final int readingSize = 1;
 
     public ProximityAgentSensor(float bearing) {
@@ -24,15 +22,13 @@ public class ProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    protected SensorReading provideObjectReading(List<SensedObject> objects) {
+    protected void provideObjectReading(List<SensedObject> objects, List<Double> output) {
         double reading = 0.0;
         if (!objects.isEmpty()) {
             reading = 1 - Math.min(objects.get(0).getDistance() / range, 1.0);
         }
 
-        readings.clear();
-        readings.add(reading);
-        return new SensorReading(readings);
+        output.add(reading);
     }
 
     protected double readingCurve(double fraction) {

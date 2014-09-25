@@ -18,7 +18,7 @@ public class EdgeSensedObject extends SensedObject<Line2D> {
 
     private Line2D shape;
 
-    public EdgeSensedObject(PhysicalObject object, double distance, float x0, float y0, float x1,
+    public EdgeSensedObject(PhysicalObject object, float distance, float x0, float y0, float x1,
                 float y1) {
         super(object, distance);
 

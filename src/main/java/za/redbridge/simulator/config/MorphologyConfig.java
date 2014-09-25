@@ -5,6 +5,7 @@ import za.redbridge.simulator.config.Config;
 import za.redbridge.simulator.sensor.AgentSensor;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -216,7 +217,35 @@ public class MorphologyConfig extends Config {
         for (AgentSensor sensor: sensorList) {
 
             Map<String,Object> sensorMap = sensor.getAdditionalConfigs();
-            yamlDump.put(sensorID+"s", sensorMap);
+            Map<String,Object> thisMap = new HashMap<>();
+
+            thisMap.put("type", sensor.getClass().getName());
+            thisMap.put("readingSize", sensor.getReadingSize());
+            thisMap.put("bearing", Math.toDegrees(sensor.getBearing()));
+            thisMap.put("orientation", Math.toDegrees(sensor.getOrientation()));
+            thisMap.put("fieldOfView", Math.toDegrees(sensor.getFieldOfView()));
+            thisMap.put("range", sensor.getRange());
+
+            for (Map.Entry<String,Object> entry: sensorMap.entrySet()) {
+
+                try {
+                    Field field = sensor.getClass().getDeclaredField(entry.getKey());
+
+                    try {
+
+                        field.setAccessible(true);
+                        thisMap.put(entry.getKey(), field.get(sensor));
+                    }
+                    catch(IllegalAccessException i) {
+                        System.out.println("Illegal access of field " + entry.getKey());
+                    }
+                }
+                catch (NoSuchFieldException n) {
+                    //System.out.println("No such field: " + entry.getKey() + " " + sensorID);
+                }
+            }
+
+            yamlDump.put(sensorID+"s", thisMap);
             sensorID++;
         }
 
@@ -228,7 +257,7 @@ public class MorphologyConfig extends Config {
             fileWriter = new FileWriter(filename);
             yaml.dump(yamlDump, stringWriter);
             fileWriter.write(stringWriter.toString());
-            System.out.println(stringWriter.toString());
+            //System.out.println(stringWriter.toString());
             fileWriter.close();
         }
         catch (IOException e) {

@@ -1,18 +1,14 @@
 package za.redbridge.simulator.phenotype;
 
-import org.jbox2d.dynamics.Fixture;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 
 import sim.util.Double2D;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ProximityAgentSensor;
-import za.redbridge.simulator.sensor.SensorReading;
 
 public class ChasingPhenotype implements Phenotype {
     private static final int COOLDOWN = 10;
@@ -39,7 +35,7 @@ public class ChasingPhenotype implements Phenotype {
     }
 
     @Override
-    public Double2D step(List<SensorReading> list) {
+    public Double2D step(List<List<Double>> list) {
         Double2D left = new Double2D(0.5,1.0);
         Double2D forward = new Double2D(1.0,1.0);
         Double2D right = new Double2D(1.0,0.5);
@@ -52,9 +48,9 @@ public class ChasingPhenotype implements Phenotype {
             cooldownCounter = COOLDOWN;
         }
 
-        double leftReading = list.get(0).getValues().get(0);
-        double forwardReading = list.get(1).getValues().get(0);
-        double rightReading = list.get(2).getValues().get(0);
+        double leftReading = list.get(0).get(0);
+        double forwardReading = list.get(1).get(0);
+        double rightReading = list.get(2).get(0);
         double max = Math.max(leftReading, Math.max(forwardReading, rightReading));
         if(max < 0.0001){
             lastMove = random;
@@ -89,8 +85,8 @@ public class ChasingPhenotype implements Phenotype {
         }
 
         @Override
-        public boolean isRelevantObject(Fixture otherFixture) {
-            return otherFixture.getBody().getUserData() instanceof ResourceObject;
+        public boolean isRelevantObject(PhysicalObject object) {
+            return object instanceof ResourceObject;
         }
 
         @Override
