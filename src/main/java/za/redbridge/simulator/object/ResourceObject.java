@@ -86,7 +86,7 @@ public class ResourceObject extends PhysicalObject {
                 .setRectangular(width, height, mass)
                 .setFriction(0.3f)
                 .setRestitution(0.4f)
-                .setGroundFriction(0.3f, 10f)
+                .setGroundFriction(0.8f, 0.1f, 0.8f, 0.1f)
                 .build(world);
     }
 
@@ -144,6 +144,16 @@ public class ResourceObject extends PhysicalObject {
                 joints.put(entry.getKey(), joint);
             }
             pendingJoints.clear();
+        }
+
+        // Add an additional check here in case joints fail to be destroyed
+        if (isCollected && !joints.isEmpty()) {
+            for (Map.Entry<RobotObject, Joint> entry : joints.entrySet()) {
+                RobotObject robot = entry.getKey();
+                robot.setBoundToResource(false);
+                getBody().getWorld().destroyJoint(entry.getValue());
+            }
+            joints.clear();
         }
     }
 
