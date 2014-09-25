@@ -173,6 +173,11 @@ public class Main {
         }
 
         @Override
+        public boolean isRelevantObject(PhysicalObject otherObject) {
+            return otherObject instanceof ResourceObject;
+        }
+
+        @Override
         protected boolean filterOutObject(PhysicalObject object) {
             if(object instanceof ResourceObject) return ((ResourceObject) object).isCollected();
             else return false;
