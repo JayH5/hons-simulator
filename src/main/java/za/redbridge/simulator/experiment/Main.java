@@ -1,10 +1,5 @@
 package za.redbridge.simulator.experiment;
 
-import net.neoremind.sshxcute.core.ConnBean;
-import net.neoremind.sshxcute.core.SSHExec;
-import net.neoremind.sshxcute.exception.TaskExecFailException;
-import net.neoremind.sshxcute.task.CustomTask;
-import net.neoremind.sshxcute.task.impl.ExecCommand;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -13,9 +8,8 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ComplementFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
+
 
 //example entry point into simulator
 /**
@@ -40,8 +34,11 @@ public class Main {
     @Option(name = "--controller", aliases = "-nn", usage = "The neural network file name for visualisation")
     private String nnDump;
 
-    @Option(name = "--multihost", aliases = "-p", usage = "Test complement list on multiple hosts provided in text file")
+    @Option(name = "--multihost", aliases = "-p", usage = "Generate complements and assign them to be processed by the given list of hosts")
     private String hosts;
+
+    @Option(name = "--testComplementSet", aliases = "-t", usage = "Search for this complement set in the shared directories and test them")
+    private String timestamp;
 
     @Option(name = "--evolve-complements", aliases = "-e", usage = "Evolve sensor sensitivity complements using a Genetic Algorithm")
     private boolean evolveComplements = false;
@@ -61,8 +58,18 @@ public class Main {
 
         ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
         SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
+        MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
 
-        if (options.hosts != null) {
+        MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
+                morphologyConfig, options.evolveComplements, true, true);
+
+        if (options.timestamp != null) {
+
+            masterExperimentController.testAssignedMorphologies(Long.parseLong(options.timestamp));
+            System.exit(0);
+        }
+
+        if (options.hosts == null) {
             //TODO: work with multiple morphology configs (specifically, filter sensitivities)
             //if we need to show a visualisation
             if (options.showVisuals()) {
@@ -71,22 +78,23 @@ public class Main {
                 simulationVisual.run();
 
             } else {
-
-                MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
-
-                MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
-                        morphologyConfig, options.evolveComplements, true, true);
-
                 masterExperimentController.start();
-
             }
         }
+
+        //if a host file is provided, generate some complements and split them over the given hosts
         else {
 
+            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig,
+                    experimentConfiguration.getComplementGeneratorResolution());
 
+            final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
+            ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);
 
-
-
+            complementDistributor.assignHosts();
+            complementDistributor.writeMorphologiesToAssignment();
+            System.out.println("Assigned morphologies to list of IPs.");
+            System.exit(0);
         }
     }
 

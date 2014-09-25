@@ -88,8 +88,6 @@ public class TrainController implements Runnable{
             System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
 
             long time = System.currentTimeMillis();
-            IOUtils.writeNetwork(scoreCache.last().getNetwork(), "bestNetwork" + time + ".tmp");
-            morphologyConfig.dumpMorphology("bestMorphology" + time + ".tmp");
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             scoreCache.clear();
@@ -101,13 +99,13 @@ public class TrainController implements Runnable{
         } while(epochs <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
+        long endtime = System.currentTimeMillis();
+
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/bestNetwork.tmp");
-        morphologyConfig.dumpMorphology("results/bestMorphology.tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results//bestNetwork" + endtime + ".tmp");
+        morphologyConfig.dumpMorphology("results//bestMorphology" + endtime + ".tmp");
 
-        System.out.print("shouldprint");
-        ComplementFactory.printArray(morphologyConfig.getSensitivities());
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }

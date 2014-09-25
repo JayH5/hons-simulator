@@ -7,10 +7,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
@@ -100,8 +97,6 @@ public class MasterExperimentController {
 
     }
 
-
-
     public void start() {
 
         //Evolve complements instead of generating them
@@ -114,7 +109,30 @@ public class MasterExperimentController {
                     experimentConfig.getComplementGeneratorResolution());
 
             final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
-            testComplements("results",sensitivityComplements);
+            testComplements("results/",sensitivityComplements);
         }
     }
+
+    //test the designated morphologies assigned to this host for this timestamp
+    public void testAssignedMorphologies(long timestamp) {
+
+        if (!ExperimentUtils.searchForExperimentSet(timestamp)) {
+            System.out.println("Experiment set does not exist; aborting.");
+            System.exit(-1);
+        }
+
+        String thisIP = ExperimentUtils.getIP();
+
+        //read the morphology set (identified by timestamp) assigned to this IP
+        HashMap<MorphologyConfig,String> readMorphologies = ExperimentUtils.readAssignedMorphologies(timestamp, thisIP);
+
+        for (Map.Entry<MorphologyConfig,String> entry: readMorphologies.entrySet()) {
+
+            final TrainComplement trainer = new TrainComplement(experimentConfig, simulationConfig,
+                    entry.getKey(), morphologyScores);
+
+            trainer.run();
+        }
+    }
+
 }
