@@ -128,8 +128,8 @@ public class MasterExperimentController {
 
         for (Map.Entry<MorphologyConfig,String> entry: readMorphologies.entrySet()) {
 
-            final TrainComplement trainer = new TrainComplement(experimentConfig, simulationConfig,
-                    entry.getKey(), morphologyScores);
+            final TrainController trainer = new TrainController(experimentConfig, simulationConfig,
+                    entry.getKey(), morphologyScores, true);
 
             trainer.run();
         }

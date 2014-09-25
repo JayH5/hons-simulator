@@ -110,12 +110,4 @@ public class Main {
         return showVisuals;
     }
 
-    private boolean evolveComplements() {
-        return evolveComplements;
-    }
-
-    private String getMorphologyDump() { return morphologyDump; }
-
-    private String getNnDump() { return nnDump; }
-
 }

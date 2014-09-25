@@ -103,8 +103,8 @@ public class TrainController implements Runnable{
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results//bestNetwork" + endtime + ".tmp");
-        morphologyConfig.dumpMorphology("results//bestMorphology" + endtime + ".tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/bestNetwork" + endtime + ".tmp");
+        morphologyConfig.dumpMorphology("results/bestMorphology" + endtime + ".tmp");
 
     }
 
