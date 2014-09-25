@@ -3,6 +3,7 @@ package za.redbridge.simulator.gp.functions;
 import org.epochx.epox.Node;
 import za.redbridge.simulator.gp.types.Bearing;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +26,9 @@ public class LoadBearing extends Node {
     }
 
     public Bearing evaluate(){
-        return (Bearing)state.get(this).getOrDefault(KEY,DEFAULT);
+        if(!state.containsKey(this)) state.put(this,new HashMap<String,Object>());
+        if(!state.get(this).containsKey(KEY)) state.get(this).put(KEY, DEFAULT);
+        return (Bearing)state.get(this).get(KEY);
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.epochx.epox.Node;
 import za.redbridge.simulator.gp.types.Bearing;
 import za.redbridge.simulator.gp.types.WheelDrive;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -31,6 +32,7 @@ public class SaveBearing extends Node {
         Object bearing = getChild(0).evaluate();
         if(bearing.getClass() == Bearing.class){
             Bearing b = (Bearing) bearing;
+            if(!state.containsKey(this)) state.put(this,new HashMap<String,Object>());
             state.get(this).put(KEY, b);
             return b;
         }
