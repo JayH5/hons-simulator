@@ -43,13 +43,17 @@ public class TrainController implements Runnable{
 
     private final boolean threadSubruns;
 
+    private String thisIP;
+
+    private long testSetID;
+
     //the best-performing network for this complement
     private NEATNetwork bestNetwork;
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
                            ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
-                           boolean threadSubruns) {
+                           boolean threadSubruns, long testSetID) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
@@ -58,6 +62,9 @@ public class TrainController implements Runnable{
         scoreCache = new ConcurrentSkipListSet<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
         this.threadSubruns = threadSubruns;
+
+        this.thisIP = ExperimentUtils.getIP();
+        this.testSetID = testSetID;
     }
 
     public void run() {
@@ -99,12 +106,10 @@ public class TrainController implements Runnable{
         } while(epochs <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
-        long endtime = System.currentTimeMillis();
-
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/bestNetwork" + endtime + ".tmp");
-        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "bestMorphology" + endtime + ".tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/bestNetwork" + testSetID + ".tmp");
+        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "bestMorphology" + testSetID + ".tmp");
 
     }
 

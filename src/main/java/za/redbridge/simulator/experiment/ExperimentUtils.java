@@ -113,22 +113,4 @@ public class ExperimentUtils {
 
         return "???";
     }
-
-    //matches morphologyfile with a valid serial file name
-    private static class MorphologyFileFilter implements FileFilter {
-
-        private long timestamp; 
-
-        public MorphologyFileFilter(long timestamp) { System.out.println("PENIS"); this.timestamp = timestamp; }
-
-        public boolean accept(File file) {
-
-            String t = Long.toString(timestamp);
-            Pattern morphologyFilePattern = Pattern.compile(t +"[0-9]+[:][0-9]+.morphology");
-            System.out.println(file.getAbsoluteFile());
-            Matcher fileMatcher = morphologyFilePattern.matcher(file.getName());
-
-            return fileMatcher.find();
-        }
-    }
 }
