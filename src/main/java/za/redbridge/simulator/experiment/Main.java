@@ -19,8 +19,10 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import sim.display.Console;
+import sim.util.Double2D;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
@@ -28,6 +30,9 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.AgentModel;
+import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
+import za.redbridge.simulator.khepera.ProximitySensor;
+import za.redbridge.simulator.khepera.UltrasonicSensor;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.phenotype.GPPhenotype;
@@ -79,14 +84,28 @@ public class Main {
             p.printStackTrace();
         }
 
+        /*
         List<AgentSensor> sensors = new ArrayList<>();
-        AgentSensor leftSensor = new ResourceProximitySensor((float) ((7 / 4.0f) * Math.PI), 0f, 10f, 0.1f);
-        AgentSensor forwardSensor = new ResourceProximitySensor(0f, 0f, 10f, 0.2f);
-        AgentSensor rightSensor = new ResourceProximitySensor((float) (Math.PI/4), 0f, 10f, 0.1f);
+        sensors.add(new UltrasonicSensor(0f, 0f));
+        sensors.add(new UltrasonicSensor((float)Math.PI/2, 0f));
+        sensors.add(new UltrasonicSensor((float)Math.PI, 0f));
+        sensors.add(new UltrasonicSensor((float)(3*Math.PI/2), 0f));
 
-        sensors.add(leftSensor);
-        sensors.add(forwardSensor);
-        sensors.add(rightSensor);
+        sensors.add(new ProximitySensor((float)Math.PI/4,0f));
+        sensors.add(new ProximitySensor((float)(3*Math.PI/4),0f));
+        sensors.add(new ProximitySensor((float)(5*Math.PI/4),0f));
+        sensors.add(new ProximitySensor((float)(7*Math.PI/4),0f));
+        */
+        class LOL extends KheperaIIIPhenotype{
+            @Override
+            public Double2D step(List<List<Double>> list) {
+                return null;
+            }
+
+            @Override
+            public void configure(Map<String,Object> phenotypeConfigs) {}}
+        List<AgentSensor> sensors = new LOL().getSensors();
+
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
         model.setNoGenerations(100);
