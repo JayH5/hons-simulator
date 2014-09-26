@@ -127,7 +127,7 @@ public class Main {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-            String tree = "WHEELDRIVEFROMFLOATS(READINGTODISTANCE(IF(GT(0.0 READINGTODISTANCE(S2)) IF(GT(0.0 1.0) S2 S2) S0)) 1.0)";
+            String tree = "WHEELDRIVEFROMFLOATS(1.0 IF(IF(GT(0.0 0.0) GT(1.0 0.0) GT(1.0 0.0)) IF(GT(1.0 0.0) READINGTODISTANCE(S2) 0.0) 0.0))";
             Node root = model.getParser().parse(tree);
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
