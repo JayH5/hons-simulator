@@ -63,6 +63,7 @@ public abstract class Heuristic implements Comparable<Heuristic> {
      */
     protected static Double2D wheelDriveForTargetAngle(double targetAngle) {
         final double left, right;
+        if(Math.abs(targetAngle) > Math.PI) targetAngle = Math.PI*Math.signum(targetAngle);
         // Different response for each of four quadrants
         if (targetAngle >= 0) {
             if (targetAngle < HALF_PI) {
