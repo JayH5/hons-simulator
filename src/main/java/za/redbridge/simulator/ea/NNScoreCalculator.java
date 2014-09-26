@@ -71,7 +71,7 @@ public class NNScoreCalculator implements CalculateScore {
                 Simulation simulation = new Simulation(config, robotFactory);
                 SimRun simulationRunner = new SimRun(simulation, performances, i);
 
-                simThreads[i] = new Thread(simulationRunner, "THREAD PENIS " +i);
+                simThreads[i] = new Thread(simulationRunner);
                 simThreads[i].run();
             }
             for (int i = 0; i < testRuns; i++) {
@@ -84,6 +84,7 @@ public class NNScoreCalculator implements CalculateScore {
                     iex.printStackTrace();
                 }
             }
+
         }
         else {
 

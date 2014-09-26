@@ -43,7 +43,7 @@ public class TrainController implements Runnable{
 
     private final boolean threadSubruns;
 
-    private String thisIP;
+    private final String thisIP;
 
     private long testSetID;
 
@@ -65,6 +65,22 @@ public class TrainController implements Runnable{
 
         this.thisIP = ExperimentUtils.getIP();
         this.testSetID = testSetID;
+    }
+
+    public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                           MorphologyConfig morphologyConfig,
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
+                           boolean threadSubruns) {
+
+        this.experimentConfig = experimentConfig;
+        this.simConfig = simConfig;
+        this.morphologyConfig = morphologyConfig;
+        leaderBoard = new TreeMap<>();
+        scoreCache = new ConcurrentSkipListSet<>();
+        this.morphologyLeaderboard = morphologyLeaderboard;
+        this.threadSubruns = threadSubruns;
+
+        this.thisIP = ExperimentUtils.getIP();
     }
 
     public void run() {
@@ -95,6 +111,10 @@ public class TrainController implements Runnable{
             System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
 
             long time = System.currentTimeMillis();
+
+            IOUtils.writeNetwork(scoreCache.last().getNetwork(), "results/" + time + "bestnetworkat" + epochs+".tmp");
+            morphologyConfig.dumpMorphology("results/" + time + "bestmorphologyat" + epochs+".tmp");
+
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             scoreCache.clear();

@@ -89,6 +89,8 @@ public class Main {
                     experimentConfiguration.getComplementGeneratorResolution());
 
             final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
+
+            System.out.println("Generated " + sensitivityComplements.size() + " complements.");
             ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);
 
             complementDistributor.assignHosts();
