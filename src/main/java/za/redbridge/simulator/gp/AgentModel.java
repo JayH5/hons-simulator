@@ -46,7 +46,7 @@ public class AgentModel extends GPModel {
        this.config = config;
        this.exConfig = exConfig;
        this.numSims = 3;
-       this.numSteps = 20000;
+       this.numSteps = 10000;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
            inputs.add(new Variable("S" + i, ProximityReading.class));
