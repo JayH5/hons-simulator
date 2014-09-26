@@ -80,9 +80,9 @@ public class Main {
         }
 
         List<AgentSensor> sensors = new ArrayList<>();
-        AgentSensor leftSensor = new ResourceProximitySensor((float) ((7 / 4.0f) * Math.PI), 0f, 1f, 0.2f);
-        AgentSensor forwardSensor = new ResourceProximitySensor(0f, 0f, 1f, 0.2f);
-        AgentSensor rightSensor = new ResourceProximitySensor((float) (Math.PI/4), 0f, 1f, 0.2f);
+        AgentSensor leftSensor = new ResourceProximitySensor((float) ((7 / 4.0f) * Math.PI), 0f, 10f, 0.1f);
+        AgentSensor forwardSensor = new ResourceProximitySensor(0f, 0f, 10f, 0.2f);
+        AgentSensor rightSensor = new ResourceProximitySensor((float) (Math.PI/4), 0f, 10f, 0.1f);
 
         sensors.add(leftSensor);
         sensors.add(forwardSensor);
