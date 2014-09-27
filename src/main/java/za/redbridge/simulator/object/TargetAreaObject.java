@@ -108,6 +108,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         return totalFitness;
     }
 
+    public int getNumberOfContainedResources() {
+        return containedObjects.size();
+    }
+
     public AABB getAabb() {
         return aabb;
     }
