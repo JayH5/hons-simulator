@@ -52,7 +52,7 @@ public class PickupHeuristic extends Heuristic {
         if (resource.tryPickup(robot)) {
             // Success! Head for the target zone
             return wheelDriveForTargetAngle(targetAreaAngle());
-        } else {
+        } else if (ENABLE_PICKUP_POSITIONING) {
             // Couldn't pick it up, add a heuristic to navigate to the resource
             getSchedule().addHeuristic(new PickupPositioningHeuristic(pickupSensor, robot));
         }
