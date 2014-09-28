@@ -10,10 +10,13 @@ import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
+
+import java.util.Set;
 
 /**
  * The main simulation state.
@@ -156,6 +159,18 @@ public class Simulation extends SimState {
     public void setSeed(long seed) {
         super.setSeed(seed);
         config.setSimulationSeed(seed);
+    }
+
+    private double getRobotAvgDisplacement() {
+        Set<PhysicalObject> objects = placementArea.getPlacedObjects();
+        double totalDisplacement = 0.0;
+
+        for (PhysicalObject object: objects) {
+            if (object instanceof RobotObject) {
+                totalDisplacement += ((RobotObject) object).getTotalDisplacement();
+            }
+        }
+        return totalDisplacement/config.getObjectsRobots();
     }
 
     /** Get the environment (forage area) for this simulation. */

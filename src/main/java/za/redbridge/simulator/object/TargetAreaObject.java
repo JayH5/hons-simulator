@@ -32,6 +32,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private int width, height;
     private final AABB aabb;
 
+    //the fitness function describes how the value the target area keeps track of is calculated
     private FitnessFunction fitnessFunction;
 
     //total fitness value for the agents in this simulation. unfortunately fitness is dead tied to forage area and
