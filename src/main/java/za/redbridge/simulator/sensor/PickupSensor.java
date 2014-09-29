@@ -1,14 +1,14 @@
 package za.redbridge.simulator.sensor;
 
-import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
+import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
 /**
  * Sensor to detect when object hit a certain position on the agent
@@ -16,27 +16,31 @@ import za.redbridge.simulator.portrayal.Portrayal;
  */
 public class PickupSensor extends ClosestObjectSensor {
 
-    private final float radius;
+    private final float width;
+    private final float height;
 
-    public PickupSensor(float radius) {
-        this.radius = radius;
+    public PickupSensor(float width, float height) {
+        this.width = width;
+        this.height = height;
     }
 
     @Override
     protected Transform createTransform(RobotObject robot) {
-        return new Transform();
+        Transform transform = new Transform();
+        transform.p.set(robot.getRadius() + width / 2, 0);
+        return transform;
     }
 
     @Override
     protected Shape createShape(Transform transform) {
-        CircleShape shape = new CircleShape();
-        shape.setRadius(radius);
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(width / 2, height / 2);
         return shape;
     }
 
     @Override
     protected Portrayal createPortrayal() {
-        return new CirclePortrayal(radius, DEFAULT_PAINT, true);
+        return new RectanglePortrayal(width, height, DEFAULT_PAINT, true);
     }
 
     @Override
