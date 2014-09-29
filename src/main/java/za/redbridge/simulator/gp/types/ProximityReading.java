@@ -8,13 +8,34 @@ import java.text.DecimalFormat;
 public class ProximityReading {
 
     protected float value;
+    protected float bearing;
+    protected float range;
+    protected float fov;
 
-    public ProximityReading(float f){
-        this.value = f;
+    public ProximityReading(float value, float bearing, float range, float fov){
+        this.value = value;
+        this.bearing = bearing;
+        this.range = range;
+        this.fov = fov;
     }
 
     public float getValue() {
         return value;
+    }
+
+    public float getDistance(){
+        return (1.0f - value) * range;
+    }
+
+    public Bearing getBearing(){
+        return new Bearing(bearing);
+    }
+
+    /*
+     * Note: this gets more and more terrible for higher fovs.
+     */
+    public RelativeCoordinate getCoordinate(){
+        return RelativeCoordinate.fromDistAndBearing(getDistance(),getBearing());
     }
 
     public String toString(){

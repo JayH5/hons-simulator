@@ -20,10 +20,7 @@ import za.redbridge.simulator.gp.types.WheelDrive;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -49,7 +46,7 @@ public class AgentModel extends GPModel {
        this.numSteps = 10000;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
-           inputs.add(new Variable("S" + i, ProximityReading.class));
+           inputs.add(new SensorVariable("S" + i, Float.class, sensors.get(i)));
        }
 
        /*
@@ -65,11 +62,6 @@ public class AgentModel extends GPModel {
        syntax.add(new TangentFunction());
        syntax.add(new ArcTangentFunction());
        */
-
-       for(AgentSensor s : sensors){
-           syntax.add(new Literal(new Bearing(s.getBearing())));
-       }
-       syntax.add(new ReadingToDistance(0.4f)); //sensor range
 
        syntax.add(new IfFunction());
        syntax.add(new GreaterThanFunction());
@@ -87,7 +79,9 @@ public class AgentModel extends GPModel {
        syntax.add(new WheelDriveFromFloats());
        syntax.add(new WheelDriveFromBearing());
        syntax.add(new WheelDriveFromCoordinate());
-       syntax.add(new CoordinateFromDistanceAndBearing());
+       syntax.add(new ReadingToCoordinate());
+       syntax.add(new ReadingToDistance());
+       syntax.add(new ReadingToFloat());
        syntax.add(new RotateCoordinate());
        syntax.add(new BearingFromCoordinate());
        syntax.add(new RandomBearing());

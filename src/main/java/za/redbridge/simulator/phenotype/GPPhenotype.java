@@ -32,7 +32,7 @@ public class GPPhenotype implements Phenotype {
     public Double2D step(List<List<Double>> list) {
         if(list.size() != sortedInputs.size()) throw new IllegalArgumentException("SensorReading list needs to be of size " + sortedInputs.size());
         for(int i = 0; i < list.size(); i++){
-            sortedInputs.get(i).setValue(new ProximityReading(list.get(i).get(0).floatValue()));
+            sortedInputs.get(i).setValue(list.get(i).get(0).floatValue());
         }
         WheelDrive d = (WheelDrive) program.evaluate();
         return new Double2D(d.x, d.y);

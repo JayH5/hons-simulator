@@ -13,13 +13,12 @@ public class ReadingToDistance extends Node {
 
     protected float range;
 
-    public ReadingToDistance(float range){
-        this(null, range);
+    public ReadingToDistance(){
+        this(null);
     }
 
-    public ReadingToDistance(final Node c1, float range){
+    public ReadingToDistance(final Node c1){
         super(c1);
-        this.range = range;
     }
     @Override
     public String getIdentifier(){
@@ -29,8 +28,8 @@ public class ReadingToDistance extends Node {
     public Float evaluate(){
         Object reading = getChild(0).evaluate();
         if(reading.getClass() == ProximityReading.class) {
-            float c = ((ProximityReading)reading).getValue();
-            return (1.0f - c) * range;
+            ProximityReading r = (ProximityReading)reading;
+            return r.getDistance();
         }
         else return null;
     }
@@ -42,26 +41,5 @@ public class ReadingToDistance extends Node {
         } else{
             return null;
         }
-    }
-
-    @Override
-    public ReadingToDistance clone(){
-        final ReadingToDistance clone = (ReadingToDistance) super.clone();
-        clone.range = range;
-        return clone;
-    }
-
-    @Override
-    public ReadingToDistance newInstance() {
-        return clone();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (!(obj instanceof ReadingToDistance)) {
-            return false;
-        }
-
-        return ((ReadingToDistance) obj).range == range;
     }
 }
