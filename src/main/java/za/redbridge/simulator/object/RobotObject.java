@@ -59,6 +59,9 @@ public class RobotObject extends PhysicalObject {
 
     private final Paint defaultPaint;
 
+    private double totalDisplacement;
+    private Vec2 previousPosition;
+
     public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
             Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
         super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
@@ -72,6 +75,8 @@ public class RobotObject extends PhysicalObject {
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);
         leftWheelPosition = new Vec2(0f, wheelDistance);
         rightWheelPosition = new Vec2(0f, -wheelDistance);
+
+        previousPosition = new Vec2();
     }
 
     private void initSensors() {
@@ -142,6 +147,12 @@ public class RobotObject extends PhysicalObject {
         applyWheelDrive((float) wheelDrives.y, rightWheelPosition);
 
         updateFriction();
+
+        if (sim.schedule.getSteps() % 500 == 0) {
+            Vec2 currentPosition = this.getBody().getPosition();
+            totalDisplacement += currentPosition.sub(previousPosition).length();
+            previousPosition = currentPosition;
+        }
     }
 
     private void applyWheelDrive(float wheelDrive, Vec2 wheelPosition) {
