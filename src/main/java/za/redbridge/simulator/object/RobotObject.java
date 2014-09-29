@@ -151,7 +151,7 @@ public class RobotObject extends PhysicalObject {
         if (sim.schedule.getSteps() % 500 == 0) {
             Vec2 currentPosition = this.getBody().getPosition();
             totalDisplacement += currentPosition.sub(previousPosition).length();
-            previousPosition = currentPosition;
+            previousPosition = currentPosition.clone();
         }
     }
 
