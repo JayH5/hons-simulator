@@ -1,6 +1,6 @@
 ---
 simulation:
-  iterations: 100
+  iterations: 10000
 resourceProperties:
   smallResources: 20
   smallObjectWidth: 0.4

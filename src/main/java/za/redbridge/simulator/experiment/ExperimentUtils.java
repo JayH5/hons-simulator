@@ -81,7 +81,7 @@ public class ExperimentUtils {
             Matcher fileMatcher = morphologyFilePattern.matcher(name);
 
             if (fileMatcher.find()) {
-                morphologies.put(new MorphologyConfig(assignedPath.resolve(name).normalize().toString()), name);
+                morphologies.put(new MorphologyConfig(name), name);
             }
         }
 

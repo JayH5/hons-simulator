@@ -1,0 +1,9 @@
+
+BUILD FAILED
+
+Total time: 4.068 secs
+:compileJava
+
+BUILD FAILED
+
+Total time: 5.124 secs
