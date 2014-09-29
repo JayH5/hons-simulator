@@ -1,9 +1,0 @@
-
-BUILD FAILED
-
-Total time: 7.877 secs
-:compileJava
-
-BUILD FAILED
-
-Total time: 9.387 secs
