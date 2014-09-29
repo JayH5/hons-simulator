@@ -2,7 +2,7 @@ package za.redbridge.simulator.factories;
 
 import org.jbox2d.dynamics.World;
 
-import java.awt.Paint;
+import java.awt.Color;
 
 import za.redbridge.simulator.PlacementArea;
 import za.redbridge.simulator.config.SimConfig;
@@ -12,15 +12,15 @@ import za.redbridge.simulator.phenotype.Phenotype;
 public class HomogeneousRobotFactory implements RobotFactory {
     protected double mass;
     protected double radius;
-    protected Paint paint;
+    protected Color color;
     protected Phenotype phenotype;
     protected int numRobots;
 
-    public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Paint paint, int numRobots) {
+    public HomogeneousRobotFactory(Phenotype phenotype, double mass, double radius, Color color, int numRobots) {
         this.phenotype = phenotype;
         this.mass = mass;
         this.radius = radius;
-        this.paint = paint;
+        this.color = color;
         this.numRobots = numRobots;
     }
 
@@ -32,8 +32,8 @@ public class HomogeneousRobotFactory implements RobotFactory {
 
             Phenotype phenotype = this.phenotype.clone();
 
-            RobotObject robot =
-                    new RobotObject(world, space.getPosition(), radius, mass, paint, phenotype, targetAreaPlacement);
+            RobotObject robot = new RobotObject(world, space.getPosition(), radius, mass, color,
+                    phenotype, targetAreaPlacement);
 
             placementArea.placeObject(space, robot);
         }
