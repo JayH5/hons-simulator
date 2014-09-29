@@ -17,3 +17,6 @@ build/
 # IDE
 *.iml
 .idea/
+
+*.morphology
+*.tmp

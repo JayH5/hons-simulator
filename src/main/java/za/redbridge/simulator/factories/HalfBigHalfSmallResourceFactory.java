@@ -57,4 +57,9 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
 
     @Override
     public void configure(Map<String, Object> resourceConfigs) {}
+
+    @Override
+    public int getNumberOfResources() {
+        return DEFAULT_OBJECTS_RESOURCES_LARGE + DEFAULT_OBJECTS_RESOURCES_SMALL;
+    }
 }
