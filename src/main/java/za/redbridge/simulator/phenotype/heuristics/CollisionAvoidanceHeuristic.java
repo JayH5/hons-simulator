@@ -1,7 +1,6 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +18,7 @@ import static za.redbridge.simulator.Utils.jitter;
  */
 public class CollisionAvoidanceHeuristic extends Heuristic {
 
-    private static final Paint PAINT = Color.RED;
+    private static final Color COLOR = Color.RED;
 
     protected final CollisionSensor collisionSensor;
 
@@ -40,8 +39,8 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
     }
 
     @Override
-    Paint getPaint() {
-        return PAINT;
+    Color getColor() {
+        return COLOR;
     }
 
     @Override

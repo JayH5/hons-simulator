@@ -28,7 +28,7 @@ import za.redbridge.simulator.portrayal.RectanglePortrayal;
 public class ResourceObject extends PhysicalObject {
 
     private static final Paint DEFAULT_COLOUR = new Color(255, 235, 82);
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public enum Side {
         LEFT, RIGHT, TOP, BOTTOM
