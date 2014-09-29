@@ -28,8 +28,8 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
     private static final boolean PICKUP_HEURISTIC_ENABLED = true;
     private static final boolean COLLISION_HEURISTIC_ENABLED = false;
 
-    private static final float PICKUP_SENSOR_WIDTH = 0.05f;
-    private static final float PICKUP_SENSOR_HEIGHT = 0.1f;
+    private static final float PICKUP_SENSOR_WIDTH = 0.1f;
+    private static final float PICKUP_SENSOR_HEIGHT = 0.2f;
 
     // Make sure this is > robot radius
     private static final float COLLISION_SENSOR_RADIUS = 0.55f;
