@@ -92,8 +92,8 @@ public class MasterExperimentController {
     NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
     MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
 
-    IOUtils.writeNetwork(bestNetwork, outputDir + "bestNetwork.tmp");
-    bestMorphology.dumpMorphology(outputDir + "bestMorphology.yml");
+    IOUtils.writeNetwork(bestNetwork, outputDir, "bestNetwork.tmp");
+    bestMorphology.dumpMorphology(outputDir, "bestMorphology.yml");
 
     }
 

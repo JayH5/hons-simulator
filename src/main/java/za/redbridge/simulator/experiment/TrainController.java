@@ -111,10 +111,10 @@ public class TrainController implements Runnable{
             System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
 
             long time = System.currentTimeMillis();
-
-            IOUtils.writeNetwork(scoreCache.last().getNetwork(), "results/" + time + "bestnetworkat" + epochs+".tmp");
-            morphologyConfig.dumpMorphology("results/" + time + "bestmorphologyat" + epochs+".tmp");
-
+/*
+            IOUtils.writeNetwork(scoreCache.last().getNetwork(), "results/", + time + "bestnetworkat" + epochs+".tmp");
+            morphologyConfig.dumpMorphology("results/", time + "bestmorphologyat" + epochs+".tmp");
+*/
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             scoreCache.clear();
@@ -128,8 +128,8 @@ public class TrainController implements Runnable{
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/bestNetwork" + testSetID + ".tmp");
-        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "bestMorphology" + testSetID + ".tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/", ExperimentUtils.getIP() + "/bestNetwork" + testSetID + ".tmp");
+        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
 
     }
 

@@ -81,7 +81,7 @@ public class ComplementDistributor {
             }
 
             for (Map.Entry<MorphologyConfig,String> morphology: assigned.getValue().entrySet()) {
-                morphology.getKey().dumpMorphology("shared/" + assigned.getKey() + "/morphologies/" + morphology.getValue() + ".morphology");
+                morphology.getKey().dumpMorphology("shared/" + assigned.getKey() + "/morphologies/", morphology.getValue() + ".morphology");
             }
         }
 

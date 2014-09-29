@@ -21,6 +21,9 @@ public class SimulationVisual {
 
     public SimulationVisual(SimConfig simulationConfiguration, String controllerFile, String morphologyFile) {
 
+        String[] splitPath = controllerFile.split("/");
+        String filename = splitPath[splitPath.length-2];
+
         network = IOUtils.readNetwork(controllerFile);
         morphologyConfig = new MorphologyConfig(morphologyFile);
         this.simulationConfiguration = simulationConfiguration;

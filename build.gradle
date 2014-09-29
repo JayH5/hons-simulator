@@ -9,7 +9,6 @@ repositories {
     }
 }
 
-
 dependencies {
   compile 'edu.gmu.mason:mason:18-SNAPSHOT'
   compile 'org.jbox2d:jbox2d-library:2.3.1-SNAPSHOT'

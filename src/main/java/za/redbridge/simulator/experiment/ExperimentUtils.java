@@ -9,6 +9,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,20 +62,26 @@ public class ExperimentUtils {
         }
 
         HashMap<MorphologyConfig,String> morphologies = new HashMap<>();
-        File morphologyFolder = new File("shared/" + IP + "/morphologies");
+        Path assignedPath = Paths.get("shared/" + IP + "/morphologies");
+        ArrayList<String> fileNames = new ArrayList<>();
 
-        System.out.println(morphologyFolder.getAbsolutePath());
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(assignedPath)) {
 
-        File[] morphologyFiles = morphologyFolder.listFiles();
+            for (Path path : directoryStream) {
+                fileNames.add(path.toString());
+            }
 
-        for (File file: morphologyFiles) {
+        } catch (IOException ex) {}
+
+
+        for (String name: fileNames) {
 
             //TODO: trim serial
             Pattern morphologyFilePattern = Pattern.compile(Long.toString(timestamp)+"[:][0-9]+.morphology");
-            Matcher fileMatcher = morphologyFilePattern.matcher(file.getName());
+            Matcher fileMatcher = morphologyFilePattern.matcher(name);
 
             if (fileMatcher.find()) {
-                morphologies.put(new MorphologyConfig(file.getPath()), file.getName());
+                morphologies.put(new MorphologyConfig(assignedPath.resolve(name).normalize().toString()), name);
             }
         }
 

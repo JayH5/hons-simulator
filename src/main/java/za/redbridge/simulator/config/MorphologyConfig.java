@@ -11,6 +11,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -275,7 +276,7 @@ public class MorphologyConfig extends Config implements Serializable {
         return output;
     }
 
-    public void dumpMorphology(String filename) {
+    public void dumpMorphology(String path, String filename) {
 
         Map<String,Object> yamlDump = new HashMap<>();
         Map<String,Object> meta = new HashMap<>();
@@ -320,14 +321,20 @@ public class MorphologyConfig extends Config implements Serializable {
 
         Yaml yaml = new Yaml();
         StringWriter stringWriter = new StringWriter();
-        FileWriter fileWriter = null;
+        Path outputPath = Paths.get(path);
 
         try {
-            fileWriter = new FileWriter(filename);
+            Files.createDirectories(outputPath);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath.resolve(filename))){
+
             yaml.dump(yamlDump, stringWriter);
             fileWriter.write(stringWriter.toString());
-            //System.out.println(stringWriter.toString());
-            fileWriter.close();
         }
         catch (IOException e) {
             System.out.println("Error dumping morphology.");

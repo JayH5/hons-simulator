@@ -3,17 +3,20 @@ package za.redbridge.simulator.experiment;
 import org.encog.neural.neat.NEATNetwork;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by shsu on 2014/09/19.
  */
 public class IOUtils {
 
-    public static void writeNetwork(NEATNetwork network, String filename) {
+    public static void writeNetwork(NEATNetwork network, String path, String filename) {
 
-        try {
-            FileOutputStream fileWriter = new FileOutputStream(filename);
-            ObjectOutputStream objectWriter = new ObjectOutputStream(fileWriter);
+        Path outputPath = Paths.get(path).resolve(filename);
+
+        try (ObjectOutputStream objectWriter = new ObjectOutputStream(Files.newOutputStream(outputPath))) {
 
             objectWriter.writeObject(network);
         } catch (FileNotFoundException f) {
@@ -24,16 +27,40 @@ public class IOUtils {
         }
     }
 
-    public static NEATNetwork readNetwork(String filename) {
+    public static NEATNetwork readNetwork(String path, String filename) {
 
         Object o = null;
+        Path inputPath = Paths.get(path);
 
-        try {
-            FileInputStream fileReader = new FileInputStream(filename);
+        try (InputStream fileReader = Files.newInputStream(inputPath.resolve(filename))){
+
             ObjectInputStream objectReader = new ObjectInputStream(fileReader);
             o = objectReader.readObject();
         } catch (FileNotFoundException f) {
             System.out.println("File " + filename + " not found; aborting.");
+            System.exit(0);
+        } catch (IOException e) {
+            System.out.println("Error reading network from file.");
+            e.printStackTrace();
+            System.exit(0);
+        } catch (ClassNotFoundException c) {
+            System.out.println("Class not found.");
+        }
+
+        return (NEATNetwork) o;
+    }
+
+    public static NEATNetwork readNetwork(String fullPath) {
+
+        Object o = null;
+        Path inputPath = Paths.get(fullPath);
+
+        try (InputStream fileReader = Files.newInputStream(inputPath)){
+
+            ObjectInputStream objectReader = new ObjectInputStream(fileReader);
+            o = objectReader.readObject();
+        } catch (FileNotFoundException f) {
+            System.out.println("File " + fullPath + " not found; aborting.");
             System.exit(0);
         } catch (IOException e) {
             System.out.println("Error reading network from file.");
