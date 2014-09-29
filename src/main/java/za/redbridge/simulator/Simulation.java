@@ -161,7 +161,7 @@ public class Simulation extends SimState {
         config.setSimulationSeed(seed);
     }
 
-    private double getRobotAvgDisplacement() {
+    public double getRobotAvgDisplacement() {
         Set<PhysicalObject> objects = placementArea.getPlacedObjects();
         double totalDisplacement = 0.0;
 
