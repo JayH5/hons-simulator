@@ -2,7 +2,7 @@ package za.redbridge.simulator.config;
 
 import org.yaml.snakeyaml.Yaml;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
@@ -13,7 +13,6 @@ import java.util.Map;
 import za.redbridge.simulator.ea.DefaultFitnessFunction;
 import za.redbridge.simulator.ea.FitnessFunction;
 import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.factories.ResourceFactory;
 
 public class SimConfig extends Config {
@@ -28,7 +27,7 @@ public class SimConfig extends Config {
 
     private static final double DEFAULT_ROBOT_MASS = 0.7;
     private static final double DEFAULT_ROBOT_RADIUS = 0.15;
-    private static final Paint DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
+    private static final Color DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
 
 
     private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
@@ -49,7 +48,7 @@ public class SimConfig extends Config {
     private final int objectsRobots;
     private final double robotMass;
     private final double robotRadius;
-    private final Paint robotColour;
+    private final Color robotColour;
 
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
@@ -70,7 +69,7 @@ public class SimConfig extends Config {
     public SimConfig(long simulationSeed, int simulationIterations,
                      int environmentWidth, int environmentHeight,
                      Direction targetAreaPlacement, int targetAreaThickness,
-                     int objectsRobots, double robotMass, double robotRadius, Paint robotColour,
+                     int objectsRobots, double robotMass, double robotRadius, Color robotColour,
                      FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
                      String robotFactoryName) {
 
@@ -115,7 +114,7 @@ public class SimConfig extends Config {
 
         double rMass = DEFAULT_ROBOT_MASS;
         double rRadius = DEFAULT_ROBOT_RADIUS;
-        Paint robotColour = DEFAULT_ROBOT_COLOUR;
+        Color robotColour = DEFAULT_ROBOT_COLOUR;
 
         FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
 
@@ -313,7 +312,7 @@ public class SimConfig extends Config {
         return objectsRobots;
     }
 
-    public Paint getRobotColour() { return robotColour; }
+    public Color getRobotColour() { return robotColour; }
 
     public double getRobotMass() { return robotMass; }
 

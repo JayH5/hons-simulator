@@ -6,6 +6,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Drawable;
+import za.redbridge.simulator.portrayal.PolygonPortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
 
@@ -57,17 +59,20 @@ public class RobotObject extends PhysicalObject {
 
     private boolean isBoundToResource = false;
 
-    private final Paint defaultPaint;
+    private final Color defaultColor;
 
     private double totalDisplacement;
     private Vec2 previousPosition;
 
-    public RobotObject(World world, Double2D position, double radius, double mass, Paint paint,
+    private final Portrayal directionPortrayal = new DirectionPortrayal();
+
+    public RobotObject(World world, Double2D position, double radius, double mass, Color color,
             Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
-        super(createPortrayal(radius, paint), createBody(world, position, radius, mass));
+        super(createPortrayal(radius, color), createBody(world, position, radius, mass));
 
         this.phenotype = phenotype;
-        this.defaultPaint = paint;
+        this.defaultColor = color;
+        directionPortrayal.setPaint(invertColor(color));
 
         heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPlacement);
         initSensors();
@@ -88,6 +93,7 @@ public class RobotObject extends PhysicalObject {
         getPortrayal().setChildDrawable(new Drawable() {
             @Override
             public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+                directionPortrayal.draw(object, graphics, info);
                 heuristicPhenotype.draw(object, graphics, info);
                 for (AgentSensor sensor : phenotype.getSensors()) {
                     Portrayal portrayal = sensor.getPortrayal();
@@ -99,6 +105,7 @@ public class RobotObject extends PhysicalObject {
 
             @Override
             public void setTransform(Transform transform) {
+                directionPortrayal.setTransform(transform);
                 heuristicPhenotype.setTransform(transform);
                 for (AgentSensor sensor : phenotype.getSensors()) {
                     Portrayal portrayal = sensor.getPortrayal();
@@ -230,7 +237,37 @@ public class RobotObject extends PhysicalObject {
         this.isBoundToResource = isBoundToResource;
     }
 
-    public void resetPaintToDefault() {
-        getPortrayal().setPaint(defaultPaint);
+    public void setColor(Color color) {
+        if (color == null) {
+            color = defaultColor;
+        }
+
+        getPortrayal().setPaint(color);
+        directionPortrayal.setPaint(invertColor(color));
+    }
+
+    private static Color invertColor(Color color) {
+        return new Color(255 - color.getRed(), 255 - color.getGreen(), 255 - color.getBlue());
+    }
+
+    private static class DirectionPortrayal extends PolygonPortrayal {
+
+        static final float WIDTH = 0.1f;
+        static final float HEIGHT = 0.2f;
+        static final float THICKNESS = 0.1f;
+
+        DirectionPortrayal() {
+            super(6);
+
+            final float halfWidth = WIDTH / 2;
+            final float halfHeight = HEIGHT / 2;
+            final float halfThickness = THICKNESS / 2;
+            vertices[0].set(-halfWidth + halfThickness, halfHeight);
+            vertices[1].set(halfWidth + halfThickness, 0f);
+            vertices[2].set(-halfWidth + halfThickness, -halfHeight);
+            vertices[3].set(-halfWidth - halfThickness, -halfHeight);
+            vertices[4].set(halfWidth - halfThickness, 0f);
+            vertices[5].set(-halfWidth - halfThickness, halfHeight);
+        }
     }
 }

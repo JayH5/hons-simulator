@@ -3,6 +3,7 @@ package za.redbridge.simulator.phenotype.heuristics;
 import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 
+import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
 
@@ -37,10 +38,10 @@ public abstract class Heuristic implements Comparable<Heuristic> {
     abstract Double2D step(List<List<Double>> list);
 
     /**
-     * Paint used to change colour of robot as each heuristic takes over.
-     * @return the paint to colour the agent when the heuristic returns a value
+     * Color used to change colour of robot as each heuristic takes over.
+     * @return the color to colour the agent when the heuristic returns a value
      */
-    abstract Paint getPaint();
+    abstract Color getColor();
 
     /**
      * Get the sensor for this heuristic. May return null if no sensor is used.

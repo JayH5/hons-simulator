@@ -1,7 +1,6 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.util.List;
 
 import sim.util.Double2D;
@@ -20,7 +19,8 @@ import static za.redbridge.simulator.Utils.wrapAngle;
  */
 public class PickupHeuristic extends Heuristic {
 
-    private static final Paint PAINT = Color.GREEN;
+    private static final Color COLOR = Color.GREEN;
+    private static final boolean ENABLE_PICKUP_POSITIONING = false;
 
     protected final PickupSensor pickupSensor;
     protected final SimConfig.Direction targetAreaDirection;
@@ -61,8 +61,8 @@ public class PickupHeuristic extends Heuristic {
     }
 
     @Override
-    Paint getPaint() {
-        return PAINT;
+    Color getColor() {
+        return COLOR;
     }
 
     @Override

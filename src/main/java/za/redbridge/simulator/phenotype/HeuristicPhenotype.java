@@ -65,8 +65,7 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
 
     @Override
     public HeuristicPhenotype clone() {
-        return new HeuristicPhenotype(controllerPhenotype.clone(), robot,
-                targetAreaPlacement);
+        return new HeuristicPhenotype(controllerPhenotype.clone(), robot, targetAreaPlacement);
     }
 
     @Override
@@ -84,7 +83,7 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
         Double2D wheelDrives = schedule.step(list);
 
         if (wheelDrives == null) {
-            robot.resetPaintToDefault();
+            robot.setColor(null);
             wheelDrives = controllerPhenotype.step(list);
         }
 

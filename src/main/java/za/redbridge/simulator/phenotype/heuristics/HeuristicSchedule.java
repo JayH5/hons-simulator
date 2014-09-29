@@ -29,7 +29,7 @@ public class HeuristicSchedule {
             wheelDrive = heuristic.step(readings);
             if (wheelDrive != null) {
                 // Update the robot's paint
-                heuristic.getRobot().getPortrayal().setPaint(heuristic.getPaint());
+                heuristic.getRobot().setColor(heuristic.getColor());
                 break;
             }
         }
