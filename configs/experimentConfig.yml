@@ -1,5 +1,5 @@
 control:
-  maxEpochs: 1000
+  maxEpochs: 200
   runsPerGenome: 3
 
 phenotype:
@@ -7,7 +7,7 @@ phenotype:
 
 evolutionaryAlgorithm:
   controllerEA: NEAT
-  populationSize: 100
+  populationSize: 50
   GAPopulationSize: 20
 
 complements:

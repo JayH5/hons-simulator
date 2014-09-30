@@ -14,9 +14,17 @@ public class IOUtils {
 
     public static void writeNetwork(NEATNetwork network, String path, String filename) {
 
-        Path outputPath = Paths.get(path).resolve(filename);
+        Path outputPath = Paths.get(path);
 
-        try (ObjectOutputStream objectWriter = new ObjectOutputStream(Files.newOutputStream(outputPath))) {
+        try {
+            Files.createDirectories(outputPath);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        try (ObjectOutputStream objectWriter = new ObjectOutputStream(Files.newOutputStream(outputPath.resolve(filename)))) {
 
             objectWriter.writeObject(network);
         } catch (FileNotFoundException f) {

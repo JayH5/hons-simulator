@@ -1,23 +1,18 @@
 package za.redbridge.simulator.experiment;
 
 import org.apache.commons.math3.stat.StatUtils;
-import org.encog.engine.network.activation.ActivationSteepenedSigmoid;
-import org.encog.engine.network.activation.ActivationTANH;
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
-import org.encog.neural.neat.NEATUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.NNScoreCalculator;
-import za.redbridge.simulator.factories.ComplementFactory;
-import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -47,8 +42,12 @@ public class TrainController implements Runnable{
 
     private long testSetID;
 
+    private double[] previousCache;
+
     //the best-performing network for this complement
     private NEATNetwork bestNetwork;
+
+    private static Logger controllerTrainingLogger = LoggerFactory.getLogger(TrainController.class);
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
@@ -65,6 +64,8 @@ public class TrainController implements Runnable{
 
         this.thisIP = ExperimentUtils.getIP();
         this.testSetID = testSetID;
+
+        this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
@@ -111,12 +112,17 @@ public class TrainController implements Runnable{
             System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
 
             long time = System.currentTimeMillis();
-/*
-            IOUtils.writeNetwork(scoreCache.last().getNetwork(), "results/", + time + "bestnetworkat" + epochs+".tmp");
-            morphologyConfig.dumpMorphology("results/", time + "bestmorphologyat" + epochs+".tmp");
-*/
+
+            if (epochs % 5 == 0) {
+                IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/", ExperimentUtils.getIP() + "/best_network_at_" + epochs + ".tmp");
+                morphologyConfig.dumpMorphology("results/", ExperimentUtils.getIP() + "/best_morphology_at_" + epochs + ".tmp");
+            }
+
+            //do some stats comparison stuff here
+
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
+            previousCache = getEpochScoreData();
             scoreCache.clear();
 
             long duration = (System.currentTimeMillis() - start)/1000;
@@ -137,7 +143,9 @@ public class TrainController implements Runnable{
 
     public Map.Entry<ComparableNEATNetwork,Integer> getHighestEntry() { return leaderBoard.lastEntry(); }
 
-    private synchronized double getEpochMeanScore() {
+    private synchronized double getEpochMeanScore() { return StatUtils.mean(getEpochScoreData()); }
+
+    private synchronized double[] getEpochScoreData() {
 
         double[] scores = new double[scoreCache.size()];
         int counter = 0;
@@ -148,6 +156,15 @@ public class TrainController implements Runnable{
             counter++;
         }
 
-        return StatUtils.mean(scores);
+        return scores;
+    }
+
+    private synchronized double getVariance() { return StatUtils.variance(getEpochScoreData()); }
+
+    private synchronized double mannWhitneyImprovementTest() {
+
+        MannWhitneyUTest mwTest = new MannWhitneyUTest();
+
+        return mwTest.mannWhitneyU(getEpochScoreData(), previousCache);
     }
 }
