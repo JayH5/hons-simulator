@@ -125,7 +125,7 @@ public class TrainController implements Runnable{
             scoreCache.clear();
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
-            controllerTrainingLogger.debug("Epoch took " + minutes + " seconds.");
+            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
 
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
