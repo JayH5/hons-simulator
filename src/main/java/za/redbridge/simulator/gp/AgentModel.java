@@ -71,8 +71,8 @@ public class AgentModel extends GPModel {
        syntax.add(new Literal(new Bearing(2*P2)));
        syntax.add(new Literal(new Bearing(3*P2)));
 
-       syntax.add(new Literal(0.0f));
-       syntax.add(new Literal(1.0f));
+       //syntax.add(new Literal(0.0));
+       //syntax.add(new Literal(1.0));
        //syntax.add(new Literal(2.0));
        //syntax.add(new Literal(3.0));
 
@@ -82,6 +82,7 @@ public class AgentModel extends GPModel {
        syntax.add(new ReadingToCoordinate());
        syntax.add(new ReadingToDistance());
        syntax.add(new ReadingToFloat());
+       syntax.add(new ReadingToBoolean());
        syntax.add(new RotateCoordinate());
        syntax.add(new BearingFromCoordinate());
        syntax.add(new RandomBearing());
