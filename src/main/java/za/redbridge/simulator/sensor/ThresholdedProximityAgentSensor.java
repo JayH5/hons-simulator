@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by shsu on 2014/09/15.
  */
-public class ThresholdedProximityAgentSensor extends ProximityAgentSensor {
+public class ThresholdedProximityAgentSensor extends AdjustableSensitivityAgentSensor {
 
     private static final int readingSize = 1;
     private double sensitivity;
@@ -77,7 +77,12 @@ public class ThresholdedProximityAgentSensor extends ProximityAgentSensor {
         return cloned;
     }
 
+    @Override
     public void setSensitivity(double sensitivity) { this.sensitivity = sensitivity; }
 
+    @Override
     public double getSensitivity() { return sensitivity; }
+
+    @Override
+    public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 }

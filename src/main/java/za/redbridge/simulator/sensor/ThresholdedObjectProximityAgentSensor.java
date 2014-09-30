@@ -19,7 +19,7 @@ import java.util.Map;
  * Created by shsu on 2014/09/15.
  */
 //Object types are analogous to colours
-public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
+public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivityAgentSensor {
 
     protected static final int readingSize = 1;
     protected double sensitivity;
@@ -182,8 +182,10 @@ public class ThresholdedObjectProximityAgentSensor extends AgentSensor {
         return cloned;
     }
 
+    @Override
     public void setSensitivity(double sensitivity) { this.sensitivity = sensitivity; }
 
+    @Override
     public double getSensitivity() { return sensitivity; }
 
     @Override

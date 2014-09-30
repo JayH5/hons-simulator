@@ -3,27 +3,19 @@ package za.redbridge.simulator.ea;
 import org.apache.commons.math3.stat.StatUtils;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
-
 import org.encog.neural.neat.NEATNetwork;
-import org.jbox2d.dynamics.World;
-import sim.display.Console;
-import za.redbridge.simulator.PlacementArea;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import za.redbridge.simulator.Simulation;
-import za.redbridge.simulator.SimulationGUI;
+import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.experiment.ComparableNEATNetwork;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.factories.ResourceFactory;
-import za.redbridge.simulator.factories.RobotFactory;
-import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.phenotype.ChasingPhenotype;
 import za.redbridge.simulator.phenotype.NEATPhenotype;
 
-import java.awt.*;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+
 
 /**
  * Created by shsu on 2014/08/13.
@@ -39,6 +31,8 @@ public class NNScoreCalculator implements CalculateScore {
     //stores fitnesses of population
     private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
     private final boolean threadSubruns;
+
+    private static Logger neuralScoreLogger = LoggerFactory.getLogger(NNScoreCalculator.class);
 
     public NNScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
                              MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache,
@@ -98,7 +92,7 @@ public class NNScoreCalculator implements CalculateScore {
         }
 
         double score = StatUtils.mean(performances);
-        System.out.println("Score for this NEAT controller: " + score);
+        neuralScoreLogger.debug("Score for this NEAT controller: " + score);
         scoreCache.add(new ComparableNEATNetwork((NEATNetwork) method, score));
 
         return score;

@@ -3,6 +3,7 @@ package za.redbridge.simulator.config;
 import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
 import za.redbridge.simulator.factories.ComplementFactory;
+import za.redbridge.simulator.sensor.AdjustableSensitivityAgentSensor;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
 import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
@@ -365,6 +366,29 @@ public class MorphologyConfig extends Config implements Serializable {
         }
 
         return new MorphologyConfig(newSensors);
+    }
+
+    public String sensitivitiesToString() {
+
+        String output = "";
+
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof AdjustableSensitivityAgentSensor) {
+                output += sensor.getClass().getSimpleName() + "\t";
+            }
+        }
+
+        output += "\n";
+
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof AdjustableSensitivityAgentSensor) {
+                output += ((AdjustableSensitivityAgentSensor) sensor).getSensitivity() + "\t";
+            }
+        }
+
+        return output;
     }
 
 }

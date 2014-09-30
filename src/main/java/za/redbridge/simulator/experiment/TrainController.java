@@ -13,6 +13,8 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.NNScoreCalculator;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -82,6 +84,8 @@ public class TrainController implements Runnable{
         this.threadSubruns = threadSubruns;
 
         this.thisIP = ExperimentUtils.getIP();
+
+        this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
     public void run() {
@@ -98,45 +102,38 @@ public class TrainController implements Runnable{
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
-        int epochs = 1;
-
+        controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
+        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitheyU");
         do {
 
-            long start = System.currentTimeMillis();
+            int epochs = train.getIteration()+1;
+            Instant start = Instant.now();
 
-            System.out.println("Controller Trainer Epoch #" + train.getIteration());
             train.iteration();
-            epochs++;
 
-            System.out.println("Average performance of controllers in this epoch scored: " + getEpochMeanScore());
-            System.out.println("Best-performing controller of this epoch scored " + scoreCache.last().getScore());
+            controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
+                    "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
 
-            long time = System.currentTimeMillis();
-
-            if (epochs % 5 == 0) {
+            if (train.getIteration() % 5 == 0) {
                 IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/", ExperimentUtils.getIP() + "/best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/", ExperimentUtils.getIP() + "/best_morphology_at_" + epochs + ".tmp");
             }
-
-            //do some stats comparison stuff here
 
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             previousCache = getEpochScoreData();
             scoreCache.clear();
 
-            long duration = (System.currentTimeMillis() - start)/1000;
+            long minutes = Duration.between(start, Instant.now()).toMinutes();
+            controllerTrainingLogger.debug("Epoch took " + minutes + " seconds.");
 
-            System.out.println("Epoch took " + duration + " seconds.");
-
-        } while(epochs <= experimentConfig.getMaxEpochs());
+        } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
         IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/", ExperimentUtils.getIP() + "/bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
-
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
