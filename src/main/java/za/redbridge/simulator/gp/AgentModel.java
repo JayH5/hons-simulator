@@ -5,7 +5,6 @@ import org.epochx.epox.Literal;
 import org.epochx.epox.Node;
 import org.epochx.epox.Variable;
 import org.epochx.epox.lang.IfFunction;
-import org.epochx.epox.math.*;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
@@ -14,9 +13,7 @@ import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.functions.*;
-import za.redbridge.simulator.gp.types.Bearing;
-import za.redbridge.simulator.gp.types.ProximityReading;
-import za.redbridge.simulator.gp.types.WheelDrive;
+import za.redbridge.simulator.gp.types.*;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 
@@ -64,17 +61,18 @@ public class AgentModel extends GPModel {
        */
 
        syntax.add(new IfFunction());
-       syntax.add(new GreaterThanFunction());
+       syntax.add(new GT());
 
        syntax.add(new Literal(new Bearing(0.0f)));
        syntax.add(new Literal(new Bearing(P2)));
        syntax.add(new Literal(new Bearing(2*P2)));
        syntax.add(new Literal(new Bearing(3*P2)));
 
-       //syntax.add(new Literal(0.0));
-       //syntax.add(new Literal(1.0));
-       //syntax.add(new Literal(2.0));
-       //syntax.add(new Literal(3.0));
+       syntax.add(new Literal(new GPFloatLiteral(0.0f)));
+       syntax.add(new Literal(new GPFloatLiteral(1.0f)));
+       syntax.add(new RandomGPFloat());
+       //syntax.add(new Literal(new FloatLiteral(2.0f)));
+       //syntax.add(new Literal(new FloatLiteral(3.0f)));
 
        syntax.add(new WheelDriveFromFloats());
        syntax.add(new WheelDriveFromBearing());

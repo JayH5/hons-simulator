@@ -2,7 +2,6 @@ package za.redbridge.simulator.gp;
 
 import org.epochx.epox.Variable;
 import za.redbridge.simulator.gp.types.Bearing;
-import za.redbridge.simulator.gp.types.FloatVariable;
 import za.redbridge.simulator.gp.types.ProximityReading;
 import za.redbridge.simulator.gp.types.RelativeCoordinate;
 import za.redbridge.simulator.sensor.AgentSensor;

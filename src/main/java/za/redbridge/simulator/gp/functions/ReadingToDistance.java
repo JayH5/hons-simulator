@@ -3,6 +3,7 @@ package za.redbridge.simulator.gp.functions;
 import org.epochx.epox.Node;
 import org.epochx.tools.util.TypeUtils;
 import za.redbridge.simulator.gp.types.Bearing;
+import za.redbridge.simulator.gp.types.GPFloat;
 import za.redbridge.simulator.gp.types.ProximityReading;
 import za.redbridge.simulator.gp.types.RelativeCoordinate;
 
@@ -25,11 +26,11 @@ public class ReadingToDistance extends Node {
         return "READINGTODISTANCE";
     }
 
-    public Float evaluate(){
+    public GPFloat evaluate(){
         Object reading = getChild(0).evaluate();
         if(reading.getClass() == ProximityReading.class) {
             ProximityReading r = (ProximityReading)reading;
-            return r.getDistance();
+            return new GPFloat(r.getDistance());
         }
         else return null;
     }
@@ -37,7 +38,7 @@ public class ReadingToDistance extends Node {
     @Override
     public Class<?> getReturnType(final Class<?> ... inputTypes) {
         if (inputTypes.length == 1 && inputTypes[0] == ProximityReading.class) {
-            return Float.class;
+            return GPFloat.class;
         } else{
             return null;
         }
