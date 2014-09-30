@@ -3,6 +3,7 @@ package za.redbridge.simulator.gp.functions;
 import org.epochx.epox.Node;
 import za.redbridge.simulator.gp.types.Bearing;
 import za.redbridge.simulator.gp.types.GPFloat;
+import za.redbridge.simulator.gp.types.GPFloatVariable;
 
 /**
  * Created by xenos on 9/10/14.
@@ -15,17 +16,17 @@ public class RandomGPFloat extends Node {
 
     @Override
     public String getIdentifier(){
-        return "RANDOMGPFLOAT";
+        return "RANDOMFLOAT";
     }
 
-    public GPFloat evaluate(){
-        return new GPFloat((float)Math.random()*2 - 1);
+    public GPFloatVariable evaluate(){
+        return new GPFloatVariable((float)Math.random()*2 - 1);
     }
 
     @Override
     public Class<?> getReturnType(final Class<?> ... inputTypes) {
         if (inputTypes.length == 0) {
-            return GPFloat.class;
+            return GPFloatVariable.class;
         } else{
             return null;
         }

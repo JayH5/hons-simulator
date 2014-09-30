@@ -7,7 +7,7 @@ import java.util.Optional;
  * An abstraction of a float; done for the ability to differentiate float literals (which are disallowed in both branches of a GT) and variable-derived floats.
  * The actual Float class is banned from our GP.
  */
-public class GPFloat {
+public abstract class GPFloat {
     protected float value;
     public GPFloat(float value){
         this.value = value;
@@ -18,11 +18,10 @@ public class GPFloat {
 
     public static Optional<Float> maybeFloat(Object x){
         if(isNumeric(x.getClass())) return Optional.of(((GPFloat) x).getValue());
-        else if(x instanceof GPFloatLiteral) return Optional.of(((GPFloatLiteral) x).getValue());
         else return Optional.empty();
     }
 
     public static boolean isNumeric(Class x){
-        return GPFloat.class.isAssignableFrom(x);
+        return GPFloat.class.isAssignableFrom(x) && x != GPFloat.class;
     }
 }

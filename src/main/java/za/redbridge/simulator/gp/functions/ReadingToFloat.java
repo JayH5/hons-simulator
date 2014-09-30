@@ -2,6 +2,7 @@ package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
 import za.redbridge.simulator.gp.types.GPFloat;
+import za.redbridge.simulator.gp.types.GPFloatVariable;
 import za.redbridge.simulator.gp.types.ProximityReading;
 
 /**
@@ -23,11 +24,11 @@ public class ReadingToFloat extends Node {
         return "READINGTOFLOAT";
     }
 
-    public GPFloat evaluate(){
+    public GPFloatVariable evaluate(){
         Object reading = getChild(0).evaluate();
         if(reading.getClass() == ProximityReading.class) {
             ProximityReading r = (ProximityReading)reading;
-            return new GPFloat(r.getValue());
+            return new GPFloatVariable(r.getValue());
         }
         else return null;
     }
@@ -35,7 +36,7 @@ public class ReadingToFloat extends Node {
     @Override
     public Class<?> getReturnType(final Class<?> ... inputTypes) {
         if (inputTypes.length == 1 && inputTypes[0] == ProximityReading.class) {
-            return GPFloat.class;
+            return GPFloatVariable.class;
         } else{
             return null;
         }

@@ -30,6 +30,7 @@ import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.op.ConfigOperator;
 import org.epochx.representation.CandidateProgram;
 import org.epochx.tools.random.RandomNumberGenerator;
+import za.redbridge.simulator.gp.types.GPFloat;
 
 /**
  * Initialisation implementation which randomly grows program trees down to a
