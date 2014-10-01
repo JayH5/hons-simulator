@@ -12,11 +12,11 @@ import za.redbridge.simulator.phenotype.heuristics.Heuristic;
 public class WheelDriveFromBearing extends Node {
 
     public WheelDriveFromBearing(){
-        this(null, null);
+        this(null);
     }
 
-    public WheelDriveFromBearing(final Node c1, final Node c2){
-        super(c1,c2);
+    public WheelDriveFromBearing(final Node c1){
+        super(c1);
     }
     @Override
     public String getIdentifier(){
