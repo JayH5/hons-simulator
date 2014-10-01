@@ -19,6 +19,15 @@ public class PolygonSensedObject extends SensedObject<Rectangle2D> {
 
     private Rectangle2D shape;
 
+    /**
+     *
+     * @param object The object detected
+     * @param distance The estimated distance to the object
+     * @param x The x-coordinate of the bottom left corner
+     * @param y The y-coordinate of the bottom left corner
+     * @param w The width
+     * @param h The height
+     */
     public PolygonSensedObject(PhysicalObject object, float distance, float x, float y, float w,
             float h) {
         super(object, distance);
@@ -32,7 +41,7 @@ public class PolygonSensedObject extends SensedObject<Rectangle2D> {
     @Override
     public Rectangle2D getShape() {
         if (shape == null) {
-            shape = new Rectangle2D.Float(x, y, w, h);
+            shape = new Rectangle2D.Float(x + w, y, w, h);
         }
 
         return shape;

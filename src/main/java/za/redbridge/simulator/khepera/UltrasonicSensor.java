@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
@@ -65,5 +67,8 @@ public class UltrasonicSensor extends AgentSensor {
         return null;
     }
 
-
+    @Override
+    public boolean isRelevantObject(PhysicalObject object) {
+        return !(object instanceof TargetAreaObject);
+    }
 }
