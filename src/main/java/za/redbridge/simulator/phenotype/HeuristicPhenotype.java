@@ -28,8 +28,10 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
     private static final boolean PICKUP_HEURISTIC_ENABLED = true;
     private static final boolean COLLISION_HEURISTIC_ENABLED = false;
 
-    // Make sure these are > robot radius
-    private static final float PICKUP_SENSOR_RADIUS = 0.25f;
+    private static final float PICKUP_SENSOR_WIDTH = 0.1f;
+    private static final float PICKUP_SENSOR_HEIGHT = 0.2f;
+
+    // Make sure this is > robot radius
     private static final float COLLISION_SENSOR_RADIUS = 0.55f;
 
     private final Phenotype controllerPhenotype;
@@ -57,7 +59,7 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
             schedule.addHeuristic(new CollisionAvoidanceHeuristic(collisionSensor, robot));
         }
         if (PICKUP_HEURISTIC_ENABLED) {
-            pickupSensor = new PickupSensor(PICKUP_SENSOR_RADIUS);
+            pickupSensor = new PickupSensor(PICKUP_SENSOR_WIDTH, PICKUP_SENSOR_HEIGHT);
             pickupSensor.attach(robot);
             schedule.addHeuristic(new PickupHeuristic(pickupSensor, robot, targetAreaPlacement));
         }
