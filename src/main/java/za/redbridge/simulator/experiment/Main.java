@@ -84,7 +84,6 @@ public class Main {
             p.printStackTrace();
         }
 
-        /*
         List<AgentSensor> sensors = new ArrayList<>();
         sensors.add(new UltrasonicSensor(0f, 0f));
         sensors.add(new UltrasonicSensor((float)Math.PI/2, 0f));
@@ -95,16 +94,6 @@ public class Main {
         sensors.add(new ProximitySensor((float)(3*Math.PI/4),0f));
         sensors.add(new ProximitySensor((float)(5*Math.PI/4),0f));
         sensors.add(new ProximitySensor((float)(7*Math.PI/4),0f));
-        */
-        class LOL extends KheperaIIIPhenotype{
-            @Override
-            public Double2D step(List<List<Double>> list) {
-                return null;
-            }
-
-            @Override
-            public void configure(Map<String,Object> phenotypeConfigs) {}}
-        List<AgentSensor> sensors = new LOL().getSensors();
 
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
