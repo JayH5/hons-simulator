@@ -227,9 +227,10 @@ public class GrowInitialiser extends ConfigOperator<GPModel> implements GPInitia
 	 * @return a new <code>GPCandidateProgram</code> instance.
 	 */
 	public GPCandidateProgram getInitialProgram() {
-		final Node root = getGrownNodeTree(maxDepth);
+		final Optional<Node> root = getGrownNodeTree(maxDepth);
+		if(!root.isPresent()) throw new IllegalStateException("Syntax cannot produce root trees");
 
-		return new GPCandidateProgram(root, getModel());
+		return new GPCandidateProgram(root.get(), getModel());
 	}
 
 	/**
@@ -241,7 +242,7 @@ public class GrowInitialiser extends ConfigOperator<GPModel> implements GPInitia
 	 *        the depth is the number of nodes from the root.
 	 * @return The root node of a randomly generated node tree.
 	 */
-	public Node getGrownNodeTree(final int maxDepth) {
+	public Optional<Node> getGrownNodeTree(final int maxDepth) {
 		if (rng == null) {
 			throw new IllegalStateException("No random number generator has been set");
 		} else if (maxDepth < 0) {
@@ -266,9 +267,10 @@ public class GrowInitialiser extends ConfigOperator<GPModel> implements GPInitia
 	 * children of a node, to construct a full tree down to a depth of
 	 * maxDepth.
 	 */
-	private Node getNodeTree(final Class<?> requiredType, final int currentDepth) {
+	private Optional<Node> getNodeTree(final Class<?> requiredType, final int currentDepth) {
 		// Choose a node with correct type and obtainable arg types.
 		final List<Node> validNodes = getValidNodes(maxDepth - currentDepth, requiredType);
+		if(validNodes.size() == 0) return Optional.empty();
 		final int randomIndex = rng.nextInt(validNodes.size());
 		final Node root = validNodes.get(randomIndex).newInstance();
 		final int arity = root.getArity();
@@ -292,14 +294,23 @@ public class GrowInitialiser extends ConfigOperator<GPModel> implements GPInitia
 			}
 
 			// Randomly select from the valid arg sets.
-			final Class<?>[] argTypes = validArgTypeSets.get(rng.nextInt(validArgTypeSets.size()));
+			List<Optional<Node>> children = new ArrayList<>();
+			do {
+				children.clear();
+				final Class<?>[] argTypes = validArgTypeSets.get(rng.nextInt(validArgTypeSets.size()));
 
-			for (int i = 0; i < arity; i++) {
-				root.setChild(i, getNodeTree(argTypes[i], currentDepth + 1));
+				for (int i = 0; i < arity; i++) {
+					Optional<Node> newChild = getNodeTree(argTypes[i], currentDepth + 1);
+					children.add(newChild);
+				}
+			}while(children.stream().anyMatch(o -> !o.isPresent()));
+
+			for(int i = 0; i < arity; i++){
+				root.setChild(i, children.get(i).get());
 			}
 		}
 
-		return root;
+		return Optional.of(root);
 	}
 
 	private List<Node> getValidNodes(final int remainingDepth, final Class<?> requiredType) {

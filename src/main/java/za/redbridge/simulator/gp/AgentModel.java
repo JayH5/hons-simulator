@@ -70,7 +70,7 @@ public class AgentModel extends GPModel {
 
        syntax.add(new Literal(new GPFloatLiteral(0.0f)));
        syntax.add(new Literal(new GPFloatLiteral(1.0f)));
-       syntax.add(new RandomGPFloat());
+       //syntax.add(new RandomGPFloat());
        //syntax.add(new Literal(new FloatLiteral(2.0f)));
        //syntax.add(new Literal(new FloatLiteral(3.0f)));
 

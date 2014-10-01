@@ -25,7 +25,8 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
      */
     public KheperaIIIPhenotype() {
         configuration = new Configuration();
-        sensors = new ArrayList<>();
+        sensors = new ArrayList<>(configuration.getNumberOfSensors());
+        initSensors();
     }
 
     /**

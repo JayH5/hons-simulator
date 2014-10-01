@@ -22,6 +22,7 @@
 package org.epochx.gp.op.mutation;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.epochx.epox.Node;
 import org.epochx.gp.model.GPModel;
@@ -146,23 +147,27 @@ public class SubtreeMutation extends ConfigOperator<GPModel> implements GPMutati
 
 		// Randomly choose a mutation point.
 		final int length = program.getProgramLength();
-		final int mutationPoint = rng.nextInt(length);
+		Optional<Node> subtree;
+		Integer mutationPoint;
+		do {
+			mutationPoint = rng.nextInt(length);
+
+			// Update grower to use the right data-type.
+			final Node originalSubtree = program.getNthNode(mutationPoint);
+			grower.setReturnType(originalSubtree.getReturnType());
+
+			// Grow a new subtree using the GrowInitialiser.
+			subtree = grower.getGrownNodeTree(maxSubtreeDepth);
+		}while(!subtree.isPresent());
 
 		// Add mutation point into the stats manager.
 		Stats.get().addData(MUT_POINT, mutationPoint);
-
-		// Update grower to use the right data-type.
-		final Node originalSubtree = program.getNthNode(mutationPoint);
-		grower.setReturnType(originalSubtree.getReturnType());
-
-		// Grow a new subtree using the GrowInitialiser.
-		final Node subtree = grower.getGrownNodeTree(maxSubtreeDepth);
 
 		// Add subtree into the stats manager.
 		Stats.get().addData(MUT_SUBTREE, subtree);
 
 		// Set the new subtree.
-		program.setNthNode(mutationPoint, subtree);
+		program.setNthNode(mutationPoint.intValue(), subtree.get());
 
 		return program;
 	}
