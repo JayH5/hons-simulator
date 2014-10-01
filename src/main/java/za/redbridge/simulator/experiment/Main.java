@@ -113,7 +113,7 @@ public class Main {
         model.setMaxDepth(7);
         model.setPopulationSize(200);
         model.setPoolSize(model.getPopulationSize() / 2);
-        model.setProgramSelector(new TournamentSelector(model, 10));
+        model.setProgramSelector(new TournamentSelector(model, 4));
         model.setNoRuns(1);
         model.setNoElites(model.getPopulationSize() / 10);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
