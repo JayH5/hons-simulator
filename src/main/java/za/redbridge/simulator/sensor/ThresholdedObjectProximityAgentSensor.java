@@ -4,6 +4,7 @@ import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.ConePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
@@ -24,11 +25,10 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
     protected static final int readingSize = 1;
     protected double sensitivity;
 
-    protected String sensitiveClass;
-    
     protected Class senseClass;
-
     protected Color paint;
+
+
 
     public ThresholdedObjectProximityAgentSensor() {
         super();
@@ -55,6 +55,37 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
 
     }
 
+    @Override
+    protected int getFilterCategoryBits() {
+        if (senseClass.getSimpleName().contains("TargetAreaObject")) {
+            return FilterConstants.CategoryBits.TARGET_AREA_SENSOR;
+        }
+
+        return FilterConstants.CategoryBits.AGENT_SENSOR;
+    }
+
+    @Override
+    protected int getFilterMaskBits() {
+
+        String className = senseClass.getSimpleName();
+
+        if (className.equals("RobotObject")) {
+            return FilterConstants.CategoryBits.ROBOT;
+        }
+        else if (className.equals("ResourceObject")) {
+            return FilterConstants.CategoryBits.RESOURCE;
+        }
+        else if (className.equals("TargetAreaObject")) {
+            return FilterConstants.CategoryBits.TARGET_AREA;
+        }
+        else if (className.equals("WallObject")) {
+            return FilterConstants.CategoryBits.WALL;
+        }
+        else {
+            return FilterConstants.CategoryBits.DEFAULT;
+        }
+    }
+
     protected void setPaint () {
 
         int red = 0; 
@@ -64,23 +95,23 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
         float value = 1f-((float) sensitivity);
         int alpha = (int) (value*255f);
 
-        String className = senseClass.getName();
+        String className = senseClass.getSimpleName();
 
-        if (className.equals("za.redbridge.simulator.object.RobotObject")) {
+        if (className.equals("RobotObject")) {
             blue = 34;
             green = 255;
         }
-        else if (className.equals("za.redbridge.simulator.object.ResourceObject")) {
+        else if (className.equals("ResourceObject")) {
 
             red = 255;
             blue = 208;
         }
-        else if (className.equals("za.redbridge.simulator.object.TargetAreaObject")) {
+        else if (className.equals("TargetAreaObject")) {
 
             red = 69;
             blue = 138;
         }
-        else if (className.equals("za.redbridge.simulator.object.WallObject")) {
+        else if (className.equals("WallObject")) {
 
             red = 69;
             blue = 0;
@@ -133,7 +164,6 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
         if (checkFieldPresent(sensitive, "sensitiveClass")) {
                 try {
                     senseClass = Class.forName(sensitive);
-                    sensitiveClass = sensitive;
                 }
                 catch (ClassNotFoundException c) {
                     System.out.println("Specified sensitive class not found.");
