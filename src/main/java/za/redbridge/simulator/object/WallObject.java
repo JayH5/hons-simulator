@@ -6,6 +6,7 @@ import org.jbox2d.dynamics.World;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.LinePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 
@@ -29,6 +30,7 @@ public class WallObject extends PhysicalObject {
                 .setEdge(v1, v2)
                 .setFriction(0.8f)
                 .setRestitution(1f)
+                .setFilterCategoryBits(FilterConstants.CategoryBits.WALL)
                 .build(world);
     }
 }

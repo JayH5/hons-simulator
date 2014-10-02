@@ -7,6 +7,7 @@ import org.jbox2d.common.Transform;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
@@ -39,6 +40,11 @@ public class PickupSensor extends ClosestObjectSensor {
     }
 
     @Override
+    protected int getFilterMaskBits() {
+        return FilterConstants.CategoryBits.RESOURCE;
+    }
+
+    @Override
     protected Portrayal createPortrayal() {
         return new RectanglePortrayal(width, height, DEFAULT_PAINT, true);
     }
@@ -50,8 +56,4 @@ public class PickupSensor extends ClosestObjectSensor {
         return !resource.canBePickedUp();
     }
 
-    @Override
-    public boolean isRelevantObject(PhysicalObject object) {
-        return object instanceof ResourceObject;
-    }
 }

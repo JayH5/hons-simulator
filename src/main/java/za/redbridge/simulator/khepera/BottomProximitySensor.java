@@ -9,9 +9,9 @@ import org.jbox2d.dynamics.Fixture;
 import java.text.ParseException;
 import java.util.Map;
 
-import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.AgentSensor;
@@ -54,6 +54,16 @@ public class BottomProximitySensor extends ProximitySensor {
         shape.setRadius(FIELD_RADIUS);
         shape.m_p.set(transform.p);
         return shape;
+    }
+
+    @Override
+    protected int getFilterCategoryBits() {
+        return FilterConstants.CategoryBits.TARGET_AREA_SENSOR;
+    }
+
+    @Override
+    protected int getFilterMaskBits() {
+        return FilterConstants.CategoryBits.TARGET_AREA;
     }
 
     @Override
@@ -161,8 +171,4 @@ public class BottomProximitySensor extends ProximitySensor {
         return super.readingCurve(distance + 0.0025f);
     }
 
-    @Override
-    public boolean isRelevantObject(PhysicalObject object) {
-        return object instanceof TargetAreaObject;
-    }
 }

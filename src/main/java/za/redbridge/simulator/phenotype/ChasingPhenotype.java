@@ -6,8 +6,7 @@ import java.util.Map;
 import sim.util.Double2D;
 import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
 import za.redbridge.simulator.khepera.UltrasonicSensor;
-import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.sensor.AgentSensor;
 
 public class ChasingPhenotype extends KheperaIIIPhenotype {
@@ -68,8 +67,8 @@ public class ChasingPhenotype extends KheperaIIIPhenotype {
     protected AgentSensor createUltrasonicSensor(float bearing, float orientation) {
         return new UltrasonicSensor(bearing, orientation) {
             @Override
-            public boolean isRelevantObject(PhysicalObject object) {
-                return object instanceof ResourceObject;
+            protected int getFilterMaskBits() {
+                return FilterConstants.CategoryBits.RESOURCE;
             }
         };
     }
