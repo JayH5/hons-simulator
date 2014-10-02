@@ -14,8 +14,10 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.functions.*;
 import za.redbridge.simulator.gp.types.*;
+import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
+import za.redbridge.simulator.sensor.Sensor;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -43,7 +45,9 @@ public class AgentModel extends GPModel {
        this.numSteps = 10000;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
-           inputs.add(new SensorVariable("S" + i, Float.class, sensors.get(i)));
+           Sensor sensor = sensors.get(i);
+           if(sensor instanceof BottomProximitySensor)  inputs.add(new ThresholdedSensorVariable("TS" + i, 0.5f));
+           else inputs.add(new ProximitySensorVariable("PS" + i, Float.class, sensors.get(i)));
        }
 
        /*

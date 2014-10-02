@@ -12,13 +12,13 @@ import za.redbridge.simulator.sensor.Sensor;
  * A class to tie the sensor parameters to the input variable; it will then produce ProximityReading objects with the same parameters set.
  * This allows us to convert ProximityReading objects to their RelativeCoordinate, Bearing and FloatVariable (distance) counterparts.
  */
-public class SensorVariable extends Variable {
+public class ProximitySensorVariable extends Variable {
     private final float bearing;
     private final float range;
     private final float fov;
     private Class innerDatatype;
 
-    public SensorVariable(String identifier, Class<?> datatype, AgentSensor sensor) {
+    public ProximitySensorVariable(String identifier, Class<?> datatype, AgentSensor sensor) {
         super(identifier, ProximityReading.class);
         this.bearing = sensor.getBearing();
         this.range = sensor.getRange();
@@ -26,7 +26,7 @@ public class SensorVariable extends Variable {
         this.innerDatatype = datatype;
     }
 
-    public SensorVariable(String identifier, Class<?> datatype, float range, float bearing, float fov) {
+    public ProximitySensorVariable(String identifier, Class<?> datatype, float range, float bearing, float fov) {
         super(identifier, datatype);
         this.range = range;
         this.bearing = bearing;
