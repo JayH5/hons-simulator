@@ -140,7 +140,6 @@ public class AgentModel extends GPModel {
     protected double simFitness(Simulation sim){
         double resourceFitness = sim.getFitness()/10.4;
         double speedFitness = 1.0-(sim.getStepNumber()/numSteps);
-        double scoutingFitness = sim.getRobotAvgDisplacement();
         return -(resourceFitness * 80 + speedFitness * 20);
     }
 
