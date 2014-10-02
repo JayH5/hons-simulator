@@ -111,4 +111,6 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
             pickupSensor.getPortrayal().setTransform(transform);
         }
     }
+
+    public String getActiveHeuristic() { return schedule.getActiveHeuristic(); }
 }
