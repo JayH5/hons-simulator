@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import sim.engine.SimState;
@@ -62,11 +63,8 @@ public class RobotObject extends PhysicalObject {
 
     private final Color defaultColor;
 
-    private double totalDisplacement;
-    private Vec2 previousPosition;
-
-    private ArrayList<Vec2> samplePoints;
-    private ArrayList<Double> sampleRectangleAreas;
+    private ArrayList<SpatialPoint> samplePoints;
+    private ArrayList<Double> samplePolygonAreas;
 
     private final Portrayal directionPortrayal = new DirectionPortrayal();
 
@@ -86,7 +84,7 @@ public class RobotObject extends PhysicalObject {
         rightWheelPosition = new Vec2(0f, -wheelDistance);
 
         samplePoints = new ArrayList<>();
-        sampleRectangleAreas = new ArrayList<>();
+        samplePolygonAreas = new ArrayList<>();
     }
 
     private void initSensors() {
@@ -162,13 +160,15 @@ public class RobotObject extends PhysicalObject {
         updateFriction();
 
         if (sim.schedule.getSteps() % 50 == 0 && !heuristicPhenotype.getActiveHeuristic().equalsIgnoreCase("none")) {
-            Vec2 currentPosition = this.getBody().getPosition();
-            samplePoints.add(currentPosition);
 
+            SpatialPoint sample = new SpatialPoint(this.getBody().getPosition(), samplePoints);
+            samplePoints.add(sample);
             //after collecting 4 points (or something), calculate area and flush sample point buffer
             if (samplePoints.size() == 4) {
 
-
+                Collections.sort(samplePoints);
+                samplePolygonAreas.add(calculatePolygonArea(samplePoints));
+                samplePoints.clear();
             }
 
         }
@@ -245,6 +245,16 @@ public class RobotObject extends PhysicalObject {
 
     public HeuristicPhenotype getHeuristicPhenotype() { return heuristicPhenotype; }
 
+    public double getAverageCoveragePolgygonArea() {
+
+        double sum = 0;
+        for (Double area: samplePolygonAreas) {
+            sum += area;
+        }
+
+        return sum/samplePolygonAreas.size();
+    }
+
     public void setBoundToResource(boolean isBoundToResource) {
         this.isBoundToResource = isBoundToResource;
     }
@@ -283,15 +293,13 @@ public class RobotObject extends PhysicalObject {
         }
     }
 
-
-
     //class for spatial point in the context of some shape
     private static class SpatialPoint implements Comparable<SpatialPoint> {
 
         private final Vec2 point;
-        private final ArrayList<Vec2> otherPoints;
+        private final ArrayList<SpatialPoint> otherPoints;
 
-        public SpatialPoint(Vec2 point, ArrayList<Vec2> otherPoints) {
+        public SpatialPoint(Vec2 point, ArrayList<SpatialPoint> otherPoints) {
             this.point = point;
             this.otherPoints = otherPoints;
         }
@@ -324,17 +332,34 @@ public class RobotObject extends PhysicalObject {
 
         }
 
-        private static Vec2 getCenterOfPoints(ArrayList<Vec2> points) {
+        private static Vec2 getCenterOfPoints(ArrayList<SpatialPoint> points) {
 
             final Vec2 center = new Vec2(0,0);
-            for (Vec2 point: points) {
+            for (SpatialPoint point: points) {
 
-                center.x += point.x;
-                center.y += point.y;
+                center.x += point.getPoint().x;
+                center.y += point.getPoint().y;
             }
             center.x /= points.size();
             center.y /= points.size();
             return center;
         }
+
+        public Vec2 getPoint() { return point; }
     }
+
+    private double calculatePolygonArea(ArrayList<SpatialPoint> vertices) {
+
+        double totalArea = 0;
+        int j = vertices.size()-1;
+
+        for (int i = 0; i < vertices.size(); i++) {
+            totalArea +=  (vertices.get(j).getPoint().x + vertices.get(i).getPoint().x) *
+                    (vertices.get(j).getPoint().y + vertices.get(i).getPoint().y);
+            j = i;
+        }
+        return totalArea/2;
+    }
+
+
 }

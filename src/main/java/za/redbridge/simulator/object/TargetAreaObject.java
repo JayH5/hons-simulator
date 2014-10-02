@@ -131,6 +131,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     @Override
     public void handleBeginContact(Contact contact, Fixture otherFixture) {
+        if (!(otherFixture.getBody().getUserData() instanceof ResourceObject)) {
+            return;
+        }
+
         if (!watchedFixtures.contains(otherFixture)) {
             watchedFixtures.add(otherFixture);
         }
@@ -138,6 +142,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     @Override
     public void handleEndContact(Contact contact, Fixture otherFixture) {
+        if (!(otherFixture.getBody().getUserData() instanceof ResourceObject)) {
+            return;
+        }
+
         // Remove from watch list
         watchedFixtures.remove(otherFixture);
 
