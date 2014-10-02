@@ -19,6 +19,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Drawable;
 import za.redbridge.simulator.portrayal.PolygonPortrayal;
@@ -130,6 +131,7 @@ public class RobotObject extends PhysicalObject {
                 .setFriction(0.7f)
                 .setRestitution(1.0f)
                 .setGroundFriction(0.4f, 0.2f, 0.4f, 0.4f)
+                .setFilterCategoryBits(FilterConstants.CategoryBits.ROBOT)
                 .build(world);
     }
 
