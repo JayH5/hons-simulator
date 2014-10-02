@@ -92,8 +92,8 @@ public class AgentModel extends GPModel {
        setSyntax(syntax);
 
        for(Node n : syntax){
-           if(n.getClass() == Literal.class) parser.declareLiteral(n.toString(), ((Literal)n).getValue());
-           else if(n.getClass() == Variable.class) parser.declareVariable((Variable)n);
+           if(Literal.class.isAssignableFrom(n.getClass())) parser.declareLiteral(n.toString(), ((Literal)n).getValue());
+           else if(Variable.class.isAssignableFrom(n.getClass())) parser.declareVariable((Variable)n);
            else parser.declareFunction(n.getIdentifier(), n);
        }
    }

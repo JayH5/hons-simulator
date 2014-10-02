@@ -135,7 +135,7 @@ public class Main {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-            String tree = "WHEELDRIVEFROMCOORD(IF(GT(READINGTODISTANCE(S2) READINGTODISTANCE(S1)) IF(GT(0.0 0.0) COORDINATEFROMDISTANCEANDBEARING(1.0 B3.14) COORDINATEFROMDISTANCEANDBEARING(0.0 B5.50)) IF(GT(0.0 0.0) COORDINATEFROMDISTANCEANDBEARING(1.0 LOADBEARING()) COORDINATEFROMDISTANCEANDBEARING(1.0 B1.57))))";
+            String tree = "WHEELDRIVEFROMBEARING(IF(READINGTOBOOLEAN(S3) B1.57 SAVEBEARING(B.00)))";
             Node root = model.getParser().parse(tree);
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
