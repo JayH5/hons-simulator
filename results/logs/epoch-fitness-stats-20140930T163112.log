@@ -1,5 +1,0 @@
-261  [main] INFO  TrainController - Sensitivity values: 
-ThresholdedObjectProximityAgentSensor	ThresholdedObjectProximityAgentSensor	ThresholdedObjectProximityAgentSensor	ThresholdedObjectProximityAgentSensor	
-0.9000000357627869	0.30000001192092896	0.9000000357627869	0.30000001192092896	
-264  [main] INFO  TrainController - Epoch# 	 Mean 	 Best 	 Variance 	 MannWhitheyU
-333221 [main] INFO  TrainController - 1	1.7065000000000001	3.173333333333333	0.4880134739803096	3975.0

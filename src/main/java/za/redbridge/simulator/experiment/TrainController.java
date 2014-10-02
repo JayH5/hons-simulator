@@ -13,6 +13,8 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.NNScoreCalculator;
 
+import java.io.IOException;
+import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -44,6 +46,8 @@ public class TrainController implements Runnable{
 
     private long testSetID;
 
+    private long testSetSerial;
+
     private double[] previousCache;
 
     //the best-performing network for this complement
@@ -54,7 +58,7 @@ public class TrainController implements Runnable{
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
                            ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
-                           boolean threadSubruns, long testSetID) {
+                           boolean threadSubruns, long testSetID, long testSetSerial) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
@@ -102,8 +106,9 @@ public class TrainController implements Runnable{
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
+        controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
-        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitheyU");
+        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitneyU");
         do {
 
             int epochs = train.getIteration()+1;
@@ -114,9 +119,9 @@ public class TrainController implements Runnable{
             controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
                     "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
 
-            if (train.getIteration() % 5 == 0) {
-                IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/", ExperimentUtils.getIP() + "/best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/", ExperimentUtils.getIP() + "/best_morphology_at_" + epochs + ".tmp");
+            if (epochs % 20 == 0) {
+                IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "best_network_at_" + epochs + ".tmp");
+                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", "best_morphology_at_" + epochs + ".tmp");
             }
 
             //get the highest-performing network in this epoch, store it in leaderBoard
@@ -132,8 +137,22 @@ public class TrainController implements Runnable{
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/", ExperimentUtils.getIP() + "/bestNetwork" + testSetID + ".tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
+
+        //delete this morphology file if it was a result of the multihost operation
+        Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
+
+        try {
+            Files.delete(morphologyPath);
+        } catch (NoSuchFileException x) {
+            System.err.format("Error deleting morphology: %s: no such" + " file or directory%n", morphologyPath);
+        } catch (DirectoryNotEmptyException x) {
+            System.err.format("%s not empty%n", morphologyPath);
+        } catch (IOException x) {
+            // File permission problems are caught here.
+            System.err.println(x);
+        }
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }

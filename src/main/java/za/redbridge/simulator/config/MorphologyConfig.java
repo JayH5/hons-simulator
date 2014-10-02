@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -324,15 +325,15 @@ public class MorphologyConfig extends Config implements Serializable {
         StringWriter stringWriter = new StringWriter();
         Path outputPath = Paths.get(path);
 
-        try {
-            Files.createDirectories(outputPath);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+            try {
+                Files.createDirectories(outputPath);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
 
-        try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath.resolve(filename))){
+        try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath.resolve(filename), StandardOpenOption.CREATE)){
 
             yaml.dump(yamlDump, stringWriter);
             fileWriter.write(stringWriter.toString());
@@ -375,7 +376,12 @@ public class MorphologyConfig extends Config implements Serializable {
         for (AgentSensor sensor : sensorList) {
 
             if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += sensor.getClass().getSimpleName() + "\t";
+                output += sensor.getClass().getSimpleName();
+
+                if (sensor instanceof  ThresholdedObjectProximityAgentSensor) {
+                    output += "\t" + ((ThresholdedObjectProximityAgentSensor) sensor).getSensitiveClass();
+                }
+                    output += "\t";
             }
         }
 

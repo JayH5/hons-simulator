@@ -42,6 +42,11 @@ public class ComplementFactory {
         int numConfigurableSensors = template.getNumAdjustableSensitivities();
 
         double[] sensitivities = new double[numConfigurableSensors];
+
+        for (int i = 0; i < sensitivities.length; i++) {
+            sensitivities[i] = resolution;
+        }
+
         generateAndConfigure(sensitivities, 0, morphologyList);
 
         return morphologyList;

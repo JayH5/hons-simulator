@@ -88,6 +88,48 @@ public class ExperimentUtils {
         return morphologies;
     }
 
+    //returns a list of all filenames under a path (excl directories)
+    static ArrayList<String> listFiles(Path path, ArrayList<String> fileNames) throws IOException {
+        DirectoryStream<Path> stream = Files.newDirectoryStream(path);
+        for (Path entry : stream) {
+            if (Files.isDirectory(entry)) {
+                listFiles(entry, fileNames);
+            }
+            fileNames.add(entry.getFileName().normalize().toString());
+        }
+
+        return fileNames;
+    }
+
+    //return all the untested morphologies in the shared folder
+    public static HashMap<MorphologyConfig,String> getUntestedMorphologies(long timestamp) {
+
+        HashMap<MorphologyConfig,String> morphologies = new HashMap<>();
+        Path assignedPath = Paths.get("shared/");
+        final ArrayList<String> fileNames = new ArrayList<>();
+
+        try {
+            listFiles(assignedPath, fileNames);
+        }
+        catch (IOException i) {
+            i.printStackTrace();
+            System.exit(-1);
+        }
+
+        for (String name: fileNames) {
+
+            //TODO: trim serial
+            Pattern morphologyFilePattern = Pattern.compile(Long.toString(timestamp)+"[:][0-9]+.morphology");
+            Matcher fileMatcher = morphologyFilePattern.matcher(name);
+
+            if (fileMatcher.find()) {
+                morphologies.put(new MorphologyConfig(name), name);
+            }
+        }
+
+        return morphologies;
+    }
+
     //get IP of this host on Nightmare
     public static String getIP() {
 

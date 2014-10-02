@@ -1,4 +1,0 @@
-230  [main] INFO  TrainController - Sensitivity values: 
-za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor	za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor	za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor	za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor	
-0.9000000357627869	0.30000001192092896	0.9000000357627869	0.30000001192092896	
-232  [main] INFO  TrainController - Epoch# 	 Mean 	 Best 	 Variance 	 MannWhitheyU

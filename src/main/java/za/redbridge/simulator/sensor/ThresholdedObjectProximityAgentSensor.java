@@ -188,6 +188,8 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
     @Override
     public double getSensitivity() { return sensitivity; }
 
+    public String getSensitiveClass() { return senseClass.getSimpleName(); }
+
     @Override
     public Map<String,Object> getAdditionalConfigs() { return additionalConfigs; }
 

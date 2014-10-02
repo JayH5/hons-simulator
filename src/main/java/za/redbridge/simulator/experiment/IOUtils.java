@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Created by shsu on 2014/09/19.
@@ -16,15 +17,16 @@ public class IOUtils {
 
         Path outputPath = Paths.get(path);
 
-        try {
-            Files.createDirectories(outputPath);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+                try {
+                    Files.createDirectories(outputPath);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    System.exit(-1);
+                }
 
-        try (ObjectOutputStream objectWriter = new ObjectOutputStream(Files.newOutputStream(outputPath.resolve(filename)))) {
+        try (ObjectOutputStream objectWriter = new ObjectOutputStream(Files.newOutputStream(outputPath.resolve(filename),
+                StandardOpenOption.CREATE))) {
 
             objectWriter.writeObject(network);
         } catch (FileNotFoundException f) {

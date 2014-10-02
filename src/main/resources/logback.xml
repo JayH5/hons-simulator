@@ -1,3 +1,4 @@
+
 <configuration>
 
     <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
@@ -10,7 +11,6 @@
         </encoder>
     </appender>
 
-
     <appender name="EPOCH-STATS-FILE" class="ch.qos.logback.core.FileAppender">
 
         <file>results/logs/epoch-fitness-stats-${bySecond}.log</file>
@@ -19,16 +19,12 @@
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{0} - %msg%n</pattern>
+            <pattern>%msg %n</pattern>
         </encoder>
     </appender>
 
     <logger name="za.redbridge.simulator.experiment.TrainController" level="info">
         <appender-ref ref="EPOCH-STATS-FILE" />
-    </logger>
-
-    <logger name="za.redbridge.simulator.ea.NNScoreCalculator" level="debug">
-        <appender-ref ref="STDOUT" />
     </logger>
 
     <root level="DEBUG">

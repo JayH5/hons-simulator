@@ -128,8 +128,12 @@ public class MasterExperimentController {
 
         for (Map.Entry<MorphologyConfig,String> entry: readMorphologies.entrySet()) {
 
+            String[] temp = entry.getValue().split(":");
+            long testSetID = Long.parseLong(temp[0]);
+            long testSetSerial = Long.parseLong(temp[1].split(".")[0]);
+
             final TrainController trainer = new TrainController(experimentConfig, simulationConfig,
-                    entry.getKey(), morphologyScores, true);
+                    entry.getKey(), morphologyScores, true, testSetID, testSetSerial);
 
             trainer.run();
         }

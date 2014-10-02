@@ -92,7 +92,7 @@ public class NNScoreCalculator implements CalculateScore {
         }
 
         double score = StatUtils.mean(performances);
-        neuralScoreLogger.debug("Score for this NEAT controller: " + score);
+        neuralScoreLogger.debug("Controller scored: " + score);
         scoreCache.add(new ComparableNEATNetwork((NEATNetwork) method, score));
 
         return score;
