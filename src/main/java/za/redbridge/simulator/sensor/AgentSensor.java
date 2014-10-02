@@ -21,6 +21,7 @@ import java.util.Map;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.ConePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.sensor.sensedobjects.CircleSensedObject;
@@ -110,6 +111,18 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
         PolygonShape shape = new PolygonShape();
         shape.set(vertices, 3);
         return shape;
+    }
+
+    @Override
+    protected int getFilterCategoryBits() {
+        return FilterConstants.CategoryBits.AGENT_SENSOR;
+    }
+
+    @Override
+    protected int getFilterMaskBits() {
+        return FilterConstants.CategoryBits.RESOURCE
+                | FilterConstants.CategoryBits.ROBOT
+                | FilterConstants.CategoryBits.WALL;
     }
 
     @Override
@@ -380,11 +393,8 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
     }
 
     /**
-     * Decide whether to filter out a given PhysicalObject instance. Since the object may still
-     * enter/leave the field of the sensor, we can't filter it out in
-     * {@link #isRelevantObject(PhysicalObject)} because we still want to receive updates of the
-     * object leaving. We might want to filter out the object here if its state changes and it
-     * becomes irrelevant while we are observing it.
+     * Decide whether to filter out a given PhysicalObject instance due to some state changing in
+     * the object being observed.
      * @param object an object in the fixture list
      * @return true if the object should be ignored
      */

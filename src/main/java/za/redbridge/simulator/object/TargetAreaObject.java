@@ -19,6 +19,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.ea.FitnessFunction;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
@@ -68,6 +69,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 .setPosition(position)
                 .setRectangular(width, height)
                 .setSensor(true)
+                .setFilterCategoryBits(FilterConstants.CategoryBits.TARGET_AREA)
+                .setFilterMaskBits(FilterConstants.CategoryBits.RESOURCE
+                        | FilterConstants.CategoryBits.TARGET_AREA_SENSOR)
                 .build(world);
     }
 
@@ -146,11 +150,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 decrementTotalObjectValue(resource);
             }
         }
-    }
-
-    @Override
-    public boolean isRelevantObject(PhysicalObject object) {
-        return object instanceof ResourceObject;
     }
 
 }

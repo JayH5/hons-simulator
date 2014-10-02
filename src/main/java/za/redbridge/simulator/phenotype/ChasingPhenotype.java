@@ -1,37 +1,28 @@
 package za.redbridge.simulator.phenotype;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.object.PhysicalObject;
-import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
+import za.redbridge.simulator.khepera.UltrasonicSensor;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.ProximityAgentSensor;
 
-public class ChasingPhenotype implements Phenotype {
+public class ChasingPhenotype extends KheperaIIIPhenotype {
     private static final int COOLDOWN = 10;
 
     private int cooldownCounter = 0;
     private Double2D lastMove = null;
-    private final List<AgentSensor> sensors;
 
-    public ChasingPhenotype() {
-
-        AgentSensor leftSensor = new ChasingSensor((float) (Math.PI / 4), 0f, 1f, 0.2f);
-        AgentSensor forwardSensor = new ChasingSensor(0f, 0f, 1f, 0.2f);
-        AgentSensor rightSensor = new ChasingSensor((float) -(Math.PI / 4), 0f, 1f, 0.2f);
-
-        sensors = new ArrayList<>();
-        sensors.add(leftSensor);
-        sensors.add(forwardSensor);
-        sensors.add(rightSensor);
+    private static final Configuration CONFIG = new Configuration();
+    static {
+        CONFIG.enableUltrasonicSensor0Degrees = true;
+        CONFIG.enableUltrasonicSensors40Degrees = true;
     }
 
-    @Override
-    public List<AgentSensor> getSensors() {
-        return sensors;
+    public ChasingPhenotype() {
+        super(CONFIG);
     }
 
     @Override
@@ -68,35 +59,18 @@ public class ChasingPhenotype implements Phenotype {
     }
 
     @Override
-    public Phenotype clone() {
+    public ChasingPhenotype clone() {
         return new ChasingPhenotype();
     }
 
-    private static class ChasingSensor extends ProximityAgentSensor {
-
-        private static final int readingSize = 1;
-
-        public ChasingSensor(float bearing) {
-            super(bearing);
-        }
-
-        public ChasingSensor(float bearing, float orientation, float range, float fieldOfView) {
-            super(bearing, orientation, range, fieldOfView);
-        }
-
-        @Override
-        public boolean isRelevantObject(PhysicalObject object) {
-            return object instanceof ResourceObject;
-        }
-
-        @Override
-        protected boolean filterOutObject(PhysicalObject object) {
-            ResourceObject resourceObject = (ResourceObject) object;
-            return resourceObject.isCollected();
-        }
-
-        @Override
-        public int getReadingSize() { return readingSize; }
+    @Override
+    protected AgentSensor createUltrasonicSensor(float bearing, float orientation) {
+        return new UltrasonicSensor(bearing, orientation) {
+            @Override
+            protected int getFilterMaskBits() {
+                return FilterConstants.CategoryBits.RESOURCE;
+            }
+        };
     }
 
     @Override

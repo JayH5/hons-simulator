@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.physics.FilterConstants;
 
 
 /**
@@ -20,6 +21,11 @@ public abstract class ClosestObjectSensor
         extends Sensor<Optional<ClosestObjectSensor.ClosestObject>> {
 
     public ClosestObjectSensor() {
+    }
+
+    @Override
+    protected int getFilterCategoryBits() {
+        return FilterConstants.CategoryBits.HEURISTIC_SENSOR;
     }
 
     protected ClosestObject senseFixture(Fixture fixture) {
