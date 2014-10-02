@@ -77,10 +77,14 @@ public class AgentModel extends GPModel {
        syntax.add(new WheelDriveFromFloats());
        syntax.add(new WheelDriveFromBearing());
        syntax.add(new WheelDriveFromCoordinate());
+       syntax.add(new WheelDriveSpotTurnLeft());
+       syntax.add(new WheelDriveSpotTurnRight());
+
        syntax.add(new ReadingToCoordinate());
        syntax.add(new ReadingToDistance());
        syntax.add(new ReadingToFloat());
        syntax.add(new ReadingToBoolean());
+
        syntax.add(new RotateCoordinate());
        syntax.add(new BearingFromCoordinate());
        syntax.add(new RandomBearing());

@@ -30,12 +30,14 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.AgentModel;
+import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
 import za.redbridge.simulator.khepera.ProximitySensor;
 import za.redbridge.simulator.khepera.UltrasonicSensor;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.phenotype.GPPhenotype;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ProximityAgentSensor;
 
@@ -90,11 +92,7 @@ public class Main {
         sensors.add(new UltrasonicSensor((float)Math.PI, 0f));
         sensors.add(new UltrasonicSensor((float)(3*Math.PI/2), 0f));
 
-        sensors.add(new ProximitySensor((float)Math.PI/4,0f));
-        sensors.add(new ProximitySensor((float)(3*Math.PI/4),0f));
-        sensors.add(new ProximitySensor((float)(5*Math.PI/4),0f));
-        sensors.add(new ProximitySensor((float)(7*Math.PI/4),0f));
-
+        sensors.add(new BottomProximitySensor());
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
         model.setNoGenerations(100);
@@ -160,28 +158,6 @@ public class Main {
             s.print(StatField.GEN_FITTEST_PROGRAMS);
         }
 
-    }
-
-    private static class ResourceProximitySensor extends ProximityAgentSensor {
-
-        public ResourceProximitySensor(float bearing) {
-            super(bearing);
-        }
-
-        public ResourceProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
-            super(bearing, orientation, range, fieldOfView);
-        }
-
-        @Override
-        public boolean isRelevantObject(PhysicalObject otherObject) {
-            return otherObject instanceof ResourceObject;
-        }
-
-        @Override
-        protected boolean filterOutObject(PhysicalObject object) {
-            if(object instanceof ResourceObject) return ((ResourceObject) object).isCollected();
-            else return false;
-        }
     }
 
     public String getExperimentConfig() { return experimentConfig; }
