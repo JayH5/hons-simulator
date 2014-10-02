@@ -65,8 +65,4 @@ public class UltrasonicSensor extends AgentSensor {
         return null;
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 }

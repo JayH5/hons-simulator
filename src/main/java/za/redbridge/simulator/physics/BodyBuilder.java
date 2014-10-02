@@ -168,8 +168,6 @@ public class BodyBuilder {
         return this;
     }
 
-<<<<<<< HEAD
-=======
     public BodyBuilder setFilterCategoryBits(int categoryBits) {
         fd.filter.categoryBits = categoryBits;
         return this;
@@ -185,7 +183,7 @@ public class BodyBuilder {
         return this;
     }
 
->>>>>>> master
+
     public BodyBuilder setGroundFriction(float staticCOF, float kineticCOF,
             float staticFrictionTorque, float kineticFrictionTorque) {
         this.staticCOF = staticCOF;

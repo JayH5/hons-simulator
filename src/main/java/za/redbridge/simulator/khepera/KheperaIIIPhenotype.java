@@ -2,10 +2,7 @@ package za.redbridge.simulator.khepera;
 
 import java.util.ArrayList;
 import java.util.List;
-<<<<<<< HEAD
-=======
 import java.util.Map;
->>>>>>> master
 
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
@@ -16,7 +13,6 @@ import za.redbridge.simulator.sensor.AgentSensor;
  */
 public abstract class KheperaIIIPhenotype implements Phenotype {
 
-<<<<<<< HEAD
     private static final boolean ENABLE_PROXIMITY_SENSORS_10_DEGREES = true;
     private static final boolean ENABLE_PROXIMITY_SENSORS_40_DEGREES = false;
     private static final boolean ENABLE_PROXIMITY_SENSORS_75_DEGREES = true;
@@ -28,6 +24,7 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
     private static final boolean ENABLE_ULTRASONIC_SENSORS_90_DEGREES = true;
 
     public static final int NUM_SENSORS;
+
     static {
         int numSensors = 0;
         if (ENABLE_PROXIMITY_SENSORS_10_DEGREES) numSensors += 2;
@@ -41,12 +38,7 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
         NUM_SENSORS = numSensors;
     }
 
-    private final List<AgentSensor> sensors = new ArrayList<>(NUM_SENSORS);
-
-    public KheperaIIIPhenotype() {
-=======
     private final List<AgentSensor> sensors;
-
     private final Configuration configuration;
 
     /**
@@ -68,13 +60,13 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
         configuration = new Configuration(config);
         sensors = new ArrayList<>(config.getNumberOfSensors());
         
->>>>>>> master
+
         initSensors();
     }
 
     private void initSensors() {
         // Proximity sensors
-<<<<<<< HEAD
+
         if (ENABLE_PROXIMITY_SENSORS_10_DEGREES) {
             sensors.add(new ProximitySensor((float) Math.toRadians(10), 0f));
             sensors.add(new ProximitySensor((float) Math.toRadians(-10), 0f));
@@ -115,51 +107,6 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
         }
     }
 
-=======
-        if (configuration.enableProximitySensors10Degrees) {
-            sensors.add(createProximitySensor((float) Math.toRadians(10), 0f));
-            sensors.add(createProximitySensor((float) Math.toRadians(-10), 0f));
-        }
-
-        if (configuration.enableProximitySensors40Degrees) {
-            sensors.add(createProximitySensor((float) Math.toRadians(40), 0f));
-            sensors.add(createProximitySensor((float) Math.toRadians(-40), 0f));
-        }
-
-        if (configuration.enableProximitySensors75Degrees) {
-            sensors.add(createProximitySensor((float) Math.toRadians(75), 0f));
-            sensors.add(createProximitySensor((float) Math.toRadians(-75), 0f));
-        }
-
-        if (configuration.enableProximitySensors140Degrees) {
-            sensors.add(createProximitySensor((float) Math.toRadians(140), 0f));
-            sensors.add(createProximitySensor((float) Math.toRadians(-140), 0f));
-        }
-
-        if (configuration.enableProximitySensor180Degrees) {
-            sensors.add(createProximitySensor((float) Math.PI, 0f));
-        }
-
-        if (configuration.enableProximitySensorBottom) {
-            sensors.add(createBottomProximitySensor());
-        }
-
-        // Ultrasonic sensors
-        if (configuration.enableUltrasonicSensor0Degrees) {
-            sensors.add(createUltrasonicSensor(0f, 0f));
-        }
-
-        if (configuration.enableUltrasonicSensors40Degrees) {
-            sensors.add(createUltrasonicSensor((float) Math.toRadians(40), 0f));
-            sensors.add(createUltrasonicSensor((float) Math.toRadians(-40), 0f));
-        }
-
-        if (configuration.enableUltrasonicSensors90Degrees) {
-            sensors.add(createUltrasonicSensor((float) Math.PI / 2, 0f));
-            sensors.add(createUltrasonicSensor((float) -Math.PI / 2, 0f));
-        }
-    }
-
     /** Method can be overridden to customize proximity sensor */
     protected AgentSensor createProximitySensor(float bearing, float orientation) {
         return new ProximitySensor(bearing, orientation);
@@ -180,7 +127,7 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
         return new Configuration(configuration);
     }
 
->>>>>>> master
+
     @Override
     public List<AgentSensor> getSensors() {
         return sensors;
@@ -188,9 +135,6 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
 
     @Override
     public KheperaIIIPhenotype clone() throws UnsupportedOperationException {
-<<<<<<< HEAD
-        throw new UnsupportedOperationException();
-=======
         throw new UnsupportedOperationException(
                 "This is an abstract class, implement clone in your subclass");
     }
@@ -250,7 +194,7 @@ public abstract class KheperaIIIPhenotype implements Phenotype {
             
             return numSensors;
         }
->>>>>>> master
+
     }
 
 }
