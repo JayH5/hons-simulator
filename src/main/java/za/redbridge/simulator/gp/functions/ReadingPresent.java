@@ -6,15 +6,15 @@ import za.redbridge.simulator.gp.types.ProximityReading;
 /**
  * Created by xenos on 9/10/14.
  */
-public class ReadingToBoolean extends Node {
+public class ReadingPresent extends Node {
 
     protected float range;
 
-    public ReadingToBoolean(){
+    public ReadingPresent(){
         this(null);
     }
 
-    public ReadingToBoolean(final Node c1){
+    public ReadingPresent(final Node c1){
         super(c1);
     }
     @Override

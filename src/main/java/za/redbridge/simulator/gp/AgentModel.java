@@ -87,7 +87,7 @@ public class AgentModel extends GPModel {
        syntax.add(new ReadingToCoordinate());
        syntax.add(new ReadingToDistance());
        syntax.add(new ReadingToFloat());
-       syntax.add(new ReadingToBoolean());
+       syntax.add(new ReadingPresent());
 
        syntax.add(new RotateCoordinate());
        syntax.add(new BearingFromCoordinate());
