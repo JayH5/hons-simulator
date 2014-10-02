@@ -42,7 +42,7 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
     private final SimConfig config;
 
-    private boolean stopOnceCollected = false;
+    private boolean stopOnceCollected = true;
 
     public Simulation(SimConfig config, RobotFactory robotFactory) {
         super(config.getSimulationSeed());
@@ -146,8 +146,7 @@ public class Simulation extends SimState {
         }
 
         //for now just give it the default fitness function
-        targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
-                                                            config.getFitnessFunction());
+        targetArea = new TargetAreaObject(physicsWorld, pos, width, height);
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
@@ -218,7 +217,9 @@ public class Simulation extends SimState {
 
     //return the score at this point in the simulation
     public double getFitness() {
-        return targetArea.getTotalFitness();
+        double resourceFitness = targetArea.getTotalResourceValue() / config.getResourceFactory().getTotalResourceValue();
+        double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
+        return (resourceFitness * 100) + (speedFitness * 20);
     }
 
     /** Get the number of steps this simulation has been run for. */

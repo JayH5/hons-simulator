@@ -16,7 +16,6 @@ import java.util.Set;
 
 import sim.engine.SimState;
 import sim.util.Double2D;
-import za.redbridge.simulator.ea.FitnessFunction;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
@@ -33,12 +32,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private int width, height;
     private final AABB aabb;
 
-    //the fitness function describes how the value the target area keeps track of is calculated
-    private FitnessFunction fitnessFunction;
-
-    //total fitness value for the agents in this simulation. unfortunately fitness is dead tied to forage area and
-    //how much stuff is in there.
-    private double totalFitness;
+    //total resource value in this target area
+    private double totalResourceValue;
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
@@ -46,12 +41,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     //keeps track of what has been pushed into this place
 
-    public TargetAreaObject(World world, Double2D pos, int width, int height,
-            FitnessFunction fitnessFunction) {
+    public TargetAreaObject(World world, Double2D pos, int width, int height) {
         super(createPortrayal(width, height), createBody(world, pos, width, height));
 
-        this.fitnessFunction = fitnessFunction;
-        totalFitness = 0;
+        totalResourceValue = 0;
         this.width = width;
         this.height = height;
 
@@ -100,17 +93,17 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         }
     }
 
-    //these also update the overall fitness value
+    //these also update the total resource value
     private void incrementTotalObjectValue(ResourceObject resource) {
-        totalFitness += fitnessFunction.calculateFitness(resource);
+        totalResourceValue += resource.getValue();
     }
 
     private void decrementTotalObjectValue(ResourceObject resource) {
-        totalFitness -= fitnessFunction.calculateFitness(resource);
+        totalResourceValue -= resource.getValue();
     }
 
-    public double getTotalFitness() {
-        return totalFitness;
+    public double getTotalResourceValue() {
+        return totalResourceValue;
     }
 
     public int getNumberOfContainedResources() {

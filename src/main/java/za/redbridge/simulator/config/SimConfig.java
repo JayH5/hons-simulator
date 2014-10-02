@@ -10,9 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import za.redbridge.simulator.ea.DefaultFitnessFunction;
-import za.redbridge.simulator.ea.FitnessFunction;
-import za.redbridge.simulator.factories.HalfBigHalfSmallResourceFactory;
+import za.redbridge.simulator.factories.ConfigurableResourceFactory;
 import za.redbridge.simulator.factories.ResourceFactory;
 
 public class SimConfig extends Config {
@@ -30,8 +28,7 @@ public class SimConfig extends Config {
     private static final Color DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
 
 
-    private static final FitnessFunction DEFAULT_FITNESS_FUNCTION = new DefaultFitnessFunction();
-    private static final ResourceFactory DEFAULT_RESOURCE_FACTORY = new HalfBigHalfSmallResourceFactory();
+    private static final ResourceFactory DEFAULT_RESOURCE_FACTORY = new ConfigurableResourceFactory();
     private static final String DEFAULT_ROBOT_FACTORY =
             "za.redbridge.simulator.factories.HomogeneousRobotFactory";
 
@@ -53,8 +50,6 @@ public class SimConfig extends Config {
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
 
-    private final FitnessFunction fitnessFunction;
-
     private ResourceFactory resourceFactory;
     private String robotFactoryName;
 
@@ -63,14 +58,14 @@ public class SimConfig extends Config {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
                 DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS, DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR,
-                DEFAULT_FITNESS_FUNCTION, DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
+                DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
     }
 
     public SimConfig(long simulationSeed, int simulationIterations,
                      int environmentWidth, int environmentHeight,
                      Direction targetAreaPlacement, int targetAreaThickness,
                      int objectsRobots, double robotMass, double robotRadius, Color robotColour,
-                     FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
+                     ResourceFactory resourceFactory,
                      String robotFactoryName) {
 
         this.simulationSeed = simulationSeed;
@@ -86,8 +81,6 @@ public class SimConfig extends Config {
         this.robotMass = robotMass;
         this.robotRadius = robotRadius;
         this.robotColour = robotColour;
-
-        this.fitnessFunction = fitnessFunction;
 
         this.resourceFactory = resourceFactory;
         this.robotFactoryName = robotFactoryName;
@@ -115,8 +108,6 @@ public class SimConfig extends Config {
         double rMass = DEFAULT_ROBOT_MASS;
         double rRadius = DEFAULT_ROBOT_RADIUS;
         Color robotColour = DEFAULT_ROBOT_COLOUR;
-
-        FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
 
         ResourceFactory resFactory = DEFAULT_RESOURCE_FACTORY;
         String robotFactory = DEFAULT_ROBOT_FACTORY;
@@ -188,39 +179,6 @@ public class SimConfig extends Config {
 
         }
 
-        // Fitness function
-        Map fitnessFunc = (Map) config.get("scoring");
-        if (checkFieldPresent(fitnessFunc, "scoring")) {
-            String fitnessF = (String) fitnessFunc.get("fitnessFunction");
-            if (checkFieldPresent(fitnessF, "scoring:fitnessFunction")) {
-
-                try {
-                    Class f = Class.forName(fitnessF);
-                    Object o = f.newInstance();
-
-                    if (!(o instanceof FitnessFunction)) {
-                        throw new InvalidClassException("");
-                    }
-
-                    fitness = (FitnessFunction) o;
-                }
-                catch (ClassNotFoundException c) {
-                    System.out.println("Invalid class name specified in SimConfig: " + fitnessF + ". Using default fitness function.");
-                    c.printStackTrace();
-                }
-                catch (InvalidClassException i) {
-                    System.out.println("Invalid specified fitness class. " + fitnessF + ". Using default fitness function.");
-                    i.printStackTrace();
-                }
-                catch (InstantiationException ins) {
-                    ins.printStackTrace();
-                }
-                catch (IllegalAccessException ill) {
-                    ill.printStackTrace();
-                }
-            }
-        }
-
         //factories
         Map factories = (Map) config.get("factories");
         if (checkFieldPresent(factories, "factories")) {
@@ -273,7 +231,6 @@ public class SimConfig extends Config {
         this.robotMass = rMass;
         this.robotRadius = rRadius;
         this.robotColour = robotColour;
-        this.fitnessFunction = fitness;
         this.resourceFactory = resFactory;
         this.robotFactoryName = robotFactory;
     }
@@ -317,8 +274,6 @@ public class SimConfig extends Config {
     public double getRobotMass() { return robotMass; }
 
     public double getRobotRadius() { return robotRadius; }
-
-    public FitnessFunction getFitnessFunction() { return fitnessFunction; }
 
     public ResourceFactory getResourceFactory() { return resourceFactory; }
 
