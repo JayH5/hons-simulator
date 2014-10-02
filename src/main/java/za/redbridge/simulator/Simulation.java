@@ -161,16 +161,16 @@ public class Simulation extends SimState {
         config.setSimulationSeed(seed);
     }
 
-    private double getRobotAvgDisplacement() {
+    private double getRobotAvgPolygonArea() {
         Set<PhysicalObject> objects = placementArea.getPlacedObjects();
-        double totalDisplacement = 0.0;
+        double totalArea = 0.0;
 
         for (PhysicalObject object: objects) {
             if (object instanceof RobotObject) {
-                totalDisplacement += ((RobotObject) object).getTotalDisplacement();
+                totalArea += ((RobotObject) object).getAverageCoveragePolgygonArea();
             }
         }
-        return totalDisplacement/config.getObjectsRobots();
+        return totalArea/config.getObjectsRobots();
     }
 
     /** Get the environment (forage area) for this simulation. */
