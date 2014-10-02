@@ -131,16 +131,9 @@ public class AgentModel extends GPModel {
                 new GPPhenotype(sensors, program, inputs), config.getRobotMass(),
                 config.getRobotRadius(), config.getRobotColour(), exConfig.getPopulationSize());
         Simulation sim = new Simulation(config, robotFactory);
-        sim.setStopOnceCollected(true);
-        sim.runForNIterations(numSteps);
+        sim.run();
         System.out.print('.');
-        return simFitness(sim);
-    }
-
-    protected double simFitness(Simulation sim){
-        double resourceFitness = sim.getFitness()/10.4;
-        double speedFitness = 1.0-(sim.getStepNumber()/numSteps);
-        return -(resourceFitness * 80 + speedFitness * 20);
+        return -sim.getFitness();
     }
 
     public Class getReturnType(){
