@@ -19,13 +19,13 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
     private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4;
     private static final double DEFAULT_SMALL_OBJECT_MASS = 1.0;
     private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
-    private static final double DEFAULT_SMALL_OBJECT_VALUE = DEFAULT_SMALL_OBJECT_HEIGHT * DEFAULT_SMALL_OBJECT_WIDTH;
+    private static final double DEFAULT_SMALL_OBJECT_VALUE = 1;
 
     private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6;
     private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6;
     private static final double DEFAULT_LARGE_OBJECT_MASS = 2.0;
     private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
-    private static final double DEFAULT_LARGE_OBJECT_VALUE = DEFAULT_LARGE_OBJECT_HEIGHT * DEFAULT_LARGE_OBJECT_WIDTH;
+    private static final double DEFAULT_LARGE_OBJECT_VALUE = 2;
 
     private int numSmallObjects;
     private double smallObjectWidth;
@@ -158,4 +158,8 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
         return numSmallObjects + numLargeObjects;
     }
 
+    @Override
+    public double getTotalResourceValue(){
+        return numLargeObjects * largeObjectValue + numSmallObjects * smallObjectValue;
+    }
 }

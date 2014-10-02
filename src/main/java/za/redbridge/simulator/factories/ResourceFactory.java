@@ -26,4 +26,9 @@ public interface ResourceFactory {
      * @return the number of resources this resource factory will place
      */
     int getNumberOfResources();
+
+    /**
+     * @return the total value of all the resources placed by this factory
+     */
+    public double getTotalResourceValue();
 }
