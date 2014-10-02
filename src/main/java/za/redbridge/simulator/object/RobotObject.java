@@ -19,6 +19,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Drawable;
 import za.redbridge.simulator.portrayal.PolygonPortrayal;
@@ -64,6 +65,9 @@ public class RobotObject extends PhysicalObject {
     private double totalDisplacement;
     private Vec2 previousPosition;
 
+    private ArrayList<Vec2> samplePoints;
+    private ArrayList<Double> sampleRectangleAreas;
+
     private final Portrayal directionPortrayal = new DirectionPortrayal();
 
     public RobotObject(World world, Double2D position, double radius, double mass, Color color,
@@ -81,7 +85,8 @@ public class RobotObject extends PhysicalObject {
         leftWheelPosition = new Vec2(0f, wheelDistance);
         rightWheelPosition = new Vec2(0f, -wheelDistance);
 
-        previousPosition = new Vec2();
+        samplePoints = new ArrayList<>();
+        sampleRectangleAreas = new ArrayList<>();
     }
 
     private void initSensors() {
@@ -129,6 +134,7 @@ public class RobotObject extends PhysicalObject {
                 .setFriction(0.7f)
                 .setRestitution(1.0f)
                 .setGroundFriction(0.4f, 0.2f, 0.4f, 0.4f)
+                .setFilterCategoryBits(FilterConstants.CategoryBits.ROBOT)
                 .build(world);
     }
 
@@ -155,10 +161,16 @@ public class RobotObject extends PhysicalObject {
 
         updateFriction();
 
-        if (sim.schedule.getSteps() % 500 == 0) {
+        if (sim.schedule.getSteps() % 50 == 0 && !heuristicPhenotype.getActiveHeuristic().equalsIgnoreCase("none")) {
             Vec2 currentPosition = this.getBody().getPosition();
-            totalDisplacement += currentPosition.sub(previousPosition).length();
-            previousPosition = currentPosition.clone();
+            samplePoints.add(currentPosition);
+
+            //after collecting 4 points (or something), calculate area and flush sample point buffer
+            if (samplePoints.size() == 4) {
+
+
+            }
+
         }
     }
 
@@ -268,6 +280,61 @@ public class RobotObject extends PhysicalObject {
             vertices[3].set(-halfWidth - halfThickness, -halfHeight);
             vertices[4].set(halfWidth - halfThickness, 0f);
             vertices[5].set(-halfWidth - halfThickness, halfHeight);
+        }
+    }
+
+
+
+    //class for spatial point in the context of some shape
+    private static class SpatialPoint implements Comparable<SpatialPoint> {
+
+        private final Vec2 point;
+        private final ArrayList<Vec2> otherPoints;
+
+        public SpatialPoint(Vec2 point, ArrayList<Vec2> otherPoints) {
+            this.point = point;
+            this.otherPoints = otherPoints;
+        }
+
+        public int compareTo(SpatialPoint other) {
+
+            Vec2 center = getCenterOfPoints(otherPoints);
+
+            if (this.point.x >= 0 && other.point.x < 0) {
+                return 1;
+            }
+            else if (this.point.x == 0 && other.point.x ==0) {
+                return Float.compare(this.point.y,other.point.y);
+            }
+
+            float delta = (this.point.x - center.x) * (other.point.y - center.y)
+                    - (this.point.x - center.x) * (this.point.y - center.y);
+
+            if (delta > 0) {
+                return 1;
+            }
+            else if (delta < 0) {
+                return -1;
+            }
+
+            float distFromCenter1 = (this.point.x - center.x) * (this.point.x - center.x) + (this.point.y - center.y) * (this.point.y - center.y);
+            float distFromCenter2 = (other.point.x - center.x) * (other.point.x - center.x) + (other.point.y - center.y) * (other.point.y - center.y);
+
+            return Float.compare(distFromCenter1,distFromCenter2);
+
+        }
+
+        private static Vec2 getCenterOfPoints(ArrayList<Vec2> points) {
+
+            final Vec2 center = new Vec2(0,0);
+            for (Vec2 point: points) {
+
+                center.x += point.x;
+                center.y += point.y;
+            }
+            center.x /= points.size();
+            center.y /= points.size();
+            return center;
         }
     }
 }

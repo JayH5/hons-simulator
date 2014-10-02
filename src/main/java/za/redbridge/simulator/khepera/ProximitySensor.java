@@ -57,10 +57,17 @@ public class ProximitySensor extends AgentSensor {
         return null;
     }
 
+<<<<<<< HEAD
     private double readingCurve(float distance) {
         // Output curve of the TCRT5000 seems to produce something like a Gamma distribution curve
         // See the datasheet for more information
         return function.density(distance * 1000) * 6.64;
+=======
+    protected double readingCurve(float distance) {
+        // Output curve of the TCRT5000 seems to produce something like a Gamma distribution curve
+        // See the datasheet for more information
+        return Math.min(function.density(distance * 1000) * 6.64, 1.0);
+>>>>>>> master
     }
 
 }

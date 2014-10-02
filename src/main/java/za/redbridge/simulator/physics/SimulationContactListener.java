@@ -6,8 +6,6 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
 
-import za.redbridge.simulator.object.PhysicalObject;
-
 /**
  * The contact listener for sensor intersections
  * Created by jamie on 2014/08/13.
@@ -53,11 +51,6 @@ public class SimulationContactListener implements ContactListener {
         } else if (fixtureA.getBody().getUserData() instanceof Collideable) {
             collideable = (Collideable) fixtureA.getBody().getUserData();
         } else {
-            return;
-        }
-
-        // Check if the collideable is interested in this object
-        if (!collideable.isRelevantObject((PhysicalObject) fixtureB.getBody().getUserData())) {
             return;
         }
 

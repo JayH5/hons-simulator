@@ -13,5 +13,4 @@ public class DefaultFitnessFunction implements FitnessFunction {
 
         return resource.getWidth() * resource.getHeight();
     }
-
 }

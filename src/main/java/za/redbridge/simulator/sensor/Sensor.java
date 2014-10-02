@@ -15,6 +15,7 @@ import java.util.List;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.physics.Collideable;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.STRTransform;
 
@@ -116,6 +117,13 @@ public abstract class Sensor<T> implements Collideable {
         // Add ourselves as user data so we can be fetched
         fixtureDef.userData = this;
 
+        // Set the filter flags
+        fixtureDef.filter.categoryBits = getFilterCategoryBits();
+        fixtureDef.filter.maskBits = getFilterMaskBits();
+
+        // Set a negative group index for all sensors so that they never collide
+        fixtureDef.filter.groupIndex = FilterConstants.GroupIndexes.SENSOR;
+
         // Attach
         sensorFixture = robot.getBody().createFixture(fixtureDef);
 
@@ -142,6 +150,17 @@ public abstract class Sensor<T> implements Collideable {
      * @return the shape of this sensor
      */
     protected abstract Shape createShape(Transform transform);
+
+    /**
+     * Get the filter category bits for the fixture for this sensor.
+     */
+    protected abstract int getFilterCategoryBits();
+
+    /**
+     * Get the filter mask bits for the fixture for this sensor.
+     * @return The bits for the objects that this sensor should collide with.
+     */
+    protected abstract int getFilterMaskBits();
 
     /**
      * Create the portrayal for this sensor (i.e. it's visualization). The portrayal need not be
@@ -194,11 +213,6 @@ public abstract class Sensor<T> implements Collideable {
         }
 
         sensedFixtures.remove(otherFixture);
-    }
-
-    @Override
-    public boolean isRelevantObject(PhysicalObject object) {
-        return true;
     }
 
     protected static PhysicalObject getFixtureObject(Fixture fixture) {

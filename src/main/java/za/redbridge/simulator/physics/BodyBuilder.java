@@ -168,6 +168,24 @@ public class BodyBuilder {
         return this;
     }
 
+<<<<<<< HEAD
+=======
+    public BodyBuilder setFilterCategoryBits(int categoryBits) {
+        fd.filter.categoryBits = categoryBits;
+        return this;
+    }
+
+    public BodyBuilder setFilterMaskBits(int maskBits) {
+        fd.filter.maskBits = maskBits;
+        return this;
+    }
+
+    public BodyBuilder setFilterGroupIndex(int groupIndex) {
+        fd.filter.groupIndex = groupIndex;
+        return this;
+    }
+
+>>>>>>> master
     public BodyBuilder setGroundFriction(float staticCOF, float kineticCOF,
             float staticFrictionTorque, float kineticFrictionTorque) {
         this.staticCOF = staticCOF;

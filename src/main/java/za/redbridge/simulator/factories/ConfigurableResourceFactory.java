@@ -144,4 +144,9 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
             }
     }
 
+    @Override
+    public int getNumberOfResources() {
+        return numSmallObjects + numLargeObjects;
+    }
+
 }

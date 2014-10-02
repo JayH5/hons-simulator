@@ -7,7 +7,7 @@ import org.jbox2d.common.Transform;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
-import za.redbridge.simulator.object.TargetAreaObject;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 
@@ -36,6 +36,13 @@ public class CollisionSensor extends ClosestObjectSensor {
     }
 
     @Override
+    protected int getFilterMaskBits() {
+        return FilterConstants.CategoryBits.ROBOT
+                | FilterConstants.CategoryBits.WALL
+                | FilterConstants.CategoryBits.RESOURCE;
+    }
+
+    @Override
     protected Portrayal createPortrayal() {
         return new CirclePortrayal(range, DEFAULT_PAINT, true);
     }
@@ -54,8 +61,4 @@ public class CollisionSensor extends ClosestObjectSensor {
         return false;
     }
 
-    @Override
-    public boolean isRelevantObject(PhysicalObject object) {
-        return !(object instanceof TargetAreaObject);
-    }
 }

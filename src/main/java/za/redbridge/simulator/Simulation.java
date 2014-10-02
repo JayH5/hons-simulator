@@ -8,18 +8,16 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
-import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.factories.ResourceFactory;
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
 
-
-import static za.redbridge.simulator.Utils.toDouble2D;
+import java.util.Set;
 
 /**
  * The main simulation state.
@@ -44,6 +42,8 @@ public class Simulation extends SimState {
     private TargetAreaObject targetArea;
     private RobotFactory robotFactory;
     private final SimConfig config;
+
+    private boolean stopOnceCollected = false;
 
     public Simulation(SimConfig config, RobotFactory robotFactory) {
         super(config.getSimulationSeed());
@@ -84,6 +84,7 @@ public class Simulation extends SimState {
             schedule.scheduleRepeating(object);
         }
 
+
         schedule.scheduleRepeating(new Steppable() {
             @Override
             public void step(SimState simState) {
@@ -97,6 +98,9 @@ public class Simulation extends SimState {
     public void finish() {
         kill();
         //System.out.println("Total Fitness: " + getFitness());
+        schedule.scheduleRepeating(simState ->
+            physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+        );
     }
 
     // Walls are simply added to environment since they do not need updating
@@ -193,12 +197,37 @@ public class Simulation extends SimState {
         start();
         for (int i = 0; i < n; i++) {
             schedule.step(this);
+            if (stopOnceCollected && allResourcesCollected()) {
+                break;
+            }
         }
         finish();
     }
 
+    private boolean allResourcesCollected() {
+        return config.getResourceFactory().getNumberOfResources()
+                == targetArea.getNumberOfContainedResources();
+    }
+
+    /** If true, this simulation will stop once all the resource objects have been collected. */
+    public boolean isStopOnceCollected() {
+        return stopOnceCollected;
+    }
+
+    /** If set true, this simulation will stop once all the resource objects have been collected. */
+    public void setStopOnceCollected(boolean stopOnceCollected) {
+        this.stopOnceCollected = stopOnceCollected;
+    }
+
     //return the score at this point in the simulation
-    public double getFitness() { return targetArea.getTotalFitness(); }
+    public double getFitness() {
+        return targetArea.getTotalFitness();
+    }
+
+    /** Get the number of steps this simulation has been run for. */
+    public long getStepNumber() {
+        return schedule.getSteps();
+    }
 
     /**
      * Launching the application from this main method will run the simulation in headless mode.

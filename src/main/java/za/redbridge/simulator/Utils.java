@@ -96,13 +96,18 @@ public final class Utils {
     }
 
     public static Vec2 jitter(Vec2 vec, float magnitude) {
-
         if (vec != null) {
             vec.x += magnitude * RANDOM.nextFloat() - magnitude / 2;
             vec.y += magnitude * RANDOM.nextFloat() - magnitude / 2;
             return vec;
         }
         return null;
+    }
+
+    /** Tests if the provided point is inside the provided AABB. */
+    public static boolean testPoint(Vec2 point, AABB aabb) {
+        return point.x >= aabb.lowerBound.x && point.x <= aabb.upperBound.x
+                && point.y >= aabb.lowerBound.y && point.y <= aabb.upperBound.y;
     }
 
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 import sim.engine.SimState;
 import sim.util.Double2D;
 import za.redbridge.simulator.physics.BodyBuilder;
+import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.PolygonPortrayal;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
@@ -87,6 +88,7 @@ public class ResourceObject extends PhysicalObject {
                 .setFriction(0.3f)
                 .setRestitution(0.4f)
                 .setGroundFriction(0.8f, 0.1f, 0.8f, 0.1f)
+                .setFilterCategoryBits(FilterConstants.CategoryBits.RESOURCE)
                 .build(world);
     }
 
