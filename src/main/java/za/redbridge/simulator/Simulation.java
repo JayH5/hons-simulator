@@ -146,8 +146,7 @@ public class Simulation extends SimState {
         }
 
         //for now just give it the default fitness function
-        targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
-                                                            config.getFitnessFunction());
+        targetArea = new TargetAreaObject(physicsWorld, pos, width, height);
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
