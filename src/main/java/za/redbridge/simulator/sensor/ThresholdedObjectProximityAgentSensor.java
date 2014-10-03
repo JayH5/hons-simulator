@@ -25,10 +25,11 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
     protected static final int readingSize = 1;
     protected double sensitivity;
 
+    protected String sensitiveClass;
+
     protected Class senseClass;
+
     protected Color paint;
-
-
 
     public ThresholdedObjectProximityAgentSensor() {
         super();
@@ -49,69 +50,38 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
     public ThresholdedObjectProximityAgentSensor(float bearing, String sensitiveClassName) {
         super(bearing, 0.0f, 30.0f, 0.1f);
 
-            try {
-                this.senseClass = Class.forName(sensitiveClassName);
-            }catch(ClassNotFoundException e){}
+        try {
+            this.senseClass = Class.forName(sensitiveClassName);
+        }catch(ClassNotFoundException e){}
 
-    }
-
-    @Override
-    protected int getFilterCategoryBits() {
-        if (senseClass.getSimpleName().contains("TargetAreaObject")) {
-            return FilterConstants.CategoryBits.TARGET_AREA_SENSOR;
-        }
-
-        return FilterConstants.CategoryBits.AGENT_SENSOR;
-    }
-
-    @Override
-    protected int getFilterMaskBits() {
-
-        String className = senseClass.getSimpleName();
-
-        if (className.equals("RobotObject")) {
-            return FilterConstants.CategoryBits.ROBOT;
-        }
-        else if (className.equals("ResourceObject")) {
-            return FilterConstants.CategoryBits.RESOURCE;
-        }
-        else if (className.equals("TargetAreaObject")) {
-            return FilterConstants.CategoryBits.TARGET_AREA;
-        }
-        else if (className.equals("WallObject")) {
-            return FilterConstants.CategoryBits.WALL;
-        }
-        else {
-            return FilterConstants.CategoryBits.DEFAULT;
-        }
     }
 
     protected void setPaint () {
 
-        int red = 0; 
+        int red = 0;
         int blue = 0;
         int green = 0;
 
         float value = 1f-((float) sensitivity);
         int alpha = (int) (value*255f);
 
-        String className = senseClass.getSimpleName();
+        String className = senseClass.getName();
 
-        if (className.equals("RobotObject")) {
+        if (className.equals("za.redbridge.simulator.object.RobotObject")) {
             blue = 34;
             green = 255;
         }
-        else if (className.equals("ResourceObject")) {
+        else if (className.equals("za.redbridge.simulator.object.ResourceObject")) {
 
             red = 255;
             blue = 208;
         }
-        else if (className.equals("TargetAreaObject")) {
+        else if (className.equals("za.redbridge.simulator.object.TargetAreaObject")) {
 
             red = 69;
             blue = 138;
         }
-        else if (className.equals("WallObject")) {
+        else if (className.equals("za.redbridge.simulator.object.WallObject")) {
 
             red = 69;
             blue = 0;
@@ -162,13 +132,14 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
         String sensitive = (String) map.get("sensitiveClass");
 
         if (checkFieldPresent(sensitive, "sensitiveClass")) {
-                try {
-                    senseClass = Class.forName(sensitive);
-                }
-                catch (ClassNotFoundException c) {
-                    System.out.println("Specified sensitive class not found.");
-                    System.exit(-1);
-                }
+            try {
+                senseClass = Class.forName(sensitive);
+                sensitiveClass = sensitive;
+            }
+            catch (ClassNotFoundException c) {
+                System.out.println("Specified sensitive class not found.");
+                System.exit(-1);
+            }
         }
         else {
             throw new ParseException("No sensitive class found for ThresholdedObjectProximityAgentSensor.", 0);
@@ -190,6 +161,38 @@ public class ThresholdedObjectProximityAgentSensor extends AdjustableSensitivity
 
         this.setPaint();
     }
+
+    @Override
+    protected int getFilterCategoryBits() {
+        if (senseClass.getSimpleName().contains("TargetAreaObject")) {
+            return FilterConstants.CategoryBits.TARGET_AREA_SENSOR;
+        }
+
+        return FilterConstants.CategoryBits.AGENT_SENSOR;
+    }
+
+    @Override
+    protected int getFilterMaskBits() {
+
+        String className = senseClass.getSimpleName();
+
+        if (className.equals("RobotObject")) {
+            return FilterConstants.CategoryBits.ROBOT;
+        }
+        else if (className.equals("ResourceObject")) {
+            return FilterConstants.CategoryBits.RESOURCE;
+        }
+        else if (className.equals("TargetAreaObject")) {
+            return FilterConstants.CategoryBits.TARGET_AREA;
+        }
+        else if (className.equals("WallObject")) {
+            return FilterConstants.CategoryBits.WALL;
+        }
+        else {
+            return FilterConstants.CategoryBits.DEFAULT;
+        }
+    }
+
 
     @Override
     public int getReadingSize() { return readingSize; }
