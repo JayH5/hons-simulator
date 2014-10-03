@@ -15,43 +15,52 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
     private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
     private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
 
-    private static final double DEFAULT_SMALL_OBJECT_WIDTH = 0.4;
-    private static final double DEFAULT_SMALL_OBJECT_HEIGHT = 0.4;
-    private static final double DEFAULT_SMALL_OBJECT_MASS = 1.0;
+    private static final float DEFAULT_SMALL_OBJECT_WIDTH = 0.4f;
+    private static final float DEFAULT_SMALL_OBJECT_HEIGHT = 0.4f;
+    private static final float DEFAULT_SMALL_OBJECT_MASS = 1.0f;
     private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
+    private static final double DEFAULT_SMALL_OBJECT_VALUE = 1;
 
-    private static final double DEFAULT_LARGE_OBJECT_WIDTH = 0.6;
-    private static final double DEFAULT_LARGE_OBJECT_HEIGHT = 0.6;
-    private static final double DEFAULT_LARGE_OBJECT_MASS = 2.0;
+    private static final float DEFAULT_LARGE_OBJECT_WIDTH = 0.6f;
+    private static final float DEFAULT_LARGE_OBJECT_HEIGHT = 0.6f;
+    private static final float DEFAULT_LARGE_OBJECT_MASS = 2.0f;
     private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
+    private static final double DEFAULT_LARGE_OBJECT_VALUE = 2;
 
     private int numSmallObjects;
-    private double smallObjectWidth;
-    private double smallObjectHeight;
-    private double smallObjectMass;
+    private float smallObjectWidth;
+    private float smallObjectHeight;
+    private float smallObjectMass;
     private int smallObjectPushingBots;
+    private double smallObjectValue;
 
     private int numLargeObjects;
-    private double largeObjectWidth;
-    private double largeObjectHeight;
-    private double largeObjectMass;
+    private float largeObjectWidth;
+    private float largeObjectHeight;
+    private float largeObjectMass;
     private int largeObjectPushingBots;
+    private double largeObjectValue;
 
-    public ConfigurableResourceFactory(int numSmallObjects, double smallObjectWidth, double smallObjectHeight, double smallObjectMass,
-                                       int smallObjectPushingBots, int numLargeObjects, double largeObjectWidth, double largeObjectHeight,
-                                       double largeObjectMass, int largeObjectPushingBots) {
+    public ConfigurableResourceFactory(int numSmallObjects, float smallObjectWidth,
+            float smallObjectHeight, float smallObjectMass, int smallObjectPushingBots,
+            double smallObjectValue, int numLargeObjects, float largeObjectWidth,
+            float largeObjectHeight, float largeObjectMass, int largeObjectPushingBots,
+            double largeObjectValue) {
 
         this.numSmallObjects = numSmallObjects;
         this.smallObjectWidth = smallObjectWidth;
         this.smallObjectHeight = smallObjectHeight;
         this.smallObjectMass = smallObjectMass;
         this.smallObjectPushingBots = smallObjectPushingBots;
+        this.smallObjectValue = smallObjectValue;
+
 
         this.numLargeObjects = numLargeObjects;
         this.largeObjectWidth = largeObjectWidth;
         this.largeObjectHeight = largeObjectHeight;
         this.largeObjectMass = largeObjectMass;
         this.largeObjectPushingBots = largeObjectPushingBots;
+        this.largeObjectValue = largeObjectValue;
     }
 
     public ConfigurableResourceFactory() {
@@ -61,12 +70,14 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
         this.smallObjectHeight = DEFAULT_SMALL_OBJECT_HEIGHT;
         this.smallObjectMass = DEFAULT_SMALL_OBJECT_MASS;
         this.smallObjectPushingBots = DEFAULT_SMALL_OBJECT_PUSHING_BOTS;
+        this.smallObjectValue = DEFAULT_SMALL_OBJECT_VALUE;
 
         this.numLargeObjects = DEFAULT_OBJECTS_RESOURCES_LARGE;
         this.largeObjectWidth = DEFAULT_LARGE_OBJECT_WIDTH;
         this.largeObjectHeight = DEFAULT_LARGE_OBJECT_HEIGHT;
         this.largeObjectMass = DEFAULT_LARGE_OBJECT_MASS;
         this.largeObjectPushingBots = DEFAULT_LARGE_OBJECT_PUSHING_BOTS;
+        this.largeObjectValue = DEFAULT_LARGE_OBJECT_VALUE;
     }
 
     @Override
@@ -74,11 +85,11 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
 
         for (int i = 0; i < numSmallObjects; i++) {
             PlacementArea.Space space =
-                    placementArea.getRandomSpace(smallObjectWidth, smallObjectHeight);
+                    placementArea.getRandomRectangularSpace(smallObjectWidth, smallObjectHeight);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    smallObjectWidth, smallObjectHeight, smallObjectMass,
-                    smallObjectPushingBots);
+                    space.getAngle(), smallObjectWidth, smallObjectHeight, smallObjectMass,
+                    smallObjectPushingBots, smallObjectValue);
 
             placementArea.placeObject(space, resource);
         }
@@ -86,11 +97,11 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
 
         for (int i = 0; i < numLargeObjects; i++) {
             PlacementArea.Space space =
-                    placementArea.getRandomSpace(largeObjectWidth, largeObjectHeight);
+                    placementArea.getRandomRectangularSpace(largeObjectWidth, largeObjectHeight);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    largeObjectWidth, largeObjectHeight, largeObjectMass,
-                    largeObjectPushingBots);
+                    space.getAngle(), largeObjectWidth, largeObjectHeight, largeObjectMass,
+                    largeObjectPushingBots, largeObjectValue);
 
             placementArea.placeObject(space, resource);
         }
@@ -106,15 +117,15 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
             }
             Double sObjWidth = (Double) resourceConfigs.get("smallObjectWidth");
             if (checkFieldPresent(sObjWidth, "resourceProperties:smallObjectWidth")) {
-                smallObjectWidth = sObjWidth;
+                smallObjectWidth = sObjWidth.floatValue();
             }
             Double sObjHeight = (Double) resourceConfigs.get("smallObjectHeight");
             if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectHeight")) {
-                smallObjectHeight = sObjHeight;
+                smallObjectHeight = sObjHeight.floatValue();
             }
             Double sObjMass = (Double) resourceConfigs.get("smallObjectMass");
             if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectMass")) {
-                smallObjectMass = sObjMass;
+                smallObjectMass = sObjMass.floatValue();
             }
             Integer sObjPushingBots = (Integer) resourceConfigs.get("maxSmallObjectPushingBots");
             if (checkFieldPresent(sObjPushingBots, "resourceProperties:maxSmallObjectPushingBots")) {
@@ -128,15 +139,15 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
             }
             Double lObjWidth = (Double) resourceConfigs.get("largeObjectWidth");
             if (checkFieldPresent(lObjWidth, "resourceProperties:largeObjectWidth")) {
-                largeObjectWidth = lObjWidth;
+                largeObjectWidth = lObjWidth.floatValue();
             }
             Double lObjHeight = (Double) resourceConfigs.get("largeObjectHeight");
             if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectHeight")) {
-                largeObjectHeight = lObjHeight;
+                largeObjectHeight = lObjHeight.floatValue();
             }
             Double lObjMass = (Double) resourceConfigs.get("largeObjectMass");
             if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectMass")) {
-                largeObjectMass = lObjMass;
+                largeObjectMass = lObjMass.floatValue();
             }
             Integer lObjPushingBots = (Integer) resourceConfigs.get("maxLargeObjectPushingBots");
             if (checkFieldPresent(lObjPushingBots, "resourceProperties:maxLargeObjectPushingBots")) {
@@ -149,4 +160,8 @@ public class ConfigurableResourceFactory extends Config implements ResourceFacto
         return numSmallObjects + numLargeObjects;
     }
 
+    @Override
+    public double getTotalResourceValue(){
+        return numLargeObjects * largeObjectValue + numSmallObjects * smallObjectValue;
+    }
 }

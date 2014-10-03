@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import sim.engine.SimState;
-import sim.util.Double2D;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.PolygonPortrayal;
@@ -47,19 +46,21 @@ public class ResourceObject extends PhysicalObject {
     private final double width;
     private final double height;
     private final int pushingRobots;
+    private final double value;
 
     private boolean isCollected = false;
 
     private final Map<RobotObject, JointDef> pendingJoints;
     private final Map<RobotObject, Joint> joints;
 
-    public ResourceObject(World world, Double2D position, double width, double height, double mass,
-              int pushingRobots) {
+    public ResourceObject(World world, Vec2 position, float angle, float width, float height,
+            float mass, int pushingRobots, double value) {
         super(createPortrayal(width, height),
-                createBody(world, position, width, height, mass));
+                createBody(world, position, angle, width, height, mass));
         this.width = width;
         this.height = height;
         this.pushingRobots = pushingRobots;
+        this.value = value;
 
         leftAnchorPoints = new AnchorPoint[pushingRobots];
         rightAnchorPoints = new AnchorPoint[pushingRobots];
@@ -79,11 +80,12 @@ public class ResourceObject extends PhysicalObject {
         return new RectanglePortrayal(width, height, DEFAULT_COLOUR, true);
     }
 
-    protected static Body createBody(World world, Double2D position, double width, double height,
-                                     double mass) {
+    protected static Body createBody(World world, Vec2 position, float angle, float width,
+            float height, float mass) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.DYNAMIC)
                 .setPosition(position)
+                .setAngle(angle)
                 .setRectangular(width, height, mass)
                 .setFriction(0.3f)
                 .setRestitution(0.4f)
@@ -424,6 +426,10 @@ public class ResourceObject extends PhysicalObject {
 
     public double getHeight() {
         return height;
+    }
+
+    public double getValue() {
+        return value;
     }
 
     /**
