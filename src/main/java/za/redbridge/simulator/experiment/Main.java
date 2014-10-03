@@ -133,7 +133,7 @@ public class Main {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-            String tree = "WHEELDRIVEFROMBEARING(IF(READINGTOBOOLEAN(S3) B1.57 SAVEBEARING(B.00)))";
+            String tree = "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(IF(IF(TS4 TS4 TS4) IF(TS4 PS2 PS3) IF(TS4 PS2 PS3))) BEARINGFROMCOORDINATE(IF(READINGPRESENT(PS0) READINGTOCOORDINATE(PS0) READINGTOCOORDINATE(PS0))) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(IF(TS4 IF(TS4 PS2 PS2) PS0)) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(PS1) SAVEBEARING(B4.71)))))))";
             Node root = model.getParser().parse(tree);
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
