@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import sim.engine.SimState;
@@ -62,9 +63,8 @@ public class RobotObject extends PhysicalObject {
 
     private final Color defaultColor;
 
-    private Vec2 previousPosition;
-
-    private double totalDisplacement;
+    private ArrayList<SpatialPoint> samplePoints;
+    private ArrayList<Double> samplePolygonAreas;
 
     private final Portrayal directionPortrayal = new DirectionPortrayal();
 
@@ -83,8 +83,8 @@ public class RobotObject extends PhysicalObject {
         leftWheelPosition = new Vec2(0f, wheelDistance);
         rightWheelPosition = new Vec2(0f, -wheelDistance);
 
-        this.previousPosition = getBody().getPosition();
-        this.totalDisplacement = 0.0;
+        samplePoints = new ArrayList<>();
+        samplePolygonAreas = new ArrayList<>();
     }
 
     private void initSensors() {
@@ -160,14 +160,19 @@ public class RobotObject extends PhysicalObject {
 
         updateFriction();
 
-        if (sim.schedule.getSteps() % 500 == 0) {
-            Vec2 currentPosition = this.getBody().getPosition();
-            totalDisplacement += currentPosition.sub(previousPosition).length();
-            previousPosition = currentPosition.clone();
+        if (sim.schedule.getSteps() % 50 == 0 && !heuristicPhenotype.getActiveHeuristic().equalsIgnoreCase("none")) {
+
+            SpatialPoint sample = new SpatialPoint(this.getBody().getPosition(), samplePoints);
+            samplePoints.add(sample);
+            //after collecting 4 points (or something), calculate area and flush sample point buffer
+            if (samplePoints.size() == 4) {
+
+                Collections.sort(samplePoints);
+                samplePolygonAreas.add(calculatePolygonArea(samplePoints));
+                samplePoints.clear();
+            }
         }
     }
-
-    public double getTotalDisplacement() { return totalDisplacement; }
 
     private void applyWheelDrive(float wheelDrive, Vec2 wheelPosition) {
         final Body body = getBody();
@@ -240,6 +245,16 @@ public class RobotObject extends PhysicalObject {
 
     public HeuristicPhenotype getHeuristicPhenotype() { return heuristicPhenotype; }
 
+    public double getAverageCoveragePolgygonArea() {
+
+        double sum = 0;
+        for (Double area: samplePolygonAreas) {
+            sum += area;
+        }
+
+        return sum/samplePolygonAreas.size();
+    }
+
     public void setBoundToResource(boolean isBoundToResource) {
         this.isBoundToResource = isBoundToResource;
     }
@@ -277,4 +292,74 @@ public class RobotObject extends PhysicalObject {
             vertices[5].set(-halfWidth - halfThickness, halfHeight);
         }
     }
+
+    //class for spatial point in the context of some shape
+    private static class SpatialPoint implements Comparable<SpatialPoint> {
+
+        private final Vec2 point;
+        private final ArrayList<SpatialPoint> otherPoints;
+
+        public SpatialPoint(Vec2 point, ArrayList<SpatialPoint> otherPoints) {
+            this.point = point;
+            this.otherPoints = otherPoints;
+        }
+
+        public int compareTo(SpatialPoint other) {
+
+            Vec2 center = getCenterOfPoints(otherPoints);
+
+            if (this.point.x >= 0 && other.point.x < 0) {
+                return 1;
+            }
+            else if (this.point.x == 0 && other.point.x ==0) {
+                return Float.compare(this.point.y,other.point.y);
+            }
+
+            float delta = (this.point.x - center.x) * (other.point.y - center.y)
+                    - (this.point.x - center.x) * (this.point.y - center.y);
+
+            if (delta > 0) {
+                return 1;
+            }
+            else if (delta < 0) {
+                return -1;
+            }
+
+            float distFromCenter1 = (this.point.x - center.x) * (this.point.x - center.x) + (this.point.y - center.y) * (this.point.y - center.y);
+            float distFromCenter2 = (other.point.x - center.x) * (other.point.x - center.x) + (other.point.y - center.y) * (other.point.y - center.y);
+
+            return Float.compare(distFromCenter1,distFromCenter2);
+
+        }
+
+        private static Vec2 getCenterOfPoints(ArrayList<SpatialPoint> points) {
+
+            final Vec2 center = new Vec2(0,0);
+            for (SpatialPoint point: points) {
+
+                center.x += point.getPoint().x;
+                center.y += point.getPoint().y;
+            }
+            center.x /= points.size();
+            center.y /= points.size();
+            return center;
+        }
+
+        public Vec2 getPoint() { return point; }
+    }
+
+    private double calculatePolygonArea(ArrayList<SpatialPoint> vertices) {
+
+        double totalArea = 0;
+        int j = vertices.size()-1;
+
+        for (int i = 0; i < vertices.size(); i++) {
+            totalArea +=  (vertices.get(j).getPoint().x + vertices.get(i).getPoint().x) *
+                    (vertices.get(j).getPoint().y + vertices.get(i).getPoint().y);
+            j = i;
+        }
+        return totalArea/2;
+    }
+
+
 }

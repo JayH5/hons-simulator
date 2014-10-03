@@ -40,6 +40,18 @@ public final class Utils {
         return rand.nextFloat() * range + from;
     }
 
+    public static float randomUniformRange(float from, float to) {
+
+        Random rand = new Random();
+
+        if (from >= to) {
+            throw new IllegalArgumentException("`from` must be less than `to`");
+        }
+
+        float range = to - from;
+        return rand.nextFloat() * range + from;
+    }
+
     public static Vec2 toVec2(Double2D double2D) {
         return new Vec2((float) double2D.x, (float) double2D.y);
     }

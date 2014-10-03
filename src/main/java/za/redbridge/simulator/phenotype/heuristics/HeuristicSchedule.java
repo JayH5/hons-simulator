@@ -15,6 +15,8 @@ public class HeuristicSchedule {
     private final List<Heuristic> addList = new ArrayList<>();
     private final List<Heuristic> removeList = new ArrayList<>();
 
+    private String activeHeuristic = "none";
+
     public Double2D step(List<List<Double>> readings) {
         schedule.addAll(addList);
         addList.forEach(h -> h.setSchedule(this));
@@ -25,11 +27,14 @@ public class HeuristicSchedule {
         removeList.clear();
 
         Double2D wheelDrive = null;
+        String activeHeuristic = "none";
         for (Heuristic heuristic : schedule) {
             wheelDrive = heuristic.step(readings);
             if (wheelDrive != null) {
                 // Update the robot's paint
                 heuristic.getRobot().setColor(heuristic.getColor());
+                //Update active heuristic
+                activeHeuristic = heuristic.getClass().getSimpleName();
                 break;
             }
         }
@@ -48,4 +53,6 @@ public class HeuristicSchedule {
             removeList.add(heuristic);
         }
     }
+
+    public synchronized String getActiveHeuristic() { return activeHeuristic; }
 }

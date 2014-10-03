@@ -42,7 +42,7 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
     private final SimConfig config;
 
-    private boolean stopOnceCollected = false;
+    private boolean stopOnceCollected = true;
 
     public Simulation(SimConfig config, RobotFactory robotFactory) {
         super(config.getSimulationSeed());
@@ -145,9 +145,7 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        //for now just give it the default fitness function
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height,
-                                                            config.getFitnessFunction());
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height);
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
@@ -161,16 +159,16 @@ public class Simulation extends SimState {
         config.setSimulationSeed(seed);
     }
 
-    private double getRobotAvgDisplacement() {
+    private double getRobotAvgPolygonArea() {
         Set<PhysicalObject> objects = placementArea.getPlacedObjects();
-        double totalDisplacement = 0.0;
+        double totalArea = 0.0;
 
         for (PhysicalObject object: objects) {
             if (object instanceof RobotObject) {
-                totalDisplacement += ((RobotObject) object).getTotalDisplacement();
+                totalArea += ((RobotObject) object).getAverageCoveragePolgygonArea();
             }
         }
-        return totalDisplacement/config.getObjectsRobots();
+        return totalArea/config.getObjectsRobots();
     }
 
     /** Get the environment (forage area) for this simulation. */
@@ -218,7 +216,9 @@ public class Simulation extends SimState {
 
     //return the score at this point in the simulation
     public double getFitness() {
-        return targetArea.getTotalFitness();
+        double resourceFitness = targetArea.getTotalResourceValue() / config.getResourceFactory().getTotalResourceValue();
+        double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
+        return (resourceFitness * 100) + (speedFitness * 20);
     }
 
     /** Get the number of steps this simulation has been run for. */

@@ -46,6 +46,7 @@ public class ResourceObject extends PhysicalObject {
     private final double width;
     private final double height;
     private final int pushingRobots;
+    private final double value;
 
     private boolean isCollected = false;
 
@@ -53,12 +54,13 @@ public class ResourceObject extends PhysicalObject {
     private final Map<RobotObject, Joint> joints;
 
     public ResourceObject(World world, Vec2 position, float angle, float width, float height,
-            float mass, int pushingRobots) {
+            float mass, int pushingRobots, double value) {
         super(createPortrayal(width, height),
                 createBody(world, position, angle, width, height, mass));
         this.width = width;
         this.height = height;
         this.pushingRobots = pushingRobots;
+        this.value = value;
 
         leftAnchorPoints = new AnchorPoint[pushingRobots];
         rightAnchorPoints = new AnchorPoint[pushingRobots];
@@ -424,6 +426,10 @@ public class ResourceObject extends PhysicalObject {
 
     public double getHeight() {
         return height;
+    }
+
+    public double getValue() {
+        return value;
     }
 
     /**
