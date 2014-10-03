@@ -19,7 +19,7 @@ public class ReadingPresent extends Node {
     }
     @Override
     public String getIdentifier(){
-        return "READINGTOBOOLEAN";
+        return "READINGPRESENT";
     }
 
     public Boolean evaluate(){
