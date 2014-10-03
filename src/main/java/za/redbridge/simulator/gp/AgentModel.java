@@ -28,7 +28,6 @@ import java.util.stream.IntStream;
 public class AgentModel extends GPModel {
     //number of simulations run per phenotype evaluation
     protected int numSims;
-    protected int numSteps;
     private List<AgentSensor> sensors;
     private final SimConfig config;
     private final ExperimentConfig exConfig;
@@ -42,7 +41,6 @@ public class AgentModel extends GPModel {
        this.config = config;
        this.exConfig = exConfig;
        this.numSims = 3;
-       this.numSteps = 10000;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
            Sensor sensor = sensors.get(i);
