@@ -68,9 +68,9 @@ public class RobotObject extends PhysicalObject {
 
     private final Portrayal directionPortrayal = new DirectionPortrayal();
 
-    public RobotObject(World world, Double2D position, double radius, double mass, Color color,
-            Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
-        super(createPortrayal(radius, color), createBody(world, position, radius, mass));
+    public RobotObject(World world, Vec2 position, float angle, double radius, double mass,
+            Color color, Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
+        super(createPortrayal(radius, color), createBody(world, position, angle, radius, mass));
 
         this.phenotype = phenotype;
         this.defaultColor = color;
@@ -123,10 +123,12 @@ public class RobotObject extends PhysicalObject {
         return new CirclePortrayal(radius, paint, true);
     }
 
-    protected static Body createBody(World world, Double2D position, double radius, double mass) {
+    protected static Body createBody(World world, Vec2 position, float angle, double radius,
+            double mass) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.DYNAMIC)
                 .setPosition(position)
+                .setAngle(angle)
                 .setCircular(radius, mass)
                 .setFriction(0.7f)
                 .setRestitution(1.0f)
