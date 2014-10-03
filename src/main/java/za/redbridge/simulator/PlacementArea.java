@@ -1,6 +1,7 @@
 package za.redbridge.simulator;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
@@ -10,15 +11,14 @@ import java.util.Map;
 import java.util.Set;
 
 import ec.util.MersenneTwisterFast;
-import sim.util.Double2D;
 import za.redbridge.simulator.object.PhysicalObject;
 
 
 import static za.redbridge.simulator.Utils.createAABB;
 import static za.redbridge.simulator.Utils.moveAABB;
+import static za.redbridge.simulator.Utils.randomAngle;
 import static za.redbridge.simulator.Utils.randomRange;
 import static za.redbridge.simulator.Utils.resizeAABB;
-import static za.redbridge.simulator.Utils.toDouble2D;
 
 /**
  * Describes an area for placing objects. Typically, an object factory will request some space in
@@ -32,15 +32,17 @@ public class PlacementArea {
     // The physics engine adds a small margin to objects placed in the world
     private static final float PADDING = 0.03f;
 
-    private final double width;
-    private final double height;
+    private static final int MAX_PLACEMENT_TRIES = 1000;
+
+    private final float width;
+    private final float height;
 
     private final MersenneTwisterFast random = new MersenneTwisterFast();
 
     // Need an ordered map, hence the use of a linked hashmap
     private final Map<PhysicalObject, Space> placements = new LinkedHashMap<>();
 
-    PlacementArea(double width, double height) {
+    PlacementArea(float width, float height) {
         this.width = width;
         this.height = height;
     }
@@ -57,60 +59,85 @@ public class PlacementArea {
         random.setSeed(seed);
     }
 
-    Space getRandomSpace(double width, double height) {
-        width += PADDING;
-        height += PADDING;
-
-        final int maxTries = 1000;
-        int tries = 1;
-
-        float minX = (float) (0 + width / 2);
-        float maxX = (float) (this.width - width / 2);
-        float minY = (float) (0 + height / 2);
-        float maxY = (float) (this.height - height / 2);
-
+    Space getRandomRectangularSpace(float objectWidth, float objectHeight) {
         AABB aabb = new AABB();
-        resizeAABB(aabb, (float) width, (float) height);
+        float angle;
+        int tries = 1;
         do {
-            if (tries++ >= maxTries) {
+            if (tries++ >= MAX_PLACEMENT_TRIES) {
                 throw new RuntimeException("Unable to find space for object");
             }
 
-            float x = randomRange(random, minX, maxX);
-            float y = randomRange(random, minY, maxY);
-            moveAABB(aabb, x, y);
+            angle = randomAngle(random);
+            float sin = MathUtils.abs(MathUtils.sin(angle));
+            float cos = MathUtils.abs(MathUtils.cos(angle));
+            float width = objectHeight * sin + objectWidth * cos + PADDING;
+            float height = objectWidth * sin + objectHeight * cos + PADDING;
+            resizeAABB(aabb, width, height);
 
+            float x = randomRange(random, width, this.width - width);
+            float y = randomRange(random, height, this.height - height);
+            moveAABB(aabb, x, y);
         } while (overlappingWithOtherObject(aabb));
 
-        return new Space(aabb);
+        return new Space(aabb, angle);
     }
 
-    Space getRandomSpace(double radius) {
-        double diameter = radius * 2;
-        return getRandomSpace(diameter, diameter);
+    Space getRandomCircularSpace(float objectRadius) {
+        float diameter = objectRadius * 2 + PADDING;
+
+        float halfDiameter = diameter / 2;
+        float maxX = this.width - halfDiameter;
+        float maxY = this.height - halfDiameter;
+
+        AABB aabb = new AABB();
+        resizeAABB(aabb, diameter, diameter);
+        float angle = randomAngle(random);
+        int tries = 1;
+        do {
+            if (tries++ >= MAX_PLACEMENT_TRIES) {
+                throw new RuntimeException("Unable to find space for object");
+            }
+
+            float x = randomRange(random, halfDiameter, maxX);
+            float y = randomRange(random, halfDiameter, maxY);
+            moveAABB(aabb, x, y);
+        } while (overlappingWithOtherObject(aabb));
+
+        return new Space(aabb, angle);
     }
 
-    Space getSpaceAtPosition(double width, double height, Double2D position) {
-        width += PADDING;
-        height += PADDING;
+    Space getRectangularSpace(float objectWidth, float objectHeight, Vec2 position, float angle) {
+        float sin = MathUtils.abs(MathUtils.sin(angle));
+        float cos = MathUtils.abs(MathUtils.cos(angle));
+        float width = objectHeight * sin + objectWidth * cos + PADDING;
+        float height = objectWidth * sin + objectHeight * cos + PADDING;
 
-        AABB aabb =
-                createAABB((float) position.x, (float) position.y, (float) width, (float) height);
+        AABB aabb = createAABB(position.x, position.y, width, height);
         if (overlappingWithOtherObject(aabb)) {
             return null;
         }
 
-        return new Space(aabb);
+        return new Space(aabb, angle);
     }
 
-    Space getSpaceAtPosition(double radius, Double2D position) {
-        double diameter = radius * 2;
-        return getSpaceAtPosition(diameter, diameter, position);
+    Space getCircularSpace(float radius, Vec2 position, float angle) {
+        float diameter = radius * 2 + PADDING;
+        AABB aabb = createAABB(position.x, position.y, diameter, diameter);
+        if (overlappingWithOtherObject(aabb)) {
+            return null;
+        }
+
+        return new Space(aabb, angle);
     }
 
-    boolean overlappingWithOtherObject(double width, double height, Double2D position) {
-        AABB aabb =
-                createAABB((float) position.x, (float) position.y, (float) width, (float) height);
+    boolean overlappingWithOtherObject(float objectWidth, float objectHeight, Vec2 position,
+            float angle) {
+        float sin = MathUtils.abs(MathUtils.sin(angle));
+        float cos = MathUtils.abs(MathUtils.cos(angle));
+        float width = objectHeight * sin + objectWidth * cos + PADDING;
+        float height = objectWidth * sin + objectHeight * cos + PADDING;
+        AABB aabb = createAABB(position.x, position.y, width, height);
         return overlappingWithOtherObject(aabb);
     }
 
@@ -170,16 +197,18 @@ public class PlacementArea {
      */
     public static class Space {
         private final AABB aabb;
+        private final float angle;
 
         private boolean used = false;
 
-        private Space(AABB aabb) {
+        private Space(AABB aabb, float angle) {
             this.aabb = aabb;
+            this.angle = angle;
         }
 
         /** Get the center position of the space */
-        public Double2D getPosition() {
-            return toDouble2D(aabb.getCenter());
+        public Vec2 getPosition() {
+            return aabb.getCenter();
         }
 
         /** Get the width of the space */
@@ -190,6 +219,11 @@ public class PlacementArea {
         /** Get the height of the space */
         public float getHeight() {
             return aabb.upperBound.y - aabb.lowerBound.x;
+        }
+
+        /** Get the angle of the object placed within this space */
+        public float getAngle() {
+            return angle;
         }
 
         private boolean isUsed() {
@@ -222,57 +256,63 @@ public class PlacementArea {
         }
 
         /**
-         * Try and get a placement space for an object of the given size at the given position.
-         * Returns null if insufficient space at position.
-         * @param width width of the object to be placed
-         * @param height height of the object to be placed
+         * Try and get a placement space for a rectangular object of the given size at the given
+         * position. Returns null if insufficient space at position.
+         * @param objectWidth width of the object to be placed
+         * @param objectHeight height of the object to be placed
          * @param position desired position to be placed
+         * @param angle desired angle to be placed at
          * @return Space if available
          */
-        public Space getSpaceAtPosition(double width, double height, Double2D position) {
-            return PlacementArea.this.getSpaceAtPosition(width, height, position);
+        public Space getRectangularSpace(float objectWidth, float objectHeight, Vec2 position,
+                float angle) {
+            return PlacementArea.this.getRectangularSpace(objectWidth, objectHeight, position,
+                    angle);
         }
 
         /**
-         * Try and get a placement space for an object of the given size at the given position.
-         * Returns null if insufficient space at position.
-         * @param radius radius of the object to be placed
+         * Try and get a placement space for a circular object of the given size at the given
+         * position. Returns null if insufficient space at position.
+         * @param objectRadius radius of the object to be placed
          * @param position desired position to be placed
+         * @param angle desired angle to be placed at
          * @return Space if available
          */
-        public Space getSpaceAtPosition(double radius, Double2D position) {
-            return PlacementArea.this.getSpaceAtPosition(radius, position);
+        public Space getCircularSpace(float objectRadius, Vec2 position, float angle) {
+            return PlacementArea.this.getCircularSpace(objectRadius, position, angle);
         }
 
         /**
          * Get a random placement space of the given size.
-         * @param width width of the object to be placed
-         * @param height height of the object to be placed
+         * @param objectWidth width of the object to be placed
+         * @param objectHeight height of the object to be placed
          * @return a free random space
          */
-        public Space getRandomSpace(double width, double height) {
-            return PlacementArea.this.getRandomSpace(width, height);
+        public Space getRandomRectangularSpace(float objectWidth, float objectHeight) {
+            return PlacementArea.this.getRandomRectangularSpace(objectWidth, objectHeight);
         }
 
         /**
          * Get a random placement space of the given size.
-         * @param radius radius of the object to be placed
+         * @param objectRadius radius of the object to be placed
          * @return a free random space
          */
-        public Space getRandomSpace(double radius) {
-            return PlacementArea.this.getRandomSpace(radius);
+        public Space getRandomCircularSpace(float objectRadius) {
+            return PlacementArea.this.getRandomCircularSpace(objectRadius);
         }
 
         /**
-         * Check if an object of the given size at the given position would overlap with another
-         * object that has already been placed.
-         * @param width width of the object to be placed
-         * @param height height of the object to be placed
+         * Check if a rectangular object of the given size at the given position would overlap with
+         * another object that has already been placed.
+         * @param objectWidth width of the object to be placed
+         * @param objectHeight height of the object to be placed
          * @param position position to check
+         * @param angle angle of object to be placed
          * @return true if the object would overlap
          */
-        public boolean overlappingWithOtherObject(double width, double height, Double2D position) {
-            return PlacementArea.this.overlappingWithOtherObject(width, height, position);
+        public boolean overlappingWithOtherObject(float objectWidth, float objectHeight,
+                Vec2 position, float angle) {
+            return PlacementArea.this.overlappingWithOtherObject(objectWidth, objectHeight, position, angle);
         }
 
         /**

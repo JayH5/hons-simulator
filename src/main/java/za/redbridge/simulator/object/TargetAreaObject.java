@@ -1,6 +1,7 @@
 package za.redbridge.simulator.object;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 
 import sim.engine.SimState;
-import sim.util.Double2D;
 import za.redbridge.simulator.ea.FitnessFunction;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
@@ -46,9 +46,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     //keeps track of what has been pushed into this place
 
-    public TargetAreaObject(World world, Double2D pos, int width, int height,
+    public TargetAreaObject(World world, Vec2 position, int width, int height,
             FitnessFunction fitnessFunction) {
-        super(createPortrayal(width, height), createBody(world, pos, width, height));
+        super(createPortrayal(width, height), createBody(world, position, width, height));
 
         this.fitnessFunction = fitnessFunction;
         totalFitness = 0;
@@ -63,7 +63,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         return new RectanglePortrayal(width, height, areaColour, true);
     }
 
-    protected static Body createBody(World world, Double2D position, int width, int height) {
+    protected static Body createBody(World world, Vec2 position, int width, int height) {
         BodyBuilder bb = new BodyBuilder();
         return bb.setBodyType(BodyType.STATIC)
                 .setPosition(position)

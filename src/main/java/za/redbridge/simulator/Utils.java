@@ -1,6 +1,7 @@
 package za.redbridge.simulator;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 
 import java.util.Random;
@@ -108,6 +109,11 @@ public final class Utils {
     public static boolean testPoint(Vec2 point, AABB aabb) {
         return point.x >= aabb.lowerBound.x && point.x <= aabb.upperBound.x
                 && point.y >= aabb.lowerBound.y && point.y <= aabb.upperBound.y;
+    }
+
+    /** Get a random angle in the range [-PI / 2, PI / 2] */
+    public static float randomAngle(MersenneTwisterFast random) {
+        return MathUtils.TWOPI * random.nextFloat() - MathUtils.PI;
     }
 
 }

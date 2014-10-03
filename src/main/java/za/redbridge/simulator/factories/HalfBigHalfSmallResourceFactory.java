@@ -15,15 +15,15 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
 
 
     private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
-    private static final double SMALL_OBJECT_WIDTH = 0.4;
-    private static final double SMALL_OBJECT_HEIGHT = 0.4;
-    private static final double SMALL_OBJECT_MASS = 2.0;
+    private static final float SMALL_OBJECT_WIDTH = 0.4f;
+    private static final float SMALL_OBJECT_HEIGHT = 0.4f;
+    private static final float SMALL_OBJECT_MASS = 2.0f;
     private static final int SMALL_OBJECT_PUSHING_BOTS = 1;
 
     private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
-    private static final double LARGE_OBJECT_WIDTH = 0.6;
-    private static final double LARGE_OBJECT_HEIGHT = 0.6;
-    private static final double LARGE_OBJECT_MASS = 5.0;
+    private static final float LARGE_OBJECT_WIDTH = 0.6f;
+    private static final float LARGE_OBJECT_HEIGHT = 0.6f;
+    private static final float LARGE_OBJECT_MASS = 5.0f;
     private static final int LARGE_OBJECT_PUSHING_BOTS = 2;
 
     @Override
@@ -33,10 +33,10 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
         int small = quantity / 2;
         for (int i = 0; i < small; i++) {
             PlacementArea.Space space =
-                    placementArea.getRandomSpace(SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT);
+                    placementArea.getRandomRectangularSpace(SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS,
+                    space.getAngle(), SMALL_OBJECT_WIDTH, SMALL_OBJECT_HEIGHT, SMALL_OBJECT_MASS,
                     SMALL_OBJECT_PUSHING_BOTS);
 
             placementArea.placeObject(space, resource);
@@ -45,10 +45,10 @@ public class HalfBigHalfSmallResourceFactory implements ResourceFactory {
         int big = quantity - small;
         for (int i = 0; i < big; i++) {
             PlacementArea.Space space =
-                    placementArea.getRandomSpace(LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT);
+                    placementArea.getRandomRectangularSpace(LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS,
+                    space.getAngle(), LARGE_OBJECT_WIDTH, LARGE_OBJECT_HEIGHT, LARGE_OBJECT_MASS,
                     LARGE_OBJECT_PUSHING_BOTS);
 
             placementArea.placeObject(space, resource);

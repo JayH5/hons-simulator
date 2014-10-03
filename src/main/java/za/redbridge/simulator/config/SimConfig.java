@@ -25,8 +25,8 @@ public class SimConfig extends Config {
     private static final Direction DEFAULT_TARGET_AREA_PLACEMENT = Direction.SOUTH;
     private static final int DEFAULT_OBJECTS_ROBOTS = 10;
 
-    private static final double DEFAULT_ROBOT_MASS = 0.7;
-    private static final double DEFAULT_ROBOT_RADIUS = 0.15;
+    private static final float DEFAULT_ROBOT_MASS = 0.7f;
+    private static final float DEFAULT_ROBOT_RADIUS = 0.15f;
     private static final Color DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
 
 
@@ -46,8 +46,8 @@ public class SimConfig extends Config {
     private final int environmentHeight;
 
     private final int objectsRobots;
-    private final double robotMass;
-    private final double robotRadius;
+    private final float robotMass;
+    private final float robotRadius;
     private final Color robotColour;
 
     private final Direction targetAreaPlacement;
@@ -62,16 +62,16 @@ public class SimConfig extends Config {
     public SimConfig() {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
-                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS, DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR,
-                DEFAULT_FITNESS_FUNCTION, DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
+                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS,
+                DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR, DEFAULT_FITNESS_FUNCTION,
+                DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
     }
 
-    public SimConfig(long simulationSeed, int simulationIterations,
-                     int environmentWidth, int environmentHeight,
-                     Direction targetAreaPlacement, int targetAreaThickness,
-                     int objectsRobots, double robotMass, double robotRadius, Color robotColour,
-                     FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
-                     String robotFactoryName) {
+    public SimConfig(long simulationSeed, int simulationIterations, int environmentWidth,
+            int environmentHeight, Direction targetAreaPlacement, int targetAreaThickness,
+            int objectsRobots, float robotMass, float robotRadius, Color robotColour,
+            FitnessFunction fitnessFunction, ResourceFactory resourceFactory,
+            String robotFactoryName) {
 
         this.simulationSeed = simulationSeed;
         this.simulationIterations = simulationIterations;
@@ -112,8 +112,8 @@ public class SimConfig extends Config {
         int thickness = DEFAULT_TARGET_AREA_THICKNESS;
         int robots = DEFAULT_OBJECTS_ROBOTS;
 
-        double rMass = DEFAULT_ROBOT_MASS;
-        double rRadius = DEFAULT_ROBOT_RADIUS;
+        float rMass = DEFAULT_ROBOT_MASS;
+        float rRadius = DEFAULT_ROBOT_RADIUS;
         Color robotColour = DEFAULT_ROBOT_COLOUR;
 
         FitnessFunction fitness = DEFAULT_FITNESS_FUNCTION;
@@ -169,21 +169,19 @@ public class SimConfig extends Config {
             }
             Double botRadius = (Double) bots.get("radius");
             if (checkFieldPresent(botRadius, "robots:radius")) {
-                rRadius = botRadius;
+                rRadius = botRadius.floatValue();
             }
             Double botMass = (Double) bots.get("mass");
             if (checkFieldPresent(botMass, "robots:mass")) {
-                rMass = botMass;
+                rMass = botMass.floatValue();
             }
-            String[] rgb = null;
+
             String rgbvalues = (String) bots.get("colour");
             if (checkFieldPresent(rgbvalues, "robots:colour")) {
 
-                rgb = rgbvalues.split(",");
-                Color colour = new Color(Integer.parseInt(rgb[0].trim()), Integer.parseInt(rgb[1].trim()),
-                        Integer.parseInt(rgb[2].trim()));
-
-                robotColour = colour;
+                String[] rgb = rgbvalues.split(",");
+                robotColour = new Color(Integer.parseInt(rgb[0].trim()),
+                        Integer.parseInt(rgb[1].trim()), Integer.parseInt(rgb[2].trim()));
             }
 
         }
@@ -203,20 +201,14 @@ public class SimConfig extends Config {
                     }
 
                     fitness = (FitnessFunction) o;
-                }
-                catch (ClassNotFoundException c) {
+                } catch (ClassNotFoundException c) {
                     System.out.println("Invalid class name specified in SimConfig: " + fitnessF + ". Using default fitness function.");
                     c.printStackTrace();
-                }
-                catch (InvalidClassException i) {
+                } catch (InvalidClassException i) {
                     System.out.println("Invalid specified fitness class. " + fitnessF + ". Using default fitness function.");
                     i.printStackTrace();
-                }
-                catch (InstantiationException ins) {
+                } catch (InstantiationException | IllegalAccessException ins) {
                     ins.printStackTrace();
-                }
-                catch (IllegalAccessException ill) {
-                    ill.printStackTrace();
                 }
             }
         }
@@ -239,20 +231,14 @@ public class SimConfig extends Config {
                     resFactory = (ResourceFactory) o;
                     Map resources = (Map) config.get("resourceProperties");
                     resFactory.configure(resources);
-                }
-                catch (ClassNotFoundException c) {
+                } catch (ClassNotFoundException c) {
                     System.out.println("Invalid class name specified in SimConfig: " + rFactory + ". Using default resource factory.");
                     c.printStackTrace();
-                }
-                catch (InvalidClassException i) {
+                } catch (InvalidClassException i) {
                     System.out.println("Invalid resource factory specified: " + rFactory + ". Using default resource factory.");
                     i.printStackTrace();
-                }
-                catch (InstantiationException ins) {
+                } catch (InstantiationException | IllegalAccessException ins) {
                     ins.printStackTrace();
-                }
-                catch (IllegalAccessException ill) {
-                    ill.printStackTrace();
                 }
             }
 
@@ -314,9 +300,9 @@ public class SimConfig extends Config {
 
     public Color getRobotColour() { return robotColour; }
 
-    public double getRobotMass() { return robotMass; }
+    public float getRobotMass() { return robotMass; }
 
-    public double getRobotRadius() { return robotRadius; }
+    public float getRobotRadius() { return robotRadius; }
 
     public FitnessFunction getFitnessFunction() { return fitnessFunction; }
 

@@ -62,7 +62,8 @@ public class Simulation extends SimState {
         environment.setObjectLocation(drawProxy, new Double2D());
 
         physicsWorld = new World(new Vec2());
-        placementArea = new PlacementArea(environment.getWidth(), environment.getHeight());
+        placementArea =
+                new PlacementArea((float) environment.getWidth(), (float) environment.getHeight());
         placementArea.setSeed(config.getSimulationSeed());
         schedule.reset();
         System.gc();
@@ -123,35 +124,34 @@ public class Simulation extends SimState {
         int environmentHeight = config.getEnvironmentHeight();
 
         final int width, height;
-        final Double2D pos;
-
+        final Vec2 position;
         if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
             width = environmentWidth;
             height = config.getTargetAreaThickness();
-            pos = new Double2D(width/2,height/2);
+            position = new Vec2(width / 2f, height / 2f);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
             width = environmentWidth;
             height = config.getTargetAreaThickness();
-            pos = new Double2D(environmentWidth - width/2, environmentHeight - height/2);
+            position = new Vec2(environmentWidth - width / 2f, environmentHeight - height / 2f);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
             width = config.getTargetAreaThickness();
             height = environmentHeight;
-            pos = new Double2D(environmentWidth - width/2, height/2);
+            position = new Vec2(environmentWidth - width / 2f, height / 2f);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
             width = config.getTargetAreaThickness();
             height = environmentHeight;
-            pos = new Double2D(width/2,height/2);
+            position = new Vec2(width / 2f, height / 2f);
         } else {
             return; // Don't know where to place this target area
         }
 
         //for now just give it the default fitness function
-        targetArea = new TargetAreaObject(physicsWorld, pos, width, height,
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height,
                                                             config.getFitnessFunction());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
-        PlacementArea.Space space = placementArea.getSpaceAtPosition(width, height, pos);
+        PlacementArea.Space space = placementArea.getRectangularSpace(width, height, position, 0f);
         placementArea.placeObject(space, targetArea);
     }
 
