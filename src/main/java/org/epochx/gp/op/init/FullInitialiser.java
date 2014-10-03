@@ -313,7 +313,7 @@ public class FullInitialiser extends ConfigOperator<GPModel> implements GPInitia
 		final List<Node> validNodes = new ArrayList<Node>();
 		if (remainingDepth == 0) {
 			for (final Node n: terminals) {
-				if (n.getReturnType().isAssignableFrom(requiredType)) {
+				if (requiredType.isAssignableFrom(n.getReturnType())) {
 					validNodes.add(n);
 				}
 			}

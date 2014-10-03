@@ -1,5 +1,7 @@
 package za.redbridge.simulator.gp.types;
 
+import za.redbridge.simulator.sensor.AgentSensor;
+
 import java.text.DecimalFormat;
 
 /**
@@ -12,11 +14,11 @@ public class ProximityReading {
     protected float range;
     protected float fov;
 
-    public ProximityReading(float value, float bearing, float range, float fov){
+    public ProximityReading(float value, AgentSensor sensor){
         this.value = value;
-        this.bearing = bearing;
-        this.range = range;
-        this.fov = fov;
+        this.bearing = sensor.getBearing();
+        this.range = sensor.getRange();
+        this.fov = sensor.getFieldOfView();
     }
 
     public float getValue() {

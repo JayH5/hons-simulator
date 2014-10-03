@@ -30,16 +30,20 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.AgentModel;
+import za.redbridge.simulator.gp.types.DetectedObject;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
 import za.redbridge.simulator.khepera.ProximitySensor;
 import za.redbridge.simulator.khepera.UltrasonicSensor;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ProximityAgentSensor;
+import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
 //entry point into simulator
 
@@ -89,8 +93,16 @@ public class Main {
         List<AgentSensor> sensors = new ArrayList<>();
         sensors.add(new UltrasonicSensor(0f, 0f));
         sensors.add(new UltrasonicSensor((float)Math.PI/2, 0f));
-        sensors.add(new UltrasonicSensor((float)Math.PI, 0f));
+        //sensors.add(new UltrasonicSensor((float)Math.PI, 0f));
         sensors.add(new UltrasonicSensor((float)(3*Math.PI/2), 0f));
+
+        List<Class> detectables = new ArrayList<>();
+        detectables.add(RobotObject.class);
+        detectables.add(ResourceObject.class);
+        detectables.add(WallObject.class);
+
+        sensors.add(new TypedProximityAgentSensor(detectables, (float)Math.PI/4));
+        sensors.add(new TypedProximityAgentSensor(detectables, (float)(7*Math.PI/4)));
 
         sensors.add(new BottomProximitySensor());
 

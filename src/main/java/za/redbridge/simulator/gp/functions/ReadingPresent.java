@@ -24,7 +24,7 @@ public class ReadingPresent extends Node {
 
     public Boolean evaluate(){
         Object reading = getChild(0).evaluate();
-        if(reading.getClass() == ProximityReading.class) {
+        if(ProximityReading.class.isAssignableFrom(reading.getClass())) {
             ProximityReading r = (ProximityReading)reading;
             return r.getValue() > 0.0;
         }
@@ -33,7 +33,7 @@ public class ReadingPresent extends Node {
 
     @Override
     public Class<?> getReturnType(final Class<?> ... inputTypes) {
-        if (inputTypes.length == 1 && inputTypes[0] == ProximityReading.class) {
+        if (inputTypes.length == 1 && ProximityReading.class.isAssignableFrom(inputTypes[0])) {
             return Boolean.class;
         } else{
             return null;

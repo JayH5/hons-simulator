@@ -316,7 +316,7 @@ public class GrowInitialiser extends ConfigOperator<GPModel> implements GPInitia
 	private List<Node> getValidNodes(final int remainingDepth, final Class<?> requiredType) {
 		final List<Node> validNodes = new ArrayList<Node>();
 		for (final Node n: terminals) {
-			if (n.getReturnType().isAssignableFrom(requiredType)) {
+			if (requiredType.isAssignableFrom(n.getReturnType())) {
 				validNodes.add(n);
 			}
 		}

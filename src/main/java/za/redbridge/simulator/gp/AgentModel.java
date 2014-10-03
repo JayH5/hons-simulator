@@ -17,9 +17,10 @@ import za.redbridge.simulator.gp.types.*;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.Sensor;
+import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -43,8 +44,13 @@ public class AgentModel extends GPModel {
        this.numSims = 3;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
-           Sensor sensor = sensors.get(i);
-           if(sensor instanceof BottomProximitySensor)  inputs.add(new ThresholdedSensorVariable("TS" + i, 0.5f));
+           AgentSensor sensor = sensors.get(i);
+           if(sensor instanceof BottomProximitySensor)  inputs.add(new ThresholdedSensorVariable("BS" + i, 0.5f));
+           else if(sensor instanceof TypedProximityAgentSensor) {
+               //we get the list of detectable object types from the sensor class list
+               List<DetectedObject.Type> dob = ((TypedProximityAgentSensor)sensor).getSenseClasses().stream().map(DetectedObject::fromClass).collect(Collectors.toList());
+               inputs.add(new TypedProximitySensorVariable("TS" + i, dob, sensor));
+           }
            else inputs.add(new ProximitySensorVariable("PS" + i, Float.class, sensors.get(i)));
        }
 
@@ -61,6 +67,10 @@ public class AgentModel extends GPModel {
        syntax.add(new TangentFunction());
        syntax.add(new ArcTangentFunction());
        */
+       for(DetectedObject.Type t : DetectedObject.Type.values()){
+           syntax.add(new Literal(t));
+       }
+       syntax.add(new ReadingIsOfType());
 
        syntax.add(new IfFunction());
        syntax.add(new GT());

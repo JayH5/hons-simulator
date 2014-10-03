@@ -1,5 +1,11 @@
 package za.redbridge.simulator.physics;
 
+import za.redbridge.simulator.khepera.BottomProximitySensor;
+import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.object.TargetAreaObject;
+import za.redbridge.simulator.object.WallObject;
+
 /**
  * Created by jamie on 2014/10/02.
  */
@@ -20,6 +26,14 @@ public final class FilterConstants {
         public static final int HEURISTIC_SENSOR = 1 << 6;
         public static final int AGENT_SENSOR = 1 << 7;
         public static final int TARGET_AREA_SENSOR = 1 << 8;
+
+        public static int bitForClass(Class c){
+            if(c == ResourceObject.class) return RESOURCE;
+            if(c == RobotObject.class) return ROBOT;
+            if(c == WallObject.class) return WALL;
+            if(c == TargetAreaObject.class) return TARGET_AREA;
+            return DEFAULT;
+        }
     }
 
     public static final class GroupIndexes {

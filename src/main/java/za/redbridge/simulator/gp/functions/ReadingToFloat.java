@@ -26,7 +26,7 @@ public class ReadingToFloat extends Node {
 
     public GPFloatVariable evaluate(){
         Object reading = getChild(0).evaluate();
-        if(reading.getClass() == ProximityReading.class) {
+        if(ProximityReading.class.isAssignableFrom(reading.getClass())) {
             ProximityReading r = (ProximityReading)reading;
             return new GPFloatVariable(r.getValue());
         }
@@ -35,7 +35,7 @@ public class ReadingToFloat extends Node {
 
     @Override
     public Class<?> getReturnType(final Class<?> ... inputTypes) {
-        if (inputTypes.length == 1 && inputTypes[0] == ProximityReading.class) {
+        if (inputTypes.length == 1 && ProximityReading.class.isAssignableFrom(inputTypes[0])) {
             return GPFloatVariable.class;
         } else{
             return null;
