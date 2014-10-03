@@ -11,7 +11,7 @@ evolutionaryAlgorithm:
   GAPopulationSize: 20
 
 complements:
-  generatorResolution: 1.0
+  generatorResolution: 0.25
 
 morphology:
   morphologyFileName: configs/sensorList.yml
