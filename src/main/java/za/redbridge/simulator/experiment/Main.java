@@ -101,8 +101,8 @@ public class Main {
         detectables.add(ResourceObject.class);
         detectables.add(WallObject.class);
 
-        sensors.add(new TypedProximityAgentSensor(detectables, (float)Math.PI/4));
-        sensors.add(new TypedProximityAgentSensor(detectables, (float)(7*Math.PI/4)));
+        sensors.add(new TypedProximityAgentSensor(detectables, (float)Math.PI/4, 0.0f, 1f, 0.2f));
+        sensors.add(new TypedProximityAgentSensor(detectables, (float)(7*Math.PI/4), 0.0f, 1f, 0.2f));
 
         sensors.add(new BottomProximitySensor());
 
@@ -145,7 +145,8 @@ public class Main {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-            String tree = "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(IF(IF(TS4 TS4 TS4) IF(TS4 PS2 PS3) IF(TS4 PS2 PS3))) BEARINGFROMCOORDINATE(IF(READINGPRESENT(PS0) READINGTOCOORDINATE(PS0) READINGTOCOORDINATE(PS0))) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(IF(TS4 IF(TS4 PS2 PS2) PS0)) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(PS1) SAVEBEARING(B4.71)))))))";
+            String tree = "WHEELDRIVEFROMBEARING(RANDOMBEARING())";
+            //String tree = "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(IF(IF(TS4 TS4 TS4) IF(TS4 PS2 PS3) IF(TS4 PS2 PS3))) BEARINGFROMCOORDINATE(IF(READINGPRESENT(PS0) READINGTOCOORDINATE(PS0) READINGTOCOORDINATE(PS0))) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(IF(TS4 IF(TS4 PS2 PS2) PS0)) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(PS1) SAVEBEARING(B4.71)))))))";
             Node root = model.getParser().parse(tree);
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
