@@ -114,7 +114,7 @@ public class Main {
         model.setPoolSize(model.getPopulationSize() / 2);
         model.setProgramSelector(new TournamentSelector(model, 10));
         model.setNoRuns(1);
-        model.setNoElites(model.getPopulationSize() / 10);
+        model.setNoElites(model.getPopulationSize() / 4);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setMutationProbability(0.1);
         model.setCrossoverProbability(0.9);
