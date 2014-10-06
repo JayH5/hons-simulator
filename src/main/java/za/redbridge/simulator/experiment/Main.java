@@ -15,6 +15,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.AgentModel;
+import za.redbridge.simulator.gp.EpoxRenderer;
 import za.redbridge.simulator.gp.types.DetectedObject;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
@@ -148,6 +151,13 @@ public class Main {
             String tree = "WHEELDRIVEFROMBEARING(RANDOMBEARING())";
             //String tree = "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(IF(IF(TS4 TS4 TS4) IF(TS4 PS2 PS3) IF(TS4 PS2 PS3))) BEARINGFROMCOORDINATE(IF(READINGPRESENT(PS0) READINGTOCOORDINATE(PS0) READINGTOCOORDINATE(PS0))) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(IF(TS4 IF(TS4 PS2 PS2) PS0)) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(PS1) SAVEBEARING(B4.71)))))))";
             Node root = model.getParser().parse(tree);
+            try {
+                FileWriter fw = new FileWriter("tree.dot");
+                fw.write(new EpoxRenderer().dotRender(root));
+                fw.close();
+            }catch(IOException e){
+                System.err.print("Could not write dot file");
+            }
             GPCandidateProgram cand = new GPCandidateProgram(root, model);
             HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
                     new GPPhenotype(sensors, cand, model.getInputs()), simulationConfiguration.getRobotMass(),
