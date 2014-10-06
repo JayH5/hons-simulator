@@ -1,14 +1,8 @@
 package za.redbridge.simulator.factories;
 
 import za.redbridge.simulator.config.MorphologyConfig;
-import za.redbridge.simulator.ea.SensitivityGenome;
-import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

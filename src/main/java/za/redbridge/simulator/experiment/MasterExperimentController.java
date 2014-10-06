@@ -38,14 +38,6 @@ public class MasterExperimentController {
         this.threadNNSubruns = threadNNSubruns;
     }
 
-    public void evolveComplements() {
-
-        TrainComplement complementGA = new TrainComplement(experimentConfig, simulationConfig,
-                templateMorphology, morphologyScores);
-
-        complementGA.run();
-    }
-
     public void testComplements(String outputDir, Set<MorphologyConfig> sensitivityComplements) {
 
         if (threadComplementTraining) {
@@ -99,18 +91,13 @@ public class MasterExperimentController {
 
     public void start() {
 
-        //Evolve complements instead of generating them
-        if (evolveComplements) {
-            evolveComplements();
-        }
-        else {
 
             ComplementFactory complementFactory = new ComplementFactory(templateMorphology,
                     experimentConfig.getComplementGeneratorResolution());
 
             final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
             testComplements("results/",sensitivityComplements);
-        }
+
     }
 
     //test the designated morphologies assigned to this host for this timestamp

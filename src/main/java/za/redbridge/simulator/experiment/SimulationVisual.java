@@ -6,6 +6,7 @@ import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.phenotype.HeteroNEATPhenotype;
 import za.redbridge.simulator.phenotype.NEATPhenotype;
 
 import java.text.ParseException;
@@ -32,7 +33,7 @@ public class SimulationVisual {
     public void run() {
 
         HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
-                new NEATPhenotype(morphologyConfig.getSensorList(), network, morphologyConfig.getTotalReadingSize()),
+                new HeteroNEATPhenotype(morphologyConfig.getSensorList(), network, morphologyConfig.getTotalReadingSize()),
                 simulationConfiguration.getRobotMass(),
                 simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(),
                 simulationConfiguration.getObjectsRobots());

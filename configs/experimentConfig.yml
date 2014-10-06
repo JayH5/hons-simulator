@@ -8,7 +8,8 @@ phenotype:
 evolutionaryAlgorithm:
   controllerEA: NEAT
   populationSize: 50
-  GAPopulationSize: 20
+  heteroTeamSize: 5
+
 
 complements:
   generatorResolution: 0.25

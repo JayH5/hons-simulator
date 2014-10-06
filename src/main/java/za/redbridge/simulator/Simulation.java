@@ -9,6 +9,8 @@ import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CooperativeHeteroNEATNetwork;
+
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
@@ -16,6 +18,7 @@ import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
+
 
 import java.util.Set;
 
@@ -43,12 +46,18 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
     private final SimConfig config;
 
+
     private boolean stopOnceCollected = true;
 
-    public Simulation(SimConfig config, RobotFactory robotFactory) {
+    //keep track of scores here
+    private Set<CooperativeHeteroNEATNetwork> scoreKeepingControllers;
+
+    public Simulation(SimConfig config, RobotFactory robotFactory, Set<CooperativeHeteroNEATNetwork> scoreKeepingGenotypes) {
+
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
+        this.scoreKeepingControllers = scoreKeepingGenotypes;
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }

@@ -5,13 +5,14 @@ import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.neural.neat.NEATNetwork;
-import org.encog.neural.neat.NEATPopulation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.NNScoreCalculator;
+import za.redbridge.simulator.ea.hetero.NNTeamMemberScore;
+import za.redbridge.simulator.ea.neat.CCHNEATPopulation;
+import za.redbridge.simulator.ea.neat.CNNEATUtil;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -94,14 +95,13 @@ public class TrainController implements Runnable{
 
     public void run() {
 
-        //TODO: make this get population size form Experiment configs instead
-        NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
+        CCHNEATPopulation pop = new CCHNEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
 
-        //pop.setNEATActivationFunction(new AmplifiedSigmoid());
         pop.reset();
 
-        CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
+
+        CalculateScore scoreCalculator = new NNTeamMemberScore(simConfig, experimentConfig,
                 morphologyConfig, scoreCache, threadSubruns);
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
