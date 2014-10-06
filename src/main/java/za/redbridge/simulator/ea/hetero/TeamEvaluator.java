@@ -12,7 +12,7 @@ import za.redbridge.simulator.factories.TeamPhenotypeFactory;
  * Created by racter on 2014/10/05.
  * Evaluates team in the context of a simulation.
  */
-public class TeamEvaluator {
+public class TeamEvaluator implements Runnable {
 
 
     private SimConfig simConfig;

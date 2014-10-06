@@ -640,7 +640,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                 }
             }
 
-            // now add one task for each offspring that each species is allowed - evaluate and breed
+            // now add one task for each offspring that each species is allowed breed and add it to the temp population
             while (numToSpawn-- > 0) {
                 final CCHEABreeder worker = new CCHEABreeder(this, species);
                 this.threadList.add(worker);
@@ -673,8 +673,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                 this.threadList.add(worker);
             }
 
-
         }
+
 
         // run all threads and wait for them to finish
         try {
