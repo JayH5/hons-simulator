@@ -1,4 +1,4 @@
-package za.redbridge.simulator.ea;
+package za.redbridge.simulator.ea.neat;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.encog.ml.CalculateScore;

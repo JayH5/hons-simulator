@@ -19,7 +19,7 @@ public class ExperimentConfig extends Config {
     private static final int DEFAULT_POPULATION_SIZE = 15;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
     private static final int DEFAULT_RUNS_PER_GENOME = 1;
-    private static final int DEFAULT_GA_POPULATION_SIZE = 50;
+    private static final int DEFAULT_HETERO_TEAM_SIZE = 5;
     private static final float DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION = 0.3f;
 
     public enum EvolutionaryAlgorithm {
@@ -29,7 +29,7 @@ public class ExperimentConfig extends Config {
     protected final long maxEpochs;
     protected final int populationSize;
     protected final int runsPerGenome;
-    protected final int GAPopulationSize;
+    protected final int heteroTeamSize;
     protected final float complementGeneratorResolution;
 
     protected EvolutionaryAlgorithm algorithm;
@@ -41,7 +41,7 @@ public class ExperimentConfig extends Config {
         this.populationSize = DEFAULT_POPULATION_SIZE;
         this.algorithm = EvolutionaryAlgorithm.NEAT;
         this.runsPerGenome = DEFAULT_RUNS_PER_GENOME;
-        this.GAPopulationSize = DEFAULT_GA_POPULATION_SIZE;
+        this.heteroTeamSize = DEFAULT_HETERO_TEAM_SIZE;
         this.complementGeneratorResolution = DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION;
     }
 
@@ -62,7 +62,7 @@ public class ExperimentConfig extends Config {
         int popSize = DEFAULT_POPULATION_SIZE;
         String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
         int runsPerG = DEFAULT_RUNS_PER_GENOME;
-        int GApopSize = DEFAULT_GA_POPULATION_SIZE;
+        int hetTeamSize = DEFAULT_HETERO_TEAM_SIZE;
         float compRes = DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION;
 
         Map control = (Map) config.get("control");
@@ -107,9 +107,9 @@ public class ExperimentConfig extends Config {
                 popSize = pSize;
             }
 
-            Integer gapSize = (Integer) ea.get("GAPopulationSize");
-            if (checkFieldPresent(EA, "evolutionaryAlgorithm:GAPopulationSize")) {
-                GApopSize = gapSize;
+            Integer htSize = (Integer) ea.get("heteroTeamSize");
+            if (checkFieldPresent(htSize, "evolutionaryAlgorithm:heteroTeamSize")) {
+                hetTeamSize = htSize;
             }
         }
 
@@ -136,11 +136,11 @@ public class ExperimentConfig extends Config {
         this.populationSize = popSize;
         this.morphologyConfigFile = morphologyFile;
         this.runsPerGenome = runsPerG;
-        this.GAPopulationSize = GApopSize;
+        this.heteroTeamSize = hetTeamSize;
         this.complementGeneratorResolution = compRes;
     }
 
-    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int GAPopulationSize,
+    public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int heteroTeamSize,
                             int runsPerGenome,
                             String robotFactory, String morphologyConfigFile, float complementGeneratorResolution) {
 
@@ -150,7 +150,7 @@ public class ExperimentConfig extends Config {
         this.robotFactory = robotFactory;
         this.morphologyConfigFile = morphologyConfigFile;
         this.runsPerGenome = runsPerGenome;
-        this.GAPopulationSize = GAPopulationSize;
+        this.heteroTeamSize = heteroTeamSize;
         this.complementGeneratorResolution = complementGeneratorResolution;
     }
 
@@ -166,7 +166,7 @@ public class ExperimentConfig extends Config {
 
     public int getRunsPerGenome() { return runsPerGenome; }
 
-    public int getGAPopulationSize() { return GAPopulationSize; }
+    public int getGAPopulationSize() { return heteroTeamSize; }
 
     public float getComplementGeneratorResolution() { return complementGeneratorResolution; }
 

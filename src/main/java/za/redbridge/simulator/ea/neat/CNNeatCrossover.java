@@ -1,4 +1,4 @@
-package za.redbridge.simulator.experiment;
+package za.redbridge.simulator.ea.neat;
 
 import org.encog.ml.ea.genome.Genome;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;

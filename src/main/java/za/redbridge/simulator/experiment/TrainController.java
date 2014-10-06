@@ -1,23 +1,19 @@
 package za.redbridge.simulator.experiment;
 
 import org.apache.commons.math3.stat.StatUtils;
-import org.encog.engine.network.activation.ActivationSteepenedSigmoid;
-import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
-import org.encog.neural.neat.NEATUtil;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.NNScoreCalculator;
-import za.redbridge.simulator.factories.ComplementFactory;
-import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
+import za.redbridge.simulator.ea.hetero.NNTeamMemberScore;
+import za.redbridge.simulator.ea.hetero.TeamEvaluator;
+import za.redbridge.simulator.ea.neat.CCHNEATPopulation;
+import za.redbridge.simulator.ea.neat.CNNEATUtil;
+import za.redbridge.simulator.ea.neat.NNScoreCalculator;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -85,14 +81,13 @@ public class TrainController implements Runnable{
 
     public void run() {
 
-        //TODO: make this get population size form Experiment configs instead
-        NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
+        CCHNEATPopulation pop = new CCHNEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
 
-        //pop.setNEATActivationFunction(new AmplifiedSigmoid());
         pop.reset();
 
-        CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
+
+        CalculateScore scoreCalculator = new NNTeamMemberScore(simConfig, experimentConfig,
                 morphologyConfig, scoreCache, threadSubruns);
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
