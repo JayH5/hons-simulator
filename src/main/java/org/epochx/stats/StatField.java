@@ -29,6 +29,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.epochx.core.RunManager;
 import org.epochx.representation.CandidateProgram;
 
 /**
@@ -180,9 +181,9 @@ public class StatField {
 			final List<CandidateProgram> pop = (List<CandidateProgram>) Stats.get().getStat(GEN_POP);
 			if(pop == null) return null;
 
+            RunManager.calculateFitnessList(pop);
 			// Get the fitnesses of each program.
 			return pop.stream()
-					.parallel()
 					.mapToDouble(c -> c.getFitness())
 					.toArray();
 		};

@@ -11,11 +11,13 @@ import org.epochx.representation.CandidateProgram;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.HeterogeneousRobotFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.functions.*;
 import za.redbridge.simulator.gp.types.*;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.phenotype.GPPhenotype;
+import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
@@ -128,24 +130,39 @@ public class AgentModel extends GPModel {
 
     @Override
     public double getFitness(CandidateProgram p){
-        double total = IntStream.range(0, numSims)
-                .parallel()
-                .mapToDouble(i -> resultForOneSim(p))
-                .sum();
-        return total / numSims;
+        throw new RuntimeException("Method disabled; use getGroupFitness");
     }
 
-    protected double resultForOneSim(CandidateProgram p){
-        config.setSimulationSeed(System.currentTimeMillis());
-        GPCandidateProgram program = (GPCandidateProgram) p;
+    public List<Double> getGroupFitness(List<GPCandidateProgram> p){
+        List<List<Double>> results = IntStream.range(0, numSims)
+                .parallel()
+                .mapToObj(i -> resultForOneSim(p))
+                .collect(Collectors.toList());
+        List<Double> sums = new ArrayList<>();
+        for(int i = 0; i < results.get(0).size(); i++) sums.add(0d);
+        for(List<Double> run : results){
+            for(int i = 0; i < run.size(); i++){
+                sums.set(i, sums.get(i) + run.get(i));
+            }
+        }
+        for(int i = 0; i < sums.size(); i++) sums.set(i, sums.get(i) / numSims);
+        return sums;
+    }
 
-        HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
-                new GPPhenotype(sensors, program, inputs), config.getRobotMass(),
-                config.getRobotRadius(), config.getRobotColour(), exConfig.getPopulationSize());
+    protected List<Double> resultForOneSim(List<GPCandidateProgram> pl){
+        config.setSimulationSeed(System.currentTimeMillis());
+        List<Phenotype> phenotypes = pl.stream().map(p -> new GPPhenotype(sensors.stream().map(s -> s.clone()).collect(Collectors.toList()), p, inputs)).collect(Collectors.toList());
+
+        HeterogeneousRobotFactory robotFactory = new HeterogeneousRobotFactory(phenotypes, config.getRobotMass(),
+                config.getRobotRadius(), config.getRobotColour());
         Simulation sim = new Simulation(config, robotFactory);
         sim.run();
         System.out.print('.');
-        return -sim.getFitness();
+        //TODO fix! Actually track individual fitnesses in the simulation!
+        double fitness = -sim.getFitness();
+        List<Double> result = new ArrayList<>();
+        for(int i = 0; i < pl.size(); i++)result.add(fitness);
+        return result;
     }
 
     public Class getReturnType(){

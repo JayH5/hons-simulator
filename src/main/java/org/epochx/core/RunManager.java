@@ -23,10 +23,12 @@ package org.epochx.core;
 
 import static org.epochx.stats.StatField.*;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.life.*;
 import org.epochx.representation.CandidateProgram;
 import org.epochx.stats.*;
@@ -202,14 +204,14 @@ public class RunManager implements ConfigListener {
 	 * Note this forces us to evaluate all programs, which we might
 	 * not have done if using TournamentSelection.
 	 */
-	private void updateBestProgram(final List<CandidateProgram> pop) {
+	public void updateBestProgram(final List<CandidateProgram> pop) {
 		if(!model.cacheFitness()){
 			throw new RuntimeException("Our crappy parallelisation implementation assumes fitness caching; please turn it on");
 		}
+        calculateFitnessList(pop);
 		Optional<CandidateProgram> best = pop
 		   .stream()
 		   .parallel()
-		   //this call to max() may try to get the fitness of the same phenotype twice; hence we need fitness caching to make this cheap
 		   .max((CandidateProgram a, CandidateProgram b) -> Double.compare(a.getFitness(), b.getFitness()));
 		if(best.isPresent()) {
 			bestFitness = best.get().getFitness();
@@ -220,6 +222,25 @@ public class RunManager implements ConfigListener {
 			throw new RuntimeException("Could not find best program; population is empty");
 		}
 	}
+
+    public static void calculateFitnessList(final List<CandidateProgram> pop){
+        int chunkSize = 20;
+        Set<String> uq = new HashSet<>();
+        for(CandidateProgram p : pop)uq.add(p.toString());
+        System.out.println("Uniques: " + uq.size());
+        List<CandidateProgram> inNeedOfRefresh = pop.stream()
+                .map(p -> (GPCandidateProgram)p)
+                .filter(p -> !p.getCachedFitness().isPresent())
+                .collect(Collectors.toList());
+        List<Stream<GPCandidateProgram>> l = new ArrayList<>();
+        for(int i = 0; i < inNeedOfRefresh.size() / (double) chunkSize; i++){
+            //TODO such hax, assuming GPCandidateProgram
+            l.add(inNeedOfRefresh.stream().skip(i * chunkSize).limit(chunkSize).map(p -> (GPCandidateProgram) p));
+        }
+        l.stream()
+                .parallel()
+                .forEach(s -> GPCandidateProgram.calculateGroupFitnesses(s.collect(Collectors.toList()), Optional.empty()));
+    }
 
 	/**
 	 * Retrieves this run manager's generation manager that will perform the

@@ -22,11 +22,14 @@
 package org.epochx.gp.representation;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.epochx.epox.Node;
 import org.epochx.gp.model.GPModel;
 import org.epochx.representation.CandidateProgram;
+import za.redbridge.simulator.gp.AgentModel;
 
 /**
  * A <code>GPCandidateProgram</code> encapsulates an individual program within a
@@ -165,12 +168,30 @@ public class GPCandidateProgram extends CandidateProgram {
 
 		// If we're not caching or the cache is out of date.
 		if (!model.cacheFitness() || !source.equals(sourceCache)) {
-			fitness = model.getFitness(this);
-			sourceCache = source;
+            //we can't calculate a fitness ourselves; raise error
+            //getGroupFitness with some other candidates needs to be called
+            throw new IllegalStateException("Could not find cached fitness; call getGroupFitness first or enable fitness caching.");
 		}
-
 		return fitness;
 	}
+
+    public Optional<Double> getCachedFitness(){
+        if(rootNode.toString().equals(sourceCache)) return Optional.of(fitness);
+        else return Optional.empty();
+    }
+
+    /*
+     * Heterogeneity! Calculates the individual scores of the given programs in a single simulation.
+     */
+    public static void calculateGroupFitnesses(List<GPCandidateProgram> programs, Optional<GPModel> model){
+        AgentModel actualModel = (AgentModel)(model.orElse(programs.get(0).model));
+        List<Double> fitnesses = actualModel.getGroupFitness(programs);
+        for(int i = 0; i < programs.size(); i++){
+            GPCandidateProgram current = programs.get(i);
+            current.fitness = fitnesses.get(i);
+            current.sourceCache = current.rootNode.toString();
+        }
+    }
 	
 	public void clearCache() {
 		sourceCache = null;
