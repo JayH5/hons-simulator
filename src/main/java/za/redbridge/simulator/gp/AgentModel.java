@@ -50,8 +50,12 @@ public class AgentModel extends GPModel {
                //we get the list of detectable object types from the sensor class list
                List<DetectedObject.Type> dob = ((TypedProximityAgentSensor)sensor).getSenseClasses().stream().map(DetectedObject::fromClass).collect(Collectors.toList());
                inputs.add(new TypedProximitySensorVariable("TS" + i, dob, sensor));
+               syntax.add(new Literal(new Bearing(sensor.getBearing())));
            }
-           else inputs.add(new ProximitySensorVariable("PS" + i, Float.class, sensors.get(i)));
+           else{
+               inputs.add(new ProximitySensorVariable("PS" + i, Float.class, sensors.get(i)));
+               syntax.add(new Literal(new Bearing(sensor.getBearing())));
+           }
        }
 
        /*
