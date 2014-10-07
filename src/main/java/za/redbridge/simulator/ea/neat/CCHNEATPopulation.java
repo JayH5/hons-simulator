@@ -152,7 +152,7 @@ public class CCHNEATPopulation extends BasicPopulation implements Serializable,
     /**
      * The weight range. Weights will be between -weight and +weight.
      */
-    private final double weightRange = 5;
+    private final double weightRange = 1;
 
     /**
      * The best genome that we've currently decoded into the bestNetwork
