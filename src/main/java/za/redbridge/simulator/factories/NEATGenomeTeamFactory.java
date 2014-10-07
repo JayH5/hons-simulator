@@ -1,4 +1,4 @@
-package za.redbridge.simulator.ea.neat;
+package za.redbridge.simulator.factories;
 
 import org.encog.EncogError;
 import org.encog.ml.ea.genome.Genome;
@@ -7,6 +7,7 @@ import org.encog.neural.neat.training.NEATGenome;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
+import za.redbridge.simulator.ea.neat.CCHNEATCODEC;
 
 import java.util.ArrayList;
 import java.util.HashSet;

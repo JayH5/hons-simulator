@@ -37,6 +37,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.hetero.TeamEvaluator;
+import za.redbridge.simulator.factories.NEATGenomeTeamFactory;
 import za.redbridge.simulator.factories.NEATTeamFactory;
 
 import java.io.Serializable;
