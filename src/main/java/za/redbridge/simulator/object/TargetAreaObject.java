@@ -38,13 +38,16 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final Set<ResourceObject> containedObjects = new HashSet<>();
     private final List<Fixture> watchedFixtures = new ArrayList<>();
 
+    private final boolean individualScoring;
+
     //keeps track of what has been pushed into this place
-    public TargetAreaObject(World world, Vec2 position, int width, int height) {
+    public TargetAreaObject(World world, Vec2 position, int width, int height, boolean individualScoring) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
         totalResourceValue = 0;
         this.width = width;
         this.height = height;
+        this.individualScoring = individualScoring;
 
         aabb = getBody().getFixtureList().getAABB(0);
     }
@@ -77,9 +80,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
                     resource.getPortrayal().setPaint(Color.CYAN);
-                    //get the robots pushing this box and assign each robot its task performance score
+                    //if individual scores, get the robots pushing this box and assign each robot its task performance score
                     // and cooperative score
-                    updateScores(resource, resource.getPushingBots());
+                    if (individualScoring) {
+                        updateScores(resource, resource.getPushingBots());
+                    }
                     resource.setCollected(true);
                     incrementTotalObjectValue(resource);
                 }
@@ -99,18 +104,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
         //TODO: Implement yourself
 
-        //this is fairly fucking arbitrary
-        double totalArea = resource.getWidth()*resource.getHeight();
-        int numPushingBots = pushingBots.size();
-        double cooperativeScore = numPushingBots > 1? 5 : 0;
-
-        for (RobotObject bot: pushingBots.keySet()) {
-
-            ScoreKeepingController scoreKeepingIndividual = (ScoreKeepingController) bot.getPhenotype().getController();
-            //divide spoils evenly amongst pushing bots for now
-            scoreKeepingIndividual.incrementTotalTaskScore(totalArea/numPushingBots);
-            scoreKeepingIndividual.incrementTotalCooperativeScore(cooperativeScore);
-        }
     }
 
     //these also update the total resource value

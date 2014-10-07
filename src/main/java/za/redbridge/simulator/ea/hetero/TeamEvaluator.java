@@ -30,37 +30,17 @@ public class TeamEvaluator implements Runnable {
 
     public void run() {
 
-        TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
+        //This does not work because TeamPhenotypeFactory is an unimplemented interface
+
+        /*
+        TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenomes());
 
         HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
                  simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
 
-        Simulation simulation = new Simulation(simConfig, heteroFactory, team.getGenotypes());
-        simulation.run();
+        Simulation simulation = new Simulation(simConfig, heteroFactory, team.getScoreKeepingGenotypes());
+        simulation.run();*/
 
     }
-
-
-    private class SimRun implements Runnable {
-
-        private final Simulation simulation;
-        private final double[] scores;
-        private int ticketNo;
-
-
-        public SimRun(Simulation simulation, double[] scores, int ticketNo) {
-
-            this.simulation = simulation;
-            this.scores = scores;
-            this.ticketNo = ticketNo;
-        }
-
-        public void run() {
-
-            simulation.run();
-            scores[ticketNo] = simulation.getFitness();
-        }
-    }
-
 }

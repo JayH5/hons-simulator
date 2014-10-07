@@ -8,7 +8,7 @@ import java.util.List;
  * Created by shsu on 2014/10/06.
  * Factory that divides genomes into teams.
  */
-public interface TeamFactory {
+public interface GenomeTeamFactory {
 
    List<Team> placeInTeams();
 }

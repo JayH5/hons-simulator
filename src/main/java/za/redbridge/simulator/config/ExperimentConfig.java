@@ -19,6 +19,8 @@ public class ExperimentConfig extends Config {
     private static final int DEFAULT_POPULATION_SIZE = 15;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
     private static final int DEFAULT_RUNS_PER_GENOME = 1;
+    private static final boolean DEFAULT_HETEROGENEOUS_TEAMS = false;
+    private static final int DEFAULT_HETEROGENEOUS_TEAM_SIZE = 5;
 
     public enum EvolutionaryAlgorithm {
         NEAT, EVOLUTIONARY_STRATEGY, GENETIC_PROGRAMMING;
@@ -27,17 +29,20 @@ public class ExperimentConfig extends Config {
     protected final long maxEpochs;
     protected final int populationSize;
     protected final int runsPerGenome;
+    private final boolean heterogeneousTeams;
+    private final int heterogeneousTeamSize;
 
     protected EvolutionaryAlgorithm algorithm;
     protected String robotFactory;
     protected String morphologyConfigFile;
-
 
     public ExperimentConfig() {
         this.maxEpochs = DEFAULT_MAX_EPOCHS;
         this.populationSize = DEFAULT_POPULATION_SIZE;
         this.algorithm = EvolutionaryAlgorithm.NEAT;
         this.runsPerGenome = DEFAULT_RUNS_PER_GENOME;
+        this.heterogeneousTeams = DEFAULT_HETEROGENEOUS_TEAMS;
+        this.heterogeneousTeamSize = DEFAULT_HETEROGENEOUS_TEAM_SIZE;
     }
 
     public ExperimentConfig(String filepath) {
@@ -57,6 +62,9 @@ public class ExperimentConfig extends Config {
         int popSize = DEFAULT_POPULATION_SIZE;
         String morphologyFile = DEFAULT_MORPHOLOGY_FILEPATH;
         int runsPerG = DEFAULT_RUNS_PER_GENOME;
+
+        boolean hetero = DEFAULT_HETEROGENEOUS_TEAMS;
+        int tSize = DEFAULT_HETEROGENEOUS_TEAM_SIZE;
 
         Map control = (Map) config.get("control");
         if (checkFieldPresent(control, "control")) {
@@ -99,6 +107,16 @@ public class ExperimentConfig extends Config {
             if (checkFieldPresent(EA, "evolutionaryAlgorithm:populationSize")) {
                 popSize = pSize;
             }
+
+            Boolean het = (Boolean) ea.get("heterogeneousTeams");
+            if (checkFieldPresent(het, "ea:heterogeneousTeams")) {
+                hetero = het;
+            }
+
+            Integer size = (Integer) ea.get("heterogeneousTeamSize");
+            if (checkFieldPresent(size, "teams:heterogeneousTeamsSize")) {
+                tSize = size;
+            }
         }
 
         Map morphology = (Map) config.get("morphology");
@@ -116,10 +134,14 @@ public class ExperimentConfig extends Config {
 
         this.morphologyConfigFile = morphologyFile;
         this.runsPerGenome = runsPerG;
+
+        this.heterogeneousTeams = hetero;
+        this.heterogeneousTeamSize = tSize;
     }
 
     public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int runsPerGenome,
-                            String robotFactory, String morphologyConfigFile) {
+                            String robotFactory, boolean heterogeneousTeams, int  heterogeneousTeamSize,
+                            String morphologyConfigFile) {
 
         this.maxEpochs = maxEpochs;
         this.algorithm = algorithm;
@@ -127,6 +149,9 @@ public class ExperimentConfig extends Config {
         this.robotFactory = robotFactory;
         this.morphologyConfigFile = morphologyConfigFile;
         this.runsPerGenome = runsPerGenome;
+
+        this.heterogeneousTeams = heterogeneousTeams;
+        this.heterogeneousTeamSize = heterogeneousTeamSize;
     }
 
     public long getMaxEpochs() { return maxEpochs; }
@@ -140,5 +165,9 @@ public class ExperimentConfig extends Config {
     public String getMorphologyConfigFile() { return morphologyConfigFile; }
 
     public int getRunsPerGenome() { return runsPerGenome; }
+
+    public int getHeterogeneousTeamSize() { return heterogeneousTeamSize; }
+
+    public boolean heteroGeneousTeams() { return heterogeneousTeams; }
 
 }

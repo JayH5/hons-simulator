@@ -14,4 +14,7 @@ public interface ScoreKeepingController {
 
     public void incrementTotalTaskScore(double score);
     public void incrementTotalCooperativeScore(double score);
+
+    //get the underlying controller for this ScoreKeepingController wrapper
+    public Object getController();
 }

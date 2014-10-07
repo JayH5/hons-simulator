@@ -20,6 +20,7 @@ import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
 
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -46,7 +47,6 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
     private final SimConfig config;
 
-
     private boolean stopOnceCollected = true;
 
     //keep track of scores here
@@ -58,6 +58,17 @@ public class Simulation extends SimState {
         this.config = config;
         this.robotFactory = robotFactory;
         this.scoreKeepingControllers = scoreKeepingControllers;
+
+        Settings.velocityThreshold = VELOCITY_THRESHOLD;
+    }
+
+    //if homogeneous team, just have a dummy set of SKCs.
+    public Simulation(SimConfig config, RobotFactory robotFactory) {
+
+        super(config.getSimulationSeed());
+        this.config = config;
+        this.robotFactory = robotFactory;
+        scoreKeepingControllers = new HashSet<>();
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -169,7 +180,7 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height);
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height, config.individualScoring());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).

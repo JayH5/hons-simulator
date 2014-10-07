@@ -12,11 +12,13 @@ resourceProperties:
   largeObjectHeight: 0.6
   largeObjectMass: 4.5
   maxLargeObjectPushingBots: 3
+teams:
+  heterogeneousTeams: true
+  teamSize: 5
 scoring:
-  fitnessFunction: za.redbridge.simulator.ea.DefaultFitnessFunction
+  individualScoring: true
 factories:
   resourceFactory: za.redbridge.simulator.factories.ConfigurableResourceFactory
-  robotFactory: za.redbridge.simulator.factories.HomogeneousRobotFactory
 robots:
   numRobots: 20
   mass: 0.7
