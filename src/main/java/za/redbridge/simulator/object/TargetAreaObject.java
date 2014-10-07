@@ -14,7 +14,6 @@ import java.util.*;
 
 import org.jbox2d.dynamics.joints.Joint;
 import sim.engine.SimState;
-import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
@@ -98,6 +97,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     //updates the scores of those robots pushing the boxes
     private void updateScores(ResourceObject resource, Map<RobotObject, Joint> pushingBots) {
 
+        //TODO: Implement yourself
+
         //this is fairly fucking arbitrary
         double totalArea = resource.getWidth()*resource.getHeight();
         int numPushingBots = pushingBots.size();
@@ -105,7 +106,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
         for (RobotObject bot: pushingBots.keySet()) {
 
-            ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
+            ScoreKeepingController scoreKeepingIndividual = (ScoreKeepingController) bot.getPhenotype().getController();
             //divide spoils evenly amongst pushing bots for now
             scoreKeepingIndividual.incrementTotalTaskScore(totalArea/numPushingBots);
             scoreKeepingIndividual.incrementTotalCooperativeScore(cooperativeScore);

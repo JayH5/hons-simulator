@@ -113,4 +113,8 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
     }
 
     public String getActiveHeuristic() { return schedule.getActiveHeuristic(); }
+
+    @Override
+    public Object getController() { throw new UnsupportedOperationException("No underlying controller object" +
+            "for this Phenotype"); }
 }

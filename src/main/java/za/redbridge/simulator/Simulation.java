@@ -9,13 +9,13 @@ import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.hetero.CCHIndividual;
 
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
 
@@ -50,14 +50,14 @@ public class Simulation extends SimState {
     private boolean stopOnceCollected = true;
 
     //keep track of scores here
-    private final Set<CCHIndividual> scoreKeepingControllers;
+    private final Set<ScoreKeepingController> scoreKeepingControllers;
 
-    public Simulation(SimConfig config, RobotFactory robotFactory, Set<CCHIndividual> scoreKeepingGenotypes) {
+    public Simulation(SimConfig config, RobotFactory robotFactory, Set<ScoreKeepingController> scoreKeepingControllers) {
 
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
-        this.scoreKeepingControllers = scoreKeepingGenotypes;
+        this.scoreKeepingControllers = scoreKeepingControllers;
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -108,13 +108,6 @@ public class Simulation extends SimState {
     public void finish() {
         kill();
 
-        //update the genome scores of all the individuals
-        for (CCHIndividual individual: scoreKeepingControllers) {
-
-            //TODO: Unretardify this
-           individual.incrementTotalTaskScore(1);
-        }
-        //System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
         );

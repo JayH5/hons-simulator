@@ -268,6 +268,8 @@ public class RobotObject extends PhysicalObject {
         directionPortrayal.setPaint(invertColor(color));
     }
 
+    public Phenotype getPhenotype() { return phenotype; }
+
     private static Color invertColor(Color color) {
         return new Color(255 - color.getRed(), 255 - color.getGreen(), 255 - color.getBlue());
     }
@@ -360,6 +362,4 @@ public class RobotObject extends PhysicalObject {
         }
         return totalArea/2;
     }
-
-
 }
