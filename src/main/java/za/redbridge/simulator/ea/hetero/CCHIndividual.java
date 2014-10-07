@@ -2,6 +2,7 @@ package za.redbridge.simulator.ea.hetero;
 
 import org.encog.ml.MLMethod;
 import org.encog.neural.neat.NEATNetwork;
+import org.encog.neural.neat.training.NEATGenome;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 
 import java.util.ArrayList;
@@ -14,67 +15,82 @@ import java.util.List;
  * Wraps a NEAT network with a cooperative score values, as well as a task performance score.
  */
 
-public class CooperativeHeteroNEATNetwork implements MLMethod, ScoreKeepingController {
+public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparable<CCHIndividual> {
 
     private List<Double> cooperativeScores;
     private List<Double> taskScores;
-    private NEATNetwork network;
+    private final NEATNetwork network;
+    //the NEATGenome backing this NEATNetwork.
+    private final NEATGenome genome;
 
-    public CooperativeHeteroNEATNetwork (NEATNetwork network) {
+    public int compareTo(CCHIndividual other) {
 
-        this.network = network;
-        cooperativeScores = Collections.synchronizedList(new ArrayList<>());
-        taskScores = Collections.synchronizedList(new ArrayList<>());
+        return Double.compare(getTotalTaskScore(),other.getTotalTaskScore());
     }
 
-    public synchronized void incrementTotalCooperativeScore(double input) {
+    public CCHIndividual(final NEATNetwork network, final NEATGenome genome) {
+
+        this.network = network;
+        this.genome = genome;
+
+        cooperativeScores = Collections.synchronizedList(new ArrayList<>());
+        taskScores = Collections.synchronizedList(new ArrayList<>());
+
+    }
+
+    public void incrementTotalCooperativeScore(double input) {
 
         cooperativeScores.add(input);
     }
 
-    public synchronized void incrementTotalTaskScore(double input) {
+    public void incrementTotalTaskScore(double input) {
 
         taskScores.add(input);
     }
 
-    public double getAverageTaskScore() {
+    @Override
+    public double getTotalCooperativeScore() {
 
         double sum = 0;
-        double num = 1;
-
         synchronized (cooperativeScores) {
 
             Iterator<Double> it = cooperativeScores.iterator();
             while (it.hasNext()) {
                 sum += it.next();
             }
-
-            num = cooperativeScores.size();
         }
 
-        return sum/num;
+        return sum;
     }
 
-    public double getAverageCooperativeScore() {
+    @Override
+    public double getTotalTaskScore() {
 
         double sum = 0;
-        double num = 1;
-
         synchronized (taskScores) {
 
             Iterator<Double> it = taskScores.iterator();
             while (it.hasNext()) {
                 sum += it.next();
             }
-
-            num = taskScores.size();
         }
 
-        return sum/num;
+        return sum;
     }
+
+    @Override
+    public double getAverageTaskScore() { return getTotalTaskScore()/taskScores.size(); }
+
+    @Override
+    public double getAverageCooperativeScore() { return getTotalCooperativeScore()/cooperativeScores.size(); }
 
     public NEATNetwork getNetwork() {
 
         return network;
+    }
+
+    public NEATGenome getGenome() {
+
+        return genome;
     }
 }

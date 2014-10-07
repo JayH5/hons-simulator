@@ -43,11 +43,14 @@ import org.encog.ml.train.strategy.Strategy;
 import org.encog.neural.networks.training.TrainingError;
 import org.encog.neural.networks.training.TrainingSetScore;
 import org.encog.neural.networks.training.propagation.TrainingContinuation;
+import za.redbridge.simulator.config.ExperimentConfig;
+import za.redbridge.simulator.config.MorphologyConfig;
+import za.redbridge.simulator.config.SimConfig;
 
 /**
  * Provides a MLTrain compatible class that can be used to train genomes.
  */
-public class CCHNEATTrainer extends BasicEA implements MLTrain {
+public class CCHNEATTrainer extends CCHBasicEA implements MLTrain {
 
     /**
      * The serial ID.
@@ -59,25 +62,12 @@ public class CCHNEATTrainer extends BasicEA implements MLTrain {
      * @param thePopulation The population.
      * @param theScoreFunction The score function.
      */
-    public CCHNEATTrainer(Population thePopulation, CalculateScore theScoreFunction) {
-        super(thePopulation, theScoreFunction);
+    public CCHNEATTrainer(CCHNEATPopulation thePopulation, CalculateScore theScoreFunction, ExperimentConfig experimentConfig,
+                          SimConfig simConfig, MorphologyConfig morphologyConfig){
+        super(thePopulation, theScoreFunction, experimentConfig, simConfig, morphologyConfig);
     }
 
-    /**
-     * Create a trainer for training data.
-     * @param thePopulation The population.
-     * @param trainingData The training data.
-     */
-    public CCHNEATTrainer(Population thePopulation, MLDataSet trainingData) {
-        super(thePopulation, new TrainingSetScore(trainingData));
-    }
 
-    /**
-     * Not used.
-     *
-     * @param error
-     *            Not used.
-     */
     @Override
     public void setError(final double error) {
     }

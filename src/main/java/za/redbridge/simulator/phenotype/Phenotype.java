@@ -27,6 +27,8 @@ public interface Phenotype extends Cloneable {
 
     Phenotype clone();
 
+    ScoreKeepingController getController();
+
     void configure(Map<String,Object> phenotypeConfigs);
 
     /**
@@ -52,6 +54,10 @@ public interface Phenotype extends Cloneable {
 
         @Override
         public void configure(Map<String,Object> phenotypeConfigs) {}
+
+        @Override
+        public ScoreKeepingController getController() { throw new UnsupportedOperationException("No Scorekeeping controller " +
+                "for this Phenotype."); }
 
     };
 

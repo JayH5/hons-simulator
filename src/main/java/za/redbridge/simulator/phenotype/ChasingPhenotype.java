@@ -75,4 +75,8 @@ public class ChasingPhenotype extends KheperaIIIPhenotype {
 
     @Override
     public void configure(Map<String,Object> phenotypeConfigs) {}
+
+    @Override
+    public ScoreKeepingController getController() { throw new UnsupportedOperationException("No Scorekeeping controller " +
+            "for this Phenotype."); }
 }

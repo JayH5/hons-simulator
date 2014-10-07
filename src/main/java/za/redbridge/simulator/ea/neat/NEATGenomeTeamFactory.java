@@ -1,17 +1,12 @@
-package za.redbridge.simulator.factories;
+package za.redbridge.simulator.ea.neat;
 
-import org.apache.commons.math3.genetics.Population;
 import org.encog.EncogError;
 import org.encog.ml.ea.genome.Genome;
-import org.encog.neural.neat.NEATCODEC;
 import org.encog.neural.neat.NEATNetwork;
-import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.training.NEATGenome;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
-import za.redbridge.simulator.ea.neat.CCHNEATCODEC;
-import za.redbridge.simulator.ea.neat.CCHNEATPopulation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,28 +15,19 @@ import java.util.Set;
 
 /**
  * Created by shsu on 2014/10/06.
- * Factory that makes teams out of a population of NEAT genomes
  */
-public class NEATTeamFactory {
+public class NEATGenomeTeamFactory {
 
     private final List<Genome> genomePopulation;
-    private final CCHNEATPopulation population;
     private final ExperimentConfig experimentConfig;
 
     private final Set<CCHIndividual> all_individuals;
 
-    public NEATTeamFactory(ExperimentConfig experimentConfig, CCHNEATPopulation population) {
+    public NEATGenomeTeamFactory(ExperimentConfig experimentConfig, List<Genome> genomePopulation) {
 
-        this.population = population;
         this.experimentConfig = experimentConfig;
-
+        this.genomePopulation = genomePopulation;
         all_individuals = new HashSet();
-
-        genomePopulation = new ArrayList<>();
-
-        for (Genome g: population.flatten()) {
-            genomePopulation.add(g);
-        }
     }
 
     public List<NEATTeam> placeInTeams() {

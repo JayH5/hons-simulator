@@ -4,6 +4,7 @@ import org.encog.EncogShutdownTask;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.ml.ea.train.basic.BasicEA;
 import org.encog.ml.ea.train.basic.EAWorker;
+import org.encog.neural.neat.NEATPopulation;
 import org.encog.util.concurrency.MultiThreadable;
 
 import java.io.Serializable;
@@ -47,6 +48,12 @@ import org.encog.ml.ea.species.Speciation;
 import org.encog.ml.ea.species.Species;
 import org.encog.ml.genetic.GeneticError;
 import org.encog.util.logging.EncogLogging;
+import za.redbridge.simulator.config.ExperimentConfig;
+import za.redbridge.simulator.config.MorphologyConfig;
+import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.NEATTeam;
+import za.redbridge.simulator.ea.hetero.TeamEvaluator;
+import za.redbridge.simulator.factories.NEATTeamFactory;
 
 /**
  * Provides a basic implementation of a multi-threaded Evolutionary Algorithm.
@@ -98,7 +105,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
     /**
      * The population.
      */
-    private Population population;
+    private CCHNEATPopulation population;
 
     /**
      * The score calculation function.
@@ -213,6 +220,10 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
      */
     private RuleHolder rules;
 
+    private final ExperimentConfig experimentConfig;
+    private final SimConfig simConfig;
+    private final MorphologyConfig morphologyConfig;
+
     private int maxOperationErrors = 500;
 
     /**
@@ -223,14 +234,18 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
      * @param theScoreFunction
      *            The score function.
      */
-    public CCHBasicEA(final Population thePopulation,
-                      final CalculateScore theScoreFunction) {
+    public CCHBasicEA(final CCHNEATPopulation thePopulation,
+                      final CalculateScore theScoreFunction, final ExperimentConfig experimentConfig,
+                      final SimConfig simConfig, final MorphologyConfig morphologyConfig) {
 
         super(thePopulation, theScoreFunction);
         this.population = thePopulation;
         this.scoreFunction = theScoreFunction;
         this.selection = new TournamentSelection(this, 4);
         this.rules = new BasicRuleHolder();
+        this.experimentConfig = experimentConfig;
+        this.simConfig = simConfig;
+        this.morphologyConfig = morphologyConfig;
 
         // set the score compare method
         if (theScoreFunction.shouldMinimize()) {
@@ -265,7 +280,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
      */
     public boolean addChildToTemp(final Genome genome) {
         synchronized (this.teamPopulation) {
-            if (this.teamPopulation.size() < getPopulation().getPopulationSize()) {
+            if (this.teamPopulation.size() < population.getPopulationSize()) {
                 // don't read the old best genome, it was already added
                 if (genome != this.oldBestGenome) {
 
@@ -303,7 +318,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
      */
     public boolean addChild(final Genome genome) {
         synchronized (this.newPopulation) {
-            if (this.newPopulation.size() < getPopulation().getPopulationSize()) {
+            if (this.newPopulation.size() < population.getPopulationSize()) {
                 // don't read the old best genome, it was already added
                 if (genome != this.oldBestGenome) {
 
@@ -323,7 +338,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                         && getBestComparator().isBetterThan(genome,
                         this.bestGenome)) {
                     this.bestGenome = genome;
-                    getPopulation().setBestGenome(this.bestGenome);
+                    population.setBestGenome(this.bestGenome);
                 }
                 return true;
             } else {
@@ -595,11 +610,12 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
      */
     @Override
     public void iteration() {
+
         if (this.actualThreadCount == -1) {
             preIteration();
         }
 
-        if (getPopulation().getSpecies().size() == 0) {
+        if (population.getSpecies().size() == 0) {
             throw new EncogError("Population is empty, there are no species.");
         }
 
@@ -614,16 +630,17 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         // Clear new population to just best genome.
         this.newPopulation.clear();
+        this.teamPopulation.clear();
+
         this.newPopulation.add(this.bestGenome);
+        this.teamPopulation.add(this.bestGenome);
+
         this.oldBestGenome = this.bestGenome;
 
         // execute species in parallel
         this.threadList.clear();
 
-        //temporary ref of species and genomes
-        Map<Species, Set<Genome>> tempGenomeList = new HashMap<>();
-
-        for (final Species species : getPopulation().getSpecies()) {
+        for (final Species species : population.getSpecies()) {
             int numToSpawn = species.getOffspringCount();
 
             if (species.getMembers().size() > 5) {
@@ -640,41 +657,12 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                 }
             }
 
-            // now add one task for each offspring that each species is allowed breed and add it to the temp population
+            // now apply evolutionary operators to the last generation's pool, and add it to the temp population
             while (numToSpawn-- > 0) {
                 final CCHEABreeder worker = new CCHEABreeder(this, species);
                 this.threadList.add(worker);
             }
         }
-
-
-
-        for (final Species species : getPopulation().getSpecies()) {
-            int numToSpawn = species.getOffspringCount();
-
-            // Add elite genomes directly
-            if (species.getMembers().size() > 5) {
-                final int idealEliteCount = (int) (species.getMembers().size() * getEliteRate());
-                final int eliteCount = Math.min(numToSpawn, idealEliteCount);
-                for (int i = 0; i < eliteCount; i++) {
-                    final Genome eliteGenome = species.getMembers().get(i);
-                    if (getOldBestGenome() != eliteGenome) {
-                        numToSpawn--;
-                        if (!addChild(eliteGenome)) {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // now add one task for each offspring that each species is allowed - evaluate and breed
-            while (numToSpawn-- > 0) {
-                final EAWorker worker = new EAWorker(this, species);
-                this.threadList.add(worker);
-            }
-
-        }
-
 
         // run all threads and wait for them to finish
         try {
@@ -682,6 +670,30 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         } catch (final InterruptedException e) {
             EncogLogging.log(e);
         }
+
+        //now create the teams and evaluate them in their separate threads,
+        // keeping their score within their CCHIndividual wrappers.
+        NEATGenomeTeamFactory teamFactory = new NEATGenomeTeamFactory(experimentConfig, teamPopulation);
+        List<NEATTeam> teams = teamFactory.placeInTeams();
+
+        int x = 0;
+        TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+
+        for (TeamEvaluator t: evaluators) {
+
+            t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
+            t.run();
+            x++;
+        }
+
+        // score the population
+        final CCHParallelScore pscore = new CCHParallelScore(population, teamFactory.getAllIndividuals(),
+                new ArrayList<AdjustScore>(), getScoreFunction(),
+                this.actualThreadCount);
+        pscore.process();
+
+        newPopulation.clear();
+        newPopulation.addAll(teamPopulation);
 
         // handle any errors that might have happened in the threads
         if (this.reportedError != null && !getShouldIgnoreExceptions()) {
@@ -736,10 +748,26 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
             this.actualThreadCount = this.threadCount;
         }
 
+        //now create the teams and evaluate them in their separate threads,
+        // keeping their score within their CCHIndividual wrappers.
+        NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, population);
+        List<NEATTeam> teams = teamFactory.placeInTeams();
+
+        int x = 0;
+        TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+
+        for (TeamEvaluator t: evaluators) {
+
+            t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
+            t.run();
+            x++;
+        }
+
         // score the initial population
-        final ParallelScore pscore = new ParallelScore(getPopulation(),
-                getCODEC(), new ArrayList<AdjustScore>(), getScoreFunction(),
+        final CCHParallelScore pscore = new CCHParallelScore(population, teamFactory.getAllIndividuals(),
+                 new ArrayList<AdjustScore>(), getScoreFunction(),
                 this.actualThreadCount);
+
         pscore.setThreadCount(this.actualThreadCount);
         pscore.process();
         this.actualThreadCount = pscore.getThreadCount();
@@ -760,7 +788,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         // also most populations are sorted this way after training finishes
         // (for reload)
         // if there is an empty population, the constructor would have blow
-        final List<Genome> list = getPopulation().flatten();
+        final List<Genome> list = population.flatten();
 
         int idx = 0;
         do {
@@ -769,14 +797,18 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                 && (Double.isInfinite(this.bestGenome.getScore()) || Double
                 .isNaN(this.bestGenome.getScore())));
 
-        getPopulation().setBestGenome(this.bestGenome);
+        population.setBestGenome(this.bestGenome);
 
         // speciate
-        final List<Genome> genomes = getPopulation().flatten();
+        final List<Genome> genomes = teamFactory.getGenomePopulation();
         this.speciation.performSpeciation(genomes);
+
+        System.out.println("Before purge: " + population.flatten().size());
 
         // purge invalid genomes
         this.population.purgeInvalidGenomes();
+
+        System.out.println("After purge: " + population.flatten().size());
     }
 
     /**
@@ -851,8 +883,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void setPopulation(final Population thePopulation) {
+
+    public void setPopulation(final CCHNEATPopulation thePopulation) {
         this.population = thePopulation;
     }
 
@@ -936,6 +968,6 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
     }
 
 
-
+    public List<Genome> getTeamPopulation() { return teamPopulation; }
 }
 

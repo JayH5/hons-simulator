@@ -33,7 +33,7 @@ public class TeamEvaluator implements Runnable {
         TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
 
         HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
-                simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
+                 simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
 
         Simulation simulation = new Simulation(simConfig, heteroFactory, team.getGenotypes());

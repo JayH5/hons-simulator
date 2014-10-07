@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.hetero.NNTeamMemberScore;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.ea.neat.CCHCalculateScore;
 import za.redbridge.simulator.ea.neat.CCHNEATPopulation;
+import za.redbridge.simulator.ea.neat.CCHNEATTrainer;
 import za.redbridge.simulator.ea.neat.CNNEATUtil;
 
 import java.io.IOException;
@@ -33,13 +35,14 @@ public class TrainController implements Runnable{
     private SimConfig simConfig;
     private MorphologyConfig morphologyConfig;
 
-    //stores fittest network of each epoch
-    private final TreeMap<ComparableNEATNetwork,Integer> leaderBoard;
+    //stores fittest individual of each epoch
+    private final TreeMap<CCHIndividual,Integer> leaderBoard;
 
     //stores scores for each neural network during epochs
-    private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
+    private final ConcurrentSkipListSet<CCHIndividual> scoreCache;
 
-    private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard;
+    //stores best performing morphology and controller combinations
+    private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<CCHIndividual,Integer>> morphologyLeaderboard;
 
     private final boolean threadSubruns;
 
@@ -58,7 +61,7 @@ public class TrainController implements Runnable{
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<CCHIndividual,Integer>> morphologyLeaderboard,
                            boolean threadSubruns, long testSetID, long testSetSerial) {
 
         this.experimentConfig = experimentConfig;
@@ -77,7 +80,7 @@ public class TrainController implements Runnable{
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<CCHIndividual,Integer>> morphologyLeaderboard,
                            boolean threadSubruns) {
 
         this.experimentConfig = experimentConfig;
@@ -95,27 +98,29 @@ public class TrainController implements Runnable{
 
     public void run() {
 
-        CCHNEATPopulation pop = new CCHNEATPopulation(morphologyConfig.getTotalReadingSize(),2,
+        final CCHNEATPopulation pop = new CCHNEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
 
         pop.reset();
 
+        CalculateScore scoreCalculator = new CCHCalculateScore();
 
-        CalculateScore scoreCalculator = new NNTeamMemberScore(simConfig, experimentConfig,
-                morphologyConfig, scoreCache, threadSubruns);
-
-        final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
+        final CCHNEATTrainer train = CNNEATUtil.constructCCHNEATTrainer(pop, scoreCalculator, experimentConfig, simConfig,
+                morphologyConfig);
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
         controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitneyU");
         do {
 
+            System.out.println("Epoch " + train.getIteration() + ".");
+
             int epochs = train.getIteration()+1;
             Instant start = Instant.now();
 
             train.iteration();
 
+            /*
             controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
                     "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
 
@@ -130,11 +135,11 @@ public class TrainController implements Runnable{
             scoreCache.clear();
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
-            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
+            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");*/
 
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
-
+/*
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
         IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
@@ -152,7 +157,7 @@ public class TrainController implements Runnable{
         } catch (IOException x) {
             // File permission problems are caught here.
             System.err.println(x);
-        }
+        }*/
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }

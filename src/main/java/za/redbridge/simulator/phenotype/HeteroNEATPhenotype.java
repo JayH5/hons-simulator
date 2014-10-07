@@ -2,9 +2,8 @@ package za.redbridge.simulator.phenotype;
 
 import org.encog.ml.data.MLData;
 import org.encog.neural.data.basic.BasicNeuralData;
-import org.encog.neural.neat.NEATNetwork;
 import sim.util.Double2D;
-import za.redbridge.simulator.ea.hetero.CooperativeHeteroNEATNetwork;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.sensor.AgentSensor;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +15,11 @@ import java.util.Map;
 public class HeteroNEATPhenotype implements Phenotype {
 
     private final List<AgentSensor> sensors;
-    private final CooperativeHeteroNEATNetwork controller;
+    private final CCHIndividual controller;
 
     private final int totalInputCount;
 
-    public HeteroNEATPhenotype(List<AgentSensor> sensors, CooperativeHeteroNEATNetwork controller, int totalInputCount) {
+    public HeteroNEATPhenotype(List<AgentSensor> sensors, CCHIndividual controller, int totalInputCount) {
 
         this.sensors = sensors;
         this.controller = controller;
@@ -64,5 +63,9 @@ public class HeteroNEATPhenotype implements Phenotype {
     }
 
     public void configure(Map<String,Object> phenotypeConfigs) {}
+
+    @Override
+    public ScoreKeepingController getController() { throw new UnsupportedOperationException("No Scorekeeping controller " +
+            "for this Phenotype."); }
 
 }

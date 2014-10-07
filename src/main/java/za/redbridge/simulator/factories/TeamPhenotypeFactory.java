@@ -1,7 +1,7 @@
 package za.redbridge.simulator.factories;
 
 import za.redbridge.simulator.config.MorphologyConfig;
-import za.redbridge.simulator.ea.hetero.CooperativeHeteroNEATNetwork;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.phenotype.HeteroNEATPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 
@@ -15,9 +15,9 @@ import java.util.Set;
 public class TeamPhenotypeFactory {
 
     private final MorphologyConfig morphologyConfig;
-    private final Set<CooperativeHeteroNEATNetwork> controllers;
+    private final Set<CCHIndividual> controllers;
 
-    public TeamPhenotypeFactory(MorphologyConfig morphologyConfig, Set<CooperativeHeteroNEATNetwork> controllers) {
+    public TeamPhenotypeFactory(MorphologyConfig morphologyConfig, Set<CCHIndividual> controllers) {
 
         this.morphologyConfig = morphologyConfig;
         this.controllers = controllers;
@@ -27,7 +27,7 @@ public class TeamPhenotypeFactory {
 
         Set<Phenotype> team = new HashSet<>();
 
-        for (CooperativeHeteroNEATNetwork network: controllers) {
+        for (CCHIndividual network: controllers) {
 
             team.add(new HeteroNEATPhenotype(morphologyConfig.getSensors(), network,
                     morphologyConfig.getTotalReadingSize()));

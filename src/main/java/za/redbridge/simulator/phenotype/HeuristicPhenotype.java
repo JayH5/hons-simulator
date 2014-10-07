@@ -113,4 +113,8 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
     }
 
     public String getActiveHeuristic() { return schedule.getActiveHeuristic(); }
+
+    @Override
+    public ScoreKeepingController getController() { throw new UnsupportedOperationException("No Scorekeeping controller " +
+            "for this Phenotype."); }
 }

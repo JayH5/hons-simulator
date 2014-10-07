@@ -1,9 +1,7 @@
 package za.redbridge.simulator.ea.hetero;
 
 import org.encog.ml.MLMethod;
-import org.encog.neural.neat.NEATNetwork;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -11,14 +9,14 @@ import java.util.Set;
  */
 public class NEATTeam implements MLMethod {
 
-    private final Set<CooperativeHeteroNEATNetwork> team;
+    private final Set<CCHIndividual> team;
 
-    public NEATTeam (Set<CooperativeHeteroNEATNetwork> team) {
+    public NEATTeam (Set<CCHIndividual> team) {
 
         this.team = team;
     }
 
-    public Set<CooperativeHeteroNEATNetwork> getGenotypes() {
+    public Set<CCHIndividual> getGenotypes() {
 
         return team;
     }

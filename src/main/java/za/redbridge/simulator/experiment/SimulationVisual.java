@@ -7,7 +7,6 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.phenotype.HeteroNEATPhenotype;
-import za.redbridge.simulator.phenotype.NEATPhenotype;
 
 import java.text.ParseException;
 
@@ -15,7 +14,7 @@ import java.text.ParseException;
  * Created by shsu on 2014/09/22.
  */
 public class SimulationVisual {
-
+/*
     private final NEATNetwork network;
     private final MorphologyConfig morphologyConfig;
     private final SimConfig simulationConfiguration;
@@ -45,5 +44,5 @@ public class SimulationVisual {
         //new console which displays this simulation
         sim.display.Console console = new sim.display.Console(video);
         console.setVisible(true);
-    }
+    }*/
 }

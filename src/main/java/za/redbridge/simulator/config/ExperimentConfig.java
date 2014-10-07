@@ -166,7 +166,7 @@ public class ExperimentConfig extends Config {
 
     public int getRunsPerGenome() { return runsPerGenome; }
 
-    public int getGAPopulationSize() { return heteroTeamSize; }
+    public int getHeteroTeamSize() { return heteroTeamSize; }
 
     public float getComplementGeneratorResolution() { return complementGeneratorResolution; }
 

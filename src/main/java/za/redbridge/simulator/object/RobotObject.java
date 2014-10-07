@@ -247,6 +247,8 @@ public class RobotObject extends PhysicalObject {
 
     public HeuristicPhenotype getHeuristicPhenotype() { return heuristicPhenotype; }
 
+    public Phenotype getPhenotype() { return phenotype; }
+
     public double getAverageCoveragePolgygonArea() {
 
         double sum = 0;

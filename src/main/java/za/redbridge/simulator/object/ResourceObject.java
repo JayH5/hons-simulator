@@ -432,6 +432,8 @@ public class ResourceObject extends PhysicalObject {
         return value;
     }
 
+    public Map<RobotObject, Joint> getPushingBots() { return joints; }
+
     /**
      * Container class for points along the sticky edge of the resource where robots can attach to
      * the resource.
@@ -501,5 +503,6 @@ public class ResourceObject extends PhysicalObject {
             vertices[3].set(-halfWidth, halfHeight - dy);
         }
     }
+
 
 }

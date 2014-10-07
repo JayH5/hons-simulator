@@ -37,6 +37,7 @@ import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.ea.codec.GeneticCODEC;
 import org.encog.ml.ea.genome.Genome;
+import org.encog.ml.ea.population.BasicPopulation;
 import org.encog.ml.ea.species.BasicSpecies;
 import org.encog.neural.NeuralNetworkError;
 import org.encog.neural.hyperneat.FactorHyperNEATGenome;
@@ -69,7 +70,7 @@ import java.util.Random;
  * Automatic feature selection in neuroevolution
  */
 
-public class CCHNEATPopulation extends NEATPopulation implements Serializable,
+public class CCHNEATPopulation extends BasicPopulation implements Serializable,
         MLError, MLRegression {
 
     /**
@@ -131,7 +132,7 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
      * The number of activation cycles that the networks produced by this
      * population will use.
      */
-    private int activationCycles = CCHNEATPopulation.DEFAULT_CYCLES;
+    private int activationCycles = NEATPopulation.DEFAULT_CYCLES;
 
     /**
      * Generate gene id's.
@@ -181,7 +182,7 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
     /**
      * The survival rate.
      */
-    private double survivalRate = CCHNEATPopulation.DEFAULT_SURVIVAL_RATE;
+    private double survivalRate = NEATPopulation.DEFAULT_SURVIVAL_RATE;
 
     /**
      * The substrate, if this is a hyperneat network.
@@ -211,6 +212,20 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
     private RandomFactory randomNumberFactory = Encog.getInstance()
             .getRandomFactory().factorFactory();
 
+
+
+    /**
+     * Construct a starting NEAT population. This does not generate the initial
+     * random population of genomes.
+     *
+     * @param inputCount
+     *            The input neuron count.
+     * @param outputCount
+     *            The output neuron count.
+     * @param populationSize
+     *            The population size.
+     */
+
     /**
      * An empty constructor for serialization.
      */
@@ -230,8 +245,8 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
      *            The population size.
      */
     public CCHNEATPopulation(final int inputCount, final int outputCount,
-                          final int populationSize) {
-        super(inputCount, outputCount, populationSize);
+                             final int populationSize) {
+        super(populationSize, null);
         this.inputCount = inputCount;
         this.outputCount = outputCount;
 
@@ -241,23 +256,6 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
             throw new NeuralNetworkError(
                     "Population must have more than zero genomes.");
         }
-
-    }
-
-    /**
-     * Construct a starting HyperNEAT population. This does not generate the
-     * initial random population of genomes.
-     *
-     * @param theSubstrate
-     *            The substrate ID.
-     * @param populationSize
-     */
-    public CCHNEATPopulation(final Substrate theSubstrate, final int populationSize) {
-        super(theSubstrate, populationSize);
-        this.substrate = theSubstrate;
-        this.inputCount = 6;
-        this.outputCount = 2;
-        HyperNEATGenome.buildCPPNActivationFunctions(this.activationFunctions);
     }
 
     /**
@@ -405,9 +403,13 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
      */
     public void reset() {
         // create the genome factory
-
-        //set codec to homebrew codec
-        this.codec = new NEATCODEC();
+        if (isHyperNEAT()) {
+            this.codec = new HyperNEATCODEC();
+            setGenomeFactory(new FactorHyperNEATGenome());
+        } else {
+            this.codec = new NEATCODEC();
+            setGenomeFactory(new FactorNEATGenome());
+        }
 
         // create the new genomes
         getSpecies().clear();
@@ -424,16 +426,28 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
 
         // create the initial population
         for (int i = 0; i < getPopulationSize(); i++) {
-            final NEATGenome genome = getGenomeFactory().factor(rnd, this,
+            final NEATGenome genome = getGenomeFactory().factor(rnd, this.getPopulation(),
                     this.inputCount, this.outputCount,
                     this.initialConnectionDensity);
             defaultSpecies.add(genome);
+
         }
         defaultSpecies.setLeader(defaultSpecies.getMembers().get(0));
         getSpecies().add(defaultSpecies);
 
+        System.out.println("species size: " + getSpecies().size());
+
         // create initial innovations
-        setInnovations(new NEATInnovationList((NEATPopulation) this));
+        setInnovations(new NEATInnovationList(this.getPopulation()));
+    }
+
+    //returns a NEATPopulation version of this object to make Encog happy and not babby, but basically only contains
+    //info about input/output counts, weight ranges and activation function.
+    public NEATPopulation getPopulation() {
+
+        NEATPopulation pop = new  NEATPopulation(this.inputCount, this.outputCount, this.getPopulationSize());
+        pop.setNEATActivationFunction(this.getActivationFunctions().pickFirst());
+        return pop;
     }
 
     /**
@@ -531,5 +545,6 @@ public class CCHNEATPopulation extends NEATPopulation implements Serializable,
             this.bestNetwork = (NEATNetwork) getCODEC().decode(getBestGenome());
         }
     }
+
 
 }

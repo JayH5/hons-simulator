@@ -74,8 +74,9 @@ public class Main {
             //if we need to show a visualisation
             if (options.showVisuals()) {
 
+                /*
                 SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration, options.nnDump, options.morphologyDump);
-                simulationVisual.run();
+                simulationVisual.run();*/
 
             } else {
                 masterExperimentController.start();

@@ -7,7 +7,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.phenotype.Phenotype;
 
-import java.awt.Paint;
+import java.awt.*;
 import java.util.List;
 import java.util.Set;
 
@@ -19,15 +19,15 @@ import java.util.Set;
 public class HeteroTeamRobotFactory implements RobotFactory {
 
     protected double mass;
-    protected double radius;
-    protected Paint paint;
+    protected float radius;
+    protected Color color;
     protected Set<Phenotype> phenotypes;
 
-    public HeteroTeamRobotFactory(Set<Phenotype> phenotypes, double mass, double radius, Paint paint) {
+    public HeteroTeamRobotFactory(Set<Phenotype> phenotypes, double mass, float radius, Color color) {
         this.phenotypes = phenotypes;
         this.mass = mass;
         this.radius = radius;
-        this.paint = paint;
+        this.color = color;
     }
 
     @Override
@@ -35,12 +35,14 @@ public class HeteroTeamRobotFactory implements RobotFactory {
                                SimConfig.Direction targetAreaPlacement) {
 
         for (Phenotype phenotype: phenotypes) {
-            PlacementArea.Space space = placementArea.getRandomSpace(radius);
 
-            Phenotype copy = phenotype.clone();
+            PlacementArea.Space space = placementArea.getRandomCircularSpace(radius);
 
-            RobotObject robot =
-                    new RobotObject(world, space.getPosition(), radius, mass, paint, copy, targetAreaPlacement);
+            //DO NOT CLONE THIS PHENOTYPE - WE NEED THE SAME OBJECT FOR SCORE TRACKING
+            //Phenotype copy = phenotype.clone();
+
+            RobotObject robot = new RobotObject(world, space.getPosition(), space.getAngle(),
+                    radius, mass, color, phenotype, targetAreaPlacement);
 
             placementArea.placeObject(space, robot);
         }
