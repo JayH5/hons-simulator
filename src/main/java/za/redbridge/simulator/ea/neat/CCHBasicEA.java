@@ -1,5 +1,6 @@
 package za.redbridge.simulator.ea.neat;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -700,7 +701,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         //NaNs and shit should be at the beginning i hope (idk for positive infinity)
         List<CCHIndividual> flattenedIndividuals = new ArrayList<>(teamFactory.getAllIndividuals());
-        Double[] objArray = flattenedIndividuals.toArray(objArray);
+        Double[] objArray = null;
+        flattenedIndividuals.toArray(objArray);
         double[] doubleArray = ArrayUtils.toPrimitive(objArray);
 
         lastEpochScores = thisEpochScores;
