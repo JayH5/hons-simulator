@@ -97,6 +97,7 @@ public class TrainController implements Runnable{
         //TODO: make this get population size form Experiment configs instead
         NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
+        pop.setInitialConnectionDensity(0.5);
 
         //pop.setNEATActivationFunction(new AmplifiedSigmoid());
         pop.reset();
@@ -105,6 +106,8 @@ public class TrainController implements Runnable{
                 morphologyConfig, scoreCache, threadSubruns);
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
+
+        ComparableNEATNetwork previousBest = null;
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
@@ -116,12 +119,18 @@ public class TrainController implements Runnable{
 
             train.iteration();
 
+            if (previousBest == null) {
+                previousBest = scoreCache.last();
+            }
+
             controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
                     "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
 
-            if (epochs % 20 == 0) {
-                IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", "best_morphology_at_" + epochs + ".tmp");
+
+            if (epochs % 20 == 0 && scoreCache.last().compareTo(previousBest) > 0) {
+                IOUtils.writeNetwork(scoreCache.last().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
+                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
+                previousBest = scoreCache.last();
             }
 
             //get the highest-performing network in this epoch, store it in leaderBoard
@@ -137,8 +146,8 @@ public class TrainController implements Runnable{
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
-        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
+        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
+        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig + "bestMorphology" + testSetID + ".tmp");
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
@@ -156,8 +165,6 @@ public class TrainController implements Runnable{
     }
 
     public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
-
-    public Map.Entry<ComparableNEATNetwork,Integer> getHighestEntry() { return leaderBoard.lastEntry(); }
 
     private synchronized double getEpochMeanScore() { return StatUtils.mean(getEpochScoreData()); }
 
