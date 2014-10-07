@@ -38,6 +38,14 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
 
     }
 
+    public CCHIndividual() {
+        cooperativeScores = Collections.synchronizedList(new ArrayList<>(1));
+        taskScores = Collections.synchronizedList(new ArrayList<>(1));
+
+        network = null;
+        genome = null;
+    }
+
     public void incrementTotalCooperativeScore(double input) {
 
         cooperativeScores.add(input);

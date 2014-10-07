@@ -15,6 +15,11 @@ import org.encog.neural.neat.training.species.OriginalNEATSpeciation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.experiment.ComparableMorphology;
+
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Created by racter on 2014/09/21.

@@ -37,6 +37,7 @@ import org.encog.ml.ea.train.basic.BasicEA;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * An individual threadable task for the parallel score calculation.
@@ -58,7 +59,6 @@ public class CCHParallelScoreTask implements Runnable {
      * The score adjusters.
      */
     private final List<AdjustScore> adjusters;
-
     /**
      * The owners.
      */

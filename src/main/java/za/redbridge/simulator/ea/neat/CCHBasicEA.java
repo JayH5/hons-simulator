@@ -1,27 +1,11 @@
 package za.redbridge.simulator.ea.neat;
 
-import org.encog.EncogShutdownTask;
-import org.encog.ml.ea.train.EvolutionaryAlgorithm;
-import org.encog.ml.ea.train.basic.BasicEA;
-import org.encog.ml.ea.train.basic.EAWorker;
-import org.encog.neural.neat.NEATPopulation;
-import org.encog.util.concurrency.MultiThreadable;
-
-import java.io.Serializable;
-
-/**
- * Created by racter on 2014/10/05.
- */
-
-
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.Variance;
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.Encog;
 import org.encog.EncogError;
+import org.encog.EncogShutdownTask;
 import org.encog.mathutil.randomize.factory.RandomFactory;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLContext;
@@ -37,23 +21,35 @@ import org.encog.ml.ea.population.Population;
 import org.encog.ml.ea.rules.BasicRuleHolder;
 import org.encog.ml.ea.rules.RuleHolder;
 import org.encog.ml.ea.score.AdjustScore;
-import org.encog.ml.ea.score.parallel.ParallelScore;
-import org.encog.ml.ea.sort.GenomeComparator;
-import org.encog.ml.ea.sort.MaximizeAdjustedScoreComp;
-import org.encog.ml.ea.sort.MaximizeScoreComp;
-import org.encog.ml.ea.sort.MinimizeAdjustedScoreComp;
-import org.encog.ml.ea.sort.MinimizeScoreComp;
+import org.encog.ml.ea.sort.*;
 import org.encog.ml.ea.species.SingleSpeciation;
 import org.encog.ml.ea.species.Speciation;
 import org.encog.ml.ea.species.Species;
+import org.encog.ml.ea.train.EvolutionaryAlgorithm;
+import org.encog.ml.ea.train.basic.BasicEA;
 import org.encog.ml.genetic.GeneticError;
+import org.encog.util.concurrency.MultiThreadable;
 import org.encog.util.logging.EncogLogging;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.hetero.TeamEvaluator;
 import za.redbridge.simulator.factories.NEATTeamFactory;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Created by racter on 2014/10/05.
+ */
 
 /**
  * Provides a basic implementation of a multi-threaded Evolutionary Algorithm.
@@ -220,11 +216,21 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
      */
     private RuleHolder rules;
 
+    private CCHIndividual bestIndividual;
+
+    //current average score for this epoch
+    private double currentAverage = -1;
+
     private final ExperimentConfig experimentConfig;
     private final SimConfig simConfig;
     private final MorphologyConfig morphologyConfig;
 
-    private int maxOperationErrors = 500;
+    //stats stuff
+
+    private double[] lastEpochScores;
+    private double[] thisEpochScores;
+
+    private int maxOperationErrors = 0;
 
     /**
      * Construct an EA.
@@ -692,6 +698,36 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                 this.actualThreadCount);
         pscore.process();
 
+        //NaNs and shit should be at the beginning i hope (idk for positive infinity)
+        List<CCHIndividual> flattenedIndividuals = new ArrayList<>(teamFactory.getAllIndividuals());
+        Double[] objArray = flattenedIndividuals.toArray(objArray);
+        double[] doubleArray = ArrayUtils.toPrimitive(objArray);
+
+        lastEpochScores = thisEpochScores;
+        thisEpochScores = doubleArray;
+
+        Collections.sort(flattenedIndividuals);
+
+        if (flattenedIndividuals.get(flattenedIndividuals.size()-1).compareTo(bestIndividual) > 0) {
+            bestIndividual = flattenedIndividuals.get(flattenedIndividuals.size() - 1);
+        }
+
+        // just pick the first genome with a valid score as best, it will be
+        // updated later.
+        // also most populations are sorted this way after training finishes
+        // (for reload)
+        // if there is an empty population, the constructor would have blow
+        final List<Genome> list = population.flatten();
+
+        int idx = 0;
+        do {
+            this.bestGenome = list.get(idx++);
+        } while (idx < list.size()
+                && (Double.isInfinite(this.bestGenome.getScore()) || Double
+                .isNaN(this.bestGenome.getScore())));
+
+        population.setBestGenome(this.bestGenome);
+
         newPopulation.clear();
         newPopulation.addAll(teamPopulation);
 
@@ -783,6 +819,12 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         // register for shutdown
         Encog.getInstance().addShutdownTask(this);
 
+        //NaNs and shit should be at the beginning i hope (idk for positive infinity)
+        List<CCHIndividual> flattenedIndividuals = new ArrayList<>(teamFactory.getAllIndividuals());
+        Collections.sort(flattenedIndividuals);
+
+        bestIndividual = flattenedIndividuals.get(flattenedIndividuals.size()-1);
+
         // just pick the first genome with a valid score as best, it will be
         // updated later.
         // also most populations are sorted this way after training finishes
@@ -803,12 +845,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         final List<Genome> genomes = teamFactory.getGenomePopulation();
         this.speciation.performSpeciation(genomes);
 
-        System.out.println("Before purge: " + population.flatten().size());
-
         // purge invalid genomes
         this.population.purgeInvalidGenomes();
-
-        System.out.println("After purge: " + population.flatten().size());
     }
 
     /**
@@ -969,5 +1007,28 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
 
     public List<Genome> getTeamPopulation() { return teamPopulation; }
+
+    public double mannWhitneyImprovementTest() {
+
+        MannWhitneyUTest mwTest = new MannWhitneyUTest();
+
+        return mwTest.mannWhitneyU(thisEpochScores, lastEpochScores);
+    }
+
+    public double getVariance() {
+
+        Variance variance = new Variance();
+        return variance.evaluate(thisEpochScores);
+    }
+
+    public double getEpochMean() {
+
+        Mean mean = new Mean();
+        return mean.evaluate(thisEpochScores);
+    }
+
+    //get best individual so far
+    public CCHIndividual getBestIndividual() { return bestIndividual; }
+
 }
 

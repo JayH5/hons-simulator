@@ -78,7 +78,6 @@ public class CCHNEATCODEC implements GeneticCODEC, Serializable {
         network.setActivationCycles(pop.getActivationCycles());
 
         final CCHIndividual chNetwork = new CCHIndividual(network, neatGenome);
-
         return chNetwork;
     }
 

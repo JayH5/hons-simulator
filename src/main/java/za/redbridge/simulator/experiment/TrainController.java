@@ -38,11 +38,8 @@ public class TrainController implements Runnable{
     //stores fittest individual of each epoch
     private final TreeMap<CCHIndividual,Integer> leaderBoard;
 
-    //stores scores for each neural network during epochs
-    private final ConcurrentSkipListSet<CCHIndividual> scoreCache;
-
     //stores best performing morphology and controller combinations
-    private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<CCHIndividual,Integer>> morphologyLeaderboard;
+    private final ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard;
 
     private final boolean threadSubruns;
 
@@ -61,14 +58,13 @@ public class TrainController implements Runnable{
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<CCHIndividual,Integer>> morphologyLeaderboard,
+                           ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard,
                            boolean threadSubruns, long testSetID, long testSetSerial) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
         leaderBoard = new TreeMap<>();
-        scoreCache = new ConcurrentSkipListSet<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
         this.threadSubruns = threadSubruns;
 
@@ -80,14 +76,13 @@ public class TrainController implements Runnable{
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<CCHIndividual,Integer>> morphologyLeaderboard,
+                           ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard,
                            boolean threadSubruns) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
         leaderBoard = new TreeMap<>();
-        scoreCache = new ConcurrentSkipListSet<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
         this.threadSubruns = threadSubruns;
 
@@ -108,6 +103,8 @@ public class TrainController implements Runnable{
         final CCHNEATTrainer train = CNNEATUtil.constructCCHNEATTrainer(pop, scoreCalculator, experimentConfig, simConfig,
                 morphologyConfig);
 
+        CCHIndividual lastBestIndividual = new CCHIndividual();
+
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
         controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitneyU");
@@ -120,27 +117,23 @@ public class TrainController implements Runnable{
 
             train.iteration();
 
-            /*
-            controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
-                    "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
+            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestGenome().getScore() +
+                    "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
 
-            if (epochs % 20 == 0) {
-                IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "best_network_at_" + epochs + ".tmp");
+            if (epochs % 20 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
+                IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", "best_morphology_at_" + epochs + ".tmp");
+                lastBestIndividual = train.getBestIndividual();
             }
 
-            //get the highest-performing network in this epoch, store it in leaderBoard
-            leaderBoard.put(scoreCache.last(), train.getIteration());
-            previousCache = getEpochScoreData();
-            scoreCache.clear();
-
             long minutes = Duration.between(start, Instant.now()).toMinutes();
-            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");*/
+            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
 
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
-/*
-        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
+
+        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestIndividual().getTotalTaskScore()),
+                train.getBestIndividual());
 
         IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
@@ -157,35 +150,6 @@ public class TrainController implements Runnable{
         } catch (IOException x) {
             // File permission problems are caught here.
             System.err.println(x);
-        }*/
-    }
-
-    public NEATNetwork getBestNetwork() { return leaderBoard.lastEntry().getKey().getNetwork(); }
-
-    public Map.Entry<ComparableNEATNetwork,Integer> getHighestEntry() { return leaderBoard.lastEntry(); }
-
-    private synchronized double getEpochMeanScore() { return StatUtils.mean(getEpochScoreData()); }
-
-    private synchronized double[] getEpochScoreData() {
-
-        double[] scores = new double[scoreCache.size()];
-        int counter = 0;
-
-        for (ComparableNEATNetwork network: scoreCache) {
-
-            scores[counter] = network.getScore();
-            counter++;
         }
-
-        return scores;
-    }
-
-    private synchronized double getVariance() { return StatUtils.variance(getEpochScoreData()); }
-
-    private synchronized double mannWhitneyImprovementTest() {
-
-        MannWhitneyUTest mwTest = new MannWhitneyUTest();
-
-        return mwTest.mannWhitneyU(getEpochScoreData(), previousCache);
     }
 }

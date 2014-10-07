@@ -32,6 +32,9 @@ import org.encog.ml.ea.train.basic.TrainEA;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
@@ -46,6 +49,8 @@ import org.encog.neural.networks.training.propagation.TrainingContinuation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.experiment.ComparableMorphology;
 
 /**
  * Provides a MLTrain compatible class that can be used to train genomes.
