@@ -5,9 +5,12 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
+
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
@@ -15,6 +18,7 @@ import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
+
 
 import java.util.Set;
 
@@ -42,12 +46,18 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
     private final SimConfig config;
 
+
     private boolean stopOnceCollected = true;
 
-    public Simulation(SimConfig config, RobotFactory robotFactory) {
+    //keep track of scores here
+    private final Set<CCHIndividual> scoreKeepingControllers;
+
+    public Simulation(SimConfig config, RobotFactory robotFactory, Set<CCHIndividual> scoreKeepingGenotypes) {
+
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
+        this.scoreKeepingControllers = scoreKeepingGenotypes;
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -84,6 +94,27 @@ public class Simulation extends SimState {
             schedule.scheduleRepeating(object);
         }
 
+
+        schedule.scheduleRepeating(new Steppable() {
+            @Override
+            public void step(SimState simState) {
+                physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+            }
+        });
+    }
+
+    //end behaviour
+    @Override
+    public void finish() {
+        kill();
+
+        //update the genome scores of all the individuals
+        for (CCHIndividual individual: scoreKeepingControllers) {
+
+            //TODO: Unretardify this
+           individual.incrementTotalTaskScore(1);
+        }
+        //System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
         );

@@ -10,12 +10,12 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import org.jbox2d.dynamics.joints.Joint;
 import sim.engine.SimState;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
@@ -77,8 +77,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
-                    resource.setCollected(true);
                     resource.getPortrayal().setPaint(Color.CYAN);
+                    //get the robots pushing this box and assign each robot its task performance score
+                    // and cooperative score
+                    updateScores(resource, resource.getPushingBots());
+                    resource.setCollected(true);
                     incrementTotalObjectValue(resource);
                 }
             } else if (ALLOW_REMOVAL) {
@@ -89,6 +92,23 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                     decrementTotalObjectValue(resource);
                 }
             }
+        }
+    }
+
+    //updates the scores of those robots pushing the boxes
+    private void updateScores(ResourceObject resource, Map<RobotObject, Joint> pushingBots) {
+
+        //this is fairly fucking arbitrary
+        double totalArea = resource.getWidth()*resource.getHeight();
+        int numPushingBots = pushingBots.size();
+        double cooperativeScore = numPushingBots > 1? 5 : 0;
+
+        for (RobotObject bot: pushingBots.keySet()) {
+
+            ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
+            //divide spoils evenly amongst pushing bots for now
+            scoreKeepingIndividual.incrementTotalTaskScore(totalArea/numPushingBots);
+            scoreKeepingIndividual.incrementTotalCooperativeScore(cooperativeScore);
         }
     }
 
