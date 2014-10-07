@@ -1,11 +1,8 @@
 package za.redbridge.simulator.factories;
 
-import org.apache.commons.math3.genetics.Population;
 import org.encog.EncogError;
 import org.encog.ml.ea.genome.Genome;
-import org.encog.neural.neat.NEATCODEC;
 import org.encog.neural.neat.NEATNetwork;
-import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.training.NEATGenome;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;

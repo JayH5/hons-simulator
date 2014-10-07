@@ -4,6 +4,7 @@ import org.encog.neural.neat.NEATNetwork;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.factories.ComplementFactory;
 
 import java.io.*;
@@ -23,7 +24,7 @@ public class MasterExperimentController {
     private final ExperimentConfig experimentConfig;
     private final SimConfig simulationConfig;
 
-    private final ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyScores = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyScores = new ConcurrentSkipListMap<>();
 
 
     public MasterExperimentController(ExperimentConfig experimentConfig, SimConfig simulationConfig, MorphologyConfig templateMorphology,
@@ -80,7 +81,7 @@ public class MasterExperimentController {
 
     }
 
-    Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
+    Map.Entry<ComparableMorphology,CCHIndividual> topCombo = morphologyScores.lastEntry();
     NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
     MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
 
