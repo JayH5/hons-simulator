@@ -112,7 +112,7 @@ public class TrainController implements Runnable{
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
-        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitneyU");
+        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Cooperative Score of Best \t Variance \t MannWhitneyU");
         do {
 
             System.out.println("Epoch " + train.getIteration() + ".");
@@ -122,7 +122,7 @@ public class TrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getTotalTaskScore() +
+            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getTotalTaskScore() + "\t" + train.getBestIndividual().getTotalCooperativeScore() +
                     "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
 
             if (epochs % 20 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
