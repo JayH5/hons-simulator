@@ -12,6 +12,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import sim.engine.SimState;
 import za.redbridge.simulator.physics.BodyBuilder;
@@ -426,6 +427,10 @@ public class ResourceObject extends PhysicalObject {
 
     public double getHeight() {
         return height;
+    }
+
+    public Set<RobotObject> getPushingRobots(){
+        return joints.keySet();
     }
 
     public double getValue() {

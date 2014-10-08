@@ -10,12 +10,12 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import sim.engine.SimState;
+import za.redbridge.simulator.FitnessStats;
+import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
@@ -33,7 +33,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final AABB aabb;
 
     //total resource value in this target area
-    private double totalResourceValue;
+    private Map<Phenotype,FitnessStats> fitnesses = new HashMap<>();
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
@@ -43,7 +43,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     public TargetAreaObject(World world, Vec2 position, int width, int height) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
-        totalResourceValue = 0;
         this.width = width;
         this.height = height;
 
@@ -77,32 +76,30 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
+                    List<Phenotype> pushingPhenotypes = resource.getPushingRobots().stream().map(j -> j.getPhenotype()).collect(Collectors.toList());
+                    for(Phenotype p : pushingPhenotypes){
+                        fitnesses.putIfAbsent(p, new FitnessStats());
+                        FitnessStats stats = fitnesses.get(p);
+                        stats.addTaskFitness(resource.getValue() / pushingPhenotypes.size());
+                        stats.addRetrievedResource(resource, pushingPhenotypes.size());
+                    }
                     resource.setCollected(true);
                     resource.getPortrayal().setPaint(Color.CYAN);
-                    incrementTotalObjectValue(resource);
                 }
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
                 if (containedObjects.remove(resource)) {
                     resource.setCollected(false);
                     resource.getPortrayal().setPaint(Color.MAGENTA);
-                    decrementTotalObjectValue(resource);
+                    List<Phenotype> pushingPhenotypes = new ArrayList<>(); //TODO actually find the phenotypes that pushed the box out
+                    for(Phenotype p : pushingPhenotypes){
+                        fitnesses.putIfAbsent(p, new FitnessStats());
+                        FitnessStats stats = fitnesses.get(p);
+                        stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
+                    }
                 }
             }
         }
-    }
-
-    //these also update the total resource value
-    private void incrementTotalObjectValue(ResourceObject resource) {
-        totalResourceValue += resource.getValue();
-    }
-
-    private void decrementTotalObjectValue(ResourceObject resource) {
-        totalResourceValue -= resource.getValue();
-    }
-
-    public double getTotalResourceValue() {
-        return totalResourceValue;
     }
 
     public int getNumberOfContainedResources() {
@@ -119,6 +116,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     public int getHeight() {
         return height;
+    }
+
+    public Map<Phenotype, FitnessStats> getFitnesses() {
+        return fitnesses;
     }
 
     @Override
@@ -147,7 +148,12 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (containedObjects.remove(resource)) {
                 resource.setCollected(false);
                 resource.getPortrayal().setPaint(Color.MAGENTA);
-                decrementTotalObjectValue(resource);
+                List<Phenotype> pushingPhenotypes = new ArrayList<>(); //TODO actually find the phenotypes that pushed the box out
+                for(Phenotype p : pushingPhenotypes){
+                    fitnesses.putIfAbsent(p, new FitnessStats());
+                    FitnessStats stats = fitnesses.get(p);
+                    stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
+                }
             }
         }
     }
