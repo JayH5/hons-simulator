@@ -48,13 +48,6 @@ public class Main {
         ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
         SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
 
-        if (experimentConfiguration.heteroGeneousTeams() && !simulationConfiguration.individualScoring()) {
-            throw new UnsupportedOperationException("No support for heterogeneous teams with team scoring.");
-        }
-        else if (!experimentConfiguration.heteroGeneousTeams() && simulationConfiguration.individualScoring()) {
-            throw new UnsupportedOperationException("No support for homogeneous teams with individual scoring.");
-        }
-
         //TODO: work with multiple morphology configs (specifically, filter sensitivities)
         MorphologyConfig morphologyConfig = null;
 
@@ -69,6 +62,22 @@ public class Main {
         //if we need to show a visualisation
         if (options.showVisuals()) {
 
+            //UGUGGHGHUHGHGGH, this is just with chasing phenotype, no ML stuff
+
+            HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
+                    new ChasingPhenotype(), simulationConfiguration.getRobotMass(),
+                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(),
+                    simulationConfiguration.getObjectsRobots());
+
+            Simulation simulation = new Simulation(simulationConfiguration, robotFactory);
+
+
+            SimulationGUI video =
+                    new SimulationGUI(simulation);
+
+            //new console which displays this simulation
+            Console console = new Console(video);
+            console.setVisible(true);
 
         }
         else {

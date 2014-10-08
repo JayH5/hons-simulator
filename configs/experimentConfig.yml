@@ -8,8 +8,6 @@ phenotype:
 evolutionaryAlgorithm:
   controllerEA: NEAT
   populationSize: 20
-  heterogeneousTeams: true
-  heterogeneousTeamSize: 5
 
 morphology:
   morphologyFileName: configs/sensorList.yml

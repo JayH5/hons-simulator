@@ -75,8 +75,4 @@ public class ChasingPhenotype extends KheperaIIIPhenotype {
 
     @Override
     public void configure(Map<String,Object> phenotypeConfigs) {}
-
-    @Override
-    public Object getController() { throw new UnsupportedOperationException("No underlying controller object" +
-            "for this Phenotype"); }
 }

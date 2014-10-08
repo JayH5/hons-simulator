@@ -10,11 +10,12 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.jbox2d.dynamics.joints.Joint;
 import sim.engine.SimState;
-import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
@@ -38,16 +39,13 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final Set<ResourceObject> containedObjects = new HashSet<>();
     private final List<Fixture> watchedFixtures = new ArrayList<>();
 
-    private final boolean individualScoring;
-
     //keeps track of what has been pushed into this place
-    public TargetAreaObject(World world, Vec2 position, int width, int height, boolean individualScoring) {
+    public TargetAreaObject(World world, Vec2 position, int width, int height) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
         totalResourceValue = 0;
         this.width = width;
         this.height = height;
-        this.individualScoring = individualScoring;
 
         aabb = getBody().getFixtureList().getAABB(0);
     }
@@ -79,13 +77,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
-                    resource.getPortrayal().setPaint(Color.CYAN);
-                    //if individual scores, get the robots pushing this box and assign each robot its task performance score
-                    // and cooperative score
-                    if (individualScoring) {
-                        updateScores(resource, resource.getPushingBots());
-                    }
                     resource.setCollected(true);
+                    resource.getPortrayal().setPaint(Color.CYAN);
                     incrementTotalObjectValue(resource);
                 }
             } else if (ALLOW_REMOVAL) {
@@ -97,13 +90,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 }
             }
         }
-    }
-
-    //updates the scores of those robots pushing the boxes
-    private void updateScores(ResourceObject resource, Map<RobotObject, Joint> pushingBots) {
-
-        //TODO: Implement yourself
-
     }
 
     //these also update the total resource value

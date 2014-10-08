@@ -27,9 +27,10 @@ public class SimConfig extends Config {
     private static final float DEFAULT_ROBOT_RADIUS = 0.15f;
     private static final Color DEFAULT_ROBOT_COLOUR = new Color(0,0,0);
 
-    private static final boolean DEFAULT_INDIVIDUAL_SCORING = true;
 
     private static final ResourceFactory DEFAULT_RESOURCE_FACTORY = new ConfigurableResourceFactory();
+    private static final String DEFAULT_ROBOT_FACTORY =
+            "za.redbridge.simulator.factories.HomogeneousRobotFactory";
 
     public enum Direction {
         NORTH, SOUTH, EAST, WEST
@@ -49,8 +50,6 @@ public class SimConfig extends Config {
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
 
-    private final boolean individualScoring;
-
     private ResourceFactory resourceFactory;
     private String robotFactoryName;
 
@@ -59,13 +58,14 @@ public class SimConfig extends Config {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
                 DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS,
-                DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR, DEFAULT_RESOURCE_FACTORY, DEFAULT_INDIVIDUAL_SCORING);
+                DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR, DEFAULT_RESOURCE_FACTORY,
+                DEFAULT_ROBOT_FACTORY);
     }
 
     public SimConfig(long simulationSeed, int simulationIterations, int environmentWidth,
             int environmentHeight, Direction targetAreaPlacement, int targetAreaThickness,
             int objectsRobots, float robotMass, float robotRadius, Color robotColour,
-            ResourceFactory resourceFactory, boolean individualScoring) {
+            ResourceFactory resourceFactory, String robotFactoryName) {
 
         this.simulationSeed = simulationSeed;
         this.simulationIterations = simulationIterations;
@@ -82,7 +82,7 @@ public class SimConfig extends Config {
         this.robotColour = robotColour;
 
         this.resourceFactory = resourceFactory;
-        this.individualScoring = individualScoring;
+        this.robotFactoryName = robotFactoryName;
     }
 
     @SuppressWarnings("unchecked")
@@ -109,9 +109,7 @@ public class SimConfig extends Config {
         Color robotColour = DEFAULT_ROBOT_COLOUR;
 
         ResourceFactory resFactory = DEFAULT_RESOURCE_FACTORY;
-
-
-        boolean indie = DEFAULT_INDIVIDUAL_SCORING;
+        String robotFactory = DEFAULT_ROBOT_FACTORY;
 
         // Load simulation
         Map simulation = (Map) config.get("simulation");
@@ -175,17 +173,44 @@ public class SimConfig extends Config {
                 robotColour = new Color(Integer.parseInt(rgb[0].trim()),
                         Integer.parseInt(rgb[1].trim()), Integer.parseInt(rgb[2].trim()));
             }
+
         }
 
-        // Scoring
-        Map scoring = (Map) config.get("scoring");
+        //factories
+        Map factories = (Map) config.get("factories");
+        if (checkFieldPresent(factories, "factories")) {
 
-        if (checkFieldPresent(scoring, "scoring")) {
-            Boolean ind = (Boolean) scoring.get("individualScoring");
-            if (checkFieldPresent(ind, "teams:heterogeneousTeams")) {
-                indie = ind;
+            String rFactory = (String) factories.get("resourceFactory");
+            if (checkFieldPresent(resFactory, "factories:resourceFactory")) {
+
+                try {
+                    Class f = Class.forName(rFactory);
+                    Object o = f.newInstance();
+
+                    if (!(o instanceof ResourceFactory)) {
+                        throw new InvalidClassException("");
+                    }
+
+                    resFactory = (ResourceFactory) o;
+                    Map resources = (Map) config.get("resourceProperties");
+                    resFactory.configure(resources);
+                } catch (ClassNotFoundException c) {
+                    System.out.println("Invalid class name specified in SimConfig: " + rFactory + ". Using default resource factory.");
+                    c.printStackTrace();
+                } catch (InvalidClassException i) {
+                    System.out.println("Invalid resource factory specified: " + rFactory + ". Using default resource factory.");
+                    i.printStackTrace();
+                } catch (InstantiationException | IllegalAccessException ins) {
+                    ins.printStackTrace();
+                }
+            }
+
+            String robFactory = (String) factories.get("robotFactory");
+            if (checkFieldPresent(robFactory, "factories:robotFactory")) {
+                robotFactory = robFactory;
             }
         }
+
 
         this.simulationSeed = seed;
         this.simulationIterations = iterations;
@@ -198,8 +223,7 @@ public class SimConfig extends Config {
         this.robotRadius = rRadius;
         this.robotColour = robotColour;
         this.resourceFactory = resFactory;
-
-        this.individualScoring = indie;
+        this.robotFactoryName = robotFactory;
     }
 
 
@@ -243,7 +267,5 @@ public class SimConfig extends Config {
     public float getRobotRadius() { return robotRadius; }
 
     public ResourceFactory getResourceFactory() { return resourceFactory; }
-
-    public boolean individualScoring() { return individualScoring; }
 
 }

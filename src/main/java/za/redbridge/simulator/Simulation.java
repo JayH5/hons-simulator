@@ -5,22 +5,17 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
 import sim.engine.SimState;
-import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
-
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
 
-
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -49,26 +44,10 @@ public class Simulation extends SimState {
 
     private boolean stopOnceCollected = true;
 
-    //keep track of scores here
-    private final Set<ScoreKeepingController> scoreKeepingControllers;
-
-    public Simulation(SimConfig config, RobotFactory robotFactory, Set<ScoreKeepingController> scoreKeepingControllers) {
-
-        super(config.getSimulationSeed());
-        this.config = config;
-        this.robotFactory = robotFactory;
-        this.scoreKeepingControllers = scoreKeepingControllers;
-
-        Settings.velocityThreshold = VELOCITY_THRESHOLD;
-    }
-
-    //if homogeneous team, just have a dummy set of SKCs.
     public Simulation(SimConfig config, RobotFactory robotFactory) {
-
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
-        scoreKeepingControllers = new HashSet<>();
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -104,20 +83,6 @@ public class Simulation extends SimState {
             drawProxy.registerDrawable(object.getPortrayal());
             schedule.scheduleRepeating(object);
         }
-
-
-        schedule.scheduleRepeating(new Steppable() {
-            @Override
-            public void step(SimState simState) {
-                physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-            }
-        });
-    }
-
-    //end behaviour
-    @Override
-    public void finish() {
-        kill();
 
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
@@ -180,7 +145,7 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height, config.individualScoring());
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height);
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
