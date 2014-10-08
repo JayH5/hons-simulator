@@ -8,6 +8,7 @@ import org.epochx.epox.lang.IfFunction;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
+import za.redbridge.simulator.FitnessStats;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
@@ -158,10 +159,9 @@ public class AgentModel extends GPModel {
         Simulation sim = new Simulation(config, robotFactory);
         sim.run();
         System.out.print('.');
-        //TODO fix! Actually track individual fitnesses in the simulation!
-        double fitness = -sim.getFitness();
+        Map<Phenotype,FitnessStats> fitnesses = sim.getFitness();
         List<Double> result = new ArrayList<>();
-        for(int i = 0; i < pl.size(); i++)result.add(fitness);
+        for(Phenotype p : phenotypes) result.add(-fitnesses.get(p).getTaskFitness());
         return result;
     }
 
