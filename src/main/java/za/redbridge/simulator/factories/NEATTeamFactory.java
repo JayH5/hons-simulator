@@ -57,17 +57,16 @@ public class NEATTeamFactory {
             for (int i = 0; i < genomePopulation.size(); i+=experimentConfig.getHeteroTeamSize()) {
 
                 final Set<CCHIndividual> network_team = new HashSet<>();
+                final NEATTeam neat_team = new NEATTeam(network_team);
 
                 for (int j = 0; j < experimentConfig.getHeteroTeamSize(); j++) {
 
                     final CCHIndividual individual = new CCHIndividual( ((NEATNetwork) decoder.decodeToNetwork(genomePopulation.get(i+j))),
-                            (NEATGenome) genomePopulation.get(i+j));
+                            (NEATGenome) genomePopulation.get(i+j), neat_team);
 
                     network_team.add(individual);
                     all_individuals.add(individual);
                 }
-
-                NEATTeam neat_team = new NEATTeam(network_team);
                 teams.add(neat_team);
             }
             return teams;

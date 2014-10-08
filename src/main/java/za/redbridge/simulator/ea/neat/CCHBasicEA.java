@@ -702,9 +702,12 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         //NaNs and shit should be at the beginning i hope (idk for positive infinity)
         List<CCHIndividual> flattenedIndividuals = new ArrayList<>(teamFactory.getAllIndividuals());
-        Double[] objArray = null;
-        flattenedIndividuals.toArray(objArray);
-        double[] doubleArray = ArrayUtils.toPrimitive(objArray);
+        Collections.sort(flattenedIndividuals);
+        double[] doubleArray = new double[flattenedIndividuals.size()];
+
+        for (int i = 0; i < flattenedIndividuals.size(); i++) {
+            doubleArray[i] = flattenedIndividuals.get(i).getTotalTaskScore();
+        }
 
         lastEpochScores = thisEpochScores;
         thisEpochScores = doubleArray;
@@ -1014,6 +1017,10 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
     public double mannWhitneyImprovementTest() {
 
         MannWhitneyUTest mwTest = new MannWhitneyUTest();
+
+        if (lastEpochScores == null) {
+            lastEpochScores = new double[thisEpochScores.length];
+        }
 
         return mwTest.mannWhitneyU(thisEpochScores, lastEpochScores);
     }

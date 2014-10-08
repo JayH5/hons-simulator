@@ -1,17 +1,17 @@
 ---
 simulation:
-  iterations: 20000
+  iterations: 10000
 resourceProperties:
-  smallResources: 0
-  smallObjectWidth: 0.4
-  smallObjectHeight: 0.4
+  smallResources: 30
+  smallObjectWidth: 0.3
+  smallObjectHeight: 0.3
   smallObjectMass: 1.0
   maxSmallObjectPushingBots: 1
-  largeResources: 20
-  largeObjectWidth: 0.6
-  largeObjectHeight: 0.6
-  largeObjectMass: 4.5
-  maxLargeObjectPushingBots: 3
+  largeResources: 10
+  largeObjectWidth: 0.7
+  largeObjectHeight: 0.7
+  largeObjectMass: 3.0
+  maxLargeObjectPushingBots: 2
 scoring:
   fitnessFunction: za.redbridge.simulator.ea.DefaultFitnessFunction
 factories:

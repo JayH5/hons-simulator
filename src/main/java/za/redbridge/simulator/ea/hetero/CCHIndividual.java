@@ -5,10 +5,7 @@ import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.training.NEATGenome;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by racter on 2014/10/05.
@@ -23,19 +20,22 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
     //the NEATGenome backing this NEATNetwork.
     private final NEATGenome genome;
 
+    //reference to this individual's team
+    private final NEATTeam team;
+
     public int compareTo(CCHIndividual other) {
 
         return Double.compare(getTotalTaskScore(),other.getTotalTaskScore());
     }
 
-    public CCHIndividual(final NEATNetwork network, final NEATGenome genome) {
+    public CCHIndividual(final NEATNetwork network, final NEATGenome genome, final NEATTeam team) {
 
         this.network = network;
         this.genome = genome;
+        this.team = team;
 
         cooperativeScores = Collections.synchronizedList(new ArrayList<>());
         taskScores = Collections.synchronizedList(new ArrayList<>());
-
     }
 
     public CCHIndividual() {
@@ -44,6 +44,7 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
 
         network = null;
         genome = null;
+        team = null;
     }
 
     public void incrementTotalCooperativeScore(double input) {
@@ -100,5 +101,9 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
     public NEATGenome getGenome() {
 
         return genome;
+    }
+
+    public NEATTeam getTeam() {
+        return team;
     }
 }

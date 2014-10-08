@@ -7,14 +7,19 @@ import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.neural.neat.NEATNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.neat.CCHCalculateScore;
 import za.redbridge.simulator.ea.neat.CCHNEATPopulation;
 import za.redbridge.simulator.ea.neat.CCHNEATTrainer;
 import za.redbridge.simulator.ea.neat.CNNEATUtil;
+import za.redbridge.simulator.factories.HeteroTeamRobotFactory;
+import za.redbridge.simulator.factories.TeamPhenotypeFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -117,12 +122,12 @@ public class TrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestGenome().getScore() +
+            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getTotalTaskScore() +
                     "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
 
             if (epochs % 20 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
-                IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", "best_morphology_at_" + epochs + ".tmp");
+                IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
+                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
                 lastBestIndividual = train.getBestIndividual();
             }
 
@@ -151,5 +156,22 @@ public class TrainController implements Runnable{
             // File permission problems are caught here.
             System.err.println(x);
         }
+
+        NEATTeam teamWithBestGenotype = lastBestIndividual.getTeam();
+
+        TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, teamWithBestGenotype.getGenotypes());
+
+        HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
+                simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
+
+
+        Simulation simulation = new Simulation(simConfig, heteroFactory, teamWithBestGenotype.getGenotypes());
+        simulation.run();
+
+        SimulationGUI video = new SimulationGUI(simulation);
+
+        //new console which displays this simulation
+        sim.display.Console console = new sim.display.Console(video);
+        console.setVisible(true);
     }
 }

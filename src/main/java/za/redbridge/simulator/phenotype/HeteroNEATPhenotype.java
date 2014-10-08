@@ -65,7 +65,6 @@ public class HeteroNEATPhenotype implements Phenotype {
     public void configure(Map<String,Object> phenotypeConfigs) {}
 
     @Override
-    public ScoreKeepingController getController() { throw new UnsupportedOperationException("No Scorekeeping controller " +
-            "for this Phenotype."); }
+    public ScoreKeepingController getController() { return controller; }
 
 }

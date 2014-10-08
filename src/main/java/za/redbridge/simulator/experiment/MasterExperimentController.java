@@ -82,7 +82,7 @@ public class MasterExperimentController {
     }
 
     Map.Entry<ComparableMorphology,CCHIndividual> topCombo = morphologyScores.lastEntry();
-    NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
+    NEATNetwork bestNetwork = topCombo.getValue().getNetwork();
     MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
 
     IOUtils.writeNetwork(bestNetwork, outputDir, "bestNetwork.tmp");

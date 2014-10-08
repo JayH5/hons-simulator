@@ -108,12 +108,7 @@ public class Simulation extends SimState {
     public void finish() {
         kill();
 
-        //update the genome scores of all the individuals
-        for (CCHIndividual individual: scoreKeepingControllers) {
 
-            //TODO: Unretardify this
-           individual.incrementTotalTaskScore(1);
-        }
         //System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
