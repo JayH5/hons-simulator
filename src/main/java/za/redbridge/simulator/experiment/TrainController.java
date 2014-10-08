@@ -125,7 +125,7 @@ public class TrainController implements Runnable{
             controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getTotalTaskScore() + "\t" + train.getBestIndividual().getTotalCooperativeScore() +
                     "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
 
-            if (epochs % 20 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
+            if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
                 IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
                 lastBestIndividual = train.getBestIndividual();
@@ -140,8 +140,8 @@ public class TrainController implements Runnable{
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestIndividual().getTotalTaskScore()),
                 train.getBestIndividual());
 
-        IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
-        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
+        IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
+        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");

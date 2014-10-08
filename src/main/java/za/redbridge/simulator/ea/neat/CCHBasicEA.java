@@ -705,14 +705,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         Collections.sort(flattenedIndividuals);
         double[] doubleArray = new double[flattenedIndividuals.size()];
 
-        for (int i = 0; i < flattenedIndividuals.size(); i++) {
-            doubleArray[i] = flattenedIndividuals.get(i).getTotalTaskScore();
-        }
-
         lastEpochScores = thisEpochScores;
         thisEpochScores = doubleArray;
-
-        Collections.sort(flattenedIndividuals);
 
         if (flattenedIndividuals.get(flattenedIndividuals.size()-1).compareTo(bestIndividual) > 0) {
             bestIndividual = flattenedIndividuals.get(flattenedIndividuals.size() - 1);

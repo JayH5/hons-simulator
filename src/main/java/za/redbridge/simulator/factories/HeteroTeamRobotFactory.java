@@ -38,7 +38,6 @@ public class HeteroTeamRobotFactory implements RobotFactory {
 
             PlacementArea.Space space = placementArea.getRandomCircularSpace(radius);
 
-            //DO NOT CLONE THIS PHENOTYPE - WE NEED THE SAME OBJECT FOR SCORE TRACKING
             Phenotype copy = phenotype.clone();
 
             RobotObject robot = new RobotObject(world, space.getPosition(), space.getAngle(),
