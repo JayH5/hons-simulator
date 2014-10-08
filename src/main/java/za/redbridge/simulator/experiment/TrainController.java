@@ -140,7 +140,7 @@ public class TrainController implements Runnable{
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestIndividual().getTotalTaskScore()),
                 train.getBestIndividual());
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
+        IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), "bestMorphology" + testSetID + ".tmp");
 
         //delete this morphology file if it was a result of the multihost operation
