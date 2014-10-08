@@ -277,6 +277,10 @@ public class RobotObject extends PhysicalObject {
         return new Color(255 - color.getRed(), 255 - color.getGreen(), 255 - color.getBlue());
     }
 
+    public Phenotype getPhenotype() {
+        return phenotype;
+    }
+
     private static class DirectionPortrayal extends PolygonPortrayal {
 
         static final float WIDTH = 0.1f;

@@ -13,9 +13,11 @@ import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -215,10 +217,18 @@ public class Simulation extends SimState {
     }
 
     //return the score at this point in the simulation
-    public double getFitness() {
-        double resourceFitness = targetArea.getTotalResourceValue() / config.getResourceFactory().getTotalResourceValue();
-        double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
-        return (resourceFitness * 100) + (speedFitness * 20);
+    public Map<Phenotype,FitnessStats> getFitness() {
+        Map<Phenotype,FitnessStats> fitnesses = targetArea.getFitnesses();
+        for(PhysicalObject o : placementArea.getPlacedObjects()){
+            if(o instanceof RobotObject)fitnesses.putIfAbsent(((RobotObject) o).getPhenotype(), new FitnessStats());
+        }
+        for(Phenotype p : fitnesses.keySet()){
+            FitnessStats stats = fitnesses.get(p);
+            double resourceFitness = stats.getTaskFitness() / config.getResourceFactory().getTotalResourceValue();
+            double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
+            stats.setTaskFitness(resourceFitness * 100);
+        }
+        return fitnesses;
     }
 
     /** Get the number of steps this simulation has been run for. */
