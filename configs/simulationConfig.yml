@@ -8,8 +8,8 @@ resourceProperties:
   smallObjectMass: 1.0
   maxSmallObjectPushingBots: 1
   largeResources: 20
-  largeObjectWidth: 0.6
-  largeObjectHeight: 0.6
+  largeObjectWidth: 0.8
+  largeObjectHeight: 0.8
   largeObjectMass: 4.5
   maxLargeObjectPushingBots: 3
 scoring:

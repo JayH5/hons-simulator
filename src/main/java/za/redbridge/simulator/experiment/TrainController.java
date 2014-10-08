@@ -3,7 +3,9 @@ package za.redbridge.simulator.experiment;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.ml.CalculateScore;
+import org.encog.ml.ea.genome.Genome;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
+import org.encog.neural.neat.NEATCODEC;
 import org.encog.neural.neat.NEATNetwork;
 import org.encog.neural.neat.NEATPopulation;
 import org.slf4j.Logger;
@@ -107,7 +109,9 @@ public class TrainController implements Runnable{
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
-        ComparableNEATNetwork previousBest = null;
+        Genome previousBest = train.getBestGenome();
+
+        NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
@@ -120,17 +124,17 @@ public class TrainController implements Runnable{
             train.iteration();
 
             if (previousBest == null) {
-                previousBest = scoreCache.last();
+                previousBest = train.getBestGenome();
             }
 
             controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
                     "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
 
 
-            if (epochs % 20 == 0 && scoreCache.last().compareTo(previousBest) > 0) {
-                IOUtils.writeNetwork(scoreCache.last().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
+            if (epochs % 20 == 0 && previousBest != train.getBestGenome()) {
+                IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
-                previousBest = scoreCache.last();
+                previousBest = train.getBestGenome();
             }
 
             //get the highest-performing network in this epoch, store it in leaderBoard
@@ -144,9 +148,9 @@ public class TrainController implements Runnable{
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
-        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, leaderBoard.lastKey().getScore()), leaderBoard);
+        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, previousBest.getScore()), leaderBoard);
 
-        IOUtils.writeNetwork(leaderBoard.lastKey().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
+        IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig + "bestMorphology" + testSetID + ".tmp");
 
         //delete this morphology file if it was a result of the multihost operation
