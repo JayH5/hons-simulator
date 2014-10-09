@@ -100,8 +100,6 @@ public class TrainController implements Runnable{
         NEATPopulation pop = new NEATPopulation(morphologyConfig.getTotalReadingSize(),2,
                 experimentConfig.getPopulationSize());
         pop.setInitialConnectionDensity(0.5);
-
-        //pop.setNEATActivationFunction(new AmplifiedSigmoid());
         pop.reset();
 
         CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
@@ -110,7 +108,6 @@ public class TrainController implements Runnable{
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
         Genome previousBest = train.getBestGenome();
-
         NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
@@ -131,7 +128,7 @@ public class TrainController implements Runnable{
                     "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
 
 
-            if (epochs % 20 == 0 && previousBest != train.getBestGenome()) {
+            if (epochs % 50 == 0 && previousBest != train.getBestGenome()) {
                 IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
                 previousBest = train.getBestGenome();
@@ -151,7 +148,7 @@ public class TrainController implements Runnable{
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, previousBest.getScore()), leaderBoard);
 
         IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
-        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig + "bestMorphology" + testSetID + ".tmp");
+        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
