@@ -1,5 +1,6 @@
 package za.redbridge.simulator.object;
 
+import org.jbox2d.callbacks.QueryCallback;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -91,7 +92,13 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 if (containedObjects.remove(resource)) {
                     resource.setCollected(false);
                     resource.getPortrayal().setPaint(Color.MAGENTA);
-                    List<Phenotype> pushingPhenotypes = new ArrayList<>(); //TODO actually find the phenotypes that pushed the box out
+
+                    Fixture resourceFixture = resource.getBody().getFixtureList();
+                    AABB resourceBox = resourceFixture.getAABB(0);
+                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+                    this.getBody().getWorld().queryAABB(callback, resourceBox);
+
+                    List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
                     for(Phenotype p : pushingPhenotypes){
                         fitnesses.putIfAbsent(p, new FitnessStats());
                         FitnessStats stats = fitnesses.get(p);
@@ -156,6 +163,23 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 }
             }
         }
+    }
+
+    private static class RobotObjectQueryCallback implements QueryCallback {
+
+        private List<Phenotype> nearbyPhenotypes = new ArrayList<>();
+
+        public boolean reportFixture(Fixture fixture) {
+
+            if (fixture.getBody().getUserData() instanceof RobotObject) {
+
+                nearbyPhenotypes.add(((RobotObject) fixture.getBody().getUserData()).getPhenotype());
+            }
+
+            return true;
+        }
+
+        public List<Phenotype> getNearbyPhenotypes() { return nearbyPhenotypes; }
     }
 
 }
