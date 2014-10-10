@@ -7,6 +7,7 @@ import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
 import org.epochx.op.selection.FitnessProportionateSelector;
 import org.epochx.op.selection.TournamentSelector;
+import org.epochx.representation.CandidateProgram;
 import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import org.epochx.tools.eval.MalformedProgramException;
@@ -22,6 +23,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import sim.display.Console;
 import sim.util.Double2D;
@@ -30,6 +32,7 @@ import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.factories.HeterogeneousRobotFactory;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.AgentModel;
 import za.redbridge.simulator.gp.EpoxRenderer;
@@ -43,6 +46,7 @@ import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.phenotype.GPPhenotype;
+import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.ProximityAgentSensor;
@@ -137,6 +141,8 @@ public class Main {
                 System.out.println("Fitness: " + min);
                 System.out.println("Avg: " + avg);
                 s.print(StatField.GEN_FITTEST_PROGRAM);
+                List<String> distinctPop = (List)((List)s.getStat(StatField.GEN_POP_SORTED_DESC)).stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
+                System.out.println("Best 20: {\"" + distinctPop.stream().limit(20).collect(Collectors.joining("\", \"")) + "\"}");
                 Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
                 System.out.println("Elapsed: " + elapsed.toString());
                 counter++;
@@ -148,9 +154,8 @@ public class Main {
 
         //if we need to show a visualisation
         if (options.showVisuals()) {
-            String tree = "WHEELDRIVEFROMBEARING(RANDOMBEARING())";
-            //String tree = "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(IF(IF(TS4 TS4 TS4) IF(TS4 PS2 PS3) IF(TS4 PS2 PS3))) BEARINGFROMCOORDINATE(IF(READINGPRESENT(PS0) READINGTOCOORDINATE(PS0) READINGTOCOORDINATE(PS0))) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(IF(TS4 IF(TS4 PS2 PS2) PS0)) BEARINGFROMCOORDINATE(ROTATECOORDINATE(READINGTOCOORDINATE(PS1) SAVEBEARING(B4.71)))))))";
-            Node root = model.getParser().parse(tree);
+            String[] trees = {"WHEELDRIVEFROMBEARING(LOADBEARING())", "IF(READINGISOFTYPE(TS3 NONE) WHEELDRIVEFROMFLOATS(FL1.0 FL1.0) WHEELDRIVEFROMFLOATS(FL0.0 FL0.0))", "IF(READINGPRESENT(TS4) WHEELDRIVEFROMBEARING(LOADBEARING()) WHEELDRIVEFROMBEARING(LOADBEARING()))", "WHEELDRIVEFROMBEARING(B.00)", "IF(READINGPRESENT(TS4) WHEELDRIVEFROMBEARING(B.00) WHEELDRIVEFROMBEARING(LOADBEARING()))", "IF(READINGPRESENT(PS0) WHEELDRIVEFROMBEARING(LOADBEARING()) WHEELDRIVEFROMBEARING(B1.57))", "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(TS4) SAVEBEARING(B1.57) SAVEBEARING(LOADBEARING())))", "WHEELDRIVEFROMCOORD(READINGTOCOORDINATE(PS0))", "IF(READINGISOFTYPE(TS3 WALL) WHEELDRIVEFROMFLOATS(FL0.0 FL0.0) IF(READINGPRESENT(TS3) WHEELDRIVEFROMBEARING(B3.14) WHEELDRIVEFROMBEARING(LOADBEARING())))", "IF(IF(IF(BS5 BS5 BS5) READINGISOFTYPE(IF(BS5 TS3 TS4) RESOURCE) READINGPRESENT(PS0)) WHEELDRIVEFROMCOORD(READINGTOCOORDINATE(PS0)) WHEELDRIVEFROMBEARING(IF(BS5 B.00 B1.57)))", "WHEELDRIVEFROMCOORD(ROTATECOORDINATE(READINGTOCOORDINATE(PS0) BEARINGFROMCOORDINATE(READINGTOCOORDINATE(PS1))))", "IF(READINGPRESENT(PS0) WHEELDRIVEFROMBEARING(B1.57) WHEELDRIVEFROMBEARING(B3.14))", "WHEELDRIVEFROMCOORD(ROTATECOORDINATE(READINGTOCOORDINATE(PS0) B1.57))", "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(TS4) SAVEBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(TS4))) SAVEBEARING(LOADBEARING())))", "WHEELDRIVEFROMCOORD(IF(READINGISOFTYPE(TS4 NONE) READINGTOCOORDINATE(TS4) READINGTOCOORDINATE(PS2)))", "IF(IF(IF(BS5 BS5 BS5) READINGISOFTYPE(TS3 RESOURCE) READINGPRESENT(PS0)) WHEELDRIVEFROMCOORD(READINGTOCOORDINATE(PS0)) WHEELDRIVEFROMBEARING(IF(BS5 B.00 B1.57)))", "WHEELDRIVEFROMCOORD(ROTATECOORDINATE(READINGTOCOORDINATE(TS3) SAVEBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(PS2)))))", "WHEELDRIVEFROMBEARING(SAVEBEARING(SAVEBEARING(B4.71)))", "IF(READINGISOFTYPE(TS3 WALL) WHEELDRIVEFROMFLOATS(FL0.0 FL0.0) IF(READINGPRESENT(TS3) WHEELDRIVEFROMBEARING(B3.14) WHEELDRIVEFROMCOORD(ROTATECOORDINATE(READINGTOCOORDINATE(PS0) BEARINGFROMCOORDINATE(READINGTOCOORDINATE(PS1))))))", "WHEELDRIVEFROMBEARING(IF(READINGPRESENT(TS3) SAVEBEARING(B1.57) SAVEBEARING(LOADBEARING())))"};
+            /*
             try {
                 FileWriter fw = new FileWriter("tree.dot");
                 fw.write(new EpoxRenderer().dotRender(root));
@@ -158,10 +163,14 @@ public class Main {
             }catch(IOException e){
                 System.err.print("Could not write dot file");
             }
-            GPCandidateProgram cand = new GPCandidateProgram(root, model);
-            HomogeneousRobotFactory robotFactory = new HomogeneousRobotFactory(
-                    new GPPhenotype(sensors, cand, model.getInputs()), simulationConfiguration.getRobotMass(),
-                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour(), simulationConfiguration.getObjectsRobots());
+            */
+            List<Phenotype> phenotypes = new ArrayList<>();
+            for(String t : trees){
+                GPPhenotype p = new GPPhenotype(sensors.stream().map(sen -> sen.clone()).collect(Collectors.toList()),new GPCandidateProgram(model.getParser().parse(t), model), model.getInputs());
+                phenotypes.add(p);
+            }
+            HeterogeneousRobotFactory robotFactory = new HeterogeneousRobotFactory(phenotypes, simulationConfiguration.getRobotMass(),
+                    simulationConfiguration.getRobotRadius(), simulationConfiguration.getRobotColour());
 
             Simulation simulation = new Simulation(simulationConfiguration, robotFactory);
             SimulationGUI video = new SimulationGUI(simulation);

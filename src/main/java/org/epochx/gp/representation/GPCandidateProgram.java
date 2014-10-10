@@ -175,6 +175,11 @@ public class GPCandidateProgram extends CandidateProgram {
 		return fitness;
 	}
 
+    public void setFitness(double fitness){
+        this.fitness = fitness;
+        this.sourceCache = rootNode.toString();
+    }
+
     public Optional<Double> getCachedFitness(){
         if(rootNode.toString().equals(sourceCache)) return Optional.of(fitness);
         else return Optional.empty();
@@ -183,14 +188,9 @@ public class GPCandidateProgram extends CandidateProgram {
     /*
      * Heterogeneity! Calculates the individual scores of the given programs in a single simulation.
      */
-    public static void calculateGroupFitnesses(List<GPCandidateProgram> programs, Optional<GPModel> model){
+    public static List<Double> calculateGroupFitnesses(List<GPCandidateProgram> programs, Optional<GPModel> model){
         AgentModel actualModel = (AgentModel)(model.orElse(programs.get(0).model));
-        List<Double> fitnesses = actualModel.getGroupFitness(programs);
-        for(int i = 0; i < programs.size(); i++){
-            GPCandidateProgram current = programs.get(i);
-            current.fitness = fitnesses.get(i);
-            current.sourceCache = current.rootNode.toString();
-        }
+        return actualModel.getGroupFitness(programs);
     }
 	
 	public void clearCache() {

@@ -31,7 +31,6 @@ import java.util.stream.IntStream;
  */
 public class AgentModel extends GPModel {
     //number of simulations run per phenotype evaluation
-    protected int numSims;
     private List<AgentSensor> sensors;
     private final SimConfig config;
     private final ExperimentConfig exConfig;
@@ -44,7 +43,6 @@ public class AgentModel extends GPModel {
        this.sensors = sensors;
        this.config = config;
        this.exConfig = exConfig;
-       this.numSims = 3;
        List<Node> syntax = new ArrayList<>();
        for(int i = 0; i < sensors.size(); i++){
            AgentSensor sensor = sensors.get(i);
@@ -135,19 +133,7 @@ public class AgentModel extends GPModel {
     }
 
     public List<Double> getGroupFitness(List<GPCandidateProgram> p){
-        List<List<Double>> results = IntStream.range(0, numSims)
-                .parallel()
-                .mapToObj(i -> resultForOneSim(p))
-                .collect(Collectors.toList());
-        List<Double> sums = new ArrayList<>();
-        for(int i = 0; i < results.get(0).size(); i++) sums.add(0d);
-        for(List<Double> run : results){
-            for(int i = 0; i < run.size(); i++){
-                sums.set(i, sums.get(i) + run.get(i));
-            }
-        }
-        for(int i = 0; i < sums.size(); i++) sums.set(i, sums.get(i) / numSims);
-        return sums;
+        return resultForOneSim(p);
     }
 
     protected List<Double> resultForOneSim(List<GPCandidateProgram> pl){

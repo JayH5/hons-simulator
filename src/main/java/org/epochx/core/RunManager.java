@@ -225,18 +225,33 @@ public class RunManager implements ConfigListener {
 
     public static void calculateFitnessList(final List<CandidateProgram> pop){
         int chunkSize = 20;
+        int numSims = 3;
         List<CandidateProgram> inNeedOfRefresh = pop.stream()
                 .map(p -> (GPCandidateProgram)p)
                 .filter(p -> !p.getCachedFitness().isPresent())
                 .collect(Collectors.toList());
-        List<Stream<GPCandidateProgram>> l = new ArrayList<>();
-        for(int i = 0; i < inNeedOfRefresh.size() / (double) chunkSize; i++){
-            //TODO such hax, assuming GPCandidateProgram
-            l.add(inNeedOfRefresh.stream().skip(i * chunkSize).limit(chunkSize).map(p -> (GPCandidateProgram) p));
+        Map<GPCandidateProgram,List<Double>> fitnesses = new HashMap<>(pop.size());
+        List<List<GPCandidateProgram>> l = new ArrayList<>();
+        for(int s = 0; s < numSims; s++) {
+            Collections.shuffle(inNeedOfRefresh);
+            for (int i = 0; i < inNeedOfRefresh.size() / (double) chunkSize; i++) {
+                //TODO such hax, assuming GPCandidateProgram
+                l.add(inNeedOfRefresh.stream().skip(i * chunkSize).limit(chunkSize).map(p -> (GPCandidateProgram) p).collect(Collectors.toList()));
+            }
+            List<List<Double>> fitnessesForAllTeams = l.stream()
+                    .parallel()
+                    .map(t -> GPCandidateProgram.calculateGroupFitnesses(t, Optional.empty()))
+                    .collect(Collectors.toList());
+            for(int i = 0; i < l.size(); i++){
+                for(int j = 0; j < l.get(i).size(); j++){
+                    fitnesses.putIfAbsent(l.get(i).get(j), new ArrayList<Double>());
+                    fitnesses.get(l.get(i).get(j)).add(fitnessesForAllTeams.get(i).get(j));
+                }
+            }
         }
-        l.stream()
-                .parallel()
-                .forEach(s -> GPCandidateProgram.calculateGroupFitnesses(s.collect(Collectors.toList()), Optional.empty()));
+        for(Map.Entry<GPCandidateProgram,List<Double>> e : fitnesses.entrySet()){
+            e.getKey().setFitness(e.getValue().stream().mapToDouble(o -> o).average().orElse(0.0));
+        }
     }
 
 	/**
