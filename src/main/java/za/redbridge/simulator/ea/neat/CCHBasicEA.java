@@ -1,6 +1,5 @@
 package za.redbridge.simulator.ea.neat;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -37,7 +36,6 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.hetero.TeamEvaluator;
-import za.redbridge.simulator.factories.NEATGenomeTeamFactory;
 import za.redbridge.simulator.factories.NEATTeamFactory;
 
 import java.io.Serializable;
@@ -681,7 +679,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         //now create the teams and evaluate them in their separate threads,
         // keeping their score within their CCHIndividual wrappers.
-        NEATGenomeTeamFactory teamFactory = new NEATGenomeTeamFactory(experimentConfig, teamPopulation);
+        NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, teamPopulation);
         List<NEATTeam> teams = teamFactory.placeInTeams();
 
         int x = 0;
@@ -784,19 +782,25 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
             this.actualThreadCount = this.threadCount;
         }
 
-        //now create the teams and evaluate them in their separate threads,
-        // keeping their score within their CCHIndividual wrappers.
-        NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, population);
-        List<NEATTeam> teams = teamFactory.placeInTeams();
+        //for however number of teamruns per pool
 
-        int x = 0;
-        TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+        NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, population.flatten());
 
-        for (TeamEvaluator t: evaluators) {
+        for (int i = 0; i < experimentConfig.getRunsPerGenome(); i++) {
 
-            t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
-            t.run();
-            x++;
+            //now create the teams and evaluate them in their separate threads,
+            // keeping their score within their CCHIndividual wrappers.
+            List<NEATTeam> teams = teamFactory.placeInTeams();
+
+            int x = 0;
+            TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+
+            for (TeamEvaluator t : evaluators) {
+
+                t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
+                t.run();
+                x++;
+            }
         }
 
         // score the initial population

@@ -8,37 +8,24 @@ import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.neat.CCHNEATCODEC;
-import za.redbridge.simulator.ea.neat.CCHNEATPopulation;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by shsu on 2014/10/06.
- * Factory that makes teams out of a population of NEAT genomes
  */
 public class NEATTeamFactory {
 
     private final List<Genome> genomePopulation;
-    private final CCHNEATPopulation population;
     private final ExperimentConfig experimentConfig;
 
     private final Set<CCHIndividual> all_individuals;
 
-    public NEATTeamFactory(ExperimentConfig experimentConfig, CCHNEATPopulation population) {
+    public NEATTeamFactory(ExperimentConfig experimentConfig, List<Genome> genomePopulation) {
 
-        this.population = population;
         this.experimentConfig = experimentConfig;
-
+        this.genomePopulation = genomePopulation;
         all_individuals = new HashSet();
-
-        genomePopulation = new ArrayList<>();
-
-        for (Genome g: population.flatten()) {
-            genomePopulation.add(g);
-        }
     }
 
     public List<NEATTeam> placeInTeams() {
@@ -54,19 +41,27 @@ public class NEATTeamFactory {
             ArrayList<NEATTeam> teams = new ArrayList<>();
             CCHNEATCODEC decoder = new CCHNEATCODEC();
 
-            for (int i = 0; i < genomePopulation.size(); i+=experimentConfig.getHeteroTeamSize()) {
+            ArrayList<Genome> candidates = new ArrayList<>(genomePopulation);
+            Random rand = new Random();
+
+            while(!candidates.isEmpty()) {
 
                 final Set<CCHIndividual> network_team = new HashSet<>();
                 final NEATTeam neat_team = new NEATTeam(network_team);
 
                 for (int j = 0; j < experimentConfig.getHeteroTeamSize(); j++) {
 
-                    final CCHIndividual individual = new CCHIndividual( ((NEATNetwork) decoder.decodeToNetwork(genomePopulation.get(i+j))),
-                            (NEATGenome) genomePopulation.get(i+j), neat_team);
+                    int index = rand.nextInt(candidates.size());
+
+                    Genome member = candidates.remove(index);
+
+                    final CCHIndividual individual = new CCHIndividual( ((NEATNetwork) decoder.decodeToNetwork(member)),
+                            (NEATGenome) member, neat_team);
 
                     network_team.add(individual);
                     all_individuals.add(individual);
                 }
+
                 teams.add(neat_team);
             }
             return teams;

@@ -1,12 +1,23 @@
 package za.redbridge.simulator.experiment;
 
+import org.encog.ml.ea.genome.Genome;
+import org.encog.neural.neat.NEATNetwork;
+import org.encog.neural.neat.training.NEATGenome;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import za.redbridge.simulator.Simulation;
+import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
+import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.ea.neat.CCHNEATCODEC;
 import za.redbridge.simulator.factories.ComplementFactory;
+import za.redbridge.simulator.factories.HeteroTeamRobotFactory;
+import za.redbridge.simulator.factories.HomogeneousRobotFactory;
+import za.redbridge.simulator.factories.TeamPhenotypeFactory;
+import za.redbridge.simulator.phenotype.HeteroNEATPhenotype;
 
 import java.util.Set;
 
@@ -57,10 +68,10 @@ public class Main {
         }
 
         ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
-        SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
+        SimConfig simConfig = new SimConfig(options.getSimulationConfig());
         MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
 
-        MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
+        MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simConfig,
                 morphologyConfig, options.evolveComplements, true, true);
 
         if (options.timestamp != null) {
@@ -77,6 +88,20 @@ public class Main {
                 /*
                 SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration, options.nnDump, options.morphologyDump);
                 simulationVisual.run();*/
+
+                NEATGenome bestIndividual = (NEATGenome) IOUtils.readGenome(options.nnDump);
+                CCHNEATCODEC codec = new CCHNEATCODEC();
+
+                HeteroNEATPhenotype phenotype = new HeteroNEATPhenotype(morphologyConfig.getSensorList(),
+                        new CCHIndividual((NEATNetwork) codec.decodeToNetwork(bestIndividual), bestIndividual, null), morphologyConfig.getTotalReadingSize());
+
+                HomogeneousRobotFactory factory = new HomogeneousRobotFactory(phenotype, simConfig.getRobotMass(), simConfig.getRobotRadius(),
+                        simConfig.getRobotColour(), simConfig.getObjectsRobots());
+
+                Simulation simulation = new Simulation(simConfig, factory);
+                simulation.run();
+
+                SimulationGUI video = new SimulationGUI(simulation);
 
             } else {
                 masterExperimentController.start();

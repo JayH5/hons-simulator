@@ -1,5 +1,6 @@
 package za.redbridge.simulator.object;
 
+import org.jbox2d.callbacks.QueryCallback;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -87,6 +88,14 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
                 if (containedObjects.remove(resource)) {
+
+                    Fixture resourceFixture = resource.getBody().getFixtureList();
+                    AABB resourceBox = resourceFixture.getAABB(0);
+                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+
+                    this.getBody().getWorld().queryAABB(callback, resourceBox);
+                    penaliseBots(resource, callback.getNearbyBots());
+
                     resource.setCollected(false);
                     resource.getPortrayal().setPaint(Color.MAGENTA);
                     decrementTotalObjectValue(resource);
@@ -101,14 +110,28 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         //this is fairly fucking arbitrary
         double totalArea = resource.getWidth()*resource.getHeight();
         int numPushingBots = pushingBots.size();
-        double cooperativeScore = numPushingBots > 1? 5 : 0;
+        double value = totalArea/numPushingBots;
+        double cooperativeScore = numPushingBots > 1? value : 0;
 
         for (RobotObject bot: pushingBots.keySet()) {
 
             ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
             //divide spoils evenly amongst pushing bots for now
-            scoreKeepingIndividual.incrementTotalTaskScore(totalArea/numPushingBots);
+            scoreKeepingIndividual.incrementTotalTaskScore(value);
             scoreKeepingIndividual.incrementTotalCooperativeScore(cooperativeScore);
+        }
+    }
+
+    //penalise bots
+    private void penaliseBots(ResourceObject resource, List<RobotObject> bots) {
+
+        double totalArea = resource.getWidth()*resource.getHeight();
+        int numPushingBots = bots.size();
+
+        for (RobotObject bot: bots) {
+
+            ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
+            scoreKeepingIndividual.incrementTotalTaskScore(-(totalArea/numPushingBots));
         }
     }
 
@@ -172,4 +195,20 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         }
     }
 
+    private static class RobotObjectQueryCallback implements QueryCallback {
+
+        private List<RobotObject> nearbyBots = new ArrayList<>();
+
+        public boolean reportFixture(Fixture fixture) {
+
+            if (fixture.getBody().getUserData() instanceof RobotObject) {
+
+                nearbyBots.add((RobotObject) fixture.getBody().getUserData());
+            }
+
+            return true;
+        }
+
+        public List<RobotObject> getNearbyBots() { return nearbyBots; }
+    }
 }

@@ -13,7 +13,7 @@ public class CCHCalculateScore implements CalculateScore {
     //MLMethod should be CCHIndividual which we return the score for.
     @Override
     public double calculateScore(MLMethod method) {
-        return ((CCHIndividual) method).getTotalTaskScore();
+        return ((CCHIndividual) method).getAverageTaskScore();
     }
 
     @Override

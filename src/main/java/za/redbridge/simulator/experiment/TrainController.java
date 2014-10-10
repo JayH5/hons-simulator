@@ -122,14 +122,14 @@ public class TrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getTotalTaskScore() + "\t" + train.getBestIndividual().getTotalCooperativeScore() +
+            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
                     "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
-
+            /*
             if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
                 IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
                 lastBestIndividual = train.getBestIndividual();
-            }
+            }*/
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
             controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
@@ -137,7 +137,7 @@ public class TrainController implements Runnable{
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
-        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestIndividual().getTotalTaskScore()),
+        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestIndividual().getAverageTaskScore()),
                 train.getBestIndividual());
 
         IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
@@ -164,7 +164,6 @@ public class TrainController implements Runnable{
         HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
                 simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
-
         Simulation simulation = new Simulation(simConfig, heteroFactory, teamWithBestGenotype.getGenotypes());
         simulation.run();
 
@@ -174,4 +173,6 @@ public class TrainController implements Runnable{
         sim.display.Console console = new sim.display.Console(video);
         console.setVisible(true);
     }
+
+
 }

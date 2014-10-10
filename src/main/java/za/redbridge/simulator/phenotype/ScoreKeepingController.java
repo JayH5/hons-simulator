@@ -9,9 +9,12 @@ public interface ScoreKeepingController {
     public double getAverageTaskScore();
     public double getAverageCooperativeScore();
 
-    public double getTotalTaskScore();
-    public double getTotalCooperativeScore();
+    public double getCurrentTaskScore();
+    public double getCurrentCooperativeScore();
 
     public void incrementTotalTaskScore(double score);
     public void incrementTotalCooperativeScore(double score);
+
+    public void cacheTaskScore();
+    public void cacheCooperativeScore();
 }

@@ -16,10 +16,12 @@ import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
 
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -58,6 +60,16 @@ public class Simulation extends SimState {
         this.config = config;
         this.robotFactory = robotFactory;
         this.scoreKeepingControllers = scoreKeepingGenotypes;
+
+        Settings.velocityThreshold = VELOCITY_THRESHOLD;
+    }
+
+    public Simulation(SimConfig config, RobotFactory robotFactory) {
+
+        super(config.getSimulationSeed());
+        this.config = config;
+        this.robotFactory = robotFactory;
+        scoreKeepingControllers = new HashSet<>();
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -108,6 +120,10 @@ public class Simulation extends SimState {
     public void finish() {
         kill();
 
+        for (ScoreKeepingController controller: scoreKeepingControllers) {
+            controller.cacheTaskScore();
+            controller.cacheCooperativeScore();
+        }
 
         //System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
