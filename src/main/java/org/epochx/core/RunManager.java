@@ -225,7 +225,7 @@ public class RunManager implements ConfigListener {
 
     public static void calculateFitnessList(final List<CandidateProgram> pop){
         int chunkSize = 20;
-        int numSims = 3;
+        int numSims = 10;
         List<CandidateProgram> inNeedOfRefresh = pop.stream()
                 .map(p -> (GPCandidateProgram)p)
                 .filter(p -> !p.getCachedFitness().isPresent())

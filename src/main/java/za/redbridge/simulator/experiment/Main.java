@@ -114,12 +114,12 @@ public class Main {
         sensors.add(new BottomProximitySensor());
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
-        model.setNoGenerations(100);
+        model.setNoGenerations(1000);
         model.setMaxInitialDepth(5);
         model.setMaxDepth(7);
-        model.setPopulationSize(200);
+        model.setPopulationSize(500);
         model.setPoolSize(model.getPopulationSize() / 2);
-        model.setProgramSelector(new TournamentSelector(model, 10));
+        model.setProgramSelector(new TournamentSelector(model, 7));
         model.setNoRuns(1);
         model.setNoElites(model.getPopulationSize() / 4);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
