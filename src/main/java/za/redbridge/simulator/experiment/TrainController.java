@@ -124,12 +124,14 @@ public class TrainController implements Runnable{
 
             controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
                     "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
-            /*
+
             if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
-                IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
+                /*IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
+                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");*/
                 lastBestIndividual = train.getBestIndividual();
-            }*/
+            }
+
+            lastBestIndividual = train.getBestIndividual();
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
             controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
@@ -158,6 +160,8 @@ public class TrainController implements Runnable{
         }
 
         NEATTeam teamWithBestGenotype = lastBestIndividual.getTeam();
+
+        IOUtils.writeTeam(morphologyConfig, teamWithBestGenotype);
 
         TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, teamWithBestGenotype.getGenotypes());
 

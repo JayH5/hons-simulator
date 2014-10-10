@@ -7,7 +7,7 @@ phenotype:
 
 evolutionaryAlgorithm:
   controllerEA: NEAT
-  populationSize: 200
+  populationSize: 100
   heteroTeamSize: 20
 
 

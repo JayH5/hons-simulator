@@ -108,7 +108,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private void updateScores(ResourceObject resource, Map<RobotObject, Joint> pushingBots) {
 
         //this is fairly fucking arbitrary
-        double totalArea = resource.getWidth()*resource.getHeight();
+        double totalArea = resource.getWidth() * resource.getHeight();
         int numPushingBots = pushingBots.size();
         double value = totalArea/numPushingBots;
         double cooperativeScore = numPushingBots > 1? value : 0;

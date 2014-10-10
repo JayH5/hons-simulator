@@ -2,6 +2,7 @@ package za.redbridge.simulator.experiment;
 
 import org.encog.ml.ea.genome.Genome;
 import org.encog.neural.neat.NEATNetwork;
+import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 
@@ -137,12 +138,12 @@ public class IOUtils {
         return (NEATNetwork) o;
     }
 
-    public static void writeTeam (NEATTeam team) {
+    public static void writeTeam (MorphologyConfig morphologyConfig, NEATTeam team) {
 
         int i = 0;
         for (CCHIndividual individual: team.getGenotypes()) {
 
-            IOUtils.writeGenome(individual.getGenome(), "results/" + ExperimentUtils.getIP() + "/" + team.toString(), i + ".gen");
+            IOUtils.writeGenome(individual.getGenome(), "results/" + ExperimentUtils.getIP() + "/" + morphologyConfig.getSensitivityID(), i + ".gen");
             i++;
         }
     }
@@ -163,7 +164,7 @@ public class IOUtils {
 
         for (String file: filenames) {
 
-            Pattern genomePattern = Pattern.compile("[*]+[.]gen");
+            Pattern genomePattern = Pattern.compile("[0-9]+[.]gen");
             Matcher matcher = genomePattern.matcher(file);
 
             if (matcher.find()) {

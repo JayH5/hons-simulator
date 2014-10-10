@@ -12,13 +12,12 @@ import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
+import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.neat.CCHNEATCODEC;
-import za.redbridge.simulator.factories.ComplementFactory;
-import za.redbridge.simulator.factories.HeteroTeamRobotFactory;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
-import za.redbridge.simulator.factories.TeamPhenotypeFactory;
+import za.redbridge.simulator.factories.*;
 import za.redbridge.simulator.phenotype.HeteroNEATPhenotype;
 
+import java.util.List;
 import java.util.Set;
 
 
@@ -38,6 +37,12 @@ public class Main {
 
     @Option(name = "--show-visuals", aliases = "-v", usage = "Show visualisation for simulation")
     private boolean showVisuals = false;
+
+    @Option(name = "--hetero", aliases = "-h", usage = "Heterogeneous teams")
+    private boolean hetero = true;
+
+    @Option(name = "--team-directory", aliases = "-team", usage = "The folder storing all the team you wish to visualise")
+    private String teamDirectory;
 
     @Option(name = "--morphology", aliases = "-m", usage = "The morphology file name for visualisation")
     private String morphologyDump;
@@ -85,23 +90,44 @@ public class Main {
             //if we need to show a visualisation
             if (options.showVisuals()) {
 
-                /*
-                SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration, options.nnDump, options.morphologyDump);
-                simulationVisual.run();*/
+               if (!options.hetero) {
 
-                NEATGenome bestIndividual = (NEATGenome) IOUtils.readGenome(options.nnDump);
-                CCHNEATCODEC codec = new CCHNEATCODEC();
+                   NEATGenome bestIndividual = (NEATGenome) IOUtils.readGenome(options.nnDump);
+                   CCHNEATCODEC codec = new CCHNEATCODEC();
 
-                HeteroNEATPhenotype phenotype = new HeteroNEATPhenotype(morphologyConfig.getSensorList(),
-                        new CCHIndividual((NEATNetwork) codec.decodeToNetwork(bestIndividual), bestIndividual, null), morphologyConfig.getTotalReadingSize());
+                   HeteroNEATPhenotype phenotype = new HeteroNEATPhenotype(morphologyConfig.getSensorList(),
+                           new CCHIndividual((NEATNetwork) codec.decodeToNetwork(bestIndividual), bestIndividual, null), morphologyConfig.getTotalReadingSize());
 
-                HomogeneousRobotFactory factory = new HomogeneousRobotFactory(phenotype, simConfig.getRobotMass(), simConfig.getRobotRadius(),
-                        simConfig.getRobotColour(), simConfig.getObjectsRobots());
+                   HomogeneousRobotFactory factory = new HomogeneousRobotFactory(phenotype, simConfig.getRobotMass(), simConfig.getRobotRadius(),
+                           simConfig.getRobotColour(), simConfig.getObjectsRobots());
 
-                Simulation simulation = new Simulation(simConfig, factory);
-                simulation.run();
+                   Simulation simulation = new Simulation(simConfig, factory);
+                   simulation.run();
 
-                SimulationGUI video = new SimulationGUI(simulation);
+                   SimulationGUI video = new SimulationGUI(simulation);
+
+               }
+                else {
+
+                   List<Genome> bestTeam = IOUtils.readTeam(options.teamDirectory);
+                   NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfiguration, bestTeam);
+                   List<NEATTeam> teamList = teamFactory.placeInTeams();
+                   NEATTeam team = teamList.get(0);
+
+                   TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
+
+                   HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
+                           simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
+
+                   Simulation simulation = new Simulation(simConfig, heteroFactory, team.getGenotypes());
+                   simulation.run();
+
+                   SimulationGUI video = new SimulationGUI(simulation);
+                   //new console which displays this simulation
+                   sim.display.Console console = new sim.display.Console(video);
+                   console.setVisible(true);
+
+               }
 
             } else {
                 masterExperimentController.start();

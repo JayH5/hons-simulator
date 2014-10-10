@@ -279,7 +279,6 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
     /**
      * Add a child to the population (list of genomes) that will be evaluated and scored.
-     *
      * @param genome
      *            The child.
      * @return True, if the child was added successfully.
@@ -703,6 +702,12 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         Collections.sort(flattenedIndividuals);
         double[] doubleArray = new double[flattenedIndividuals.size()];
 
+        int z = 0;
+        for (CCHIndividual individual: flattenedIndividuals) {
+            doubleArray[z] = individual.getAverageTaskScore();
+            z++;
+        }
+
         lastEpochScores = thisEpochScores;
         thisEpochScores = doubleArray;
 
@@ -828,6 +833,16 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         Collections.sort(flattenedIndividuals);
 
         bestIndividual = flattenedIndividuals.get(flattenedIndividuals.size()-1);
+
+        lastEpochScores = new double[flattenedIndividuals.size()];
+        thisEpochScores = new double[flattenedIndividuals.size()];
+
+        int z = 0;
+        for (CCHIndividual individual: flattenedIndividuals) {
+            thisEpochScores[z] = individual.getAverageTaskScore();
+            z++;
+        }
+        lastEpochScores = thisEpochScores;
 
         // just pick the first genome with a valid score as best, it will be
         // updated later.
