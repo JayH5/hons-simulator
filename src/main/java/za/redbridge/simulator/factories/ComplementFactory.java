@@ -36,12 +36,12 @@ public class ComplementFactory {
         this.resolution = resolution;
     }
 
-    public Set<MorphologyConfig> generateComplementsForTemplate() {
+    public Set<MorphologyConfig> generateSensitivitiesForTemplate() {
 
         Set<MorphologyConfig> morphologyList = new HashSet<>();
-        int numConfigurableSensors = template.getNumAdjustableSensitivities();
+        int numConfigurableSensors = template.getNumAdjustableArrays();
 
-        double[] sensitivities = new double[numConfigurableSensors];
+        double[] sensitivities = new double[4];
 
         for (int i = 0; i < sensitivities.length; i++) {
             sensitivities[i] = resolution;
@@ -62,7 +62,7 @@ public class ComplementFactory {
         for (float j = 1; j < (int) (1 / resolution) + 1; j++) {
 
             sensitivities[currentIndex] = resolution * j;
-            morphologyList.add(MorphologyConfig.MorphologyFromSensitivities(template, sensitivities));
+            morphologyList.add(MorphologyConfig.MorphologyFromGain(template, sensitivities));
             generateAndConfigure(sensitivities, currentIndex+1, morphologyList);
         }
     }
