@@ -12,156 +12,147 @@ import java.util.Map;
  */
 public class ConfigurableResourceFactory extends Config implements ResourceFactory {
 
-    private static final int DEFAULT_OBJECTS_RESOURCES_LARGE = 20;
-    private static final int DEFAULT_OBJECTS_RESOURCES_SMALL = 20;
+    private static final int DEFAULT_LARGE_QUANTITY = 10;
+    private static final int DEFAULT_MEDIUM_QUANTITY = 15;
+    private static final int DEFAULT_SMALL_QUANTITY = 15;
 
-    private static final float DEFAULT_SMALL_OBJECT_WIDTH = 0.4f;
-    private static final float DEFAULT_SMALL_OBJECT_HEIGHT = 0.4f;
-    private static final float DEFAULT_SMALL_OBJECT_MASS = 1.0f;
-    private static final int DEFAULT_SMALL_OBJECT_PUSHING_BOTS = 1;
-    private static final double DEFAULT_SMALL_OBJECT_VALUE = 1;
+    private static final float DEFAULT_SMALL_WIDTH = 0.4f;
+    private static final float DEFAULT_SMALL_HEIGHT = 0.4f;
+    private static final float DEFAULT_SMALL_MASS = 1.0f;
+    private static final int DEFAULT_SMALL_PUSHING_BOTS = 1;
+    private static final double DEFAULT_SMALL_VALUE = 1;
 
-    private static final float DEFAULT_LARGE_OBJECT_WIDTH = 0.6f;
-    private static final float DEFAULT_LARGE_OBJECT_HEIGHT = 0.6f;
-    private static final float DEFAULT_LARGE_OBJECT_MASS = 2.0f;
-    private static final int DEFAULT_LARGE_OBJECT_PUSHING_BOTS = 2;
-    private static final double DEFAULT_LARGE_OBJECT_VALUE = 2;
+    private static final float DEFAULT_MEDIUM_WIDTH = 0.6f;
+    private static final float DEFAULT_MEDIUM_HEIGHT = 0.6f;
+    private static final float DEFAULT_MEDIUM_MASS = 3.0f;
+    private static final int DEFAULT_MEDIUM_PUSHING_BOTS = 2;
+    private static final double DEFAULT_MEDIUM_VALUE = 2;
 
-    private int numSmallObjects;
-    private float smallObjectWidth;
-    private float smallObjectHeight;
-    private float smallObjectMass;
-    private int smallObjectPushingBots;
-    private double smallObjectValue;
+    private static final float DEFAULT_LARGE_WIDTH = 0.8f;
+    private static final float DEFAULT_LARGE_HEIGHT = 0.8f;
+    private static final float DEFAULT_LARGE_MASS = 5.0f;
+    private static final int DEFAULT_LARGE_PUSHING_BOTS = 3;
+    private static final double DEFAULT_LARGE_VALUE = 3;
 
-    private int numLargeObjects;
-    private float largeObjectWidth;
-    private float largeObjectHeight;
-    private float largeObjectMass;
-    private int largeObjectPushingBots;
-    private double largeObjectValue;
-
-    public ConfigurableResourceFactory(int numSmallObjects, float smallObjectWidth,
-            float smallObjectHeight, float smallObjectMass, int smallObjectPushingBots,
-            double smallObjectValue, int numLargeObjects, float largeObjectWidth,
-            float largeObjectHeight, float largeObjectMass, int largeObjectPushingBots,
-            double largeObjectValue) {
-
-        this.numSmallObjects = numSmallObjects;
-        this.smallObjectWidth = smallObjectWidth;
-        this.smallObjectHeight = smallObjectHeight;
-        this.smallObjectMass = smallObjectMass;
-        this.smallObjectPushingBots = smallObjectPushingBots;
-        this.smallObjectValue = smallObjectValue;
-
-
-        this.numLargeObjects = numLargeObjects;
-        this.largeObjectWidth = largeObjectWidth;
-        this.largeObjectHeight = largeObjectHeight;
-        this.largeObjectMass = largeObjectMass;
-        this.largeObjectPushingBots = largeObjectPushingBots;
-        this.largeObjectValue = largeObjectValue;
-    }
+    private ResourceSpec smallResourceSpec;
+    private ResourceSpec mediumResourceSpec;
+    private ResourceSpec largeResourceSpec;
 
     public ConfigurableResourceFactory() {
-
-        this.numSmallObjects = DEFAULT_OBJECTS_RESOURCES_SMALL;
-        this.smallObjectWidth = DEFAULT_SMALL_OBJECT_WIDTH;
-        this.smallObjectHeight = DEFAULT_SMALL_OBJECT_HEIGHT;
-        this.smallObjectMass = DEFAULT_SMALL_OBJECT_MASS;
-        this.smallObjectPushingBots = DEFAULT_SMALL_OBJECT_PUSHING_BOTS;
-        this.smallObjectValue = DEFAULT_SMALL_OBJECT_VALUE;
-
-        this.numLargeObjects = DEFAULT_OBJECTS_RESOURCES_LARGE;
-        this.largeObjectWidth = DEFAULT_LARGE_OBJECT_WIDTH;
-        this.largeObjectHeight = DEFAULT_LARGE_OBJECT_HEIGHT;
-        this.largeObjectMass = DEFAULT_LARGE_OBJECT_MASS;
-        this.largeObjectPushingBots = DEFAULT_LARGE_OBJECT_PUSHING_BOTS;
-        this.largeObjectValue = DEFAULT_LARGE_OBJECT_VALUE;
+        smallResourceSpec = new ResourceSpec(DEFAULT_SMALL_QUANTITY, DEFAULT_SMALL_WIDTH,
+                DEFAULT_SMALL_HEIGHT, DEFAULT_SMALL_MASS, DEFAULT_SMALL_PUSHING_BOTS,
+                DEFAULT_SMALL_VALUE);
+        
+        mediumResourceSpec = new ResourceSpec(DEFAULT_MEDIUM_QUANTITY, DEFAULT_MEDIUM_WIDTH,
+                DEFAULT_MEDIUM_HEIGHT, DEFAULT_MEDIUM_MASS, DEFAULT_MEDIUM_PUSHING_BOTS,
+                DEFAULT_MEDIUM_VALUE);
+        
+        largeResourceSpec = new ResourceSpec(DEFAULT_LARGE_QUANTITY, DEFAULT_LARGE_WIDTH,
+                DEFAULT_LARGE_HEIGHT, DEFAULT_LARGE_MASS, DEFAULT_LARGE_PUSHING_BOTS,
+                DEFAULT_LARGE_VALUE);
     }
 
     @Override
     public void placeInstances(PlacementArea.ForType<ResourceObject> placementArea, World world) {
+        placeInstances(smallResourceSpec, placementArea, world);
+        placeInstances(mediumResourceSpec, placementArea, world);
+        placeInstances(largeResourceSpec, placementArea, world);
+    }
 
-        for (int i = 0; i < numSmallObjects; i++) {
+    private void placeInstances(ResourceSpec spec,
+            PlacementArea.ForType<ResourceObject> placementArea, World world) {
+        for (int i = 0; i < spec.quantity; i++) {
             PlacementArea.Space space =
-                    placementArea.getRandomRectangularSpace(smallObjectWidth, smallObjectHeight);
+                    placementArea.getRandomRectangularSpace(spec.width, spec.height);
 
             ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    space.getAngle(), smallObjectWidth, smallObjectHeight, smallObjectMass,
-                    smallObjectPushingBots, smallObjectValue);
-
-            placementArea.placeObject(space, resource);
-        }
-
-
-        for (int i = 0; i < numLargeObjects; i++) {
-            PlacementArea.Space space =
-                    placementArea.getRandomRectangularSpace(largeObjectWidth, largeObjectHeight);
-
-            ResourceObject resource = new ResourceObject(world, space.getPosition(),
-                    space.getAngle(), largeObjectWidth, largeObjectHeight, largeObjectMass,
-                    largeObjectPushingBots, largeObjectValue);
+                    space.getAngle(), spec.width, spec.height, spec.mass, spec.pushingBots,
+                    spec.value);
 
             placementArea.placeObject(space, resource);
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void configure(Map<String, Object> resourceConfigs) {
+        Map<String, Object> smallConfig = (Map<String, Object>) resourceConfigs.get("small");
+        Map<String, Object> mediumConfig = (Map<String, Object>) resourceConfigs.get("medium");
+        Map<String, Object> largeConfig = (Map<String, Object>) resourceConfigs.get("large");
 
-            //small resources
-            Integer resourcesFieldSmall = (Integer) resourceConfigs.get("smallResources");
-            if (checkFieldPresent(resourcesFieldSmall, "resourceConfigs:smallResources")) {
-                numSmallObjects = resourcesFieldSmall;
-            }
-            Double sObjWidth = (Double) resourceConfigs.get("smallObjectWidth");
-            if (checkFieldPresent(sObjWidth, "resourceProperties:smallObjectWidth")) {
-                smallObjectWidth = sObjWidth.floatValue();
-            }
-            Double sObjHeight = (Double) resourceConfigs.get("smallObjectHeight");
-            if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectHeight")) {
-                smallObjectHeight = sObjHeight.floatValue();
-            }
-            Double sObjMass = (Double) resourceConfigs.get("smallObjectMass");
-            if (checkFieldPresent(sObjHeight, "resourceProperties:smallObjectMass")) {
-                smallObjectMass = sObjMass.floatValue();
-            }
-            Integer sObjPushingBots = (Integer) resourceConfigs.get("maxSmallObjectPushingBots");
-            if (checkFieldPresent(sObjPushingBots, "resourceProperties:maxSmallObjectPushingBots")) {
-                smallObjectPushingBots = sObjPushingBots;
-            }
-
-            //large resources
-            Integer resourcesFieldLarge = (Integer) resourceConfigs.get("largeResources");
-            if (checkFieldPresent(resourcesFieldLarge, "resourceConfigs:largeResources")) {
-                numLargeObjects = resourcesFieldLarge;
-            }
-            Double lObjWidth = (Double) resourceConfigs.get("largeObjectWidth");
-            if (checkFieldPresent(lObjWidth, "resourceProperties:largeObjectWidth")) {
-                largeObjectWidth = lObjWidth.floatValue();
-            }
-            Double lObjHeight = (Double) resourceConfigs.get("largeObjectHeight");
-            if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectHeight")) {
-                largeObjectHeight = lObjHeight.floatValue();
-            }
-            Double lObjMass = (Double) resourceConfigs.get("largeObjectMass");
-            if (checkFieldPresent(lObjHeight, "resourceProperties:largeObjectMass")) {
-                largeObjectMass = lObjMass.floatValue();
-            }
-            Integer lObjPushingBots = (Integer) resourceConfigs.get("maxLargeObjectPushingBots");
-            if (checkFieldPresent(lObjPushingBots, "resourceProperties:maxLargeObjectPushingBots")) {
-                largeObjectPushingBots = lObjPushingBots;
-            }
+        smallResourceSpec = readConfig(smallConfig, "resourceConfig:small:", DEFAULT_SMALL_VALUE);
+        mediumResourceSpec =
+                readConfig(mediumConfig, "resourceConfig:medium:", DEFAULT_MEDIUM_VALUE);
+        largeResourceSpec = readConfig(largeConfig, "resourceConfig:large:", DEFAULT_LARGE_VALUE);
+    }
+    
+    private ResourceSpec readConfig(Map<String, Object> config, String path, double value) {
+        int quantity = 0;
+        int pushingBots = 0;
+        float width = 0;
+        float height = 0;
+        float mass = 0;
+        
+        Number quantityField = (Number) config.get("quantity");
+        if (checkFieldPresent(quantityField, path + "quantity")) {
+            quantity = quantityField.intValue();
+        }
+        
+        Number widthField = (Number) config.get("width");
+        if (checkFieldPresent(widthField, path + "width")) {
+            width = widthField.floatValue();
+        }
+        
+        Number heightField = (Number) config.get("height");
+        if (checkFieldPresent(heightField, path + "height")) {
+            height = heightField.floatValue();
+        }
+        
+        Number massField = (Number) config.get("mass");
+        if (checkFieldPresent(heightField, path + "mass")) {
+            mass = massField.floatValue();
+        }
+        
+        Number pushingBotsField = (Number) config.get("pushingBots");
+        if (checkFieldPresent(pushingBotsField, path + "pushingBots")) {
+            pushingBots = pushingBotsField.intValue();
+        }
+        
+        return new ResourceSpec(quantity, width, height, mass, pushingBots, value);
     }
 
     @Override
     public int getNumberOfResources() {
-        return numSmallObjects + numLargeObjects;
+        return smallResourceSpec.quantity + mediumResourceSpec.quantity
+                + largeResourceSpec.quantity;
     }
 
     @Override
     public double getTotalResourceValue(){
-        return numLargeObjects * largeObjectValue + numSmallObjects * smallObjectValue;
+        return smallResourceSpec.getTotalValue() + mediumResourceSpec.getTotalValue() +
+                largeResourceSpec.getTotalValue();
+    }
+
+    private static class ResourceSpec {
+        private final int quantity;
+        private final float width;
+        private final float height;
+        private final float mass;
+        private final int pushingBots;
+        private final double value;
+
+        ResourceSpec(int quantity, float width, float height, float mass, int pushingBots,
+                double value) {
+            this.quantity = quantity;
+            this.width = width;
+            this.height = height;
+            this.mass = mass;
+            this.pushingBots = pushingBots;
+            this.value = value;
+        }
+        
+        double getTotalValue() {
+            return quantity * value;
+        }
     }
 }

@@ -192,7 +192,7 @@ public class SimConfig extends Config {
                     }
 
                     resFactory = (ResourceFactory) o;
-                    Map resources = (Map) config.get("resourceProperties");
+                    Map resources = (Map) config.get("resources");
                     resFactory.configure(resources);
                 } catch (ClassNotFoundException c) {
                     System.out.println("Invalid class name specified in SimConfig: " + rFactory + ". Using default resource factory.");
