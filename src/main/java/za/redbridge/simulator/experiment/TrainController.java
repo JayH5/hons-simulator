@@ -111,7 +111,7 @@ public class TrainController implements Runnable{
         NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
-        controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
+        controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.parametersToString());
         controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitneyU");
         do {
 
@@ -129,8 +129,8 @@ public class TrainController implements Runnable{
 
 
             if (epochs % 50 == 0 && previousBest != train.getBestGenome()) {
-                IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");
+                IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "best_network_at_" + epochs + ".tmp");
+                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "best_morphology_at_" + epochs + ".tmp");
                 previousBest = train.getBestGenome();
             }
 
@@ -147,8 +147,8 @@ public class TrainController implements Runnable{
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, previousBest.getScore()), leaderBoard);
 
-        IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
-        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
+        IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "bestNetwork" + testSetID + ".tmp");
+        morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getMorphologyID() + "bestMorphology" + testSetID + ".tmp");
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");

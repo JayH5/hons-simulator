@@ -11,7 +11,6 @@ public abstract class AdjustableSensitivityAgentSensor extends AgentSensor {
         super(bearing, orientation, range, fieldOfView);
     }
 
-    public abstract void setSensitivity(double sensitivity);
-
-    public abstract double getSensitivity();
+    //return a string of the adjustable parameters of this sensor
+    public abstract String parametersToString();
 }

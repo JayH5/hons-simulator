@@ -98,7 +98,6 @@ public class Simulation extends SimState {
     @Override
     public void finish() {
         kill();
-        System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
         );

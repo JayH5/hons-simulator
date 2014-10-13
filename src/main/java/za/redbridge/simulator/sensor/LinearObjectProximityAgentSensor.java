@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Created by shsu on 2014/10/08.
  */
-public class LinearObjectProximityAgentSensor extends AgentSensor {
+public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgentSensor {
 
     private static final int readingSize = 4;
     private double[] gain;
@@ -213,5 +213,16 @@ public class LinearObjectProximityAgentSensor extends AgentSensor {
         }
 
         return cloned;
+    }
+
+    public String parametersToString() {
+
+        String output = "";
+
+        for (double value: gain) {
+            output += value + " ";
+        }
+
+        return output;
     }
 }

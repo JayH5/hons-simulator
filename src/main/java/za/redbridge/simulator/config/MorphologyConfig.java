@@ -213,10 +213,7 @@ public class MorphologyConfig extends Config implements Serializable {
     public void setSensors(List<AgentSensor> sensorList) { this.sensorList = sensorList; }
 
     @Override
-    public int hashCode() {
-
-        return Arrays.hashCode(getSensitivities());
-    }
+    public int hashCode() { return Arrays.hashCode(getSensitivities()); }
 
     @Override
     public boolean equals(Object o) {
@@ -276,7 +273,7 @@ public class MorphologyConfig extends Config implements Serializable {
 
         for (AgentSensor sensor : sensorList) {
 
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
+            if (sensor instanceof LinearObjectProximityAgentSensor) {
                 output = ((LinearObjectProximityAgentSensor) sensor).getGain();
             }
         }
@@ -378,7 +375,10 @@ public class MorphologyConfig extends Config implements Serializable {
 
             if (clone instanceof LinearObjectProximityAgentSensor) {
 
-                ((LinearObjectProximityAgentSensor) clone).setGain(gain);
+                double[] gainCopy = new double[gain.length];
+                System.arraycopy(gain, 0, gainCopy, 0, gain.length);
+
+                ((LinearObjectProximityAgentSensor) clone).setGain(gainCopy);
             }
             newSensors.add(clone);
         }
@@ -386,48 +386,22 @@ public class MorphologyConfig extends Config implements Serializable {
         return new MorphologyConfig(newSensors);
     }
 
-
-
-    public String sensitivitiesToString() {
+    public String parametersToString() {
 
         String output = "";
 
-        for (AgentSensor sensor : sensorList) {
+        for (AgentSensor sensor: sensorList) {
 
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += sensor.getClass().getSimpleName();
-
-                if (sensor instanceof  ThresholdedObjectProximityAgentSensor) {
-                    output += "\t" + ((ThresholdedObjectProximityAgentSensor) sensor).getSensitiveClass();
-                }
-                    output += "\t";
-            }
-        }
-
-        output += "\n";
-
-        for (AgentSensor sensor : sensorList) {
-
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += ((AdjustableSensitivityAgentSensor) sensor).getSensitivity() + "\t";
+            if (sensor instanceof  AdjustableSensitivityAgentSensor) {
+                output += ((AdjustableSensitivityAgentSensor) sensor).parametersToString() + "\n";
             }
         }
 
         return output;
     }
 
-    public String getSensitivityID() {
+    public String getMorphologyID() {
 
-        String output = "";
-
-        for (AgentSensor sensor : sensorList) {
-
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += ((AdjustableSensitivityAgentSensor) sensor).getSensitivity() + "|";
-            }
-        }
-
-        return output;
+        return parametersToString();
     }
-
 }
