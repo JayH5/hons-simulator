@@ -77,7 +77,13 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
                 if (containedObjects.add(resource)) {
-                    List<Phenotype> pushingPhenotypes = resource.getPushingRobots().stream().map(j -> j.getPhenotype()).collect(Collectors.toList());
+                    Fixture resourceFixture = resource.getBody().getFixtureList();
+                    AABB resourceBox = resourceFixture.getAABB(0);
+                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+                    this.getBody().getWorld().queryAABB(callback, resourceBox);
+
+                    List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
+                    
                     for(Phenotype p : pushingPhenotypes){
                         fitnesses.putIfAbsent(p, new FitnessStats());
                         FitnessStats stats = fitnesses.get(p);
