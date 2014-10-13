@@ -36,6 +36,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.hetero.TeamEvaluator;
+import za.redbridge.simulator.factories.ComplementFactory;
 import za.redbridge.simulator.factories.NEATTeamFactory;
 
 import java.io.Serializable;
@@ -704,9 +705,11 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         int z = 0;
         for (CCHIndividual individual: flattenedIndividuals) {
-            doubleArray[z] = individual.getAverageTaskScore();
+            doubleArray[z] = individual.getGenome().getScore();
             z++;
         }
+
+        ComplementFactory.printArray(doubleArray);
 
         lastEpochScores = thisEpochScores;
         thisEpochScores = doubleArray;
@@ -839,7 +842,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         int z = 0;
         for (CCHIndividual individual: flattenedIndividuals) {
-            thisEpochScores[z] = individual.getAverageTaskScore();
+            thisEpochScores[z] = individual.getGenome().getScore();
             z++;
         }
         lastEpochScores = thisEpochScores;

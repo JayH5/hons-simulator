@@ -103,7 +103,6 @@ public class HeterogeneousTrainController implements Runnable{
         pop.setInitialConnectionDensity(0.5);
         pop.reset();
 
-
         CCHIndividual lastBestIndividual = new CCHIndividual();
 
         Genome previousBest = train.getBestGenome();
@@ -111,7 +110,7 @@ public class HeterogeneousTrainController implements Runnable{
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
-        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance");
+        controllerTrainingLogger.info("Epoch# \t Best Team Score \t Best \t Variance");
 
         do {
 
@@ -122,7 +121,7 @@ public class HeterogeneousTrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getEpochMean() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
+            controllerTrainingLogger.info(epochs + "\t" + train.getBestIndividual().getTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
                     "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
 
             if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {

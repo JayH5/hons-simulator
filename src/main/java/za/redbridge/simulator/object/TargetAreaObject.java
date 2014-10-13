@@ -107,10 +107,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     //updates the scores of those robots pushing the boxes
     private void updateScores(ResourceObject resource, Map<RobotObject, Joint> pushingBots) {
 
-        //this is fairly fucking arbitrary
-        double totalArea = resource.getWidth() * resource.getHeight();
+        System.out.println("well done");
+
         int numPushingBots = pushingBots.size();
-        double value = totalArea/numPushingBots;
+        double value = resource.getValue()/numPushingBots;
         double cooperativeScore = numPushingBots > 1? value : 0;
 
         for (RobotObject bot: pushingBots.keySet()) {
@@ -125,7 +125,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     //penalise bots
     private void penaliseBots(ResourceObject resource, List<RobotObject> bots) {
 
-        double totalArea = resource.getWidth()*resource.getHeight();
+        System.out.println("naughty");
+        double totalArea = resource.getValue();
         int numPushingBots = bots.size();
 
         for (RobotObject bot: bots) {

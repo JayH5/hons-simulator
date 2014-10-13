@@ -20,4 +20,16 @@ public class NEATTeam implements MLMethod {
 
         return team;
     }
+
+    public double teamFitness() {
+
+        double output = 0;
+
+        for (CCHIndividual individual: team) {
+            output += individual.getAverageTaskScore();
+        }
+
+        return output;
+    }
+
 }
