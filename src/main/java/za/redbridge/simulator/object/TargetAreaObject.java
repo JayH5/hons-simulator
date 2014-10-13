@@ -8,20 +8,19 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
-
-import java.awt.Color;
-import java.awt.Paint;
-import java.util.*;
-
-import org.jbox2d.dynamics.joints.Joint;
 import sim.engine.SimState;
-import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by shsu on 2014/08/13.
@@ -77,36 +76,47 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
-                if (containedObjects.add(resource)) {
-                    resource.getPortrayal().setPaint(Color.CYAN);
-                    //get the robots pushing this box and assign each robot its task performance score
-                    // and cooperative score
-                    Fixture resourceFixture = resource.getBody().getFixtureList();
-                    AABB resourceBox = resourceFixture.getAABB(0);
-                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-
-                    this.getBody().getWorld().queryAABB(callback, resourceBox);
-                    updateScores(resource, callback.getNearbyBots());
-
-                    resource.setCollected(true);
-                    incrementTotalObjectValue(resource);
-                }
+                addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
-                if (containedObjects.remove(resource)) {
-
-                    Fixture resourceFixture = resource.getBody().getFixtureList();
-                    AABB resourceBox = resourceFixture.getAABB(0);
-                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-
-                    this.getBody().getWorld().queryAABB(callback, resourceBox);
-                    penaliseBots(resource, callback.getNearbyBots());
-
-                    resource.setCollected(false);
-                    resource.getPortrayal().setPaint(Color.MAGENTA);
-                    decrementTotalObjectValue(resource);
-                }
+                removeResource(resource);
             }
+        }
+    }
+
+    private void addResource(ResourceObject resource) {
+        if (containedObjects.add(resource)) {
+            // Mark resource as collected
+            resource.setCollected(true);
+            resource.getPortrayal().setPaint(Color.CYAN);
+
+            // Check which robots pushed the resource in based on a bounding box
+            Fixture resourceFixture = resource.getBody().getFixtureList();
+            AABB resourceBox = resourceFixture.getAABB(0);
+            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+            this.getBody().getWorld().queryAABB(callback, resourceBox);
+
+            // Update phenotype fitness values
+            List<RobotObject> pushingBots = callback.getNearbyBots();
+            updateScores(resource, pushingBots);
+        }
+    }
+
+    private void removeResource(ResourceObject resource) {
+        if (containedObjects.remove(resource)) {
+            // Mark resource as no longer collected
+            resource.setCollected(false);
+            resource.getPortrayal().setPaint(Color.MAGENTA);
+
+            // Check which robots pushed the resource out based on a bounding box
+            Fixture resourceFixture = resource.getBody().getFixtureList();
+            AABB resourceBox = resourceFixture.getAABB(0);
+            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+            getBody().getWorld().queryAABB(callback, resourceBox);
+
+            // Update phenotype fitness values
+            List<RobotObject> pushingBots = callback.getNearbyBots();
+            penaliseBots(resource, pushingBots);
         }
     }
 
@@ -120,7 +130,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         for (RobotObject bot: pushingBots) {
 
             ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
-            //divide spoils evenly amongst pushing bots for now
             scoreKeepingIndividual.incrementTotalTaskScore(value);
             scoreKeepingIndividual.incrementTotalCooperativeScore(cooperativeScore);
         }
@@ -191,19 +200,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // Remove from the score
         if (ALLOW_REMOVAL) {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
-            if (containedObjects.remove(resource)) {
-                resource.setCollected(false);
-
-                Fixture resourceFixture = resource.getBody().getFixtureList();
-                AABB resourceBox = resourceFixture.getAABB(0);
-                RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-
-                this.getBody().getWorld().queryAABB(callback, resourceBox);
-                penaliseBots(resource, callback.getNearbyBots());
-
-                resource.getPortrayal().setPaint(Color.MAGENTA);
-                decrementTotalObjectValue(resource);
-            }
+            removeResource(resource);
         }
     }
 
