@@ -43,7 +43,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final AABB aabb;
 
     //total resource value in this target area
-    private Map<Phenotype,FitnessStats> fitnesses = new HashMap<>();
+    private Map<Phenotype, FitnessStats> fitnesses = new HashMap<>();
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
@@ -95,20 +95,32 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private void addResource(ResourceObject resource) {
         if (containedObjects.add(resource)) {
-            // Mark resource as collected
+            // Get the robots joined to the resource
+            Set<RobotObject> pushingBots = resource.getPushingRobots();
+
+            // If no robots joined, get nearby robots
+            if (pushingBots.isEmpty()) {
+                pushingBots = findRobotsNearResource(resource);
+            }
+
+            // Update the fitness for the bots involved
+            if (!pushingBots.isEmpty()) {
+                double taskFitness = resource.getValue() / pushingBots.size();
+                for (RobotObject robot : pushingBots) {
+                    FitnessStats fitness = fitnesses.get(robot.getPhenotype());
+                    if (fitness == null) {
+                        fitness = new FitnessStats();
+                        fitnesses.put(robot.getPhenotype(), fitness);
+                    }
+
+                    fitness.addTaskFitness(taskFitness);
+                    fitness.addRetrievedResource(resource, pushingBots.size());
+                }
+            }
+
+            // Mark resource as collected (this breaks the joints)
             resource.setCollected(true);
             resource.getPortrayal().setPaint(Color.CYAN);
-
-            List<Phenotype> pushingPhenotypes = blamePhenotypes(resource);
-
-            for(Phenotype p : pushingPhenotypes){
-                FitnessStats newFitness = new FitnessStats();
-                FitnessStats existingFitness = fitnesses.putIfAbsent(p, newFitness);
-
-                FitnessStats stats = existingFitness != null ? existingFitness : newFitness;
-                stats.addTaskFitness(resource.getValue() / pushingPhenotypes.size());
-                stats.addRetrievedResource(resource, pushingPhenotypes.size());
-            }
         }
     }
 
@@ -118,15 +130,19 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             resource.setCollected(false);
             resource.getPortrayal().setPaint(Color.MAGENTA);
 
-            List<Phenotype> pushingPhenotypes = blamePhenotypes(resource);
+            Set<RobotObject> pushingBots = findRobotsNearResource(resource);
 
-            // Update phenotype fitness values
-            for(Phenotype p : pushingPhenotypes){
-                FitnessStats newFitness = new FitnessStats();
-                FitnessStats existingFitness = fitnesses.putIfAbsent(p, newFitness);
+            if (!pushingBots.isEmpty()) {
+                double taskFitness = resource.getValue() / pushingBots.size();
+                for (RobotObject robot : pushingBots) {
+                    FitnessStats fitness = fitnesses.get(robot.getPhenotype());
+                    if (fitness == null) {
+                        fitness = new FitnessStats();
+                        fitnesses.put(robot.getPhenotype(), fitness);
+                    }
 
-                FitnessStats stats = existingFitness != null ? existingFitness : newFitness;
-                stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
+                    fitness.addTaskFitness(-taskFitness); // Subtract fitness
+                }
             }
         }
     }
@@ -135,18 +151,18 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
      * Finds robots very close to the ResourceObject that can be blamed for pushing the resource
      * in/out of target area.
      */
-    private List<Phenotype> blamePhenotypes(ResourceObject resource) {
+    private Set<RobotObject> findRobotsNearResource(ResourceObject resource) {
         // Check which robots pushed the resource out based on a bounding box
         Fixture resourceFixture = resource.getBody().getFixtureList();
         AABB resourceBox = resourceFixture.getAABB(0);
 
         // Try query robots within the AABB of the resource
-        RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+        Set<RobotObject> robots = new HashSet<>();
+        RobotObjectQueryCallback callback = new RobotObjectQueryCallback(robots);
         getBody().getWorld().queryAABB(callback, resourceBox);
 
-        List<Phenotype> phenotypes = callback.getNearbyPhenotypes();
-        if (!phenotypes.isEmpty()) {
-            return phenotypes;
+        if (!robots.isEmpty()) {
+            return robots;
         }
 
         // If no robots found, iteratively expand the dimensions of the query box
@@ -159,12 +175,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             resizeAABB(blameBox, width, height);
             getBody().getWorld().queryAABB(callback, blameBox);
 
-            if (!phenotypes.isEmpty()) {
+            if (!robots.isEmpty()) {
                 break;
             }
         }
-
-        return phenotypes;
+        return robots;
     }
 
     public int getNumberOfContainedResources() {
@@ -216,19 +231,23 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static class RobotObjectQueryCallback implements QueryCallback {
 
-        private List<Phenotype> nearbyPhenotypes = new ArrayList<>();
+        final Set<RobotObject> robots;
 
+        RobotObjectQueryCallback(Set<RobotObject> robots) {
+            this.robots = robots;
+        }
+
+        @Override
         public boolean reportFixture(Fixture fixture) {
-
-            if (fixture.getBody().getUserData() instanceof RobotObject) {
-
-                nearbyPhenotypes.add(((RobotObject) fixture.getBody().getUserData()).getPhenotype());
+            if (!fixture.isSensor()) { // Don't detect robot sensors, only bodies
+                Object bodyUserData = fixture.getBody().getUserData();
+                if (bodyUserData instanceof RobotObject) {
+                    robots.add((RobotObject) bodyUserData);
+                }
             }
 
             return true;
         }
-
-        public List<Phenotype> getNearbyPhenotypes() { return nearbyPhenotypes; }
     }
 
 }
