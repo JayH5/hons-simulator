@@ -66,7 +66,7 @@ public class MasterExperimentController {
             ComplementFactory complementFactory = new ComplementFactory(templateMorphology,
                     experimentConfig.getComplementGeneratorResolution());
 
-            final Set<MorphologyConfig> detectivityComplements = complementFactory.generateDetectivitiesForTemplate();
+            final Set<MorphologyConfig> detectivityComplements = complementFactory.generateSensitivitiesForTemplate();
             testComplements("results/",detectivityComplements);
     }
 

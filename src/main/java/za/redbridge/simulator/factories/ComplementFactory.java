@@ -61,37 +61,6 @@ public class ComplementFactory {
         }
     }
 
-    public Set<MorphologyConfig> generateDetectivitiesForTemplate() {
-
-        Set<MorphologyConfig> morphologyList = new HashSet<>();
-        int numConfigurableSensors = template.getNumAdjustableArrays();
-
-        double[] sensitivities = new double[4];
-
-        for (int i = 0; i < sensitivities.length; i++) {
-            sensitivities[i] = resolution;
-        }
-
-        generateAndConfigureDetectivities(sensitivities, 0, morphologyList);
-
-        return morphologyList;
-    }
-
-    public void generateAndConfigureDetectivities (double[] sensitivities, int currentIndex,
-                                      Set<MorphologyConfig> morphologyList) {
-
-        if (currentIndex > sensitivities.length-1) {
-            return;
-        }
-
-        for (float j = 1; j < (int) (1 / resolution) + 1; j++) {
-
-            sensitivities[currentIndex] = resolution * j;
-            morphologyList.add(MorphologyConfig.MorphologyFromDetectivities(template, sensitivities));
-            generateAndConfigureDetectivities(sensitivities, currentIndex+1, morphologyList);
-        }
-    }
-
     public static void printArray(double[] array) {
 
         for (int i = 0; i < array.length; i++) {
