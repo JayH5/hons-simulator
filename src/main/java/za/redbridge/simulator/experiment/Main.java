@@ -56,8 +56,8 @@ public class Main {
     @Option(name = "--testComplementSet", aliases = "-t", usage = "Search for this complement set in the shared directories and test them")
     private String timestamp;
 
-    @Option(name = "--evolve-complements", aliases = "-e", usage = "Evolve sensor sensitivity complements using a Genetic Algorithm")
-    private boolean evolveComplements = false;
+    @Option(name = "--testThresholds", aliases = "-th", usage = "Test sensor threshold complements.")
+    private boolean thresholds = false;
 
     public static void main(String[] args) {
 
@@ -77,7 +77,7 @@ public class Main {
         MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
 
         MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simConfig,
-                morphologyConfig, options.evolveComplements, true, true);
+                morphologyConfig);
 
         if (options.timestamp != null) {
 
@@ -140,7 +140,7 @@ public class Main {
             ComplementFactory complementFactory = new ComplementFactory(morphologyConfig,
                     experimentConfiguration.getComplementGeneratorResolution());
 
-            final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateComplementsForTemplate();
+            final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateSensitivitiesForTemplate();
 
             System.out.println("Generated " + sensitivityComplements.size() + " complements.");
             ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);

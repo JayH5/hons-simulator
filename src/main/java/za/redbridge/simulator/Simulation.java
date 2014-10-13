@@ -125,7 +125,6 @@ public class Simulation extends SimState {
             controller.cacheCooperativeScore();
         }
 
-        //System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
         );
@@ -256,12 +255,13 @@ public class Simulation extends SimState {
         this.stopOnceCollected = stopOnceCollected;
     }
 
+    /*
     //return the score at this point in the simulation
     public double getFitness() {
         double resourceFitness = targetArea.getTotalResourceValue() / config.getResourceFactory().getTotalResourceValue();
         double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
         return (resourceFitness * 100) + (speedFitness * 20);
-    }
+    }*/
 
     /** Get the number of steps this simulation has been run for. */
     public long getStepNumber() {

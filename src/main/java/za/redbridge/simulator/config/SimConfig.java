@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
-import java.io.StringWriter;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -212,7 +212,6 @@ public class SimConfig extends Config {
             }
         }
 
-
         this.simulationSeed = seed;
         this.simulationIterations = iterations;
         this.environmentWidth = width;
@@ -266,4 +265,5 @@ public class SimConfig extends Config {
     public float getRobotRadius() { return robotRadius; }
 
     public ResourceFactory getResourceFactory() { return resourceFactory; }
+
 }

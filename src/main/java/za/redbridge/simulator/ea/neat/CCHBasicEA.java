@@ -36,6 +36,7 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.hetero.TeamEvaluator;
+import za.redbridge.simulator.factories.ComplementFactory;
 import za.redbridge.simulator.factories.NEATTeamFactory;
 
 import java.io.Serializable;
@@ -217,6 +218,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
     private RuleHolder rules;
 
     private CCHIndividual bestIndividual;
+
+    private NEATTeam bestTeam;
 
     //current average score for this epoch
     private double currentAverage = -1;
@@ -679,17 +682,28 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         //now create the teams and evaluate them in their separate threads,
         // keeping their score within their CCHIndividual wrappers.
         NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, teamPopulation);
-        List<NEATTeam> teams = teamFactory.placeInTeams();
+        //for however number of teamruns per pool
+        List<NEATTeam> totalTeams = new ArrayList<>();
+        for (int i = 0; i < experimentConfig.getRunsPerGenome(); i++) {
 
-        int x = 0;
-        TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+            //now create the teams and evaluate them in their separate threads,
+            // keeping their score within their CCHIndividual wrappers.
+            List<NEATTeam> teams = teamFactory.placeInTeams();
+            totalTeams.addAll(teams);
 
-        for (TeamEvaluator t: evaluators) {
+            int x = 0;
+            TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
 
-            t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
-            t.run();
-            x++;
+            for (TeamEvaluator t : evaluators) {
+
+                t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
+                t.run();
+                x++;
+            }
         }
+
+        Collections.sort(totalTeams);
+        bestTeam = totalTeams.get(totalTeams.size()-1).compareTo(bestTeam) > 0 ? totalTeams.get(totalTeams.size()-1) : bestTeam;
 
         // score the population
         final CCHParallelScore pscore = new CCHParallelScore(population, teamFactory.getAllIndividuals(),
@@ -704,7 +718,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         int z = 0;
         for (CCHIndividual individual: flattenedIndividuals) {
-            doubleArray[z] = individual.getAverageTaskScore();
+            doubleArray[z] = individual.getGenome().getScore();
             z++;
         }
 
@@ -790,12 +804,14 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         //for however number of teamruns per pool
 
         NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, population.flatten());
+        List<NEATTeam> totalTeams = new ArrayList<>();
 
         for (int i = 0; i < experimentConfig.getRunsPerGenome(); i++) {
 
             //now create the teams and evaluate them in their separate threads,
             // keeping their score within their CCHIndividual wrappers.
             List<NEATTeam> teams = teamFactory.placeInTeams();
+            totalTeams.addAll(teams);
 
             int x = 0;
             TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
@@ -807,6 +823,9 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
                 x++;
             }
         }
+
+        Collections.sort(totalTeams);
+        bestTeam = totalTeams.get(totalTeams.size()-1);
 
         // score the initial population
         final CCHParallelScore pscore = new CCHParallelScore(population, teamFactory.getAllIndividuals(),
@@ -839,7 +858,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         int z = 0;
         for (CCHIndividual individual: flattenedIndividuals) {
-            thisEpochScores[z] = individual.getAverageTaskScore();
+            thisEpochScores[z] = individual.getGenome().getScore();
             z++;
         }
         lastEpochScores = thisEpochScores;
@@ -1037,6 +1056,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         return mwTest.mannWhitneyU(thisEpochScores, lastEpochScores);
     }
+
+    public NEATTeam getBestTeam() { return bestTeam; }
 
     public double getVariance() {
 
