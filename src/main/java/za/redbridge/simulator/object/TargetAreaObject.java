@@ -11,8 +11,12 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import sim.engine.SimState;
 import za.redbridge.simulator.FitnessStats;
@@ -23,6 +27,8 @@ import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
+import static za.redbridge.simulator.Utils.resizeAABB;
+
 /**
  * Created by shsu on 2014/08/13.
  */
@@ -30,11 +36,14 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static final boolean ALLOW_REMOVAL = true;
 
+    private static final float BLAME_BOX_EXPANSION_RATE = 1.05f;
+    private static final int BLAME_BOX_TRIES = 5;
+
     private int width, height;
     private final AABB aabb;
 
     //total resource value in this target area
-    private Map<Phenotype,FitnessStats> fitnesses = new HashMap<>();
+    private Map<Phenotype, FitnessStats> fitnesses = new HashMap<>();
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
@@ -76,37 +85,101 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
-                if (containedObjects.add(resource)) {
-                    List<Phenotype> pushingPhenotypes = resource.getPushingRobots().stream().map(j -> j.getPhenotype()).collect(Collectors.toList());
-                    for(Phenotype p : pushingPhenotypes){
-                        fitnesses.putIfAbsent(p, new FitnessStats());
-                        FitnessStats stats = fitnesses.get(p);
-                        stats.addTaskFitness(resource.getValue() / pushingPhenotypes.size());
-                        stats.addRetrievedResource(resource, pushingPhenotypes.size());
-                    }
-                    resource.setCollected(true);
-                    resource.getPortrayal().setPaint(Color.CYAN);
-                }
+                addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
-                if (containedObjects.remove(resource)) {
-                    resource.setCollected(false);
-                    resource.getPortrayal().setPaint(Color.MAGENTA);
+                removeResource(resource);
+            }
+        }
+    }
 
-                    Fixture resourceFixture = resource.getBody().getFixtureList();
-                    AABB resourceBox = resourceFixture.getAABB(0);
-                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-                    this.getBody().getWorld().queryAABB(callback, resourceBox);
+    private void addResource(ResourceObject resource) {
+        if (containedObjects.add(resource)) {
+            // Get the robots joined to the resource
+            Set<RobotObject> pushingBots = resource.getPushingRobots();
 
-                    List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
-                    for(Phenotype p : pushingPhenotypes){
-                        fitnesses.putIfAbsent(p, new FitnessStats());
-                        FitnessStats stats = fitnesses.get(p);
-                        stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
+            // If no robots joined, get nearby robots
+            if (pushingBots.isEmpty()) {
+                pushingBots = findRobotsNearResource(resource);
+            }
+
+            // Update the fitness for the bots involved
+            if (!pushingBots.isEmpty()) {
+                double taskFitness = resource.getValue() / pushingBots.size();
+                for (RobotObject robot : pushingBots) {
+                    FitnessStats fitness = fitnesses.get(robot.getPhenotype());
+                    if (fitness == null) {
+                        fitness = new FitnessStats();
+                        fitnesses.put(robot.getPhenotype(), fitness);
                     }
+
+                    fitness.addTaskFitness(taskFitness);
+                    fitness.addRetrievedResource(resource, pushingBots.size());
+                }
+            }
+
+            // Mark resource as collected (this breaks the joints)
+            resource.setCollected(true);
+            resource.getPortrayal().setPaint(Color.CYAN);
+        }
+    }
+
+    private void removeResource(ResourceObject resource) {
+        if (containedObjects.remove(resource)) {
+            // Mark resource as no longer collected
+            resource.setCollected(false);
+            resource.getPortrayal().setPaint(Color.MAGENTA);
+
+            Set<RobotObject> pushingBots = findRobotsNearResource(resource);
+
+            if (!pushingBots.isEmpty()) {
+                double taskFitness = resource.getValue() / pushingBots.size();
+                for (RobotObject robot : pushingBots) {
+                    FitnessStats fitness = fitnesses.get(robot.getPhenotype());
+                    if (fitness == null) {
+                        fitness = new FitnessStats();
+                        fitnesses.put(robot.getPhenotype(), fitness);
+                    }
+
+                    fitness.addTaskFitness(-taskFitness); // Subtract fitness
                 }
             }
         }
+    }
+
+    /*
+     * Finds robots very close to the ResourceObject that can be blamed for pushing the resource
+     * in/out of target area.
+     */
+    private Set<RobotObject> findRobotsNearResource(ResourceObject resource) {
+        // Check which robots pushed the resource out based on a bounding box
+        Fixture resourceFixture = resource.getBody().getFixtureList();
+        AABB resourceBox = resourceFixture.getAABB(0);
+
+        // Try query robots within the AABB of the resource
+        Set<RobotObject> robots = new HashSet<>();
+        RobotObjectQueryCallback callback = new RobotObjectQueryCallback(robots);
+        getBody().getWorld().queryAABB(callback, resourceBox);
+
+        if (!robots.isEmpty()) {
+            return robots;
+        }
+
+        // If no robots found, iteratively expand the dimensions of the query box
+        AABB blameBox = new AABB(resourceBox);
+        for (int i = 0; i < BLAME_BOX_TRIES; i++) {
+            float width = (blameBox.upperBound.x - blameBox.lowerBound.x)
+                    * BLAME_BOX_EXPANSION_RATE;
+            float height = (blameBox.upperBound.y - blameBox.upperBound.y)
+                    * BLAME_BOX_EXPANSION_RATE;
+            resizeAABB(blameBox, width, height);
+            getBody().getWorld().queryAABB(callback, blameBox);
+
+            if (!robots.isEmpty()) {
+                break;
+            }
+        }
+        return robots;
     }
 
     public int getNumberOfContainedResources() {
@@ -152,34 +225,29 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // Remove from the score
         if (ALLOW_REMOVAL) {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
-            if (containedObjects.remove(resource)) {
-                resource.setCollected(false);
-                resource.getPortrayal().setPaint(Color.MAGENTA);
-                List<Phenotype> pushingPhenotypes = new ArrayList<>(); //TODO actually find the phenotypes that pushed the box out
-                for(Phenotype p : pushingPhenotypes){
-                    fitnesses.putIfAbsent(p, new FitnessStats());
-                    FitnessStats stats = fitnesses.get(p);
-                    stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
-                }
-            }
+            removeResource(resource);
         }
     }
 
     private static class RobotObjectQueryCallback implements QueryCallback {
 
-        private List<Phenotype> nearbyPhenotypes = new ArrayList<>();
+        final Set<RobotObject> robots;
 
+        RobotObjectQueryCallback(Set<RobotObject> robots) {
+            this.robots = robots;
+        }
+
+        @Override
         public boolean reportFixture(Fixture fixture) {
-
-            if (fixture.getBody().getUserData() instanceof RobotObject) {
-
-                nearbyPhenotypes.add(((RobotObject) fixture.getBody().getUserData()).getPhenotype());
+            if (!fixture.isSensor()) { // Don't detect robot sensors, only bodies
+                Object bodyUserData = fixture.getBody().getUserData();
+                if (bodyUserData instanceof RobotObject) {
+                    robots.add((RobotObject) bodyUserData);
+                }
             }
 
             return true;
         }
-
-        public List<Phenotype> getNearbyPhenotypes() { return nearbyPhenotypes; }
     }
 
 }
