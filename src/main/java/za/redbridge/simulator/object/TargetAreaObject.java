@@ -81,7 +81,13 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                     resource.getPortrayal().setPaint(Color.CYAN);
                     //get the robots pushing this box and assign each robot its task performance score
                     // and cooperative score
-                    updateScores(resource, resource.getPushingBots());
+                    Fixture resourceFixture = resource.getBody().getFixtureList();
+                    AABB resourceBox = resourceFixture.getAABB(0);
+                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+
+                    this.getBody().getWorld().queryAABB(callback, resourceBox);
+                    updateScores(resource, callback.getNearbyBots());
+
                     resource.setCollected(true);
                     incrementTotalObjectValue(resource);
                 }
@@ -105,15 +111,13 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     }
 
     //updates the scores of those robots pushing the boxes
-    private void updateScores(ResourceObject resource, Map<RobotObject, Joint> pushingBots) {
-
-        System.out.println("well done");
+    private void updateScores(ResourceObject resource, List<RobotObject> pushingBots) {
 
         int numPushingBots = pushingBots.size();
         double value = resource.getValue()/numPushingBots;
         double cooperativeScore = numPushingBots > 1? value : 0;
 
-        for (RobotObject bot: pushingBots.keySet()) {
+        for (RobotObject bot: pushingBots) {
 
             ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
             //divide spoils evenly amongst pushing bots for now
@@ -125,7 +129,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     //penalise bots
     private void penaliseBots(ResourceObject resource, List<RobotObject> bots) {
 
-        System.out.println("naughty");
         double totalArea = resource.getValue();
         int numPushingBots = bots.size();
 
@@ -190,6 +193,14 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
             if (containedObjects.remove(resource)) {
                 resource.setCollected(false);
+
+                Fixture resourceFixture = resource.getBody().getFixtureList();
+                AABB resourceBox = resourceFixture.getAABB(0);
+                RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+
+                this.getBody().getWorld().queryAABB(callback, resourceBox);
+                penaliseBots(resource, callback.getNearbyBots());
+
                 resource.getPortrayal().setPaint(Color.MAGENTA);
                 decrementTotalObjectValue(resource);
             }

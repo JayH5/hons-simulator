@@ -41,7 +41,7 @@ public class HeterogeneousTrainController implements Runnable{
     private final TreeMap<CCHIndividual,Integer> leaderBoard;
 
     //stores best performing morphology and controller combinations
-    private final ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard;
+    private final ConcurrentSkipListMap<ComparableMorphology,NEATTeam> morphologyLeaderboard;
 
     private final String thisIP;
 
@@ -58,7 +58,7 @@ public class HeterogeneousTrainController implements Runnable{
 
     public HeterogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                                         MorphologyConfig morphologyConfig,
-                                        ConcurrentSkipListMap<ComparableMorphology, CCHIndividual> morphologyLeaderboard,
+                                        ConcurrentSkipListMap<ComparableMorphology, NEATTeam> morphologyLeaderboard,
                                          long testSetID, long testSetSerial) {
 
         this.experimentConfig = experimentConfig;
@@ -75,7 +75,7 @@ public class HeterogeneousTrainController implements Runnable{
 
     public HeterogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                                         MorphologyConfig morphologyConfig,
-                                        ConcurrentSkipListMap<ComparableMorphology, CCHIndividual> morphologyLeaderboard) {
+                                        ConcurrentSkipListMap<ComparableMorphology, NEATTeam> morphologyLeaderboard) {
 
 
         this.experimentConfig = experimentConfig;
@@ -110,7 +110,7 @@ public class HeterogeneousTrainController implements Runnable{
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
-        controllerTrainingLogger.info("Epoch# \t Best Team Score \t Best \t Variance");
+        controllerTrainingLogger.info("Epoch# \t Best Team Score \t Best Individual \t Variance");
 
         do {
 
@@ -121,8 +121,8 @@ public class HeterogeneousTrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getBestIndividual().getTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
-                    "\t" + train.getVariance() + "\t" + train.mannWhitneyImprovementTest());
+            controllerTrainingLogger.info(epochs + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
+                    "\t" + train.getVariance());
 
             if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
                 /*IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
@@ -142,10 +142,10 @@ public class HeterogeneousTrainController implements Runnable{
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
-        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestIndividual().getAverageTaskScore()),
-                train.getBestIndividual());
+        morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, train.getBestTeam().teamFitness()),
+                train.getBestTeam());
 
-        IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
+        //IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
         controllerTrainingLogger.info("Best-scoring genotype for this set of detectivity thresholds scored " + previousBest.getScore());
@@ -165,7 +165,7 @@ public class HeterogeneousTrainController implements Runnable{
             System.err.println(x);
         }
 
-        NEATTeam teamWithBestGenotype = lastBestIndividual.getTeam();
+        NEATTeam teamWithBestGenotype = train.getBestTeam();
 
         IOUtils.writeTeam(morphologyConfig, teamWithBestGenotype);
 

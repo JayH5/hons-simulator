@@ -7,9 +7,13 @@ import java.util.Set;
 /**
  * Created by racter on 2014/10/05.
  */
-public class NEATTeam implements MLMethod {
+public class NEATTeam implements MLMethod, Comparable<NEATTeam> {
 
     private final Set<CCHIndividual> team;
+
+    public int compareTo(NEATTeam other) {
+        return Double.compare(teamFitness(), other.teamFitness());
+    }
 
     public NEATTeam (Set<CCHIndividual> team) {
 
