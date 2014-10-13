@@ -15,10 +15,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
  */
 public class MasterExperimentController {
 
-    private boolean evolveComplements;
-    private boolean threadComplementTraining;
-    private boolean threadNNSubruns;
-
     private final MorphologyConfig templateMorphology;
     private final ExperimentConfig experimentConfig;
     private final SimConfig simulationConfig;
@@ -26,28 +22,24 @@ public class MasterExperimentController {
     private final ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyScores = new ConcurrentSkipListMap<>();
 
 
-    public MasterExperimentController(ExperimentConfig experimentConfig, SimConfig simulationConfig, MorphologyConfig templateMorphology,
-                                      boolean evolveComplements, boolean threadComplementTraining, boolean threadNNSubruns) {
+    public MasterExperimentController(ExperimentConfig experimentConfig, SimConfig simulationConfig, MorphologyConfig templateMorphology
+                                      ) {
 
         this.experimentConfig = experimentConfig;
         this.simulationConfig = simulationConfig;
         this.templateMorphology = templateMorphology;
-
-        this.evolveComplements = evolveComplements;
-        this.threadComplementTraining = threadComplementTraining;
-        this.threadNNSubruns = threadNNSubruns;
     }
 
     public void testComplements(String outputDir, Set<MorphologyConfig> sensitivityComplements) {
 
-        if (threadComplementTraining) {
+
             Thread[] complementThreads = new Thread[sensitivityComplements.size()];
 
             int i = 0;
             for (MorphologyConfig complement : sensitivityComplements) {
 
                 complementThreads[i] = new Thread(new TrainController(experimentConfig,
-                        simulationConfig, complement, morphologyScores, threadNNSubruns));
+                        simulationConfig, complement, morphologyScores));
 
                 complementThreads[i].run();
                 i++;
@@ -63,40 +55,22 @@ public class MasterExperimentController {
                     iex.printStackTrace();
                 }
             }
-        }
-        else {
 
-            TrainController[] complementTrainers = new TrainController[sensitivityComplements.size()];
+        Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
+        NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
+        MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
 
-            int i = 0;
-            for (MorphologyConfig complement : sensitivityComplements) {
-
-                complementTrainers[i] = new TrainController(experimentConfig,
-                        simulationConfig, complement, morphologyScores, threadNNSubruns);
-
-                complementTrainers[i].run();
-                i++;
-            }
-
-    }
-
-    Map.Entry<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> topCombo = morphologyScores.lastEntry();
-    NEATNetwork bestNetwork = topCombo.getValue().lastKey().getNetwork();
-    MorphologyConfig bestMorphology = topCombo.getKey().getMorphology();
-
-    IOUtils.writeNetwork(bestNetwork, outputDir, "bestNetwork.tmp");
-    bestMorphology.dumpMorphology(outputDir, "bestMorphology.yml");
-
+        IOUtils.writeNetwork(bestNetwork, outputDir, "bestNetwork.tmp");
+        bestMorphology.dumpMorphology(outputDir, "bestMorphology.yml");
     }
 
     public void start() {
 
-
             ComplementFactory complementFactory = new ComplementFactory(templateMorphology,
                     experimentConfig.getComplementGeneratorResolution());
 
-            final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateSensitivitiesForTemplate();
-            testComplements("results/",sensitivityComplements);
+            final Set<MorphologyConfig> detectivityComplements = complementFactory.generateDetectivitiesForTemplate();
+            testComplements("results/",detectivityComplements);
     }
 
     //test the designated morphologies assigned to this host for this timestamp

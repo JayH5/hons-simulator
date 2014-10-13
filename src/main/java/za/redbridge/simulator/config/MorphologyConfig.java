@@ -276,6 +276,9 @@ public class MorphologyConfig extends Config implements Serializable {
             if (sensor instanceof LinearObjectProximityAgentSensor) {
                 output = ((LinearObjectProximityAgentSensor) sensor).getGain();
             }
+            else if (sensor instanceof ThresholdedObjectProximityAgentSensor) {
+                output = ((ThresholdedObjectProximityAgentSensor) sensor).getDetectivity();
+            }
         }
 
         return output;
@@ -355,9 +358,12 @@ public class MorphologyConfig extends Config implements Serializable {
         for (AgentSensor sensor : template.getSensorList()) {
             AgentSensor clone = sensor.clone();
 
-            if (clone instanceof LinearObjectProximityAgentSensor) {
+            if (clone instanceof ThresholdedObjectProximityAgentSensor) {
 
-                ((LinearObjectProximityAgentSensor) clone).setDetectivity(detectivities);
+                double[] detCopy = new double[detectivities.length];
+                System.arraycopy(detectivities, 0, detCopy, 0, detectivities.length);
+
+                ((ThresholdedObjectProximityAgentSensor) clone).setDetectivity(detCopy);
             }
 
             newSensors.add(clone);

@@ -41,12 +41,43 @@ public class ComplementFactory {
             sensitivities[i] = resolution;
         }
 
-        generateAndConfigure(sensitivities, 0, morphologyList);
+        generateAndConfigureSensitivities(sensitivities, 0, morphologyList);
 
         return morphologyList;
     }
 
-    public void generateAndConfigure (double[] sensitivities, int currentIndex,
+    public void generateAndConfigureSensitivities (double[] sensitivities, int currentIndex,
+                                      Set<MorphologyConfig> morphologyList) {
+
+        if (currentIndex > sensitivities.length-1) {
+            return;
+        }
+
+        for (float j = 1; j < (int) (2 / resolution) + 1; j++) {
+
+            sensitivities[currentIndex] = resolution * j;
+            morphologyList.add(MorphologyConfig.MorphologyFromGain(template, sensitivities));
+            generateAndConfigureSensitivities(sensitivities, currentIndex+1, morphologyList);
+        }
+    }
+
+    public Set<MorphologyConfig> generateDetectivitiesForTemplate() {
+
+        Set<MorphologyConfig> morphologyList = new HashSet<>();
+        int numConfigurableSensors = template.getNumAdjustableArrays();
+
+        double[] sensitivities = new double[4];
+
+        for (int i = 0; i < sensitivities.length; i++) {
+            sensitivities[i] = resolution;
+        }
+
+        generateAndConfigureDetectivities(sensitivities, 0, morphologyList);
+
+        return morphologyList;
+    }
+
+    public void generateAndConfigureDetectivities (double[] sensitivities, int currentIndex,
                                       Set<MorphologyConfig> morphologyList) {
 
         if (currentIndex > sensitivities.length-1) {
@@ -56,8 +87,8 @@ public class ComplementFactory {
         for (float j = 1; j < (int) (1 / resolution) + 1; j++) {
 
             sensitivities[currentIndex] = resolution * j;
-            morphologyList.add(MorphologyConfig.MorphologyFromGain(template, sensitivities));
-            generateAndConfigure(sensitivities, currentIndex+1, morphologyList);
+            morphologyList.add(MorphologyConfig.MorphologyFromDetectivities(template, sensitivities));
+            generateAndConfigureDetectivities(sensitivities, currentIndex+1, morphologyList);
         }
     }
 

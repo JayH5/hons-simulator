@@ -3,9 +3,7 @@ package za.redbridge.simulator.config;
 import org.yaml.snakeyaml.Yaml;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.Reader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -267,5 +265,7 @@ public class SimConfig extends Config {
     public float getRobotRadius() { return robotRadius; }
 
     public ResourceFactory getResourceFactory() { return resourceFactory; }
+
+
 
 }

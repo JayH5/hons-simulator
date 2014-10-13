@@ -42,8 +42,6 @@ public class TrainController implements Runnable{
 
     private final ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard;
 
-    private final boolean threadSubruns;
-
     private final String thisIP;
 
     private long testSetID;
@@ -68,7 +66,6 @@ public class TrainController implements Runnable{
         leaderBoard = new TreeMap<>();
         scoreCache = new ConcurrentSkipListSet<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
-        this.threadSubruns = threadSubruns;
 
         this.thisIP = ExperimentUtils.getIP();
         this.testSetID = testSetID;
@@ -78,8 +75,7 @@ public class TrainController implements Runnable{
 
     public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
                            MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
-                           boolean threadSubruns) {
+                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
@@ -87,10 +83,8 @@ public class TrainController implements Runnable{
         leaderBoard = new TreeMap<>();
         scoreCache = new ConcurrentSkipListSet<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
-        this.threadSubruns = threadSubruns;
 
         this.thisIP = ExperimentUtils.getIP();
-
         this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
@@ -103,7 +97,7 @@ public class TrainController implements Runnable{
         pop.reset();
 
         CalculateScore scoreCalculator = new NNScoreCalculator(simConfig, experimentConfig,
-                morphologyConfig, scoreCache, threadSubruns);
+                morphologyConfig, scoreCache);
 
         final EvolutionaryAlgorithm train = CNNEATUtil.constructNEATTrainer(pop, scoreCalculator);
 
@@ -111,8 +105,8 @@ public class TrainController implements Runnable{
         NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
-        controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.parametersToString());
-        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance \t MannWhitneyU");
+        controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
+        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance");
         do {
 
             int epochs = train.getIteration()+1;
@@ -125,7 +119,7 @@ public class TrainController implements Runnable{
             }
 
             controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
-                    "\t" + getVariance() + "\t" + mannWhitneyImprovementTest());
+                    "\t" + getVariance() + "\t");
 
 
             if (epochs % 50 == 0 && previousBest != train.getBestGenome()) {
@@ -144,6 +138,8 @@ public class TrainController implements Runnable{
 
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
+
+        controllerTrainingLogger.info("Best-scoring genotype for this set of detectivity thresholds scored " + previousBest.getScore());
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, previousBest.getScore()), leaderBoard);
 

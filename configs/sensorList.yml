@@ -2,7 +2,7 @@ meta:
   numSensors: 4
 
 1s:
-  type: za.redbridge.simulator.sensor.LinearObjectProximityAgentSensor
+  type: za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor
   readingSize: 4
   bearing: 0
   fieldOfView: 20.0

@@ -30,18 +30,15 @@ public class NNScoreCalculator implements CalculateScore {
 
     //stores fitnesses of population
     private final ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache;
-    private final boolean threadSubruns;
 
     private static Logger neuralScoreLogger = LoggerFactory.getLogger(NNScoreCalculator.class);
 
     public NNScoreCalculator(SimConfig config, ExperimentConfig experimentConfig,
-                             MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache,
-                             boolean threadSubruns) {
+                             MorphologyConfig morphologyConfig, ConcurrentSkipListSet<ComparableNEATNetwork> scoreCache) {
         this.config = config;
         this.morphologyConfig = morphologyConfig;
         this.experimentConfig = experimentConfig;
         this.scoreCache = scoreCache;
-        this.threadSubruns = threadSubruns;
     }
 
     //MLMethod should be NEATNetwork which we calculate the score for
@@ -55,8 +52,6 @@ public class NNScoreCalculator implements CalculateScore {
                 new NEATPhenotype(morphologyConfig.getSensorList(), (NEATNetwork) method,
                         morphologyConfig.getTotalReadingSize()), config.getRobotMass(),
                 config.getRobotRadius(), config.getRobotColour(), config.getObjectsRobots());
-
-        if (threadSubruns) {
 
             Thread[] simThreads = new Thread[testRuns];
 
@@ -78,18 +73,6 @@ public class NNScoreCalculator implements CalculateScore {
                     iex.printStackTrace();
                 }
             }
-
-        }
-        else {
-
-            for (int i = 0; i < testRuns; i++) {
-
-                Simulation simulation = new Simulation(config, robotFactory);
-                simulation.run();
-
-                performances[i] = simulation.getFitness();
-            }
-        }
 
         double score = StatUtils.mean(performances);
         neuralScoreLogger.debug("Controller scored: " + score);
@@ -129,6 +112,4 @@ public class NNScoreCalculator implements CalculateScore {
             scores[ticketNo] = simulation.getFitness();
         }
     }
-
-
 }

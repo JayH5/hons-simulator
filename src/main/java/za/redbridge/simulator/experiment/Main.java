@@ -40,8 +40,8 @@ public class Main {
     @Option(name = "--testComplementSet", aliases = "-t", usage = "Search for this complement set in the shared directories and test them")
     private String timestamp;
 
-    @Option(name = "--evolve-complements", aliases = "-e", usage = "Evolve sensor sensitivity complements using a Genetic Algorithm")
-    private boolean evolveComplements = false;
+    @Option(name = "--testThresholds", aliases = "-th", usage = "Test sensor threshold complements.")
+    private boolean thresholds = false;
 
     public static void main(String[] args) {
 
@@ -61,7 +61,7 @@ public class Main {
         MorphologyConfig morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
 
         MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
-                morphologyConfig, options.evolveComplements, true, true);
+                morphologyConfig);
 
         if (options.timestamp != null) {
 
