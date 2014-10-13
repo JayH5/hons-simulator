@@ -27,12 +27,17 @@ import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
+import static za.redbridge.simulator.Utils.resizeAABB;
+
 /**
  * Created by shsu on 2014/08/13.
  */
 public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static final boolean ALLOW_REMOVAL = true;
+
+    private static final float BLAME_BOX_EXPANSION_RATE = 1.05f;
+    private static final int BLAME_BOX_TRIES = 5;
 
     private int width, height;
     private final AABB aabb;
@@ -94,14 +99,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             resource.setCollected(true);
             resource.getPortrayal().setPaint(Color.CYAN);
 
-            // Check which robots pushed the resource in based on a bounding box
-            Fixture resourceFixture = resource.getBody().getFixtureList();
-            AABB resourceBox = resourceFixture.getAABB(0);
-            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-            this.getBody().getWorld().queryAABB(callback, resourceBox);
+            List<Phenotype> pushingPhenotypes = blamePhenotypes(resource);
 
-            // Update phenotype fitness values
-            List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
             for(Phenotype p : pushingPhenotypes){
                 FitnessStats newFitness = new FitnessStats();
                 FitnessStats existingFitness = fitnesses.putIfAbsent(p, newFitness);
@@ -119,14 +118,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             resource.setCollected(false);
             resource.getPortrayal().setPaint(Color.MAGENTA);
 
-            // Check which robots pushed the resource out based on a bounding box
-            Fixture resourceFixture = resource.getBody().getFixtureList();
-            AABB resourceBox = resourceFixture.getAABB(0);
-            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-            getBody().getWorld().queryAABB(callback, resourceBox);
+            List<Phenotype> pushingPhenotypes = blamePhenotypes(resource);
 
             // Update phenotype fitness values
-            List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
             for(Phenotype p : pushingPhenotypes){
                 FitnessStats newFitness = new FitnessStats();
                 FitnessStats existingFitness = fitnesses.putIfAbsent(p, newFitness);
@@ -135,6 +129,42 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
             }
         }
+    }
+
+    /*
+     * Finds robots very close to the ResourceObject that can be blamed for pushing the resource
+     * in/out of target area.
+     */
+    private List<Phenotype> blamePhenotypes(ResourceObject resource) {
+        // Check which robots pushed the resource out based on a bounding box
+        Fixture resourceFixture = resource.getBody().getFixtureList();
+        AABB resourceBox = resourceFixture.getAABB(0);
+
+        // Try query robots within the AABB of the resource
+        RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+        getBody().getWorld().queryAABB(callback, resourceBox);
+
+        List<Phenotype> phenotypes = callback.getNearbyPhenotypes();
+        if (!phenotypes.isEmpty()) {
+            return phenotypes;
+        }
+
+        // If no robots found, iteratively expand the dimensions of the query box
+        AABB blameBox = new AABB(resourceBox);
+        for (int i = 0; i < BLAME_BOX_TRIES; i++) {
+            float width = (blameBox.upperBound.x - blameBox.lowerBound.x)
+                    * BLAME_BOX_EXPANSION_RATE;
+            float height = (blameBox.upperBound.y - blameBox.upperBound.y)
+                    * BLAME_BOX_EXPANSION_RATE;
+            resizeAABB(blameBox, width, height);
+            getBody().getWorld().queryAABB(callback, blameBox);
+
+            if (!phenotypes.isEmpty()) {
+                break;
+            }
+        }
+
+        return phenotypes;
     }
 
     public int getNumberOfContainedResources() {
