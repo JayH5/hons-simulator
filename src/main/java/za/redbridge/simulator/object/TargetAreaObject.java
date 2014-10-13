@@ -11,8 +11,12 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import sim.engine.SimState;
 import za.redbridge.simulator.FitnessStats;
@@ -76,41 +80,59 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
-                if (containedObjects.add(resource)) {
-                    Fixture resourceFixture = resource.getBody().getFixtureList();
-                    AABB resourceBox = resourceFixture.getAABB(0);
-                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-                    this.getBody().getWorld().queryAABB(callback, resourceBox);
-
-                    List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
-                    
-                    for(Phenotype p : pushingPhenotypes){
-                        fitnesses.putIfAbsent(p, new FitnessStats());
-                        FitnessStats stats = fitnesses.get(p);
-                        stats.addTaskFitness(resource.getValue() / pushingPhenotypes.size());
-                        stats.addRetrievedResource(resource, pushingPhenotypes.size());
-                    }
-                    resource.setCollected(true);
-                    resource.getPortrayal().setPaint(Color.CYAN);
-                }
+                addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
-                if (containedObjects.remove(resource)) {
-                    resource.setCollected(false);
-                    resource.getPortrayal().setPaint(Color.MAGENTA);
+                removeResource(resource);
+            }
+        }
+    }
 
-                    Fixture resourceFixture = resource.getBody().getFixtureList();
-                    AABB resourceBox = resourceFixture.getAABB(0);
-                    RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
-                    this.getBody().getWorld().queryAABB(callback, resourceBox);
+    private void addResource(ResourceObject resource) {
+        if (containedObjects.add(resource)) {
+            // Mark resource as collected
+            resource.setCollected(true);
+            resource.getPortrayal().setPaint(Color.CYAN);
 
-                    List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
-                    for(Phenotype p : pushingPhenotypes){
-                        fitnesses.putIfAbsent(p, new FitnessStats());
-                        FitnessStats stats = fitnesses.get(p);
-                        stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
-                    }
-                }
+            // Check which robots pushed the resource in based on a bounding box
+            Fixture resourceFixture = resource.getBody().getFixtureList();
+            AABB resourceBox = resourceFixture.getAABB(0);
+            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+            this.getBody().getWorld().queryAABB(callback, resourceBox);
+
+            // Update phenotype fitness values
+            List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
+            for(Phenotype p : pushingPhenotypes){
+                FitnessStats newFitness = new FitnessStats();
+                FitnessStats existingFitness = fitnesses.putIfAbsent(p, newFitness);
+
+                FitnessStats stats = existingFitness != null ? existingFitness : newFitness;
+                stats.addTaskFitness(resource.getValue() / pushingPhenotypes.size());
+                stats.addRetrievedResource(resource, pushingPhenotypes.size());
+            }
+        }
+    }
+
+    private void removeResource(ResourceObject resource) {
+        if (containedObjects.remove(resource)) {
+            // Mark resource as no longer collected
+            resource.setCollected(false);
+            resource.getPortrayal().setPaint(Color.MAGENTA);
+
+            // Check which robots pushed the resource out based on a bounding box
+            Fixture resourceFixture = resource.getBody().getFixtureList();
+            AABB resourceBox = resourceFixture.getAABB(0);
+            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+            getBody().getWorld().queryAABB(callback, resourceBox);
+
+            // Update phenotype fitness values
+            List<Phenotype> pushingPhenotypes = callback.getNearbyPhenotypes();
+            for(Phenotype p : pushingPhenotypes){
+                FitnessStats newFitness = new FitnessStats();
+                FitnessStats existingFitness = fitnesses.putIfAbsent(p, newFitness);
+
+                FitnessStats stats = existingFitness != null ? existingFitness : newFitness;
+                stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
             }
         }
     }
@@ -158,16 +180,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // Remove from the score
         if (ALLOW_REMOVAL) {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
-            if (containedObjects.remove(resource)) {
-                resource.setCollected(false);
-                resource.getPortrayal().setPaint(Color.MAGENTA);
-                List<Phenotype> pushingPhenotypes = new ArrayList<>(); //TODO actually find the phenotypes that pushed the box out
-                for(Phenotype p : pushingPhenotypes){
-                    fitnesses.putIfAbsent(p, new FitnessStats());
-                    FitnessStats stats = fitnesses.get(p);
-                    stats.addTaskFitness(-resource.getValue() / pushingPhenotypes.size());
-                }
-            }
+            removeResource(resource);
         }
     }
 
