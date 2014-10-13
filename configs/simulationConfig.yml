@@ -20,7 +20,6 @@ resources:
     height: 0.8
     mass: 5.0
     pushingBots: 3
->>>>>>> neat_ex
 scoring:
   fitnessFunction: za.redbridge.simulator.ea.DefaultFitnessFunction
 factories:

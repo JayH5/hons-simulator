@@ -125,7 +125,6 @@ public class Simulation extends SimState {
             controller.cacheCooperativeScore();
         }
 
-        //System.out.println("Total Fitness: " + getFitness());
         schedule.scheduleRepeating(simState ->
             physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
         );

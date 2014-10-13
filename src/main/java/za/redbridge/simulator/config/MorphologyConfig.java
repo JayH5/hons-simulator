@@ -390,8 +390,8 @@ public class MorphologyConfig extends Config implements Serializable {
 
         for (AgentSensor sensor : sensorList) {
 
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += ((AdjustableSensitivityAgentSensor) sensor).getSensitivity() + "|";
+            if (sensor instanceof LinearObjectProximityAgentSensor) {
+                output = ((LinearObjectProximityAgentSensor) sensor).parametersToString();
             }
         }
 
