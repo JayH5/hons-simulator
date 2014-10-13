@@ -209,7 +209,6 @@ public class SimConfig extends Config {
             }
         }
 
-
         this.simulationSeed = seed;
         this.simulationIterations = iterations;
         this.environmentWidth = width;

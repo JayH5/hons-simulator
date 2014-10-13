@@ -1,15 +1,11 @@
 package za.redbridge.simulator.sensor;
 
-import com.sun.deploy.model.ResourceObject;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.sensor.sensedobjects.CircleSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
-import java.awt.geom.Arc2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;

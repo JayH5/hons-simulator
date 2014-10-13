@@ -6,7 +6,6 @@ import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.ComplementFactory;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -32,13 +31,11 @@ public class MasterExperimentController {
 
     public void testComplements(String outputDir, Set<MorphologyConfig> sensitivityComplements) {
 
-
             Thread[] complementThreads = new Thread[sensitivityComplements.size()];
-
             int i = 0;
             for (MorphologyConfig complement : sensitivityComplements) {
 
-                complementThreads[i] = new Thread(new TrainController(experimentConfig,
+                complementThreads[i] = new Thread(new HomogeneousTrainController(experimentConfig,
                         simulationConfig, complement, morphologyScores));
 
                 complementThreads[i].run();
@@ -92,7 +89,7 @@ public class MasterExperimentController {
             long testSetID = Long.parseLong(temp[0]);
             long testSetSerial = Long.parseLong(temp[1].split(".")[0]);
 
-            final TrainController trainer = new TrainController(experimentConfig, simulationConfig,
+            final HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfig, simulationConfig,
                     entry.getKey(), morphologyScores, true, testSetID, testSetSerial);
 
             trainer.run();

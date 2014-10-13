@@ -23,7 +23,7 @@
         </encoder>
     </appender>
 
-    <logger name="za.redbridge.simulator.experiment.TrainController" level="info">
+    <logger name="za.redbridge.simulator.experiment.HomogeneousTrainController" level="info">
         <appender-ref ref="EPOCH-STATS-FILE" />
     </logger>
 

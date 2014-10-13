@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -28,7 +27,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * Created by racter on 2014/09/11.
  */
 //evaluates one sensor sensitivity complement, trains and gets the best performing NEAT network for this complement
-public class TrainController implements Runnable{
+public class HomogeneousTrainController implements Runnable{
 
     private ExperimentConfig experimentConfig;
     private SimConfig simConfig;
@@ -53,12 +52,12 @@ public class TrainController implements Runnable{
     //the best-performing network for this complement
     private NEATNetwork bestNetwork;
 
-    private static Logger controllerTrainingLogger = LoggerFactory.getLogger(TrainController.class);
+    private static Logger controllerTrainingLogger = LoggerFactory.getLogger(HomogeneousTrainController.class);
 
-    public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
-                           MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard,
-                           boolean threadSubruns, long testSetID, long testSetSerial) {
+    public HomogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                                      MorphologyConfig morphologyConfig,
+                                      ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyLeaderboard,
+                                      boolean threadSubruns, long testSetID, long testSetSerial) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
@@ -73,9 +72,9 @@ public class TrainController implements Runnable{
         this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
-    public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
-                           MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,TreeMap<ComparableNEATNetwork,Integer>> morphologyLeaderboard) {
+    public HomogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                                      MorphologyConfig morphologyConfig,
+                                      ConcurrentSkipListMap<ComparableMorphology, TreeMap<ComparableNEATNetwork, Integer>> morphologyLeaderboard) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;

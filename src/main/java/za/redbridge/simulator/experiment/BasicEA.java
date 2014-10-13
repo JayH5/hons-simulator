@@ -13,6 +13,4 @@ public class BasicEA extends org.encog.ml.ea.train.basic.BasicEA {
         super(thePopulation, theScoreFunction);
     }
 
-
-
 }

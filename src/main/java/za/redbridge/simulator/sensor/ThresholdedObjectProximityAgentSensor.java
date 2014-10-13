@@ -1,6 +1,6 @@
 package za.redbridge.simulator.sensor;
 
-import com.sun.deploy.model.ResourceObject;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
