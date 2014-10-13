@@ -86,7 +86,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private void addResource(ResourceObject resource) {
         if (containedObjects.add(resource)) {
             // Get the robots joined to the resource
-            Set<RobotObject> pushingBots = resource.getPushingBots().keySet();
+            Set<RobotObject> pushingBots = new HashSet<>();
+
+            pushingBots.addAll(resource.getPushingBots().keySet());
 
             // Check which robots pushed the resource in based on a bounding box
             Fixture resourceFixture = resource.getBody().getFixtureList();

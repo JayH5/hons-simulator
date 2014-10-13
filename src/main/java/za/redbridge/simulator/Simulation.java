@@ -258,6 +258,7 @@ public class Simulation extends SimState {
     /*
     //return the score at this point in the simulation
     public double getFitness() {
+
         double resourceFitness = targetArea.getTotalResourceValue() / config.getResourceFactory().getTotalResourceValue();
         double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
         return (resourceFitness * 100) + (speedFitness * 20);
