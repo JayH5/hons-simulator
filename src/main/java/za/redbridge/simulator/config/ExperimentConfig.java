@@ -19,7 +19,9 @@ public class ExperimentConfig extends Config {
     private static final int DEFAULT_POPULATION_SIZE = 15;
     private static final String DEFAULT_MORPHOLOGY_FILEPATH= "sensorList.yml";
     private static final int DEFAULT_RUNS_PER_GENOME = 1;
+
     private static final int DEFAULT_HETERO_TEAM_SIZE = 5;
+
     private static final float DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION = 0.3f;
 
     public enum EvolutionaryAlgorithm {

@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
-import java.io.StringWriter;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -193,7 +193,7 @@ public class SimConfig extends Config {
                     }
 
                     resFactory = (ResourceFactory) o;
-                    Map resources = (Map) config.get("resourceProperties");
+                    Map resources = (Map) config.get("resources");
                     resFactory.configure(resources);
                 } catch (ClassNotFoundException c) {
                     System.out.println("Invalid class name specified in SimConfig: " + rFactory + ". Using default resource factory.");
@@ -211,7 +211,6 @@ public class SimConfig extends Config {
                 robotFactory = robFactory;
             }
         }
-
 
         this.simulationSeed = seed;
         this.simulationIterations = iterations;
@@ -266,4 +265,5 @@ public class SimConfig extends Config {
     public float getRobotRadius() { return robotRadius; }
 
     public ResourceFactory getResourceFactory() { return resourceFactory; }
+
 }

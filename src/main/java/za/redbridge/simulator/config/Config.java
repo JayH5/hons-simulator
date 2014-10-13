@@ -1,5 +1,10 @@
 package za.redbridge.simulator.config;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * Created by shsu on 2014/09/08.
  */
@@ -11,5 +16,26 @@ public abstract class Config {
         }
         System.out.println("Field '" + name + "' not present, using default");
         return false;
+    }
+
+    public String printFile(String filepath) {
+
+        String output = "";
+
+        Path filePath = Paths.get(filepath);
+
+        try (BufferedReader input = Files.newBufferedReader(filePath)) {
+
+            String line = input.readLine();
+            while (line != null) {
+                output += line + "\n";
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        return output;
     }
 }

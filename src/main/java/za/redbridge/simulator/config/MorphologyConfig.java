@@ -3,10 +3,7 @@ package za.redbridge.simulator.config;
 import org.yaml.snakeyaml.Yaml;
 import za.redbridge.simulator.config.Config;
 import za.redbridge.simulator.factories.ComplementFactory;
-import za.redbridge.simulator.sensor.AdjustableSensitivityAgentSensor;
-import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedObjectProximityAgentSensor;
-import za.redbridge.simulator.sensor.ThresholdedProximityAgentSensor;
+import za.redbridge.simulator.sensor.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -216,10 +213,7 @@ public class MorphologyConfig extends Config implements Serializable {
     public void setSensors(List<AgentSensor> sensorList) { this.sensorList = sensorList; }
 
     @Override
-    public int hashCode() {
-
-        return Arrays.hashCode(getSensitivities());
-    }
+    public int hashCode() { return Arrays.hashCode(getSensitivities()); }
 
     @Override
     public boolean equals(Object o) {
@@ -244,14 +238,29 @@ public class MorphologyConfig extends Config implements Serializable {
         return new MorphologyConfig(newSensorList);
     }
 
+    public int getNumAdjustableArrays() {
+
+        int counter = 0;
+        for (AgentSensor sensor : sensorList) {
+
+            if (sensor instanceof LinearObjectProximityAgentSensor) {
+                counter++;
+            }
+        }
+
+        return counter;
+    }
 
     public int getNumAdjustableSensitivities() {
 
         int counter = 0;
         for (AgentSensor sensor : sensorList) {
 
-            if (sensor instanceof ThresholdedObjectProximityAgentSensor || sensor instanceof ThresholdedProximityAgentSensor) {
-                counter++;
+            if (sensor instanceof LinearObjectProximityAgentSensor) {
+                counter+= 4;
+            }
+            else if (sensor instanceof AdjustableSensitivityAgentSensor) {
+                counter+= 1;
             }
         }
 
@@ -261,18 +270,13 @@ public class MorphologyConfig extends Config implements Serializable {
     public double[] getSensitivities() {
 
         double[] output = new double[getNumAdjustableSensitivities()];
-        int index = 0;
 
         for (AgentSensor sensor : sensorList) {
 
-            if (sensor instanceof ThresholdedObjectProximityAgentSensor) {
-                output[index] = ((ThresholdedObjectProximityAgentSensor) sensor).getSensitivity();
-                index++;
+            if (sensor instanceof LinearObjectProximityAgentSensor) {
+                output = ((LinearObjectProximityAgentSensor) sensor).getGain();
             }
-            else if (sensor instanceof ThresholdedProximityAgentSensor) {
-                output[index] = ((ThresholdedProximityAgentSensor) sensor).getSensitivity();
-                index++;
-            }
+
         }
 
         return output;
@@ -345,52 +349,35 @@ public class MorphologyConfig extends Config implements Serializable {
         }
     }
 
-    public static MorphologyConfig MorphologyFromSensitivities (final MorphologyConfig template, double[] sensitivities) {
+
+    public static MorphologyConfig MorphologyFromGain (final MorphologyConfig template, double[] gain) {
 
         ArrayList<AgentSensor> newSensors = new ArrayList<>();
-        int counter = 0;
 
         for (AgentSensor sensor : template.getSensorList()) {
             AgentSensor clone = sensor.clone();
 
-            if (clone instanceof ThresholdedObjectProximityAgentSensor) {
+            if (clone instanceof LinearObjectProximityAgentSensor) {
 
-                ((ThresholdedObjectProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                counter++;
-            } else if (clone instanceof ThresholdedProximityAgentSensor) {
+                double[] gainCopy = new double[gain.length];
+                System.arraycopy(gain, 0, gainCopy, 0, gain.length);
 
-                ((ThresholdedProximityAgentSensor) clone).setSensitivity(sensitivities[counter]);
-                counter++;
+                ((LinearObjectProximityAgentSensor) clone).setGain(gainCopy);
             }
-
             newSensors.add(clone);
         }
 
         return new MorphologyConfig(newSensors);
     }
 
-    public String sensitivitiesToString() {
+    public String parametersToString() {
 
         String output = "";
 
-        for (AgentSensor sensor : sensorList) {
+        for (AgentSensor sensor: sensorList) {
 
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += sensor.getClass().getSimpleName();
-
-                if (sensor instanceof  ThresholdedObjectProximityAgentSensor) {
-                    output += "\t" + ((ThresholdedObjectProximityAgentSensor) sensor).getSensitiveClass();
-                }
-                    output += "\t";
-            }
-        }
-
-        output += "\n";
-
-        for (AgentSensor sensor : sensorList) {
-
-            if (sensor instanceof AdjustableSensitivityAgentSensor) {
-                output += ((AdjustableSensitivityAgentSensor) sensor).getSensitivity() + "\t";
+            if (sensor instanceof  AdjustableSensitivityAgentSensor) {
+                output += ((AdjustableSensitivityAgentSensor) sensor).parametersToString() + "\n";
             }
         }
 
@@ -409,6 +396,11 @@ public class MorphologyConfig extends Config implements Serializable {
         }
 
         return output;
+    }
+
+    public String getMorphologyID() {
+
+        return parametersToString();
     }
 
 }

@@ -1,5 +1,5 @@
 control:
-  maxEpochs: 100
+  maxEpochs: 300
   runsPerGenome: 4
 
 phenotype:
@@ -9,7 +9,6 @@ evolutionaryAlgorithm:
   controllerEA: NEAT
   populationSize: 100
   heteroTeamSize: 20
-
 
 complements:
   generatorResolution: 0.25

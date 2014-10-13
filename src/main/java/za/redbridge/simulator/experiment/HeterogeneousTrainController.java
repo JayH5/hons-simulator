@@ -1,9 +1,8 @@
 package za.redbridge.simulator.experiment;
 
-import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.ml.CalculateScore;
-import org.encog.ml.ea.train.EvolutionaryAlgorithm;
+import org.encog.ml.ea.genome.Genome;
+import org.encog.neural.neat.NEATCODEC;
 import org.encog.neural.neat.NEATNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +24,14 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Created by racter on 2014/09/11.
  */
 //evaluates one sensor sensitivity complement, trains and gets the best performing NEAT network for this complement
-public class TrainController implements Runnable{
+public class HeterogeneousTrainController implements Runnable{
 
     private ExperimentConfig experimentConfig;
     private SimConfig simConfig;
@@ -45,8 +42,6 @@ public class TrainController implements Runnable{
 
     //stores best performing morphology and controller combinations
     private final ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard;
-
-    private final boolean threadSubruns;
 
     private final String thisIP;
 
@@ -59,19 +54,18 @@ public class TrainController implements Runnable{
     //the best-performing network for this complement
     private NEATNetwork bestNetwork;
 
-    private static Logger controllerTrainingLogger = LoggerFactory.getLogger(TrainController.class);
+    private static Logger controllerTrainingLogger = LoggerFactory.getLogger(HeterogeneousTrainController.class);
 
-    public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
-                           MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard,
-                           boolean threadSubruns, long testSetID, long testSetSerial) {
+    public HeterogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                                        MorphologyConfig morphologyConfig,
+                                        ConcurrentSkipListMap<ComparableMorphology, CCHIndividual> morphologyLeaderboard,
+                                         long testSetID, long testSetSerial) {
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
         leaderBoard = new TreeMap<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
-        this.threadSubruns = threadSubruns;
 
         this.thisIP = ExperimentUtils.getIP();
         this.testSetID = testSetID;
@@ -79,20 +73,18 @@ public class TrainController implements Runnable{
         this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
-    public TrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
-                           MorphologyConfig morphologyConfig,
-                           ConcurrentSkipListMap<ComparableMorphology,CCHIndividual> morphologyLeaderboard,
-                           boolean threadSubruns) {
+    public HeterogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                                        MorphologyConfig morphologyConfig,
+                                        ConcurrentSkipListMap<ComparableMorphology, CCHIndividual> morphologyLeaderboard) {
+
 
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
         leaderBoard = new TreeMap<>();
         this.morphologyLeaderboard = morphologyLeaderboard;
-        this.threadSubruns = threadSubruns;
 
         this.thisIP = ExperimentUtils.getIP();
-
         this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
@@ -108,11 +100,19 @@ public class TrainController implements Runnable{
         final CCHNEATTrainer train = CNNEATUtil.constructCCHNEATTrainer(pop, scoreCalculator, experimentConfig, simConfig,
                 morphologyConfig);
 
+        pop.setInitialConnectionDensity(0.5);
+        pop.reset();
+
+
         CCHIndividual lastBestIndividual = new CCHIndividual();
 
+        Genome previousBest = train.getBestGenome();
+        NEATCODEC neatCodec = new NEATCODEC();
+
         controllerTrainingLogger.info("Testset ID: " + testSetID);
-        controllerTrainingLogger.info("Sensitivity values: \n" + morphologyConfig.sensitivitiesToString());
-        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Cooperative Score of Best \t Variance \t MannWhitneyU");
+        controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
+        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance");
+
         do {
 
             System.out.println("Epoch " + train.getIteration() + ".");
@@ -131,6 +131,10 @@ public class TrainController implements Runnable{
                 lastBestIndividual = train.getBestIndividual();
             }
 
+            if (previousBest == null) {
+                previousBest = train.getBestGenome();
+            }
+
             lastBestIndividual = train.getBestIndividual();
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
@@ -144,6 +148,9 @@ public class TrainController implements Runnable{
 
         IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
+
+        controllerTrainingLogger.info("Best-scoring genotype for this set of detectivity thresholds scored " + previousBest.getScore());
+
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
@@ -164,7 +171,6 @@ public class TrainController implements Runnable{
         IOUtils.writeTeam(morphologyConfig, teamWithBestGenotype);
 
         TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, teamWithBestGenotype.getGenotypes());
-
         HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
                 simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
