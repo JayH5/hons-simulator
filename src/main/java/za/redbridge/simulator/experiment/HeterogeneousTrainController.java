@@ -121,7 +121,7 @@ public class HeterogeneousTrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" + train.getBestIndividual().getAverageCooperativeScore() +
+            controllerTrainingLogger.info(epochs + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" +
                     "\t" + train.getVariance());
 
             if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {

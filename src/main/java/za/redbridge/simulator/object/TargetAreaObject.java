@@ -9,6 +9,7 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 import sim.engine.SimState;
+import za.redbridge.simulator.Utils;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
@@ -85,7 +86,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private void addResource(ResourceObject resource) {
         if (containedObjects.add(resource)) {
             // Get the robots joined to the resource
-            Set<RobotObject> pushingBots = resource.getPushingBots().keySet();
+            Set<RobotObject> pushingBots = new HashSet<>();
+
+            pushingBots.addAll(resource.getPushingBots().keySet());
 
             // Check which robots pushed the resource in based on a bounding box
             Fixture resourceFixture = resource.getBody().getFixtureList();
@@ -170,7 +173,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                     * BLAME_BOX_EXPANSION_RATE;
             float height = (blameBox.upperBound.y - blameBox.upperBound.y)
                     * BLAME_BOX_EXPANSION_RATE;
-            resizeAABB(blameBox, width, height);
+            Utils.resizeAABB(blameBox, width, height);
             getBody().getWorld().queryAABB(callback, blameBox);
 
             if (!robots.isEmpty()) {
