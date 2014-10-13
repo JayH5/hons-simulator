@@ -28,12 +28,11 @@ import java.util.Set;
 public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static final boolean ALLOW_REMOVAL = true;
+    private static final float BLAME_BOX_EXPANSION_RATE = 1.05f;
+    private static final int BLAME_BOX_TRIES = 5;
 
     private int width, height;
     private final AABB aabb;
-
-    //total resource value in this target area
-    private double totalResourceValue;
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
@@ -43,7 +42,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     public TargetAreaObject(World world, Vec2 position, int width, int height) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
-        totalResourceValue = 0;
         this.width = width;
         this.height = height;
 
@@ -86,19 +84,30 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private void addResource(ResourceObject resource) {
         if (containedObjects.add(resource)) {
-            // Mark resource as collected
-            resource.setCollected(true);
-            resource.getPortrayal().setPaint(Color.CYAN);
+            // Get the robots joined to the resource
+            Set<RobotObject> pushingBots = resource.getPushingBots().keySet();
 
             // Check which robots pushed the resource in based on a bounding box
             Fixture resourceFixture = resource.getBody().getFixtureList();
             AABB resourceBox = resourceFixture.getAABB(0);
-            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+            RobotObjectQueryCallback callback = new RobotObjectQueryCallback(pushingBots);
             this.getBody().getWorld().queryAABB(callback, resourceBox);
 
-            // Update phenotype fitness values
-            List<RobotObject> pushingBots = callback.getNearbyBots();
-            updateScores(resource, pushingBots);
+            // If no robots joined, get nearby robots
+            if (pushingBots.isEmpty()) {
+                pushingBots = findRobotsNearResource(resource);
+            }
+
+            // Update the fitness for the bots involved
+            if (!pushingBots.isEmpty()) {
+                // Update phenotype fitness values
+                updateScores(resource, pushingBots);
+            }
+
+            // Mark resource as collected (this breaks the joints)
+            resource.setCollected(true);
+            resource.getPortrayal().setPaint(Color.CYAN);
+
         }
     }
 
@@ -108,20 +117,21 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             resource.setCollected(false);
             resource.getPortrayal().setPaint(Color.MAGENTA);
 
+            Set<RobotObject> pushingBots = findRobotsNearResource(resource);
+
             // Check which robots pushed the resource out based on a bounding box
             Fixture resourceFixture = resource.getBody().getFixtureList();
             AABB resourceBox = resourceFixture.getAABB(0);
-            RobotObjectQueryCallback callback = new RobotObjectQueryCallback();
+            RobotObjectQueryCallback callback = new RobotObjectQueryCallback(pushingBots);
             getBody().getWorld().queryAABB(callback, resourceBox);
 
             // Update phenotype fitness values
-            List<RobotObject> pushingBots = callback.getNearbyBots();
             penaliseBots(resource, pushingBots);
         }
     }
 
     //updates the scores of those robots pushing the boxes
-    private void updateScores(ResourceObject resource, List<RobotObject> pushingBots) {
+    private void updateScores(ResourceObject resource, Set<RobotObject> pushingBots) {
 
         int numPushingBots = pushingBots.size();
         double value = resource.getValue()/numPushingBots;
@@ -135,8 +145,43 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         }
     }
 
+    /*
+     * Finds robots very close to the ResourceObject that can be blamed for pushing the resource
+     * in/out of target area.
+     */
+    private Set<RobotObject> findRobotsNearResource(ResourceObject resource) {
+        // Check which robots pushed the resource out based on a bounding box
+        Fixture resourceFixture = resource.getBody().getFixtureList();
+        AABB resourceBox = resourceFixture.getAABB(0);
+
+        // Try query robots within the AABB of the resource
+        Set<RobotObject> robots = new HashSet<>();
+        RobotObjectQueryCallback callback = new RobotObjectQueryCallback(robots);
+        getBody().getWorld().queryAABB(callback, resourceBox);
+
+        if (!robots.isEmpty()) {
+            return robots;
+        }
+
+        // If no robots found, iteratively expand the dimensions of the query box
+        AABB blameBox = new AABB(resourceBox);
+        for (int i = 0; i < BLAME_BOX_TRIES; i++) {
+            float width = (blameBox.upperBound.x - blameBox.lowerBound.x)
+                    * BLAME_BOX_EXPANSION_RATE;
+            float height = (blameBox.upperBound.y - blameBox.upperBound.y)
+                    * BLAME_BOX_EXPANSION_RATE;
+            resizeAABB(blameBox, width, height);
+            getBody().getWorld().queryAABB(callback, blameBox);
+
+            if (!robots.isEmpty()) {
+                break;
+            }
+        }
+        return robots;
+    }
+
     //penalise bots
-    private void penaliseBots(ResourceObject resource, List<RobotObject> bots) {
+    private void penaliseBots(ResourceObject resource, Set<RobotObject> bots) {
 
         double totalArea = resource.getValue();
         int numPushingBots = bots.size();
@@ -146,19 +191,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
             scoreKeepingIndividual.incrementTotalTaskScore(-(totalArea/numPushingBots));
         }
-    }
-
-    //these also update the total resource value
-    private void incrementTotalObjectValue(ResourceObject resource) {
-        totalResourceValue += resource.getValue();
-    }
-
-    private void decrementTotalObjectValue(ResourceObject resource) {
-        totalResourceValue -= resource.getValue();
-    }
-
-    public double getTotalResourceValue() {
-        return totalResourceValue;
     }
 
     public int getNumberOfContainedResources() {
@@ -206,18 +238,22 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static class RobotObjectQueryCallback implements QueryCallback {
 
-        private List<RobotObject> nearbyBots = new ArrayList<>();
+        final Set<RobotObject> robots;
+        RobotObjectQueryCallback(Set<RobotObject> robots) {
+            this.robots = robots;
+        }
 
+        @Override
         public boolean reportFixture(Fixture fixture) {
+            if (!fixture.isSensor()) { // Don't detect robot sensors, only bodies
+                Object bodyUserData = fixture.getBody().getUserData();
+                if (bodyUserData instanceof RobotObject) {
+                    robots.add((RobotObject) bodyUserData);
+                }
 
-            if (fixture.getBody().getUserData() instanceof RobotObject) {
-
-                nearbyBots.add((RobotObject) fixture.getBody().getUserData());
             }
 
             return true;
         }
-
-        public List<RobotObject> getNearbyBots() { return nearbyBots; }
     }
 }
