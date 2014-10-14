@@ -95,6 +95,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 //adjust value of the resource
                 double resourceValue = resource.getMaxValue() -
                         0.9*((resource.getMaxValue()/simConfig.getSimulationIterations())*simState.schedule.getSteps());
+                
                 resource.setValue(resourceValue);
                 addResource(resource);
             } else if (ALLOW_REMOVAL) {
