@@ -19,7 +19,7 @@ import za.redbridge.simulator.sensor.sensedobjects.PolygonSensedObject;
 import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 
-import static za.redbridge.simulator.Utils.testPoint;
+import static za.redbridge.simulator.physics.AABBUtil.testPoint;
 
 /**
  * The Khepera III robots feature two IR proximity sensors facing the ground near the front of the
