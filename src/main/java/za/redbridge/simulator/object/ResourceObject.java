@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import sim.engine.SimState;
+import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.PolygonPortrayal;
@@ -49,6 +50,8 @@ public class ResourceObject extends PhysicalObject {
     private final int pushingRobots;
     private final double value;
 
+    private double adjustedValue;
+
     private boolean isCollected = false;
 
     private final Map<RobotObject, JointDef> pendingJoints;
@@ -62,6 +65,8 @@ public class ResourceObject extends PhysicalObject {
         this.height = height;
         this.pushingRobots = pushingRobots;
         this.value = value;
+
+        adjustedValue = value;
 
         leftAnchorPoints = new AnchorPoint[pushingRobots];
         rightAnchorPoints = new AnchorPoint[pushingRobots];
@@ -141,6 +146,10 @@ public class ResourceObject extends PhysicalObject {
     @Override
     public void step(SimState simState) {
         super.step(simState);
+
+        // Recalculate adjusted fitness based on simulation progress
+        Simulation simulation = (Simulation) simState;
+        adjustedValue = value - 0.9 * simulation.getProgressFraction() * value;
 
         if (!pendingJoints.isEmpty()) {
             // Create all the pending joints and then clear them
@@ -435,6 +444,11 @@ public class ResourceObject extends PhysicalObject {
 
     public double getValue() {
         return value;
+    }
+
+    /** Fitness value adjusted (decreased) for the amount of time the simulation has been running */
+    public double getAdjustedValue() {
+        return adjustedValue;
     }
 
     /**

@@ -1,50 +1,55 @@
 package za.redbridge.simulator;
 
-import za.redbridge.simulator.object.ResourceObject;
-import za.redbridge.simulator.phenotype.Phenotype;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+
+import za.redbridge.simulator.phenotype.Phenotype;
 
 /**
  * Created by xenos on 10/8/14.
  */
 public class FitnessStats {
-    protected Map<Phenotype,Double> phenotypeFitnesses;
-    protected double teamFitness;
 
-    public FitnessStats(){
-        phenotypeFitnesses = new HashMap<>();
-        teamFitness = 0.0;
+    private final Map<Phenotype,Double> phenotypeFitnesses = new HashMap<>();
+    private double teamFitness = 0.0;
+
+    private final double totalResourceValue;
+
+    public FitnessStats(double totalResourceValue) {
+        this.totalResourceValue = totalResourceValue;
     }
 
-    public void setPhenotypeFitness(Phenotype p, double num){
-        phenotypeFitnesses.put(p, num);
+    /**
+     * Increment a phenotype's fitness.
+     * @param phenotype the phenotype who's score will be adjusted
+     * @param adjustedValue the adjusted value of the resource
+     */
+    public void addToPhenotypeFitness(Phenotype phenotype, double adjustedValue) {
+        phenotypeFitnesses.put(phenotype, getPhenotypeFitness(phenotype) + adjustedValue);
     }
 
-    public void addToPhenotypeFitness(Phenotype p, double num){
-        phenotypeFitnesses.put(p, phenotypeFitnesses.getOrDefault(p, 0.0) + num);
+    public double getPhenotypeFitness(Phenotype phenotype) {
+        return phenotypeFitnesses.getOrDefault(phenotype, 0.0);
     }
 
-    public double getPhenotypeFitness(Phenotype p) {
-        return phenotypeFitnesses.getOrDefault(p, 0.0);
+    /**
+     * Increment the team fitness.
+     * @param value the unadjusted resource value
+     */
+    public void addToTeamFitness(double value) {
+        teamFitness += value;
     }
 
-    public void setTeamFitness(double f){
-        teamFitness = f;
-    }
-
-    public void addToTeamFitness(double num){
-        teamFitness += num;
-    }
-
+    /** Gets the normalized team fitness (out of 100) */
     public double getTeamFitness() {
-        return teamFitness;
+        return teamFitness / totalResourceValue * 100;
     }
 
-    public Map<Phenotype,Double> getPhenotypeFitnessMap(){
+    public Map<Phenotype,Double> getPhenotypeFitnessMap() {
         return phenotypeFitnesses;
+    }
+
+    public double getTotalResourceValue() {
+        return totalResourceValue;
     }
 }
