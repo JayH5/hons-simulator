@@ -179,6 +179,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
                 break;
             }
         }
+
+        if (robots.isEmpty()) {
+            throw new RuntimeException("Unable to find robots near resource");
+        }
+
         return robots;
     }
 
