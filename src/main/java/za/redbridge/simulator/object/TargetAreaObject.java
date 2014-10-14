@@ -27,7 +27,9 @@ import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
-import static za.redbridge.simulator.Utils.resizeAABB;
+import static za.redbridge.simulator.physics.AABBUtil.getAABBWidth;
+import static za.redbridge.simulator.physics.AABBUtil.getAABBHeight;
+import static za.redbridge.simulator.physics.AABBUtil.resizeAABB;
 
 /**
  * Created by shsu on 2014/08/13.
@@ -168,10 +170,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // If no robots found, iteratively expand the dimensions of the query box
         AABB blameBox = new AABB(resourceBox);
         for (int i = 0; i < BLAME_BOX_TRIES; i++) {
-            float width = (blameBox.upperBound.x - blameBox.lowerBound.x)
-                    * BLAME_BOX_EXPANSION_RATE;
-            float height = (blameBox.upperBound.y - blameBox.upperBound.y)
-                    * BLAME_BOX_EXPANSION_RATE;
+            float width = getAABBWidth(blameBox) * BLAME_BOX_EXPANSION_RATE;
+            float height = getAABBHeight(blameBox) * BLAME_BOX_EXPANSION_RATE;
             resizeAABB(blameBox, width, height);
             getBody().getWorld().queryAABB(callback, blameBox);
 
