@@ -1,5 +1,5 @@
 control:
-  maxEpochs: 300
+  maxEpochs: 50
   runsPerGenome: 4
 
 phenotype:
@@ -11,7 +11,7 @@ evolutionaryAlgorithm:
   heteroTeamSize: 20
 
 complements:
-  generatorResolution: 0.25
+  generatorResolution: 0.50
 
 morphology:
   morphologyFileName: configs/sensorList.yml

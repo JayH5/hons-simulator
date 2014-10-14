@@ -121,9 +121,10 @@ public class Simulation extends SimState {
     public void finish() {
         kill();
 
+        getFitness();
+
         for (ScoreKeepingController controller: scoreKeepingControllers) {
             controller.cacheTaskScore();
-            controller.cacheCooperativeScore();
         }
 
         schedule.scheduleRepeating(simState ->

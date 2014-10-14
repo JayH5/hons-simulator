@@ -81,7 +81,7 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
         taskScore = 0;
     }
 
-    public void setTaskScore(double taskScore) {
+    public void setTotalTaskScore(double taskScore) {
         this.taskScore = taskScore;
     }
 
@@ -89,6 +89,8 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
 
         return genome;
     }
+
+    public NEATNetwork getNetwork() { return network; }
 
     public NEATTeam getTeam() {
         return team;

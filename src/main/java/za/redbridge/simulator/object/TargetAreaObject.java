@@ -144,7 +144,6 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
             ScoreKeepingController scoreKeepingIndividual = bot.getPhenotype().getController();
             scoreKeepingIndividual.incrementTotalTaskScore(value);
-            scoreKeepingIndividual.incrementTotalCooperativeScore(cooperativeScore);
         }
     }
 
