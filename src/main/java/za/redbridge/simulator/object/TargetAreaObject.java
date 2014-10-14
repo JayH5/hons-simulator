@@ -10,6 +10,7 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 import sim.engine.SimState;
 import za.redbridge.simulator.Utils;
+import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
@@ -39,14 +40,18 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final Set<ResourceObject> containedObjects = new HashSet<>();
     private final List<Fixture> watchedFixtures = new ArrayList<>();
 
+    private final SimConfig simConfig;
+
     //keeps track of what has been pushed into this place
-    public TargetAreaObject(World world, Vec2 position, int width, int height) {
+    public TargetAreaObject(World world, Vec2 position, int width, int height, SimConfig simConfig) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
         this.width = width;
         this.height = height;
 
         aabb = getBody().getFixtureList().getAABB(0);
+
+        this.simConfig = simConfig;
     }
 
     protected static Portrayal createPortrayal(int width, int height) {
@@ -75,6 +80,12 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
+
+                //adjust value of the resource
+                double resourceValue = resource.getMaxValue() -
+                        0.9*((resource.getMaxValue()/simConfig.getSimulationIterations())*simState.schedule.getSteps());
+                
+                resource.setValue(resourceValue);
                 addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area

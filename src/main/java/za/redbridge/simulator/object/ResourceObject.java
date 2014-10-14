@@ -46,7 +46,8 @@ public class ResourceObject extends PhysicalObject {
     private final double width;
     private final double height;
     private final int pushingRobots;
-    private final double value;
+    private final double maxValue;
+    private double value;
 
     private boolean isCollected = false;
 
@@ -60,6 +61,7 @@ public class ResourceObject extends PhysicalObject {
         this.width = width;
         this.height = height;
         this.pushingRobots = pushingRobots;
+        this.maxValue = value;
         this.value = value;
 
         leftAnchorPoints = new AnchorPoint[pushingRobots];
@@ -431,6 +433,10 @@ public class ResourceObject extends PhysicalObject {
     public double getValue() {
         return value;
     }
+
+    public void setValue(double value) { this.value = value; }
+
+    public double getMaxValue() { return maxValue; }
 
     public Map<RobotObject, Joint> getPushingBots() { return joints; }
 
