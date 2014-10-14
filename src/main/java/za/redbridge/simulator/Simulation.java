@@ -217,18 +217,11 @@ public class Simulation extends SimState {
     }
 
     //return the score at this point in the simulation
-    public Map<Phenotype,FitnessStats> getFitness() {
-        Map<Phenotype,FitnessStats> fitnesses = targetArea.getFitnesses();
-        for(PhysicalObject o : placementArea.getPlacedObjects()){
-            if(o instanceof RobotObject)fitnesses.putIfAbsent(((RobotObject) o).getPhenotype(), new FitnessStats());
-        }
-        for(Phenotype p : fitnesses.keySet()){
-            FitnessStats stats = fitnesses.get(p);
-            double resourceFitness = stats.getTaskFitness() / config.getResourceFactory().getTotalResourceValue();
-            double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
-            stats.setTaskFitness(resourceFitness * 100);
-        }
-        return fitnesses;
+    public FitnessStats getFitness() {
+        FitnessStats fitnessStats = targetArea.getFitnessStats();
+        //normalise team fitness to be out of 100
+        fitnessStats.setTeamFitness((fitnessStats.getTeamFitness() * 100) / config.getResourceFactory().getTotalResourceValue());
+        return fitnessStats;
     }
 
     /** Get the number of steps this simulation has been run for. */

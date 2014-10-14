@@ -46,7 +46,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final AABB aabb;
 
     //total resource value in this target area
-    private Map<Phenotype, FitnessStats> fitnesses = new HashMap<>();
+    private FitnessStats fitnessStats = new FitnessStats();
 
     private final SimConfig simConfig;
 
@@ -115,16 +115,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             }
             // Update the fitness for the bots involved
             if (!pushingBots.isEmpty()) {
-                double taskFitness = resource.getValue() / pushingBots.size();
+                double adjustedFitness = resource.getValue() / pushingBots.size();
+                double unadjustedFitness = resource.getMaxValue() / pushingBots.size();
                 for (RobotObject robot : pushingBots) {
-                    FitnessStats fitness = fitnesses.get(robot.getPhenotype());
-                    if (fitness == null) {
-                        fitness = new FitnessStats();
-                        fitnesses.put(robot.getPhenotype(), fitness);
-                    }
-
-                    fitness.addTaskFitness(taskFitness);
-                    fitness.addRetrievedResource(resource, pushingBots.size());
+                    fitnessStats.addToPhenotypeFitness(robot.getPhenotype(), adjustedFitness);
+                    fitnessStats.addToTeamFitness(unadjustedFitness);
                 }
             }
 
@@ -143,15 +138,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             Set<RobotObject> pushingBots = findRobotsNearResource(resource);
 
             if (!pushingBots.isEmpty()) {
-                double taskFitness = resource.getValue() / pushingBots.size();
+                double adjustedFitness = resource.getValue() / pushingBots.size();
+                double unadjustedFitness = resource.getMaxValue() / pushingBots.size();
                 for (RobotObject robot : pushingBots) {
-                    FitnessStats fitness = fitnesses.get(robot.getPhenotype());
-                    if (fitness == null) {
-                        fitness = new FitnessStats();
-                        fitnesses.put(robot.getPhenotype(), fitness);
-                    }
-
-                    fitness.addTaskFitness(-taskFitness); // Subtract fitness
+                    fitnessStats.addToPhenotypeFitness(robot.getPhenotype(), -adjustedFitness);
+                    fitnessStats.addToTeamFitness(-unadjustedFitness);
                 }
             }
         }
@@ -206,8 +197,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         return height;
     }
 
-    public Map<Phenotype, FitnessStats> getFitnesses() {
-        return fitnesses;
+    public FitnessStats getFitnessStats() {
+        return fitnessStats;
     }
 
     @Override

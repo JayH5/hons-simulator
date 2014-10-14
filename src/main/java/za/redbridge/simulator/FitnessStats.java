@@ -1,48 +1,50 @@
 package za.redbridge.simulator;
 
 import za.redbridge.simulator.object.ResourceObject;
+import za.redbridge.simulator.phenotype.Phenotype;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by xenos on 10/8/14.
  */
 public class FitnessStats {
-    protected double taskFitness;
-    protected Set<RetrievedResource> coopFitness;
+    protected Map<Phenotype,Double> phenotypeFitnesses;
+    protected double teamFitness;
 
     public FitnessStats(){
-        taskFitness = 0.0;
-        coopFitness = new HashSet<>();
-    }
-    public void setTaskFitness(double taskFitness){
-        this.taskFitness = taskFitness;
+        phenotypeFitnesses = new HashMap<>();
+        teamFitness = 0.0;
     }
 
-    public void addTaskFitness(double num){
-        taskFitness += num;
+    public void setPhenotypeFitness(Phenotype p, double num){
+        phenotypeFitnesses.put(p, num);
     }
 
-    public double getTaskFitness() {
-        return taskFitness;
+    public void addToPhenotypeFitness(Phenotype p, double num){
+        phenotypeFitnesses.put(p, phenotypeFitnesses.getOrDefault(p, 0.0) + num);
     }
 
-    public Set<RetrievedResource> getCoopFitness() {
-        return coopFitness;
+    public double getPhenotypeFitness(Phenotype p) {
+        return phenotypeFitnesses.getOrDefault(p, 0.0);
     }
 
-    public void addRetrievedResource(ResourceObject o, int numRobots){
-        coopFitness.add(new RetrievedResource(o, numRobots));
+    public void setTeamFitness(double f){
+        teamFitness = f;
     }
 
-    protected class RetrievedResource{
-        public ResourceObject resource;
-        public int numRobots;
+    public void addToTeamFitness(double num){
+        teamFitness += num;
+    }
 
-        public RetrievedResource(ResourceObject resource, int numRobots){
-            this.resource = resource;
-            this.numRobots = numRobots;
-        }
+    public double getTeamFitness() {
+        return teamFitness;
+    }
+
+    public Map<Phenotype,Double> getPhenotypeFitnessMap(){
+        return phenotypeFitnesses;
     }
 }
