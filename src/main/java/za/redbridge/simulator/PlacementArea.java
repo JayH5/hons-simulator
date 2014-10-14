@@ -14,11 +14,11 @@ import ec.util.MersenneTwisterFast;
 import za.redbridge.simulator.object.PhysicalObject;
 
 
-import static za.redbridge.simulator.Utils.createAABB;
-import static za.redbridge.simulator.Utils.moveAABB;
 import static za.redbridge.simulator.Utils.randomAngle;
 import static za.redbridge.simulator.Utils.randomRange;
-import static za.redbridge.simulator.Utils.resizeAABB;
+import static za.redbridge.simulator.physics.AABBUtil.createAABB;
+import static za.redbridge.simulator.physics.AABBUtil.moveAABB;
+import static za.redbridge.simulator.physics.AABBUtil.resizeAABB;
 
 /**
  * Describes an area for placing objects. Typically, an object factory will request some space in
