@@ -16,6 +16,7 @@ import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
+import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
@@ -126,7 +127,7 @@ public class Simulation extends SimState {
         }
 
         schedule.scheduleRepeating(simState ->
-            physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+                        physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
         );
     }
 
@@ -255,14 +256,23 @@ public class Simulation extends SimState {
         this.stopOnceCollected = stopOnceCollected;
     }
 
-    /*
-    //return the score at this point in the simulation
+
+    //return the team score at this point in the simulation
     public double getFitness() {
 
-        double resourceFitness = targetArea.getTotalResourceValue() / config.getResourceFactory().getTotalResourceValue();
-        double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
-        return (resourceFitness * 100) + (speedFitness * 20);
-    }*/
+        int teamFitness = 0;
+
+        for(ScoreKeepingController controller : scoreKeepingControllers){
+
+            double resourceFitness = controller.getCurrentTaskScore() / config.getResourceFactory().getTotalResourceValue();
+            double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
+            double totalScore = resourceFitness * 100;
+            controller.setTotalTaskScore(totalScore);
+            teamFitness += totalScore;
+        }
+
+        return teamFitness;
+    }
 
     /** Get the number of steps this simulation has been run for. */
     public long getStepNumber() {

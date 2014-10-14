@@ -15,12 +15,10 @@ import java.util.*;
 public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparable<CCHIndividual> {
 
     //scores in a single run
-    private double cooperativeScore;
     private double taskScore;
 
     //scores across all runs
     private final List<Double> allTaskScores;
-    private final List<Double> allCooperativeScores;
 
     private final NEATNetwork network;
     //the NEATGenome backing this NEATNetwork.
@@ -41,44 +39,20 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
         this.team = team;
 
         allTaskScores = Collections.synchronizedList(new ArrayList<>());
-        allCooperativeScores = Collections.synchronizedList(new ArrayList<>());
     }
 
     public CCHIndividual() {
         allTaskScores = Collections.synchronizedList(new ArrayList<>());
-        allCooperativeScores = Collections.synchronizedList(new ArrayList<>());
-
         network = null;
         genome = null;
         team = null;
     }
 
-    @Override
-    public void incrementTotalCooperativeScore(double input) {
-
-        cooperativeScore += input;
-    }
 
     @Override
     public void incrementTotalTaskScore(double input) {
 
         taskScore += input;
-    }
-
-    @Override
-    public double getAverageCooperativeScore() {
-
-        double sum = 0;
-        double num = 1;
-        synchronized (allCooperativeScores) {
-
-            Iterator<Double> it = allCooperativeScores.iterator();
-            while (it.hasNext()) {
-                sum += it.next();
-            }
-        }
-
-        return sum/num;
     }
 
     @Override
@@ -100,13 +74,6 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
     @Override
     public double getCurrentTaskScore() { return taskScore; }
 
-    @Override
-    public double getCurrentCooperativeScore() { return cooperativeScore; }
-
-    public NEATNetwork getNetwork() {
-
-        return network;
-    }
 
     @Override
     public void cacheTaskScore() {
@@ -114,10 +81,8 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
         taskScore = 0;
     }
 
-    @Override
-    public void cacheCooperativeScore() {
-        allCooperativeScores.add(cooperativeScore);
-        cooperativeScore = 0;
+    public void setTaskScore(double taskScore) {
+        this.taskScore = taskScore;
     }
 
     public NEATGenome getGenome() {
