@@ -145,9 +145,9 @@ public class AgentModel extends GPModel {
         Simulation sim = new Simulation(config, robotFactory);
         sim.run();
         System.out.print('.');
-        Map<Phenotype,FitnessStats> fitnesses = sim.getFitness();
+        FitnessStats fitnesses = sim.getFitness();
         List<Double> result = new ArrayList<>();
-        for(Phenotype p : phenotypes) result.add(-fitnesses.get(p).getTaskFitness());
+        for(Phenotype p : phenotypes) result.add(-fitnesses.getPhenotypeFitness(p));
         return result;
     }
 
