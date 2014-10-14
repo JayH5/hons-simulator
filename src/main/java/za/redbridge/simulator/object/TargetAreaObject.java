@@ -20,7 +20,6 @@ import java.util.Set;
 
 import sim.engine.SimState;
 import za.redbridge.simulator.FitnessStats;
-import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
@@ -48,21 +47,18 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     //total resource value in this target area
     private FitnessStats fitnessStats = new FitnessStats();
 
-    private final SimConfig simConfig;
-
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
     private final List<Fixture> watchedFixtures = new ArrayList<>();
 
     //keeps track of what has been pushed into this place
-    public TargetAreaObject(World world, Vec2 position, int width, int height, SimConfig simConfig) {
+    public TargetAreaObject(World world, Vec2 position, int width, int height) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
         this.width = width;
         this.height = height;
 
         aabb = getBody().getFixtureList().getAABB(0);
-        this.simConfig = simConfig;
     }
 
     protected static Portrayal createPortrayal(int width, int height) {
@@ -89,13 +85,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // Check if any objects have passed into the target area completely or have left
         for (Fixture fixture : watchedFixtures) {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
-
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
-                //adjust value of the resource
-                double resourceValue = resource.getMaxValue() -
-                        0.9*((resource.getMaxValue()/simConfig.getSimulationIterations())*simState.schedule.getSteps());
-                resource.setValue(resourceValue);
                 addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
@@ -113,6 +104,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (pushingBots.isEmpty()) {
                 pushingBots = findRobotsNearResource(resource);
             }
+
             // Update the fitness for the bots involved
             if (!pushingBots.isEmpty()) {
                 double adjustedFitness = resource.getValue() / pushingBots.size();

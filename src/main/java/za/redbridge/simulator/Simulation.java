@@ -147,7 +147,7 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height, config);
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height);
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).

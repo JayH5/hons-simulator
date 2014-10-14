@@ -47,8 +47,7 @@ public class ResourceObject extends PhysicalObject {
     private final double width;
     private final double height;
     private final int pushingRobots;
-    private final double maxValue;
-    private double value;
+    private final double value;
 
     private boolean isCollected = false;
 
@@ -62,8 +61,7 @@ public class ResourceObject extends PhysicalObject {
         this.width = width;
         this.height = height;
         this.pushingRobots = pushingRobots;
-        this.maxValue = value;
-        this.value = maxValue;
+        this.value = value;
 
         leftAnchorPoints = new AnchorPoint[pushingRobots];
         rightAnchorPoints = new AnchorPoint[pushingRobots];
@@ -438,12 +436,6 @@ public class ResourceObject extends PhysicalObject {
     public double getValue() {
         return value;
     }
-
-    public void setValue(double value) {
-        this.value = value;
-    }
-
-    public double getMaxValue() { return maxValue; }
 
     /**
      * Container class for points along the sticky edge of the resource where robots can attach to
