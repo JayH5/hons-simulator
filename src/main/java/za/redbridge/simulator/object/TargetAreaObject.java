@@ -36,7 +36,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static final boolean ALLOW_REMOVAL = true;
 
-    private static final float BLAME_BOX_EXPANSION_RATE = 1.05f;
+    private static final float BLAME_BOX_EXPANSION_RATE = 1.2f;
     private static final int BLAME_BOX_TRIES = 5;
 
     private int width, height;
