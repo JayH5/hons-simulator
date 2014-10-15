@@ -12,24 +12,22 @@ import org.jbox2d.dynamics.contacts.Contact;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import sim.engine.SimState;
 import za.redbridge.simulator.FitnessStats;
-import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.phenotype.Phenotype;
+import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
 
-import static za.redbridge.simulator.physics.AABBUtil.getAABBWidth;
+
 import static za.redbridge.simulator.physics.AABBUtil.getAABBHeight;
+import static za.redbridge.simulator.physics.AABBUtil.getAABBWidth;
 import static za.redbridge.simulator.physics.AABBUtil.resizeAABB;
 
 /**
@@ -46,23 +44,22 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
     private final AABB aabb;
 
     //total resource value in this target area
-    private FitnessStats fitnessStats = new FitnessStats();
-
-    private final SimConfig simConfig;
+    private final FitnessStats fitnessStats;
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
     private final List<Fixture> watchedFixtures = new ArrayList<>();
 
     //keeps track of what has been pushed into this place
-    public TargetAreaObject(World world, Vec2 position, int width, int height, SimConfig simConfig) {
+    public TargetAreaObject(World world, Vec2 position, int width, int height,
+            double totalResourceValue) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
         this.width = width;
         this.height = height;
+        this.fitnessStats = new FitnessStats(totalResourceValue);
 
         aabb = getBody().getFixtureList().getAABB(0);
-        this.simConfig = simConfig;
     }
 
     protected static Portrayal createPortrayal(int width, int height) {
@@ -89,13 +86,11 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // Check if any objects have passed into the target area completely or have left
         for (Fixture fixture : watchedFixtures) {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
-
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
-                //adjust value of the resource
-                double resourceValue = resource.getMaxValue() -
-                        0.9*((resource.getMaxValue()/simConfig.getSimulationIterations())*simState.schedule.getSteps());
-                resource.setValue(resourceValue);
+
+                // Recalculate adjusted fitness based on simulation progress
+                resource.adjustValue(simState);
                 addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
@@ -106,6 +101,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private void addResource(ResourceObject resource) {
         if (containedObjects.add(resource)) {
+            fitnessStats.addToTeamFitness(resource.getValue());
+
             // Get the robots joined to the resource
             Set<RobotObject> pushingBots = resource.getPushingRobots();
 
@@ -113,13 +110,13 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             if (pushingBots.isEmpty()) {
                 pushingBots = findRobotsNearResource(resource);
             }
+
             // Update the fitness for the bots involved
             if (!pushingBots.isEmpty()) {
-                double adjustedFitness = resource.getValue() / pushingBots.size();
-                double unadjustedFitness = resource.getMaxValue() / pushingBots.size();
+                double adjustedFitness = resource.getAdjustedValue() / pushingBots.size();
                 for (RobotObject robot : pushingBots) {
-                    fitnessStats.addToPhenotypeFitness(robot.getPhenotype(), adjustedFitness);
-                    fitnessStats.addToTeamFitness(unadjustedFitness);
+                    fitnessStats
+                            .addToPhenotypeFitness(robot.getPhenotype(), adjustedFitness);
                 }
             }
 
@@ -131,6 +128,8 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private void removeResource(ResourceObject resource) {
         if (containedObjects.remove(resource)) {
+            fitnessStats.addToTeamFitness(-resource.getValue());
+
             // Mark resource as no longer collected
             resource.setCollected(false);
             resource.getPortrayal().setPaint(Color.MAGENTA);
@@ -138,11 +137,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             Set<RobotObject> pushingBots = findRobotsNearResource(resource);
 
             if (!pushingBots.isEmpty()) {
-                double adjustedFitness = resource.getValue() / pushingBots.size();
-                double unadjustedFitness = resource.getMaxValue() / pushingBots.size();
+                double adjustedFitness = resource.getAdjustedValue() / pushingBots.size();
                 for (RobotObject robot : pushingBots) {
                     fitnessStats.addToPhenotypeFitness(robot.getPhenotype(), -adjustedFitness);
-                    fitnessStats.addToTeamFitness(-unadjustedFitness);
                 }
             }
         }

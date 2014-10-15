@@ -4,6 +4,8 @@ import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
+import java.util.Set;
+
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
@@ -13,12 +15,8 @@ import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The main simulation state.
@@ -147,7 +145,8 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height, config);
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height,
+                config.getResourceFactory().getTotalResourceValue());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
@@ -218,10 +217,12 @@ public class Simulation extends SimState {
 
     //return the score at this point in the simulation
     public FitnessStats getFitness() {
-        FitnessStats fitnessStats = targetArea.getFitnessStats();
-        //normalise team fitness to be out of 100
-        fitnessStats.setTeamFitness((fitnessStats.getTeamFitness() * 100) / config.getResourceFactory().getTotalResourceValue());
-        return fitnessStats;
+        return targetArea.getFitnessStats();
+    }
+
+    /** Gets the progress of the simulation as a percentage */
+    public double getProgressFraction() {
+        return (double) schedule.getSteps() / config.getSimulationIterations();
     }
 
     /** Get the number of steps this simulation has been run for. */

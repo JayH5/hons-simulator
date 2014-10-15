@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import sim.engine.SimState;
+import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.PolygonPortrayal;
@@ -47,8 +48,9 @@ public class ResourceObject extends PhysicalObject {
     private final double width;
     private final double height;
     private final int pushingRobots;
-    private final double maxValue;
-    private double value;
+    private final double value;
+
+    private double adjustedValue;
 
     private boolean isCollected = false;
 
@@ -62,8 +64,9 @@ public class ResourceObject extends PhysicalObject {
         this.width = width;
         this.height = height;
         this.pushingRobots = pushingRobots;
-        this.maxValue = value;
-        this.value = maxValue;
+        this.value = value;
+
+        adjustedValue = value;
 
         leftAnchorPoints = new AnchorPoint[pushingRobots];
         rightAnchorPoints = new AnchorPoint[pushingRobots];
@@ -92,7 +95,7 @@ public class ResourceObject extends PhysicalObject {
                 .setRectangular(width, height, mass)
                 .setFriction(0.3f)
                 .setRestitution(0.4f)
-                .setGroundFriction(0.8f, 0.1f, 0.8f, 0.1f)
+                .setGroundFriction(0.6f, 0.1f, 0.05f, 0.01f)
                 .setFilterCategoryBits(FilterConstants.CategoryBits.RESOURCE)
                 .build(world);
     }
@@ -138,6 +141,11 @@ public class ResourceObject extends PhysicalObject {
             default:
                 return null;
         }
+    }
+
+    public void adjustValue(SimState simState) {
+        Simulation simulation = (Simulation) simState;
+        this.adjustedValue = value - 0.9 * simulation.getProgressFraction() * value;
     }
 
     @Override
@@ -439,11 +447,10 @@ public class ResourceObject extends PhysicalObject {
         return value;
     }
 
-    public void setValue(double value) {
-        this.value = value;
+    /** Fitness value adjusted (decreased) for the amount of time the simulation has been running */
+    public double getAdjustedValue() {
+        return adjustedValue;
     }
-
-    public double getMaxValue() { return maxValue; }
 
     /**
      * Container class for points along the sticky edge of the resource where robots can attach to
