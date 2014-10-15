@@ -163,7 +163,7 @@ public class Simulation extends SimState {
 
 
         targetArea = new TargetAreaObject(physicsWorld, position, width, height,
-                config.getResourceFactory().getTotalResourceValue());
+                config.getResourceFactory().getTotalResourceValue(), config.getSimulationIterations());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).

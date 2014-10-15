@@ -55,12 +55,12 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     //keeps track of what has been pushed into this place
     public TargetAreaObject(World world, Vec2 position, int width, int height,
-            double totalResourceValue) {
+            double totalResourceValue, int maxSteps) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
         this.width = width;
         this.height = height;
-        this.fitnessStats = new FitnessStats(totalResourceValue);
+        this.fitnessStats = new FitnessStats(totalResourceValue, maxSteps);
 
         aabb = getBody().getFixtureList().getAABB(0);
 
