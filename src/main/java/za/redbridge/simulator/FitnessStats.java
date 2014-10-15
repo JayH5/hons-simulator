@@ -1,48 +1,55 @@
 package za.redbridge.simulator;
 
-import za.redbridge.simulator.object.ResourceObject;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.HashSet;
-import java.util.Set;
+import za.redbridge.simulator.phenotype.Phenotype;
 
 /**
  * Created by xenos on 10/8/14.
  */
 public class FitnessStats {
-    protected double taskFitness;
-    protected Set<RetrievedResource> coopFitness;
 
-    public FitnessStats(){
-        taskFitness = 0.0;
-        coopFitness = new HashSet<>();
-    }
-    public void setTaskFitness(double taskFitness){
-        this.taskFitness = taskFitness;
-    }
+    private final Map<Phenotype,Double> phenotypeFitnesses = new HashMap<>();
+    private double teamFitness = 0.0;
 
-    public void addTaskFitness(double num){
-        taskFitness += num;
+    private final double totalResourceValue;
+
+    public FitnessStats(double totalResourceValue) {
+        this.totalResourceValue = totalResourceValue;
     }
 
-    public double getTaskFitness() {
-        return taskFitness;
+    /**
+     * Increment a phenotype's fitness.
+     * @param phenotype the phenotype who's score will be adjusted
+     * @param adjustedValue the adjusted value of the resource
+     */
+    public void addToPhenotypeFitness(Phenotype phenotype, double adjustedValue) {
+        phenotypeFitnesses.put(phenotype, getPhenotypeFitness(phenotype) + adjustedValue);
     }
 
-    public Set<RetrievedResource> getCoopFitness() {
-        return coopFitness;
+    public double getPhenotypeFitness(Phenotype phenotype) {
+        return phenotypeFitnesses.getOrDefault(phenotype, 0.0);
     }
 
-    public void addRetrievedResource(ResourceObject o, int numRobots){
-        coopFitness.add(new RetrievedResource(o, numRobots));
+    /**
+     * Increment the team fitness.
+     * @param value the unadjusted resource value
+     */
+    public void addToTeamFitness(double value) {
+        teamFitness += value;
     }
 
-    protected class RetrievedResource{
-        public ResourceObject resource;
-        public int numRobots;
+    /** Gets the normalized team fitness (out of 100) */
+    public double getTeamFitness() {
+        return teamFitness / totalResourceValue * 100;
+    }
 
-        public RetrievedResource(ResourceObject resource, int numRobots){
-            this.resource = resource;
-            this.numRobots = numRobots;
-        }
+    public Map<Phenotype,Double> getPhenotypeFitnessMap() {
+        return phenotypeFitnesses;
+    }
+
+    public double getTotalResourceValue() {
+        return totalResourceValue;
     }
 }

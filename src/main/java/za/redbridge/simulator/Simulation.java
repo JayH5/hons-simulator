@@ -4,6 +4,8 @@ import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
+import java.util.Set;
+
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
@@ -13,12 +15,8 @@ import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The main simulation state.
@@ -147,7 +145,8 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height, config);
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height,
+                config.getResourceFactory().getTotalResourceValue());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
@@ -217,18 +216,13 @@ public class Simulation extends SimState {
     }
 
     //return the score at this point in the simulation
-    public Map<Phenotype,FitnessStats> getFitness() {
-        Map<Phenotype,FitnessStats> fitnesses = targetArea.getFitnesses();
-        for(PhysicalObject o : placementArea.getPlacedObjects()){
-            if(o instanceof RobotObject)fitnesses.putIfAbsent(((RobotObject) o).getPhenotype(), new FitnessStats());
-        }
-        for(Phenotype p : fitnesses.keySet()){
-            FitnessStats stats = fitnesses.get(p);
-            double resourceFitness = stats.getTaskFitness() / config.getResourceFactory().getTotalResourceValue();
-            double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
-            stats.setTaskFitness(resourceFitness * 100);
-        }
-        return fitnesses;
+    public FitnessStats getFitness() {
+        return targetArea.getFitnessStats();
+    }
+
+    /** Gets the progress of the simulation as a percentage */
+    public double getProgressFraction() {
+        return (double) schedule.getSteps() / config.getSimulationIterations();
     }
 
     /** Get the number of steps this simulation has been run for. */
