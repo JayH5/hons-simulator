@@ -44,8 +44,8 @@ public class FitnessStats {
     }
 
     /** Gets the normalized team fitness (out of 120 if stepsTaken is provided; out of 100 otherwise) */
-    public double getTeamFitness(Optional<Integer> stepsTaken) {
-        return (teamFitness / totalResourceValue) * 100 + (stepsTaken.orElse(0) / maxSteps) * 20;
+    public double getTeamFitness(Optional<Long> stepsTaken) {
+        return (teamFitness / totalResourceValue) * 100 + (stepsTaken.orElse(0L) / maxSteps) * 20;
     }
 
     public Map<Phenotype,Double> getPhenotypeFitnessMap() {
