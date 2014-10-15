@@ -92,6 +92,9 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
+
+                // Recalculate adjusted fitness based on simulation progress
+                resource.adjustValue(simState);
                 addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
@@ -114,7 +117,7 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
             // Update the fitness for the bots involved
             if (!pushingBots.isEmpty()) {
-                double adjustedFitness = resource.getValue() / pushingBots.size();
+                double adjustedFitness = resource.getAdjustedValue() / pushingBots.size();
                 for (RobotObject robot : pushingBots) {
                     fitnessStats
                             .addToPhenotypeFitness(robot.getPhenotype(), adjustedFitness);

@@ -34,8 +34,8 @@ public class BodyBuilder {
     private boolean groundFriction = false;
     private float staticCOF;
     private float kineticCOF;
-    private float staticFrictionTorque;
-    private float kineticFrictionTorque;
+    private float staticTorqueCOF;
+    private float kineticTorqueCOF;
 
     public BodyBuilder() {
         bd.setAngularDamping(DEFAULT_ANGULAR_DAMPING);
@@ -185,11 +185,11 @@ public class BodyBuilder {
 
 
     public BodyBuilder setGroundFriction(float staticCOF, float kineticCOF,
-            float staticFrictionTorque, float kineticFrictionTorque) {
+            float staticTorqueCOF, float kineticTorqueCOF) {
         this.staticCOF = staticCOF;
         this.kineticCOF = kineticCOF;
-        this.staticFrictionTorque = staticFrictionTorque;
-        this.kineticFrictionTorque = kineticFrictionTorque;
+        this.staticTorqueCOF = staticTorqueCOF;
+        this.kineticTorqueCOF = kineticTorqueCOF;
         groundFriction = true;
         return this;
     }
@@ -201,10 +201,12 @@ public class BodyBuilder {
         if (groundFriction) {
             TopDownFrictionJointDef jd = new TopDownFrictionJointDef();
 
-            // TODO: calculate torque friction based on mass and shape
+            // TODO: calculate torque friction based on shape
             float normalForce = body.getMass() * ACCELERATION_GRAVITY;
             float staticFrictionForce = normalForce * staticCOF;
             float kineticFrictionForce = normalForce * kineticCOF;
+            float staticFrictionTorque = normalForce * staticTorqueCOF;
+            float kineticFrictionTorque = normalForce * kineticTorqueCOF;
             jd.initialize(body, staticFrictionForce, kineticFrictionForce, staticFrictionTorque,
                     kineticFrictionTorque);
             world.createJoint(jd);
