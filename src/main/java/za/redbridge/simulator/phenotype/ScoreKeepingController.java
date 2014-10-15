@@ -8,11 +8,6 @@ public interface ScoreKeepingController {
 
     public double getAverageTaskScore();
 
-    public double getCurrentTaskScore();
+    public void addTaskScore(double score);
 
-    public void incrementTotalTaskScore(double score);
-
-    public void setTotalTaskScore(double score);
-
-    public void cacheTaskScore();
 }

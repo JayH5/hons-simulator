@@ -1,6 +1,6 @@
 control:
-  maxEpochs: 5
-  runsPerGenome: 100
+  maxEpochs: 300
+  runsPerGenome: 4
 
 phenotype:
   robotPhenotype: za.redbridge.simulator.phenotype.NEATPhenotype

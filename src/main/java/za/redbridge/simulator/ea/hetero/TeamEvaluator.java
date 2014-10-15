@@ -34,23 +34,20 @@ public class TeamEvaluator implements Runnable {
 
     public void run() {
 
-            TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
+        TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
 
-            HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
-                    simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
+        HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
+                simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
-
-            Simulation simulation = new Simulation(simConfig, heteroFactory);
-            simulation.run();
+        Simulation simulation = new Simulation(simConfig, heteroFactory);
+        simulation.run();
 
         FitnessStats fitnessStats = simulation.getFitness();
-
         Map<Phenotype,Double> fitnesses = fitnessStats.getPhenotypeFitnessMap();
 
         for (Map.Entry<Phenotype,Double> entry: fitnesses.entrySet()) {
 
-            entry.getKey().getController().incrementTotalTaskScore(entry.getValue());
-            entry.getKey().getController().cacheTaskScore();
+            entry.getKey().getController().addTaskScore(entry.getValue());
         }
 
         team.setTeamFitness(fitnessStats.getTeamFitness());

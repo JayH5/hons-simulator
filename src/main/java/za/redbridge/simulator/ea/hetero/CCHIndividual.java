@@ -50,10 +50,7 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
 
 
     @Override
-    public void incrementTotalTaskScore(double input) {
-
-        taskScore += input;
-    }
+    public void addTaskScore(double input) { allTaskScores.add(input); }
 
     @Override
     public double getAverageTaskScore() {
@@ -69,20 +66,6 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
         }
 
         return sum/num;
-    }
-
-    @Override
-    public double getCurrentTaskScore() { return taskScore; }
-
-
-    @Override
-    public void cacheTaskScore() {
-        allTaskScores.add(taskScore);
-        taskScore = 0;
-    }
-
-    public void setTotalTaskScore(double taskScore) {
-        this.taskScore = taskScore;
     }
 
     public NEATGenome getGenome() {

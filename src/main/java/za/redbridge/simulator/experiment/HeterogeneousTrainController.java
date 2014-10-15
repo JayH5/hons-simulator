@@ -77,7 +77,6 @@ public class HeterogeneousTrainController implements Runnable{
                                         MorphologyConfig morphologyConfig,
                                         ConcurrentSkipListMap<ComparableMorphology, NEATTeam> morphologyLeaderboard) {
 
-
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
@@ -103,10 +102,7 @@ public class HeterogeneousTrainController implements Runnable{
         pop.setInitialConnectionDensity(0.5);
         pop.reset();
 
-        CCHIndividual lastBestIndividual = new CCHIndividual();
-
         Genome previousBest = train.getBestGenome();
-        NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
@@ -124,17 +120,9 @@ public class HeterogeneousTrainController implements Runnable{
             controllerTrainingLogger.info(epochs + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" +
                     "\t" + train.getVariance());
 
-            if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
-                /*IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");*/
-                lastBestIndividual = train.getBestIndividual();
-            }
-
             if (previousBest == null) {
                 previousBest = train.getBestGenome();
             }
-
-            lastBestIndividual = train.getBestIndividual();
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
             controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
@@ -149,7 +137,6 @@ public class HeterogeneousTrainController implements Runnable{
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
         controllerTrainingLogger.info("Best-scoring genotype for this set of gain constants scored: " + train.getBestIndividual().getAverageTaskScore());
-
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
@@ -182,6 +169,4 @@ public class HeterogeneousTrainController implements Runnable{
         sim.display.Console console = new sim.display.Console(video);
         console.setVisible(true);
     }
-
-
 }
