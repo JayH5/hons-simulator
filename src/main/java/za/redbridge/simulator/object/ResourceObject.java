@@ -95,7 +95,7 @@ public class ResourceObject extends PhysicalObject {
                 .setRectangular(width, height, mass)
                 .setFriction(0.3f)
                 .setRestitution(0.4f)
-                .setGroundFriction(0.8f, 0.1f, 0.8f, 0.1f)
+                .setGroundFriction(0.6f, 0.1f, 0.05f, 0.01f)
                 .setFilterCategoryBits(FilterConstants.CategoryBits.RESOURCE)
                 .build(world);
     }
