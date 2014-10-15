@@ -148,7 +148,7 @@ public class HeterogeneousTrainController implements Runnable{
         //IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
-        controllerTrainingLogger.info("Best-scoring genotype for this set of detectivity thresholds scored " + previousBest.getScore());
+        controllerTrainingLogger.info("Best-scoring genotype for this set of gain constants scored: " + train.getBestIndividual().getAverageTaskScore());
 
 
         //delete this morphology file if it was a result of the multihost operation

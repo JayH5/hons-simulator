@@ -1,5 +1,5 @@
 control:
-  maxEpochs: 50
+  maxEpochs: 2
   runsPerGenome: 4
 
 phenotype:

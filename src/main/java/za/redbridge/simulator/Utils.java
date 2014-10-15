@@ -1,6 +1,5 @@
 package za.redbridge.simulator;
 
-import org.jbox2d.collision.AABB;
 import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 
@@ -60,39 +59,6 @@ public final class Utils {
         return new Double2D(vec2.x, vec2.y);
     }
 
-    /** Move an AABB, keeping the same size. */
-    public static void moveAABB(AABB aabb, float x, float y) {
-        // Upper bound is top right vertex
-        // Lower bound is bottom left vertex
-        float halfWidth = (aabb.upperBound.x - aabb.lowerBound.x) / 2;
-        float halfHeight = (aabb.upperBound.y - aabb.lowerBound.y) / 2;
-
-        aabb.upperBound.set(x + halfWidth, y + halfHeight);
-        aabb.lowerBound.set(x - halfWidth, y - halfHeight);
-    }
-
-    /** Resize an AABB, keeping the same center position. */
-    public static void resizeAABB(AABB aabb, float width, float height) {
-        Vec2 center = aabb.getCenter();
-
-        float halfWidth = width / 2;
-        float halfHeight = height / 2;
-
-        aabb.upperBound.set(center.x + halfWidth, center.y + halfHeight);
-        aabb.lowerBound.set(center.x - halfWidth, center.y - halfHeight);
-    }
-
-    /** Create an AABB at the given position with the given size. */
-    public static AABB createAABB(float x, float y, float width, float height) {
-        float halfWidth = width / 2;
-        float halfHeight = height / 2;
-
-        Vec2 lowerBound = new Vec2(x - halfWidth, y - halfHeight);
-        Vec2 upperBound = new Vec2(x + halfWidth, y + halfHeight);
-
-        return new AABB(lowerBound, upperBound);
-    }
-
     /** Wrap an angle between (-PI, PI] */
     public static double wrapAngle(double angle) {
         angle %= TWO_PI;
@@ -115,12 +81,6 @@ public final class Utils {
             return vec;
         }
         return null;
-    }
-
-    /** Tests if the provided point is inside the provided AABB. */
-    public static boolean testPoint(Vec2 point, AABB aabb) {
-        return point.x >= aabb.lowerBound.x && point.x <= aabb.upperBound.x
-                && point.y >= aabb.lowerBound.y && point.y <= aabb.upperBound.y;
     }
 
     /** Get a random angle in the range [-PI / 2, PI / 2] */

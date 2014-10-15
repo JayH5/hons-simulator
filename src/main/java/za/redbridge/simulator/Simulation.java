@@ -4,6 +4,9 @@ import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
@@ -20,10 +23,6 @@ import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
-
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The main simulation state.
@@ -188,7 +187,9 @@ public class Simulation extends SimState {
             return; // Don't know where to place this target area
         }
 
-        targetArea = new TargetAreaObject(physicsWorld, position, width, height, config);
+
+        targetArea = new TargetAreaObject(physicsWorld, position, width, height,
+                config.getResourceFactory().getTotalResourceValue());
 
         // Add target area to placement area (trust that space returned since nothing else placed
         // yet).
@@ -257,22 +258,14 @@ public class Simulation extends SimState {
         this.stopOnceCollected = stopOnceCollected;
     }
 
+    //return the score at this point in the simulation
+    public FitnessStats getFitness() {
+        return targetArea.getFitnessStats();
+    }
 
-    //return the team score at this point in the simulation
-    public double getFitness() {
-
-        int teamFitness = 0;
-
-        for(ScoreKeepingController controller : scoreKeepingControllers){
-
-            double resourceFitness = controller.getCurrentTaskScore() / config.getResourceFactory().getTotalResourceValue();
-            double speedFitness = 1.0 - (getStepNumber()/(float)config.getSimulationIterations());
-            double totalScore = resourceFitness * 100;
-            controller.setTotalTaskScore(totalScore);
-            teamFitness += totalScore;
-        }
-
-        return teamFitness;
+    /** Gets the progress of the simulation as a percentage */
+    public double getProgressFraction() {
+        return (double) schedule.getSteps() / config.getSimulationIterations();
     }
 
     /** Get the number of steps this simulation has been run for. */

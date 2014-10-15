@@ -13,4 +13,5 @@ public abstract class AdjustableSensitivityAgentSensor extends AgentSensor {
 
     //return a string of the adjustable parameters of this sensor
     public abstract String parametersToString();
+
 }
