@@ -132,7 +132,7 @@ public class RobotObject extends PhysicalObject {
                 .setCircular(radius, mass)
                 .setFriction(0.7f)
                 .setRestitution(1.0f)
-                .setGroundFriction(0.4f, 0.2f, 0.4f, 0.4f)
+                .setGroundFriction(0.3f, 0.2f, 0.04f, 0.06f)
                 .setFilterCategoryBits(FilterConstants.CategoryBits.ROBOT)
                 .build(world);
     }
