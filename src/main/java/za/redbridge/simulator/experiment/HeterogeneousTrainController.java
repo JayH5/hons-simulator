@@ -173,7 +173,7 @@ public class HeterogeneousTrainController implements Runnable{
         HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
                 simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
-        Simulation simulation = new Simulation(simConfig, heteroFactory, teamWithBestGenotype.getGenotypes());
+        Simulation simulation = new Simulation(simConfig, heteroFactory);
         simulation.run();
 
         SimulationGUI video = new SimulationGUI(simulation);

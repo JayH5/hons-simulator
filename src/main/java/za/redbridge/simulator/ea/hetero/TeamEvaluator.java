@@ -1,11 +1,15 @@
 package za.redbridge.simulator.ea.hetero;
 
+import za.redbridge.simulator.FitnessStats;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HeteroTeamRobotFactory;
 import za.redbridge.simulator.factories.TeamPhenotypeFactory;
+import za.redbridge.simulator.phenotype.Phenotype;
+
+import java.util.Map;
 
 
 /**
@@ -36,8 +40,19 @@ public class TeamEvaluator implements Runnable {
                     simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
 
-            Simulation simulation = new Simulation(simConfig, heteroFactory, team.getGenotypes());
+            Simulation simulation = new Simulation(simConfig, heteroFactory);
             simulation.run();
 
+        FitnessStats fitnessStats = simulation.getFitness();
+
+        Map<Phenotype,Double> fitnesses = fitnessStats.getPhenotypeFitnessMap();
+
+        for (Map.Entry<Phenotype,Double> entry: fitnesses.entrySet()) {
+
+            entry.getKey().getController().incrementTotalTaskScore(entry.getValue());
+            entry.getKey().getController().cacheTaskScore();
+        }
+
+        team.setTeamFitness(fitnessStats.getTeamFitness());
     }
 }

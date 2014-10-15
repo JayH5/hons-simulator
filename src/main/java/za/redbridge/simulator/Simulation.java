@@ -3,26 +3,20 @@ package za.redbridge.simulator;
 import org.jbox2d.common.Settings;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
-import za.redbridge.simulator.ea.hetero.CCHIndividual;
-
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
-import za.redbridge.simulator.phenotype.Phenotype;
-import za.redbridge.simulator.phenotype.ScoreKeepingController;
 import za.redbridge.simulator.physics.SimulationContactListener;
 import za.redbridge.simulator.portrayal.DrawProxy;
+
+import java.util.Set;
 
 /**
  * The main simulation state.
@@ -48,28 +42,13 @@ public class Simulation extends SimState {
     private RobotFactory robotFactory;
     private final SimConfig config;
 
-
     private boolean stopOnceCollected = true;
-
-    //keep track of scores here
-    private final Set<CCHIndividual> scoreKeepingControllers;
-
-    public Simulation(SimConfig config, RobotFactory robotFactory, Set<CCHIndividual> scoreKeepingGenotypes) {
-
-        super(config.getSimulationSeed());
-        this.config = config;
-        this.robotFactory = robotFactory;
-        this.scoreKeepingControllers = scoreKeepingGenotypes;
-
-        Settings.velocityThreshold = VELOCITY_THRESHOLD;
-    }
 
     public Simulation(SimConfig config, RobotFactory robotFactory) {
 
         super(config.getSimulationSeed());
         this.config = config;
         this.robotFactory = robotFactory;
-        scoreKeepingControllers = new HashSet<>();
 
         Settings.velocityThreshold = VELOCITY_THRESHOLD;
     }
@@ -119,12 +98,7 @@ public class Simulation extends SimState {
     @Override
     public void finish() {
         kill();
-
         getFitness();
-
-        for (ScoreKeepingController controller: scoreKeepingControllers) {
-            controller.cacheTaskScore();
-        }
 
         schedule.scheduleRepeating(simState ->
                         physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
