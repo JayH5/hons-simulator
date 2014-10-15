@@ -143,13 +143,14 @@ public class ResourceObject extends PhysicalObject {
         }
     }
 
+    public void adjustValue(SimState simState) {
+        Simulation simulation = (Simulation) simState;
+        this.adjustedValue = value - 0.9 * simulation.getProgressFraction() * value;
+    }
+
     @Override
     public void step(SimState simState) {
         super.step(simState);
-
-        // Recalculate adjusted fitness based on simulation progress
-        Simulation simulation = (Simulation) simState;
-        adjustedValue = value - 0.9 * simulation.getProgressFraction() * value;
 
         if (!pendingJoints.isEmpty()) {
             // Create all the pending joints and then clear them
