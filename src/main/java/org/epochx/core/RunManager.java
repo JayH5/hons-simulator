@@ -91,7 +91,6 @@ public class RunManager implements ConfigListener {
 	private final InitialisationManager initialisation;
 
 	private int noGenerations;
-	private double terminationFitness;
 
 	// The best program found so far during the run.
 	private CandidateProgram bestProgram;
@@ -124,7 +123,6 @@ public class RunManager implements ConfigListener {
 	@Override
 	public void onConfigure() {
 		noGenerations = model.getNoGenerations();
-		terminationFitness = model.getTerminationFitness();
 	}
 
 	/**
@@ -181,7 +179,7 @@ public class RunManager implements ConfigListener {
 			updateBestProgram(pop);
 
 			// We might be finished?
-			if (bestFitness <= terminationFitness) {
+			if (bestFitness <= model.getTerminationFitness()) {
 				Life.get().fireSuccessEvent();
 				break;
 			}

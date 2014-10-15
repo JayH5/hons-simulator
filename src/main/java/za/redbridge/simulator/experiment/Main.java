@@ -1,5 +1,6 @@
 package za.redbridge.simulator.experiment;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.epochx.epox.Node;
 import org.epochx.gp.op.init.RampedHalfAndHalfInitialiser;
 import org.epochx.gp.representation.GPCandidateProgram;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 import sim.display.Console;
 import sim.util.Double2D;
@@ -140,11 +143,24 @@ public class Main {
                 System.out.println(); //newline after the dots
                 System.out.println("Fitness: " + min);
                 System.out.println("Avg: " + avg);
+
+                List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
+                List<String> distinctPop = (List<String>) pop.stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
+                DoubleStream fitnesses = pop.stream().mapToDouble(p -> p.getFitness());
+                Double stddev = Math.sqrt(fitnesses.map(f -> Math.pow(f - avg, 2)).average().orElse(0.0));
+                System.out.println("Stddev: " + stddev);
+                System.out.println("Distinct programs: " + distinctPop.size());
+
                 s.print(StatField.GEN_FITTEST_PROGRAM);
-                List<String> distinctPop = (List)((List)s.getStat(StatField.GEN_POP_SORTED_DESC)).stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
                 System.out.println("Best 20: {\"" + distinctPop.stream().limit(20).collect(Collectors.joining("\", \"")) + "\"}");
                 Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
                 System.out.println("Elapsed: " + elapsed.toString());
+
+                //stop if diversity is low enough
+                if(stddev < 0.2 && distinctPop.size() < pop.size()/4.0){
+                    System.out.println("Diversity below threshold; stopping.");
+                    model.setTerminationFitness(0.0);
+                }
                 counter++;
             }
             @Override
@@ -183,11 +199,6 @@ public class Main {
             System.out.println("Commencing experiment");
             //headless option
             model.run();
-            System.out.println("Experiment finished. Best fitness: ");
-            Stats s = Stats.get();
-            s.print(StatField.ELITE_FITNESS_MIN);
-            System.out.println("Best programs: ");
-            s.print(StatField.GEN_FITTEST_PROGRAMS);
         }
 
     }
