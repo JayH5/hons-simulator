@@ -105,9 +105,9 @@ public class AgentModel extends GPModel {
        syntax.add(new RotateCoordinate());
        syntax.add(new BearingFromCoordinate());
        syntax.add(new RandomBearing());
-       Map<Node,Map<String,Object>> state = new HashMap<>();
-       syntax.add(new LoadBearing(state));
-       syntax.add(new SaveBearing(state));
+       //Map<Node,Map<String,Object>> state = new HashMap<>();
+       //syntax.add(new LoadBearing(state));
+       //syntax.add(new SaveBearing(state));
 
        syntax.addAll(inputs);
        setSyntax(syntax);
