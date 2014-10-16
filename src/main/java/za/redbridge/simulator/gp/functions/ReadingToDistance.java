@@ -1,8 +1,8 @@
 package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
-import org.epochx.tools.util.TypeUtils;
-import za.redbridge.simulator.gp.types.*;
+import za.redbridge.simulator.gp.types.GPFloatVariable;
+import za.redbridge.simulator.gp.types.ProximityReading;
 
 /**
  * Created by xenos on 9/10/14.

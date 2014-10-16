@@ -1,7 +1,6 @@
 package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
-import org.epochx.tools.util.TypeUtils;
 import org.jbox2d.common.Rot;
 import org.jbox2d.common.Vec2;
 import za.redbridge.simulator.gp.types.Bearing;

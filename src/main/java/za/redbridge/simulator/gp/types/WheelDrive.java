@@ -1,7 +1,6 @@
 package za.redbridge.simulator.gp.types;
 
 import org.jbox2d.common.Vec2;
-import sim.util.Double2D;
 import za.redbridge.simulator.phenotype.heuristics.Heuristic;
 
 /**

@@ -1,8 +1,8 @@
 package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
-import za.redbridge.simulator.gp.types.GPFloatLiteral;
 import za.redbridge.simulator.gp.types.GPFloat;
+import za.redbridge.simulator.gp.types.GPFloatLiteral;
 
 /**
  * Created by xenos on 9/10/14.

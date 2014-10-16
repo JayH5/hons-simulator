@@ -15,14 +15,19 @@ import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HeterogeneousRobotFactory;
 import za.redbridge.simulator.gp.functions.*;
-import za.redbridge.simulator.gp.types.*;
+import za.redbridge.simulator.gp.types.Bearing;
+import za.redbridge.simulator.gp.types.DetectedObject;
+import za.redbridge.simulator.gp.types.GPFloatLiteral;
+import za.redbridge.simulator.gp.types.WheelDrive;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**

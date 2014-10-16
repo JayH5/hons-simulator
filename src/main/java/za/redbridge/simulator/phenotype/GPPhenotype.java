@@ -1,11 +1,8 @@
 package za.redbridge.simulator.phenotype;
 
-import org.epochx.epox.Node;
 import org.epochx.epox.Variable;
 import org.epochx.gp.representation.GPCandidateProgram;
 import sim.util.Double2D;
-import sun.management.Agent;
-import za.redbridge.simulator.gp.types.ProximityReading;
 import za.redbridge.simulator.gp.types.WheelDrive;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.TypedProximityAgentSensor;

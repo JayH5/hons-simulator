@@ -1,8 +1,6 @@
 package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
-import za.redbridge.simulator.gp.types.Bearing;
-import za.redbridge.simulator.gp.types.GPFloat;
 import za.redbridge.simulator.gp.types.GPFloatVariable;
 
 /**

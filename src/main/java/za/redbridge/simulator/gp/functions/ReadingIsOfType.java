@@ -2,7 +2,6 @@ package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
 import za.redbridge.simulator.gp.types.DetectedObject;
-import za.redbridge.simulator.gp.types.ProximityReading;
 import za.redbridge.simulator.gp.types.TypedProximityReading;
 
 /**

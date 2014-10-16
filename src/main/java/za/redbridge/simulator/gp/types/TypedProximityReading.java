@@ -2,7 +2,6 @@ package za.redbridge.simulator.gp.types;
 
 import za.redbridge.simulator.sensor.AgentSensor;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

@@ -1,11 +1,8 @@
 package za.redbridge.simulator.gp;
 
 import org.epochx.epox.Variable;
-import za.redbridge.simulator.gp.types.Bearing;
 import za.redbridge.simulator.gp.types.ProximityReading;
-import za.redbridge.simulator.gp.types.RelativeCoordinate;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.Sensor;
 
 /**
  * Created by xenos on 9/29/14.

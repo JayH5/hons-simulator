@@ -1,11 +1,8 @@
 package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
-import org.epochx.tools.util.TypeUtils;
-import org.jbox2d.common.Vec2;
 import za.redbridge.simulator.gp.types.Bearing;
 import za.redbridge.simulator.gp.types.RelativeCoordinate;
-import za.redbridge.simulator.phenotype.heuristics.Heuristic;
 
 /**
  * Created by xenos on 9/10/14.
