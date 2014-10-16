@@ -1,59 +1,42 @@
 package za.redbridge.simulator.experiment;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.epochx.epox.Node;
 import org.epochx.gp.op.init.RampedHalfAndHalfInitialiser;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
-import org.epochx.op.selection.FitnessProportionateSelector;
 import org.epochx.op.selection.TournamentSelector;
 import org.epochx.representation.CandidateProgram;
 import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import org.epochx.tools.eval.MalformedProgramException;
-import org.jbox2d.dynamics.Fixture;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.ParseException;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
-
 import sim.display.Console;
-import sim.util.Double2D;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HeterogeneousRobotFactory;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.AgentModel;
-import za.redbridge.simulator.gp.EpoxRenderer;
-import za.redbridge.simulator.gp.types.DetectedObject;
+import za.redbridge.simulator.gp.CustomStatFields;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
-import za.redbridge.simulator.khepera.KheperaIIIPhenotype;
-import za.redbridge.simulator.khepera.ProximitySensor;
 import za.redbridge.simulator.khepera.UltrasonicSensor;
-import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.WallObject;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
-import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.sensor.AgentSensor;
-import za.redbridge.simulator.sensor.ProximityAgentSensor;
 import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
+
+import java.text.ParseException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 //entry point into simulator
 
@@ -141,7 +124,10 @@ public class Main {
                 Double min = (Double)s.getStat(StatField.GEN_FITNESS_MIN);
                 Double avg = (Double)s.getStat(StatField.GEN_FITNESS_AVE);
                 System.out.println(); //newline after the dots
-                System.out.println("Fitness: " + min);
+                System.out.println("Best Individual Fitness: " + min);
+                System.out.println("Best Team fitness: " + (Double)s.getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN));
+                List<CandidateProgram> bestTeam = (List<CandidateProgram>)s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
+                System.out.println("Best team: {\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}");
                 System.out.println("Avg: " + avg);
 
                 List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
@@ -152,7 +138,7 @@ public class Main {
                 System.out.println("Distinct programs: " + distinctPop.size());
 
                 s.print(StatField.GEN_FITTEST_PROGRAM);
-                System.out.println("Best 20: {\"" + distinctPop.stream().limit(20).collect(Collectors.joining("\", \"")) + "\"}");
+                System.out.println("Best 20 individuals: {\"" + distinctPop.stream().limit(20).collect(Collectors.joining("\", \"")) + "\"}");
                 Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
                 System.out.println("Elapsed: " + elapsed.toString());
 

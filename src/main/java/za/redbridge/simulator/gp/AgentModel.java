@@ -8,12 +8,12 @@ import org.epochx.epox.lang.IfFunction;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
+import org.epochx.stats.Stats;
 import za.redbridge.simulator.FitnessStats;
 import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HeterogeneousRobotFactory;
-import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.gp.functions.*;
 import za.redbridge.simulator.gp.types.*;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
@@ -24,7 +24,6 @@ import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Created by xenos on 9/9/14.
@@ -147,6 +146,11 @@ public class AgentModel extends GPModel {
         System.out.print('.');
         FitnessStats fitnesses = sim.getFitness();
         List<Double> result = new ArrayList<>();
+        double teamFitness = -fitnesses.getTeamFitness(Optional.of((int)sim.getStepNumber()));
+        if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
+            Stats.get().addData(CustomStatFields.GEN_TEAM_FITNESS_MIN, teamFitness);
+            Stats.get().addData(CustomStatFields.GEN_FITTEST_TEAM, pl);
+        }
         for(Phenotype p : phenotypes) result.add(-fitnesses.getPhenotypeFitness(p));
         return result;
     }
