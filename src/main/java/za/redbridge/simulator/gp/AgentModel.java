@@ -151,7 +151,7 @@ public class AgentModel extends GPModel {
         System.out.print('.');
         FitnessStats fitnesses = sim.getFitness();
         List<Double> result = new ArrayList<>();
-        double teamFitness = -fitnesses.getTeamFitness(Optional.of((int)sim.getStepNumber()));
+        double teamFitness = -fitnesses.getTeamFitness(Optional.of(sim.getStepNumber()));
         if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
             Stats.get().addData(CustomStatFields.GEN_TEAM_FITNESS_MIN, teamFitness);
             Stats.get().addData(CustomStatFields.GEN_FITTEST_TEAM, pl);
