@@ -72,7 +72,7 @@ public class RobotObject extends PhysicalObject {
 
     private final Portrayal directionPortrayal = new DirectionPortrayal();
 
-    private boolean DAMAGE_ENABLED = true;
+    private boolean DAMAGE_ENABLED = false;
     private float damage = 0.0f;
     private static final float MAX_DAMAGE = 5.0f;
     private boolean disabled = false;
@@ -298,6 +298,7 @@ public class RobotObject extends PhysicalObject {
         }
         if(damage > MAX_DAMAGE) {
             disabled = true;
+            getPortrayal().setPaint(Color.RED);
         }
     }
     private static class DirectionPortrayal extends PolygonPortrayal {

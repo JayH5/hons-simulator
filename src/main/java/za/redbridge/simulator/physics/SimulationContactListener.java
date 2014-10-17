@@ -77,8 +77,7 @@ public class SimulationContactListener implements ContactListener {
         Fixture[] fixtures = {contact.getFixtureA(), contact.getFixtureB()};
         List<RobotObject> robots = new ArrayList<RobotObject>();
         for(Fixture f : fixtures){
-            if(f.getUserData() instanceof RobotObject) robots.add((RobotObject)f.getUserData());
-            else if(f.getBody().getUserData() instanceof RobotObject) robots.add((RobotObject) f.getBody().getUserData());
+            if(f.getBody().getUserData() instanceof RobotObject) robots.add((RobotObject) f.getBody().getUserData());
         }
         if(robots.size() > 0) {
             float sum = 0.0f;
