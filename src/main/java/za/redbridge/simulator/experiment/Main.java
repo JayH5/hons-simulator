@@ -71,9 +71,9 @@ public class Main {
     @Option (name="--filename", aliases="-f", usage="Filename for the output")
     private String filename;
 
-    private static Stat[] fields = {StatField.GEN_NUMBER, CustomStatFields.RUN_TEAM_FITNESS_MIN, StatField.RUN_FITNESS_MIN, CustomStatFields.GEN_TEAM_FITNESS_MIN, StatField.GEN_FITNESS_MIN, StatField.GEN_FITNESS_AVE, StatField.GEN_FITNESS_MAX, StatField.GEN_FITNESS_STDEV};
-    private static String[] fieldLabels = {"Generation", "Run Max Team", "Run Max Individual", "Max Team", "Max Individual", "Avg Individual", "Min Individual", "Std Dev", "Distinct Individuals"};
-    private static String fieldFormat = "%-10d,   %-12.2f,   %-18.2f,   %-8.2f,   %-14.2f,   %-14.2f,   %-14.2f,   %-7.2f,   %-20d";
+    private static Stat[] fields = {StatField.GEN_NUMBER, CustomStatFields.RUN_TEAM_FITNESS_MIN, CustomStatFields.GEN_TEAM_FITNESS_MIN, StatField.GEN_FITNESS_MIN, StatField.GEN_FITNESS_AVE, StatField.GEN_FITNESS_MAX, StatField.GEN_FITNESS_STDEV};
+    private static String[] fieldLabels = {"Generation", "Run Max Team", "Max Team", "Max Individual", "Avg Individual", "Min Individual", "Std Dev", "Distinct Individuals"};
+    private static String fieldFormat = "%-10d,   %-12.2f,   %-8.2f,   %-14.2f,   %-14.2f,   %-14.2f,   %-7.2f,   %-20d";
 
     public static void main (String[] args) throws MalformedProgramException, FileNotFoundException, IOException {
 
@@ -149,12 +149,11 @@ public class Main {
         class GenerationTrackingListener implements GenerationListener{
             private int counter = 0;
             @Override
-            public void onGenerationEnd() {
+            public void onGenerationStart() {
+                if(counter == 0) {counter++; return;}
                 try {
                     Stats s = Stats.get();
-                    //RUN_FITNESS_MIN is not first populated until updateBestProgram in RunManager fires, but this is not how the first iteration gets evaluated
-                    //it's evaluated when GEN_FITNESS_MIN is requested; so, we request it, and set the RUN_FITNESS_MIN ourselves
-                    if (counter == 0) s.addData(StatField.RUN_FITNESS_MIN, s.getStat(StatField.GEN_FITNESS_MIN));
+                    s.getStat(StatField.GEN_FITNESS_MIN);
                     List<Object> printables = Arrays.asList(fields).stream().map(f -> s.getStat(f)).collect(Collectors.toList());
 
                     List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
@@ -163,7 +162,7 @@ public class Main {
                     csvWriter.write(String.format(fieldFormat, printables.toArray()) + "\n");
 
                     List<CandidateProgram> bestTeam = (List<CandidateProgram>) s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
-                    treeWriter.write(StatField.GEN_NUMBER + "\t");
+                    treeWriter.write(s.getStat(StatField.GEN_NUMBER) + ",   ");
                     treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}\n");
 
                     //stop if diversity is low enough
@@ -181,7 +180,7 @@ public class Main {
                 }
             }
             @Override
-            public void onGenerationStart(){}
+            public void onGenerationEnd(){}
         }
         Life.get().addGenerationListener(new GenerationTrackingListener());
 
@@ -213,7 +212,7 @@ public class Main {
             console.setVisible(true);
         }
         else {
-            csvWriter.write(Arrays.asList(fieldLabels).stream().collect(Collectors.joining(",   ")));
+            csvWriter.write(Arrays.asList(fieldLabels).stream().collect(Collectors.joining(",   ")) + "\n");
             csvWriter.flush();
             //headless option
             model.run();

@@ -181,7 +181,7 @@ public class StatField {
 			final List<CandidateProgram> pop = (List<CandidateProgram>) Stats.get().getStat(GEN_POP);
 			if(pop == null) return null;
 
-            RunManager.calculateFitnessList(pop);
+            //RunManager.calculateFitnessList(pop);
 			// Get the fitnesses of each program.
 			return pop.stream()
 					.mapToDouble(c -> c.getFitness())

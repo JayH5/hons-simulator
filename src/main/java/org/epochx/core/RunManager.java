@@ -210,7 +210,7 @@ public class RunManager implements ConfigListener {
 		Optional<CandidateProgram> best = pop
 		   .stream()
 		   .parallel()
-		   .max((CandidateProgram a, CandidateProgram b) -> Double.compare(a.getFitness(), b.getFitness()));
+		   .min((CandidateProgram a, CandidateProgram b) -> Double.compare(a.getFitness(), b.getFitness()));
 		if(best.isPresent()) {
 			bestFitness = best.get().getFitness();
 			bestProgram = best.get();
