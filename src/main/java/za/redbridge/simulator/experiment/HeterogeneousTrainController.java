@@ -106,7 +106,7 @@ public class HeterogeneousTrainController implements Runnable{
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
-        controllerTrainingLogger.info("Epoch# \t Best Team Score \t Best Individual \t Variance");
+        controllerTrainingLogger.info("Epoch# \t BestTeamScore \t BestIndividual \t Mean \t Variance \t StdDeviation \t BestTeamEver \t BestIndividualEver");
 
         do {
 
@@ -117,8 +117,8 @@ public class HeterogeneousTrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" +
-                    "\t" + train.getVariance());
+            controllerTrainingLogger.info(epochs + "\t" + train.getCurrentBestTeam().teamFitness() + "\t" + train.getCurrentBestIndividual().getAverageTaskScore() + "\t" +
+                    + train.getEpochMean() + "\t" + train.getVariance() + "\t" + train.getStandardDeviation() + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore());
 
             if (previousBest == null) {
                 previousBest = train.getBestGenome();
@@ -162,11 +162,11 @@ public class HeterogeneousTrainController implements Runnable{
 
         Simulation simulation = new Simulation(simConfig, heteroFactory);
         simulation.run();
-
+/*
         SimulationGUI video = new SimulationGUI(simulation);
 
         //new console which displays this simulation
         sim.display.Console console = new sim.display.Console(video);
-        console.setVisible(true);
+        console.setVisible(true);*/
     }
 }
