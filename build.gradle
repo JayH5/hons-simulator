@@ -38,3 +38,14 @@ run {
         args Eval.me(appArgs)
     }
 }
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Redbridge Mining Crew Simulator',
+            /*'Implementation-Version': '1.0',*/
+            'Main-Class': 'za.redbridge.simulator.experiment.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
