@@ -27,7 +27,7 @@ import za.redbridge.simulator.portrayal.STRTransform;
  * @param <T> the type that this Sensor returns from the {@link #sense()} method
  */
 public abstract class Sensor<T> implements Collideable {
-    protected static final Paint DEFAULT_PAINT = new Color(100, 100, 100, 100);
+    protected static final Paint DEFAULT_PAINT = new Color(100, 100, 100, 50);
 
     private Portrayal portrayal;
     private Fixture sensorFixture;

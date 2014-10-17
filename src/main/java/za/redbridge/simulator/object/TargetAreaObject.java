@@ -1,5 +1,6 @@
 package za.redbridge.simulator.object;
 
+import org.jbox2d.callbacks.QueryCallback;
 import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -16,11 +17,18 @@ import java.util.List;
 import java.util.Set;
 
 import sim.engine.SimState;
+import za.redbridge.simulator.FitnessStats;
+import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.Portrayal;
 import za.redbridge.simulator.portrayal.RectanglePortrayal;
+
+
+import static za.redbridge.simulator.physics.AABBUtil.getAABBHeight;
+import static za.redbridge.simulator.physics.AABBUtil.getAABBWidth;
+import static za.redbridge.simulator.physics.AABBUtil.resizeAABB;
 
 /**
  * Created by shsu on 2014/08/13.
@@ -29,23 +37,27 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     private static final boolean ALLOW_REMOVAL = true;
 
+    private static final float BLAME_BOX_EXPANSION_RATE = 1.5f;
+    private static final int BLAME_BOX_TRIES = 5;
+
     private int width, height;
     private final AABB aabb;
 
     //total resource value in this target area
-    private double totalResourceValue;
+    private final FitnessStats fitnessStats;
 
     //hash set so that object values only get added to forage area once
     private final Set<ResourceObject> containedObjects = new HashSet<>();
     private final List<Fixture> watchedFixtures = new ArrayList<>();
 
     //keeps track of what has been pushed into this place
-    public TargetAreaObject(World world, Vec2 position, int width, int height) {
+    public TargetAreaObject(World world, Vec2 position, int width, int height,
+            double totalResourceValue, int maxSteps) {
         super(createPortrayal(width, height), createBody(world, position, width, height));
 
-        totalResourceValue = 0;
         this.width = width;
         this.height = height;
+        this.fitnessStats = new FitnessStats(totalResourceValue, maxSteps);
 
         aabb = getBody().getFixtureList().getAABB(0);
     }
@@ -76,33 +88,94 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
             ResourceObject resource = (ResourceObject) fixture.getBody().getUserData();
             if (aabb.contains(fixture.getAABB(0))) {
                 // Object moved completely into the target area
-                if (containedObjects.add(resource)) {
-                    resource.setCollected(true);
-                    resource.getPortrayal().setPaint(Color.CYAN);
-                    incrementTotalObjectValue(resource);
-                }
+
+                // Recalculate adjusted fitness based on simulation progress
+                resource.adjustValue(simState);
+                addResource(resource);
             } else if (ALLOW_REMOVAL) {
                 // Object moved out of completely being within the target area
-                if (containedObjects.remove(resource)) {
-                    resource.setCollected(false);
-                    resource.getPortrayal().setPaint(Color.MAGENTA);
-                    decrementTotalObjectValue(resource);
+                removeResource(resource);
+            }
+        }
+    }
+
+    private void addResource(ResourceObject resource) {
+        if (containedObjects.add(resource)) {
+            fitnessStats.addToTeamFitness(resource.getValue());
+
+            // Get the robots joined to the resource
+            Set<RobotObject> pushingBots = resource.getPushingRobots();
+
+            // If no robots joined, get nearby robots
+            if (pushingBots.isEmpty()) {
+                pushingBots = findRobotsNearResource(resource);
+            }
+
+            // Update the fitness for the bots involved
+            if (!pushingBots.isEmpty()) {
+                double adjustedFitness = resource.getAdjustedValue() / pushingBots.size();
+                for (RobotObject robot : pushingBots) {
+                    fitnessStats
+                            .addToPhenotypeFitness(robot.getPhenotype(), adjustedFitness);
+                }
+            }
+
+            // Mark resource as collected (this breaks the joints)
+            resource.setCollected(true);
+            resource.getPortrayal().setPaint(Color.CYAN);
+        }
+    }
+
+    private void removeResource(ResourceObject resource) {
+        if (containedObjects.remove(resource)) {
+            fitnessStats.addToTeamFitness(-resource.getValue());
+
+            // Mark resource as no longer collected
+            resource.setCollected(false);
+            resource.getPortrayal().setPaint(Color.MAGENTA);
+
+            Set<RobotObject> pushingBots = findRobotsNearResource(resource);
+
+            if (!pushingBots.isEmpty()) {
+                double adjustedFitness = resource.getAdjustedValue() / pushingBots.size();
+                for (RobotObject robot : pushingBots) {
+                    fitnessStats.addToPhenotypeFitness(robot.getPhenotype(), -adjustedFitness);
                 }
             }
         }
     }
 
-    //these also update the total resource value
-    private void incrementTotalObjectValue(ResourceObject resource) {
-        totalResourceValue += resource.getValue();
-    }
+    /*
+     * Finds robots very close to the ResourceObject that can be blamed for pushing the resource
+     * in/out of target area.
+     */
+    private Set<RobotObject> findRobotsNearResource(ResourceObject resource) {
+        // Check which robots pushed the resource out based on a bounding box
+        Fixture resourceFixture = resource.getBody().getFixtureList();
+        AABB resourceBox = resourceFixture.getAABB(0);
 
-    private void decrementTotalObjectValue(ResourceObject resource) {
-        totalResourceValue -= resource.getValue();
-    }
+        // Try query robots within the AABB of the resource
+        Set<RobotObject> robots = new HashSet<>();
+        RobotObjectQueryCallback callback = new RobotObjectQueryCallback(robots);
+        getBody().getWorld().queryAABB(callback, resourceBox);
 
-    public double getTotalResourceValue() {
-        return totalResourceValue;
+        if (!robots.isEmpty()) {
+            return robots;
+        }
+
+        // If no robots found, iteratively expand the dimensions of the query box
+        AABB blameBox = new AABB(resourceBox);
+        for (int i = 0; i < BLAME_BOX_TRIES; i++) {
+            float width = getAABBWidth(blameBox) * BLAME_BOX_EXPANSION_RATE;
+            float height = getAABBHeight(blameBox) * BLAME_BOX_EXPANSION_RATE;
+            resizeAABB(blameBox, width, height);
+            getBody().getWorld().queryAABB(callback, blameBox);
+
+            if (!robots.isEmpty()) {
+                break;
+            }
+        }
+        return robots;
     }
 
     public int getNumberOfContainedResources() {
@@ -119,6 +192,10 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
 
     public int getHeight() {
         return height;
+    }
+
+    public FitnessStats getFitnessStats() {
+        return fitnessStats;
     }
 
     @Override
@@ -144,11 +221,28 @@ public class TargetAreaObject extends PhysicalObject implements Collideable {
         // Remove from the score
         if (ALLOW_REMOVAL) {
             ResourceObject resource = (ResourceObject) otherFixture.getBody().getUserData();
-            if (containedObjects.remove(resource)) {
-                resource.setCollected(false);
-                resource.getPortrayal().setPaint(Color.MAGENTA);
-                decrementTotalObjectValue(resource);
+            removeResource(resource);
+        }
+    }
+
+    private static class RobotObjectQueryCallback implements QueryCallback {
+
+        final Set<RobotObject> robots;
+
+        RobotObjectQueryCallback(Set<RobotObject> robots) {
+            this.robots = robots;
+        }
+
+        @Override
+        public boolean reportFixture(Fixture fixture) {
+            if (!fixture.isSensor()) { // Don't detect robot sensors, only bodies
+                Object bodyUserData = fixture.getBody().getUserData();
+                if (bodyUserData instanceof RobotObject) {
+                    robots.add((RobotObject) bodyUserData);
+                }
             }
+
+            return true;
         }
     }
 

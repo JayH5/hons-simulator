@@ -1,0 +1,32 @@
+---
+simulation:
+  iterations: 10000
+resources:
+  small:
+    quantity: 0
+    width: 0.4
+    height: 0.4
+    mass: 1.0
+    pushingBots: 1
+  medium:
+    quantity: 5
+    width: 0.6
+    height: 0.6
+    mass: 3.0
+    pushingBots: 2
+  large:
+    quantity: 10
+    width: 0.8
+    height: 0.8
+    mass: 6.0
+    pushingBots: 3
+scoring:
+  fitnessFunction: za.redbridge.simulator.ea.DefaultFitnessFunction
+factories:
+  resourceFactory: za.redbridge.simulator.factories.ConfigurableResourceFactory
+  robotFactory: za.redbridge.simulator.factories.HomogeneousRobotFactory
+robots:
+  numRobots: 20
+  mass: 0.7
+  radius: 0.15
+  colour: 0, 0, 0

@@ -1,6 +1,7 @@
 package za.redbridge.simulator.experiment;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.genome.Genome;
@@ -105,7 +106,7 @@ public class HomogeneousTrainController implements Runnable{
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
-        controllerTrainingLogger.info("Epoch# \t Mean \t Best \t Variance");
+        controllerTrainingLogger.info("Epoch# \t CurrentBest \t Mean \t StandardDeviation \t Variance \t BestEver");
         do {
 
             int epochs = train.getIteration()+1;
@@ -113,19 +114,19 @@ public class HomogeneousTrainController implements Runnable{
 
             train.iteration();
 
-            if (previousBest == null) {
+            if (previousBest == null || train.getBestGenome().getScore() > previousBest.getScore()) {
                 previousBest = train.getBestGenome();
             }
 
-            controllerTrainingLogger.info(epochs + "\t" + getEpochMeanScore() + "\t" + scoreCache.last().getScore() +
-                    "\t" + getVariance() + "\t");
+            controllerTrainingLogger.info(epochs + "\t" + train.getBestGenome().getScore() + "\t" + getEpochMeanScore() + "\t" + getStandardDeviation()
+                    + "\t" + getVariance() + "\t" + previousBest.getScore());
 
-
+            /*
             if (epochs % 50 == 0 && previousBest != train.getBestGenome()) {
                 IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "best_network_at_" + epochs + ".tmp");
                 morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "best_morphology_at_" + epochs + ".tmp");
                 previousBest = train.getBestGenome();
-            }
+            }*/
 
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
@@ -179,6 +180,14 @@ public class HomogeneousTrainController implements Runnable{
     }
 
     private synchronized double getVariance() { return StatUtils.variance(getEpochScoreData()); }
+
+    private synchronized double getStandardDeviation() {
+
+        StandardDeviation stdDev = new StandardDeviation();
+        return stdDev.evaluate(getEpochScoreData());
+    }
+
+    private synchronized double getMean() { return StatUtils.mean(getEpochScoreData());}
 
     private synchronized double mannWhitneyImprovementTest() {
 

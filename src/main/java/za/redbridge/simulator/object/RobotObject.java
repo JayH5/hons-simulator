@@ -133,7 +133,7 @@ public class RobotObject extends PhysicalObject {
                 .setCircular(radius, mass)
                 .setFriction(0.7f)
                 .setRestitution(1.0f)
-                .setGroundFriction(0.4f, 0.2f, 0.4f, 0.4f)
+                .setGroundFriction(0.3f, 0.2f, 0.04f, 0.06f)
                 .setFilterCategoryBits(FilterConstants.CategoryBits.ROBOT)
                 .build(world);
     }
@@ -272,6 +272,10 @@ public class RobotObject extends PhysicalObject {
 
     private static Color invertColor(Color color) {
         return new Color(255 - color.getRed(), 255 - color.getGreen(), 255 - color.getBlue());
+    }
+
+    public Phenotype getPhenotype() {
+        return phenotype;
     }
 
     private static class DirectionPortrayal extends PolygonPortrayal {
