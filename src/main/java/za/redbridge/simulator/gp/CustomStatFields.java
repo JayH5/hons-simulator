@@ -10,4 +10,6 @@ import org.epochx.stats.Stats;
 public class CustomStatFields {
     public static Stat GEN_TEAM_FITNESS_MIN = new AbstractStat(Stats.ExpiryEvent.GENERATION){};
     public static Stat GEN_FITTEST_TEAM = new AbstractStat(Stats.ExpiryEvent.GENERATION){};
+    public static Stat RUN_TEAM_FITNESS_MIN = new AbstractStat(Stats.ExpiryEvent.RUN){};
+    public static Stat RUN_FITTEST_TEAM = new AbstractStat(Stats.ExpiryEvent.RUN){};
 }

@@ -181,8 +181,6 @@ public class MorphologyConfig extends Config {
         numSensors = sensors;
         totalReadingSize = totReadingSize;
 
-        System.out.println("read " + sensorList.size() + " sensors.");
-
         yamlCache = config;
 
     }

@@ -6,6 +6,7 @@ import org.epochx.life.GenerationListener;
 import org.epochx.life.Life;
 import org.epochx.op.selection.TournamentSelector;
 import org.epochx.representation.CandidateProgram;
+import org.epochx.stats.Stat;
 import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import org.epochx.tools.eval.MalformedProgramException;
@@ -31,9 +32,14 @@ import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -56,7 +62,20 @@ public class Main {
     @Option (name="--show-visuals", aliases="-v", usage="Show visualisation for simulation")
     private boolean showVisuals = false;
 
-    public static void main (String[] args) throws MalformedProgramException{
+    @Option (name="--population", aliases="-p", usage="GP population pool size")
+    private int popSize = 1000;
+
+    @Option (name="--tournament-size", aliases="-t", usage="GP Tournament size")
+    private int tournSize = 7;
+
+    @Option (name="--filename", aliases="-f", usage="Filename for the output")
+    private String filename;
+
+    private static Stat[] fields = {StatField.GEN_NUMBER, CustomStatFields.RUN_TEAM_FITNESS_MIN, StatField.RUN_FITNESS_MIN, CustomStatFields.GEN_TEAM_FITNESS_MIN, StatField.GEN_FITNESS_MIN, StatField.GEN_FITNESS_AVE, StatField.GEN_FITNESS_MAX, StatField.GEN_FITNESS_STDEV};
+    private static String[] fieldLabels = {"Generation", "Run Max Team", "Run Max Individual", "Max Team", "Max Individual", "Avg Individual", "Min Individual", "Std Dev", "Distinct Individuals"};
+    private static String fieldFormat = "%-10d,   %-12.2f,   %-18.2f,   %-8.2f,   %-14.2f,   %-14.2f,   %-14.2f,   %-7.2f,   %-20d";
+
+    public static void main (String[] args) throws MalformedProgramException, FileNotFoundException, IOException {
 
         Main options = new Main();
         CmdLineParser parser = new CmdLineParser(options);
@@ -65,7 +84,7 @@ public class Main {
             parser.parseArgument(args);
         }
         catch (CmdLineException c) {
-            System.out.println("Error parsing command-line arguments.");
+            System.err.println("Error parsing command-line arguments.");
             System.exit(1);
         }
 
@@ -79,7 +98,7 @@ public class Main {
             morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
         }
         catch(ParseException p) {
-            System.out.println("Error parsing morphology file.");
+            System.err.println("Error parsing morphology file.");
             p.printStackTrace();
         }
 
@@ -112,51 +131,54 @@ public class Main {
         model.setNoGenerations(200);
         model.setMaxInitialDepth(5);
         model.setMaxDepth(7);
-        model.setPopulationSize(200);
+        model.setPopulationSize(options.popSize);
         model.setPoolSize(model.getPopulationSize() / 2);
-        model.setProgramSelector(new TournamentSelector(model, 7));
+        model.setProgramSelector(new TournamentSelector(model, options.tournSize));
         model.setNoRuns(1);
         model.setNoElites(model.getPopulationSize() / 4);
         model.setInitialiser(new RampedHalfAndHalfInitialiser(model));
         model.setMutationProbability(0.1);
         model.setCrossoverProbability(0.9);
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
+        if(options.filename == null) {
+            System.err.println("Error: No output filename specified in arguments!");
+            System.exit(1);
+        }
+        FileWriter csvWriter = new FileWriter(options.filename + ".csv");
+        FileWriter treeWriter = new FileWriter(options.filename + ".trees");
         class GenerationTrackingListener implements GenerationListener{
             private int counter = 0;
-            private Long startTime = null;
             @Override
             public void onGenerationEnd() {
-                if(startTime == null) startTime = System.currentTimeMillis();
-                Stats s = Stats.get();
-                System.out.println();
-                System.out.println("Generation " + (counter+1));
-                Double min = (Double)s.getStat(StatField.GEN_FITNESS_MIN);
-                Double avg = (Double)s.getStat(StatField.GEN_FITNESS_AVE);
-                System.out.println(); //newline after the dots
-                System.out.println("Best Individual Fitness: " + min);
-                System.out.println("Best Team fitness: " + (Double)s.getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN));
-                List<CandidateProgram> bestTeam = (List<CandidateProgram>)s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
-                System.out.println("Best team: {\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}");
-                System.out.println("Avg: " + avg);
+                try {
+                    Stats s = Stats.get();
+                    //RUN_FITNESS_MIN is not first populated until updateBestProgram in RunManager fires, but this is not how the first iteration gets evaluated
+                    //it's evaluated when GEN_FITNESS_MIN is requested; so, we request it, and set the RUN_FITNESS_MIN ourselves
+                    if (counter == 0) s.addData(StatField.RUN_FITNESS_MIN, s.getStat(StatField.GEN_FITNESS_MIN));
+                    List<Object> printables = Arrays.asList(fields).stream().map(f -> s.getStat(f)).collect(Collectors.toList());
 
-                List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
-                List<String> distinctPop = (List<String>) pop.stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
-                DoubleStream fitnesses = pop.stream().mapToDouble(p -> p.getFitness());
-                Double stddev = Math.sqrt(fitnesses.map(f -> Math.pow(f - avg, 2)).average().orElse(0.0));
-                System.out.println("Stddev: " + stddev);
-                System.out.println("Distinct programs: " + distinctPop.size());
+                    List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
+                    List<String> distinctPop = (List<String>) pop.stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
+                    printables.add(distinctPop.size());
+                    csvWriter.write(String.format(fieldFormat, printables.toArray()));
 
-                s.print(StatField.GEN_FITTEST_PROGRAM);
-                System.out.println("Best 20 individuals: {\"" + distinctPop.stream().limit(20).collect(Collectors.joining("\", \"")) + "\"}");
-                Duration elapsed = Duration.ofMillis(System.currentTimeMillis() - startTime);
-                System.out.println("Elapsed: " + elapsed.toString());
+                    List<CandidateProgram> bestTeam = (List<CandidateProgram>) s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
+                    treeWriter.write(StatField.GEN_NUMBER + "\t");
+                    treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}");
 
-                //stop if diversity is low enough
-                if(stddev < 0.2 && distinctPop.size() < pop.size()/4.0){
-                    System.out.println("Diversity below threshold; stopping.");
-                    model.setTerminationFitness(0.0);
+                    //stop if diversity is low enough
+                    if ((Double) s.getStat(StatField.GEN_FITNESS_STDEV) < 0.2 && distinctPop.size() < pop.size() / 4.0) {
+                        System.out.println("Diversity below threshold; stopping.");
+                        model.setTerminationFitness(0.0);
+                    }
+                    csvWriter.flush();
+                    treeWriter.flush();
+                    counter++;
                 }
-                counter++;
+                catch(IOException e){
+                    e.printStackTrace();
+                    System.exit(1);
+                }
             }
             @Override
             public void onGenerationStart(){}
@@ -191,9 +213,12 @@ public class Main {
             console.setVisible(true);
         }
         else {
-            System.out.println("Commencing experiment");
+            csvWriter.write(Arrays.asList(fieldLabels).stream().collect(Collectors.joining(",   ")));
+            csvWriter.flush();
             //headless option
             model.run();
+            csvWriter.close();
+            treeWriter.close();
         }
 
     }

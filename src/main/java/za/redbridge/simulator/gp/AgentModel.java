@@ -1,5 +1,6 @@
 package za.redbridge.simulator.gp;
 
+import org.apache.commons.math3.util.Pair;
 import org.epochx.epox.EpoxParser;
 import org.epochx.epox.Literal;
 import org.epochx.epox.Node;
@@ -29,6 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static za.redbridge.simulator.Utils.sumLists;
 
 /**
  * Created by xenos on 9/9/14.
@@ -136,11 +141,38 @@ public class AgentModel extends GPModel {
         throw new RuntimeException("Method disabled; use getGroupFitness");
     }
 
-    public List<Double> getGroupFitness(List<GPCandidateProgram> p){
-        return resultForOneSim(p);
+    public List<Double> getGroupFitness(List<GPCandidateProgram> team){
+        List<Pair<List<Double>,Double>> fitnessStatses = IntStream.range(0, 3)
+                .mapToObj(i -> resultForOneSim(team))
+                .collect(Collectors.toList());
+        //average over the runs and negate
+        List<Double> fitnesses =  fitnessStatses.stream()
+                .map(p -> p.getFirst())
+                .reduce((a,b) -> sumLists(a,b))
+                .get() //guaranteed to have 3 elements
+                .stream()
+                .map(d -> -d/3)
+                .collect(Collectors.toList());
+        Double teamFitness = fitnessStatses.stream()
+                .mapToDouble(p -> -p.getSecond())
+                .average()
+                .getAsDouble(); //guaranteed to have 3 elements
+
+        //update fittest team stats
+        if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
+            Stats.get().addData(CustomStatFields.GEN_TEAM_FITNESS_MIN, teamFitness);
+            Stats.get().addData(CustomStatFields.GEN_FITTEST_TEAM, team);
+        }
+
+        if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.RUN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
+            Stats.get().addData(CustomStatFields.RUN_TEAM_FITNESS_MIN, teamFitness);
+            Stats.get().addData(CustomStatFields.RUN_FITTEST_TEAM, team);
+        }
+        return fitnesses;
     }
 
-    protected List<Double> resultForOneSim(List<GPCandidateProgram> pl){
+    //returns a list of individual fitnesses and a team fitness
+    protected Pair<List<Double>,Double> resultForOneSim(List<GPCandidateProgram> pl){
         config.setSimulationSeed(System.currentTimeMillis());
         List<Phenotype> phenotypes = pl.stream().map(p -> new GPPhenotype(sensors.stream().map(s -> s.clone()).collect(Collectors.toList()), p, inputs)).collect(Collectors.toList());
 
@@ -148,16 +180,10 @@ public class AgentModel extends GPModel {
                 config.getRobotRadius(), config.getRobotColour());
         Simulation sim = new Simulation(config, robotFactory);
         sim.run();
-        System.out.print('.');
+        //System.out.print('.');
         FitnessStats fitnesses = sim.getFitness();
-        List<Double> result = new ArrayList<>();
-        double teamFitness = -fitnesses.getTeamFitness(Optional.of(sim.getStepNumber()));
-        if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
-            Stats.get().addData(CustomStatFields.GEN_TEAM_FITNESS_MIN, teamFitness);
-            Stats.get().addData(CustomStatFields.GEN_FITTEST_TEAM, pl);
-        }
-        for(Phenotype p : phenotypes) result.add(-fitnesses.getPhenotypeFitness(p));
-        return result;
+        //we pass through the fitness stats, except that only we know the phenotypes, so we do the mapping here
+        return new Pair<>(phenotypes.stream().map(p -> fitnesses.getPhenotypeFitness(p)).collect(Collectors.toList()), fitnesses.getTeamFitness(Optional.of(sim.getStepNumber())));
     }
 
     public Class getReturnType(){

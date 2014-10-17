@@ -3,6 +3,7 @@ package za.redbridge.simulator;
 import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 
+import java.util.List;
 import java.util.Random;
 
 import ec.util.MersenneTwisterFast;
@@ -86,6 +87,14 @@ public final class Utils {
     /** Get a random angle in the range [-PI / 2, PI / 2] */
     public static float randomAngle(MersenneTwisterFast random) {
         return MathUtils.TWOPI * random.nextFloat() - MathUtils.PI;
+    }
+
+    public static List<Double> sumLists(List<Double> a, List<Double> b){
+        if(a.size() != b.size()) throw new IllegalArgumentException("Lists are not of the same size");
+        for(int i = 0; i < a.size(); i++){
+            a.set(i, a.get(i) + b.get(i));
+        }
+        return a;
     }
 
 }

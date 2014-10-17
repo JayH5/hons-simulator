@@ -9,7 +9,6 @@ public abstract class Config {
         if (field != null) {
             return true;
         }
-        System.out.println("Field '" + name + "' not present, using default");
         return false;
     }
 }
