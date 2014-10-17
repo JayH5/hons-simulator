@@ -160,11 +160,11 @@ public class Main {
                     List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
                     List<String> distinctPop = (List<String>) pop.stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
                     printables.add(distinctPop.size());
-                    csvWriter.write(String.format(fieldFormat, printables.toArray()));
+                    csvWriter.write(String.format(fieldFormat, printables.toArray()) + "\n");
 
                     List<CandidateProgram> bestTeam = (List<CandidateProgram>) s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
                     treeWriter.write(StatField.GEN_NUMBER + "\t");
-                    treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}");
+                    treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}\n");
 
                     //stop if diversity is low enough
                     if ((Double) s.getStat(StatField.GEN_FITNESS_STDEV) < 0.2 && distinctPop.size() < pop.size() / 4.0) {
