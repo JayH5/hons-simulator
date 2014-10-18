@@ -21,6 +21,7 @@ public class ExperimentConfig extends Config {
     private static final int DEFAULT_RUNS_PER_GENOME = 1;
 
     private static final int DEFAULT_HETERO_TEAM_SIZE = 5;
+    private static final int DEFAULT_RUNS_PER_TEAM = 5;
 
     private static final float DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION = 0.3f;
 
@@ -33,6 +34,7 @@ public class ExperimentConfig extends Config {
     protected final int runsPerGenome;
     protected final int heteroTeamSize;
     protected final float complementGeneratorResolution;
+    protected final int runsPerTeam;
 
     protected EvolutionaryAlgorithm algorithm;
     protected String robotFactory;
@@ -45,6 +47,7 @@ public class ExperimentConfig extends Config {
         this.runsPerGenome = DEFAULT_RUNS_PER_GENOME;
         this.heteroTeamSize = DEFAULT_HETERO_TEAM_SIZE;
         this.complementGeneratorResolution = DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION;
+        this.runsPerTeam = DEFAULT_RUNS_PER_TEAM;
     }
 
     public ExperimentConfig(String filepath) {
@@ -66,6 +69,7 @@ public class ExperimentConfig extends Config {
         int runsPerG = DEFAULT_RUNS_PER_GENOME;
         int hetTeamSize = DEFAULT_HETERO_TEAM_SIZE;
         float compRes = DEFAULT_COMPLEMENT_GENERATOR_RESOLUTION;
+        int runsPerT = DEFAULT_RUNS_PER_TEAM;
 
         Map control = (Map) config.get("control");
         if (checkFieldPresent(control, "control")) {
@@ -113,6 +117,11 @@ public class ExperimentConfig extends Config {
             if (checkFieldPresent(htSize, "evolutionaryAlgorithm:heteroTeamSize")) {
                 hetTeamSize = htSize;
             }
+
+            Integer runsPT = (Integer) ea.get("runsPerTeam");
+            if (checkFieldPresent(runsPT, "evolutionaryAlgorithm:runsPerTeam")) {
+                runsPerT = runsPT;
+            }
         }
 
         Map morphology = (Map) config.get("morphology");
@@ -140,10 +149,11 @@ public class ExperimentConfig extends Config {
         this.runsPerGenome = runsPerG;
         this.heteroTeamSize = hetTeamSize;
         this.complementGeneratorResolution = compRes;
+        this.runsPerTeam = runsPerT;
     }
 
     public ExperimentConfig(long maxEpochs, EvolutionaryAlgorithm algorithm, int populationSize, int heteroTeamSize,
-                            int runsPerGenome,
+                            int runsPerGenome, int runsPerTeam,
                             String robotFactory, String morphologyConfigFile, float complementGeneratorResolution) {
 
         this.maxEpochs = maxEpochs;
@@ -154,6 +164,7 @@ public class ExperimentConfig extends Config {
         this.runsPerGenome = runsPerGenome;
         this.heteroTeamSize = heteroTeamSize;
         this.complementGeneratorResolution = complementGeneratorResolution;
+        this.runsPerTeam = runsPerTeam;
     }
 
     public long getMaxEpochs() { return maxEpochs; }
@@ -171,5 +182,7 @@ public class ExperimentConfig extends Config {
     public int getHeteroTeamSize() { return heteroTeamSize; }
 
     public float getComplementGeneratorResolution() { return complementGeneratorResolution; }
+
+    public int getRunsPerTeam() { return runsPerTeam; }
 
 }

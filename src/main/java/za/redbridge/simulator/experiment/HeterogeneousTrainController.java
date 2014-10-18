@@ -77,7 +77,6 @@ public class HeterogeneousTrainController implements Runnable{
                                         MorphologyConfig morphologyConfig,
                                         ConcurrentSkipListMap<ComparableMorphology, NEATTeam> morphologyLeaderboard) {
 
-
         this.experimentConfig = experimentConfig;
         this.simConfig = simConfig;
         this.morphologyConfig = morphologyConfig;
@@ -103,14 +102,11 @@ public class HeterogeneousTrainController implements Runnable{
         pop.setInitialConnectionDensity(0.5);
         pop.reset();
 
-        CCHIndividual lastBestIndividual = new CCHIndividual();
-
         Genome previousBest = train.getBestGenome();
-        NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
-        controllerTrainingLogger.info("Epoch# \t Best Team Score \t Best Individual \t Variance");
+        controllerTrainingLogger.info("Epoch# \t BestTeamScore \t BestIndividual \t Mean \t Variance \t StdDeviation \t BestTeamEver \t BestIndividualEver");
 
         do {
 
@@ -121,20 +117,12 @@ public class HeterogeneousTrainController implements Runnable{
 
             train.iteration();
 
-            controllerTrainingLogger.info(epochs + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore() + "\t" +
-                    "\t" + train.getVariance());
-
-            if (epochs % 50 == 0 && train.getBestIndividual().compareTo(lastBestIndividual) > 0) {
-                /*IOUtils.writeNetwork(train.getBestIndividual().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "best_morphology_at_" + epochs + ".tmp");*/
-                lastBestIndividual = train.getBestIndividual();
-            }
+            controllerTrainingLogger.info(epochs + "\t" + train.getCurrentBestTeam().teamFitness() + "\t" + train.getCurrentBestIndividual().getAverageTaskScore() + "\t" +
+                    + train.getEpochMean() + "\t" + train.getVariance() + "\t" + train.getStandardDeviation() + "\t" + train.getBestTeam().teamFitness() + "\t" + train.getBestIndividual().getAverageTaskScore());
 
             if (previousBest == null) {
                 previousBest = train.getBestGenome();
             }
-
-            lastBestIndividual = train.getBestIndividual();
 
             long minutes = Duration.between(start, Instant.now()).toMinutes();
             controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
@@ -148,8 +136,7 @@ public class HeterogeneousTrainController implements Runnable{
         //IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
-        controllerTrainingLogger.info("Best-scoring genotype for this set of detectivity thresholds scored " + previousBest.getScore());
-
+        controllerTrainingLogger.info("Best-scoring genotype for this set of gain constants scored: " + train.getBestIndividual().getAverageTaskScore());
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
@@ -173,15 +160,13 @@ public class HeterogeneousTrainController implements Runnable{
         HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
                 simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
 
-        Simulation simulation = new Simulation(simConfig, heteroFactory, teamWithBestGenotype.getGenotypes());
+        Simulation simulation = new Simulation(simConfig, heteroFactory);
         simulation.run();
-
+/*
         SimulationGUI video = new SimulationGUI(simulation);
 
         //new console which displays this simulation
         sim.display.Console console = new sim.display.Console(video);
-        console.setVisible(true);
+        console.setVisible(true);*/
     }
-
-
 }

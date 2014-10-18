@@ -1,6 +1,7 @@
 package za.redbridge.simulator.ea.neat;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.encog.Encog;
@@ -30,16 +31,19 @@ import org.encog.ml.ea.train.basic.BasicEA;
 import org.encog.ml.genetic.GeneticError;
 import org.encog.util.concurrency.MultiThreadable;
 import org.encog.util.logging.EncogLogging;
+import org.jbox2d.common.MathUtils;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.ea.hetero.CCHIndividual;
 import za.redbridge.simulator.ea.hetero.NEATTeam;
 import za.redbridge.simulator.ea.hetero.TeamEvaluator;
+import za.redbridge.simulator.experiment.Main;
 import za.redbridge.simulator.factories.ComplementFactory;
 import za.redbridge.simulator.factories.NEATTeamFactory;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -218,8 +222,10 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
     private RuleHolder rules;
 
     private CCHIndividual bestIndividual;
+    private CCHIndividual currentBestIndividual;
 
     private NEATTeam bestTeam;
+    private NEATTeam currentBestTeam;
 
     //current average score for this epoch
     private double currentAverage = -1;
@@ -691,18 +697,20 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
             List<NEATTeam> teams = teamFactory.placeInTeams();
             totalTeams.addAll(teams);
 
-            int x = 0;
-            TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-            for (TeamEvaluator t : evaluators) {
+            for (int j = 0; j < teams.size(); j++) {
 
-                t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
-                t.run();
-                x++;
+                executor.execute(new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(j)));
+            }
+
+            executor.shutdown();
+            while (!executor.isTerminated()) {
             }
         }
 
         Collections.sort(totalTeams);
+        currentBestTeam = totalTeams.get(totalTeams.size()-1);
         bestTeam = totalTeams.get(totalTeams.size()-1).compareTo(bestTeam) > 0 ? totalTeams.get(totalTeams.size()-1) : bestTeam;
 
         // score the population
@@ -714,6 +722,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         //NaNs and shit should be at the beginning i hope (idk for positive infinity)
         List<CCHIndividual> flattenedIndividuals = new ArrayList<>(teamFactory.getAllIndividuals());
         Collections.sort(flattenedIndividuals);
+        currentBestIndividual = flattenedIndividuals.get(flattenedIndividuals.size()-1);
         double[] doubleArray = new double[flattenedIndividuals.size()];
 
         int z = 0;
@@ -813,19 +822,21 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
             List<NEATTeam> teams = teamFactory.placeInTeams();
             totalTeams.addAll(teams);
 
-            int x = 0;
-            TeamEvaluator[] evaluators = new TeamEvaluator[teams.size()];
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-            for (TeamEvaluator t : evaluators) {
+            for (int j = 0; j < teams.size(); j++) {
 
-                t = new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(x));
-                t.run();
-                x++;
+                executor.execute(new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(j)));
+            }
+
+            executor.shutdown();
+            while (!executor.isTerminated()) {
             }
         }
 
         Collections.sort(totalTeams);
         bestTeam = totalTeams.get(totalTeams.size()-1);
+        currentBestTeam = bestTeam;
 
         // score the initial population
         final CCHParallelScore pscore = new CCHParallelScore(population, teamFactory.getAllIndividuals(),
@@ -852,6 +863,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         Collections.sort(flattenedIndividuals);
 
         bestIndividual = flattenedIndividuals.get(flattenedIndividuals.size()-1);
+        currentBestIndividual = bestIndividual;
 
         lastEpochScores = new double[flattenedIndividuals.size()];
         thisEpochScores = new double[flattenedIndividuals.size()];
@@ -1059,10 +1071,19 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
     public NEATTeam getBestTeam() { return bestTeam; }
 
+    public NEATTeam getCurrentBestTeam() { return currentBestTeam; }
+
     public double getVariance() {
 
         Variance variance = new Variance();
-        return variance.evaluate(thisEpochScores);
+        double raw = variance.evaluate(thisEpochScores);
+        return raw;
+    }
+
+    public double getStandardDeviation() {
+
+        StandardDeviation stdDev = new StandardDeviation();
+        return stdDev.evaluate(thisEpochScores);
     }
 
     public double getEpochMean() {
@@ -1073,6 +1094,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
     //get best individual so far
     public CCHIndividual getBestIndividual() { return bestIndividual; }
+
+    public CCHIndividual getCurrentBestIndividual() { return currentBestIndividual; }
 
 }
 

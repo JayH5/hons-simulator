@@ -26,7 +26,7 @@ mainClassName = "za.redbridge.simulator.experiment.Main"
 apply plugin: 'maven'
 install {
   repositories.mavenInstaller {
-    pom.version = '0.5-SNAPSHOT'
+    pom.version = '0.6-SNAPSHOT'
     pom.artifactId = 'simulator'
     pom.groupId = 'za.redbridge.simulator'
   }

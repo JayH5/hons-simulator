@@ -7,14 +7,7 @@ package za.redbridge.simulator.phenotype;
 public interface ScoreKeepingController {
 
     public double getAverageTaskScore();
-    public double getAverageCooperativeScore();
 
-    public double getCurrentTaskScore();
-    public double getCurrentCooperativeScore();
+    public void addTaskScore(double score);
 
-    public void incrementTotalTaskScore(double score);
-    public void incrementTotalCooperativeScore(double score);
-
-    public void cacheTaskScore();
-    public void cacheCooperativeScore();
 }

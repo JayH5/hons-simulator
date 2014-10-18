@@ -10,6 +10,7 @@ import java.util.Set;
 public class NEATTeam implements MLMethod, Comparable<NEATTeam> {
 
     private final Set<CCHIndividual> team;
+    private double teamFitness;
 
     public int compareTo(NEATTeam other) {
         return Double.compare(teamFitness(), other.teamFitness());
@@ -25,15 +26,7 @@ public class NEATTeam implements MLMethod, Comparable<NEATTeam> {
         return team;
     }
 
-    public double teamFitness() {
+    public void setTeamFitness(double teamFitness) { this.teamFitness = teamFitness; }
 
-        double output = 0;
-
-        for (CCHIndividual individual: team) {
-            output += individual.getAverageTaskScore();
-        }
-
-        return output;
-    }
-
+    public double teamFitness() { return teamFitness; }
 }

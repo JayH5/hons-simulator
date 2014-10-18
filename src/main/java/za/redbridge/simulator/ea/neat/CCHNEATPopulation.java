@@ -435,8 +435,6 @@ public class CCHNEATPopulation extends BasicPopulation implements Serializable,
         defaultSpecies.setLeader(defaultSpecies.getMembers().get(0));
         getSpecies().add(defaultSpecies);
 
-        System.out.println("species size: " + getSpecies().size());
-
         // create initial innovations
         setInnovations(new NEATInnovationList(this.getPopulation()));
     }

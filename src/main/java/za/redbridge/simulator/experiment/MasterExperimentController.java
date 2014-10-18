@@ -61,7 +61,7 @@ public class MasterExperimentController {
 
     //IOUtils.writeNetwork(bestNetwork,outputDir,"bestNetwork.tmp");
     bestMorphology.dumpMorphology(outputDir,"bestMorphology.yml");
-
+    IOUtils.writeTeam(bestMorphology, topCombo.getValue());
     }
 
     public void start() {
