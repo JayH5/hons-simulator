@@ -7,6 +7,7 @@ import za.redbridge.simulator.sensor.AgentSensor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -51,7 +52,8 @@ public class MorphologyConfig extends Config {
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;
 
-        try (Reader reader = Files.newBufferedReader(Paths.get(filepath))) {
+        try (Reader reader =
+                     Files.newBufferedReader(Paths.get(filepath), Charset.defaultCharset())) {
             config = (Map<String, Object>) yaml.load(reader);
         } catch (IOException e) {
             e.printStackTrace();

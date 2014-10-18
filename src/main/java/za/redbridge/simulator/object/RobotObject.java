@@ -4,7 +4,6 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
 import java.awt.Color;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jbox2d.dynamics.contacts.Contact;
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
@@ -22,7 +20,6 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
-import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Drawable;
@@ -156,7 +153,9 @@ public class RobotObject extends PhysicalObject {
 
         List<AgentSensor> sensors = phenotype.getSensors();
         List<List<Double>> readings = new ArrayList<>(sensors.size());
-        sensors.forEach(s -> readings.add(s.sense()));
+        for (AgentSensor sensor : sensors) {
+            readings.add(sensor.sense());
+        }
 
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 
