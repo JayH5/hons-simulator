@@ -4,7 +4,6 @@ import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
 import java.awt.Color;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jbox2d.dynamics.contacts.Contact;
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
@@ -22,7 +20,6 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
-import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
 import za.redbridge.simulator.portrayal.CirclePortrayal;
 import za.redbridge.simulator.portrayal.Drawable;
@@ -51,7 +48,6 @@ public class RobotObject extends PhysicalObject {
     private static final float GROUND_TRACTION = 0.8f;
     private static final float VELOCITY_RAMPDOWN_START = 0.2f;
     private static final float VELOCITY_RAMPDOWN_END = 0.5f;
-    private static final float IMPULSE_THRESHOLD = 1.5f;
 
     private final Phenotype phenotype;
     private final HeuristicPhenotype heuristicPhenotype;
@@ -71,11 +67,6 @@ public class RobotObject extends PhysicalObject {
     private ArrayList<Double> samplePolygonAreas;
 
     private final Portrayal directionPortrayal = new DirectionPortrayal();
-
-    private boolean DAMAGE_ENABLED = true;
-    private float damage = 0.0f;
-    private static final float MAX_DAMAGE = 5.0f;
-    private boolean disabled = false;
 
     public RobotObject(World world, Vec2 position, float angle, double radius, double mass,
             Color color, Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
@@ -184,7 +175,6 @@ public class RobotObject extends PhysicalObject {
     }
 
     private void applyWheelDrive(float wheelDrive, Vec2 wheelPosition) {
-        if(disabled) return;
         final Body body = getBody();
 
         // Calculate the force due to the wheel
@@ -286,15 +276,6 @@ public class RobotObject extends PhysicalObject {
         return phenotype;
     }
 
-    public void damage(float impulse){
-        if(!DAMAGE_ENABLED) return;
-        if(impulse > IMPULSE_THRESHOLD){
-            this.damage += impulse - IMPULSE_THRESHOLD;
-        }
-        if(damage > MAX_DAMAGE) {
-            disabled = true;
-        }
-    }
     private static class DirectionPortrayal extends PolygonPortrayal {
 
         static final float WIDTH = 0.1f;

@@ -5,11 +5,6 @@ import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
-import za.redbridge.simulator.object.RobotObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * The contact listener for sensor intersections
@@ -74,19 +69,6 @@ public class SimulationContactListener implements ContactListener {
 
     @Override
     public void postSolve(Contact contact, ContactImpulse contactImpulse) {
-        Fixture[] fixtures = {contact.getFixtureA(), contact.getFixtureB()};
-        List<RobotObject> robots = new ArrayList<RobotObject>();
-        for(Fixture f : fixtures){
-            if(f.getUserData() instanceof RobotObject) robots.add((RobotObject)f.getUserData());
-            else if(f.getBody().getUserData() instanceof RobotObject) robots.add((RobotObject) f.getBody().getUserData());
-        }
-        if(robots.size() > 0) {
-            float sum = 0.0f;
-            for (int n = 0, t = 0; n < contactImpulse.normalImpulses.length && t < contactImpulse.tangentImpulses.length; n++, t++) {
-                sum += contactImpulse.normalImpulses[n];
-                sum += contactImpulse.tangentImpulses[t];
-            }
-            for(RobotObject r : robots) r.damage(sum);
-        }
+        // NO-OP
     }
 }
