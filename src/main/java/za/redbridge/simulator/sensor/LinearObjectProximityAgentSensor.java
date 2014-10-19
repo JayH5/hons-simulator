@@ -213,7 +213,7 @@ public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgent
 
     public String parametersToString() {
 
-        String output = "";
+        String output = "RobotObjectSensor\tResourceObjectSensor\tTargetAreaSensor\tWallObjectSensor\n";
 
         for (double value: gain) {
             output += value + " ";
