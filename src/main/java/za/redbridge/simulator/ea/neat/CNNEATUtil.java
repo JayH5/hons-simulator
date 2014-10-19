@@ -95,7 +95,7 @@ public class CNNEATUtil {
         weightMutation.getComponents().finalizeStructure();
         result.setChampMutation(weightMutation);
         result.addOperation(0.5, new CNNeatCrossover());
-        result.addOperation(0.5, weightMutation);
+        result.addOperation(0.475, weightMutation);
         result.addOperation(0.01, new CCHNEATMutateAddNode());
         result.addOperation(0.01, new CCHNEATMutateAddLink());
         result.addOperation(0.005, new NEATMutateRemoveLink());
