@@ -8,7 +8,6 @@ import org.jbox2d.dynamics.contacts.Contact;
 import za.redbridge.simulator.object.RobotObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

@@ -183,7 +183,7 @@ public class AgentModel extends GPModel {
         //System.out.print('.');
         FitnessStats fitnesses = sim.getFitness();
         //we pass through the fitness stats, except that only we know the phenotypes, so we do the mapping here
-        return new Pair<>(phenotypes.stream().map(p -> fitnesses.getPhenotypeFitness(p)).collect(Collectors.toList()), fitnesses.getTeamFitness(Optional.of(sim.getStepNumber())));
+        return new Pair<>(phenotypes.stream().map(p -> fitnesses.getPhenotypeFitness(p)).collect(Collectors.toList()), fitnesses.getTeamFitnessWithTimeBonus(sim.getStepNumber()));
     }
 
     public Class getReturnType(){
