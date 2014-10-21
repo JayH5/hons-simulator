@@ -7,6 +7,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.Sensor;
 
@@ -42,8 +43,9 @@ public class PickupHeuristic extends Heuristic {
         }
 
         // Check for a resource in the sensor
-        ResourceObject resource =
-                pickupSensor.sense().map(o -> (ResourceObject) o.getObject()).orElse(null);
+        ClosestObjectSensor.ClosestObject closestObject = pickupSensor.sense();
+        ResourceObject resource = closestObject != null ?
+                (ResourceObject) closestObject.getObject() : null;
         if (resource == null || !resource.canBePickedUp()) {
             return null; // No viable resource, nothing to do
         }

@@ -38,11 +38,11 @@ public class CCHIndividual implements MLMethod, ScoreKeepingController, Comparab
         this.genome = genome;
         this.team = team;
 
-        allTaskScores = Collections.synchronizedList(new ArrayList<>());
+        allTaskScores = Collections.synchronizedList(new ArrayList<Double>());
     }
 
     public CCHIndividual() {
-        allTaskScores = Collections.synchronizedList(new ArrayList<>());
+        allTaskScores = Collections.synchronizedList(new ArrayList<Double>());
         network = null;
         genome = null;
         team = null;

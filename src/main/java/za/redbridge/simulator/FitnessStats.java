@@ -2,7 +2,6 @@ package za.redbridge.simulator;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import za.redbridge.simulator.phenotype.Phenotype;
 
@@ -32,7 +31,8 @@ public class FitnessStats {
     }
 
     public double getPhenotypeFitness(Phenotype phenotype) {
-        return phenotypeFitnesses.getOrDefault(phenotype, 0.0);
+        Double fitness = phenotypeFitnesses.get(phenotype);
+        return fitness != null ? fitness : 0.0;
     }
 
     /**
@@ -43,9 +43,14 @@ public class FitnessStats {
         teamFitness += value;
     }
 
-    /** Gets the normalized team fitness (out of 120 if stepsTaken is provided; out of 100 otherwise) */
-    public double getTeamFitness(Optional<Long> stepsTaken) {
-        return (teamFitness / totalResourceValue) * 100 + (stepsTaken.orElse(0L) / maxSteps) * 20;
+    /** Gets the normalized team fitness including time bonus (out of 120) */
+    public double getTeamFitnessWithTimeBonus(long stepsTaken) {
+        return (teamFitness / totalResourceValue) * 100 + (stepsTaken / maxSteps) * 20;
+    }
+
+    /** Gets the normalized team fitness (out of 100) */
+    public double getTeamFitness() {
+        return (teamFitness / totalResourceValue) * 100;
     }
 
     public Map<Phenotype,Double> getPhenotypeFitnessMap() {

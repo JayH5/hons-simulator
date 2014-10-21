@@ -1,8 +1,9 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
+import org.jbox2d.common.Vec2;
+
 import java.awt.Color;
 import java.util.List;
-import java.util.Optional;
 
 import sim.util.Double2D;
 import za.redbridge.simulator.object.RobotObject;
@@ -31,11 +32,12 @@ public class CollisionAvoidanceHeuristic extends Heuristic {
 
     @Override
     public Double2D step(List<List<Double>> list) {
-        Optional<ClosestObjectSensor.ClosestObject> collision = collisionSensor.sense();
-
-        return collision.map(o -> o.getVectorToObject())
-                .map(o -> wheelDriveForTargetPosition(jitter(o.negate(), 0.2f)))
-                .orElse(null);
+        ClosestObjectSensor.ClosestObject collision = collisionSensor.sense();
+        if (collision != null) {
+            Vec2 position = collision.getVectorToObject().negate();
+            return wheelDriveForTargetPosition(jitter(position, 0.2f));
+        }
+        return null;
     }
 
     @Override

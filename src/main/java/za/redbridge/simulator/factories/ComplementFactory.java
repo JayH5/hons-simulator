@@ -33,8 +33,6 @@ public class ComplementFactory {
     public Set<MorphologyConfig> generateSensitivitiesForTemplate() {
 
         Set<MorphologyConfig> morphologyList = new HashSet<>();
-        int numConfigurableSensors = template.getNumAdjustableArrays();
-
         double[] sensitivities = new double[4];
 
         for (int i = 0; i < sensitivities.length; i++) {
@@ -42,6 +40,8 @@ public class ComplementFactory {
         }
 
         generateAndConfigureSensitivities(sensitivities, 0, morphologyList);
+
+        System.out.println("Generated " + morphologyList.size() + " complements.");
 
         return morphologyList;
     }
@@ -53,7 +53,7 @@ public class ComplementFactory {
             return;
         }
 
-        for (float j = 1; j < (int) (2 / resolution) + 1; j++) {
+        for (float j = 1; j < (int) (1.5 / resolution) + 1; j++) {
 
             sensitivities[currentIndex] = resolution * j;
             morphologyList.add(MorphologyConfig.MorphologyFromGain(template, sensitivities));
