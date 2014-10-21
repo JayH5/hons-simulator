@@ -101,6 +101,8 @@ public class HeterogeneousTrainController implements Runnable{
         Genome previousBest = train.getBestGenome();
 
         controllerTrainingLogger.info("Testset ID: " + testSetID);
+        controllerTrainingLogger.info("Host IP: " + ExperimentUtils.getIP());
+        controllerTrainingLogger.info("Total Resource Value: " + simConfig.getResourceFactory().getTotalResourceValue());
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
         controllerTrainingLogger.info("Epoch# \t BestTeamScore \t BestIndividual \t Mean \t Variance \t StdDeviation \t BestTeamEver \t BestIndividualEver");
 
