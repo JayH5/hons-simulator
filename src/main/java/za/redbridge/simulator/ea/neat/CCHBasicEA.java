@@ -708,7 +708,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         executor.shutdown();
 
         try {
-            taskExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.out.println("sh*t.");
@@ -838,7 +838,7 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         executor.shutdown();
 
         try {
-            taskExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.out.println("sh*t.");
