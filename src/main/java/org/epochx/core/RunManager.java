@@ -32,6 +32,7 @@ import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.life.*;
 import org.epochx.representation.CandidateProgram;
 import org.epochx.stats.*;
+import za.redbridge.simulator.gp.CustomStatFields;
 
 /**
  * Instances of this class are responsible for executing single evolutionary
@@ -224,17 +225,13 @@ public class RunManager implements ConfigListener {
     public static void calculateFitnessList(final List<CandidateProgram> pop){
         int chunkSize = 20;
         int numSims = 3;
-        List<CandidateProgram> inNeedOfRefresh = pop.stream()
-                .map(p -> (GPCandidateProgram)p)
-                .filter(p -> !p.getCachedFitness().isPresent())
-                .collect(Collectors.toList());
         Map<GPCandidateProgram,List<Double>> fitnesses = new HashMap<>(pop.size());
         List<List<GPCandidateProgram>> l = new ArrayList<>();
         for(int s = 0; s < numSims; s++) {
-            Collections.shuffle(inNeedOfRefresh);
-            for (int i = 0; i < inNeedOfRefresh.size() / (double) chunkSize; i++) {
+            Collections.shuffle(pop);
+            for (int i = 0; i < pop.size() / (double) chunkSize; i++) {
                 //TODO such hax, assuming GPCandidateProgram
-                l.add(inNeedOfRefresh.stream().skip(i * chunkSize).limit(chunkSize).map(p -> (GPCandidateProgram) p).collect(Collectors.toList()));
+                l.add(pop.stream().skip(i * chunkSize).limit(chunkSize).map(p -> (GPCandidateProgram) p).collect(Collectors.toList()));
             }
             List<List<Double>> fitnessesForAllTeams = l.stream()
                     .parallel()

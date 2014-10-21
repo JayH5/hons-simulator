@@ -15,10 +15,6 @@ public class WheelDrive extends Vec2 {
         super((float) Heuristic.wheelDriveForTargetAngle(bearing.getValue()).x, (float) Heuristic.wheelDriveForTargetAngle(bearing.getValue()).y);
     }
 
-    public WheelDrive(RelativeCoordinate c){
-        super((float)Heuristic.wheelDriveForTargetPosition(c).x, (float)Heuristic.wheelDriveForTargetPosition(c).y);
-    }
-
     private static float clamp(float f){
         return (float)Math.max(0.0, Math.min(1.0, f));
     }

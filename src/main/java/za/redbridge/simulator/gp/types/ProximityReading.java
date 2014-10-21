@@ -33,13 +33,6 @@ public class ProximityReading {
         return new Bearing(bearing);
     }
 
-    /*
-     * Note: this gets more and more terrible for higher fovs.
-     */
-    public RelativeCoordinate getCoordinate(){
-        return RelativeCoordinate.fromDistAndBearing(getDistance(),getBearing());
-    }
-
     public String toString(){
         DecimalFormat df = new DecimalFormat("#.00");
         return "ProximityReading " + df.format(value);

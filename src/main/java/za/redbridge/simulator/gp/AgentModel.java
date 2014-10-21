@@ -9,6 +9,7 @@ import org.epochx.epox.lang.IfFunction;
 import org.epochx.gp.model.GPModel;
 import org.epochx.gp.representation.GPCandidateProgram;
 import org.epochx.representation.CandidateProgram;
+import org.epochx.stats.StatField;
 import org.epochx.stats.Stats;
 import za.redbridge.simulator.FitnessStats;
 import za.redbridge.simulator.Simulation;
@@ -95,6 +96,7 @@ public class AgentModel extends GPModel {
        syntax.add(new Literal(new Bearing(3*P2)));
 
        syntax.add(new Literal(new GPFloatLiteral(0.0f)));
+       syntax.add(new Literal(new GPFloatLiteral(0.5f)));
        syntax.add(new Literal(new GPFloatLiteral(1.0f)));
        //syntax.add(new RandomGPFloat());
        //syntax.add(new Literal(new FloatLiteral(2.0f)));
@@ -102,17 +104,13 @@ public class AgentModel extends GPModel {
 
        syntax.add(new WheelDriveFromFloats());
        syntax.add(new WheelDriveFromBearing());
-       syntax.add(new WheelDriveFromCoordinate());
        syntax.add(new WheelDriveSpotTurnLeft());
        syntax.add(new WheelDriveSpotTurnRight());
 
-       syntax.add(new ReadingToCoordinate());
        syntax.add(new ReadingToDistance());
        syntax.add(new ReadingToFloat());
        syntax.add(new ReadingPresent());
 
-       syntax.add(new RotateCoordinate());
-       syntax.add(new BearingFromCoordinate());
        syntax.add(new RandomBearing());
        //Map<Node,Map<String,Object>> state = new HashMap<>();
        //syntax.add(new LoadBearing(state));
@@ -159,12 +157,14 @@ public class AgentModel extends GPModel {
                 .getAsDouble(); //guaranteed to have 3 elements
 
         //update fittest team stats
-        if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
+        Double genMinTeamFitness =  (Double)Stats.get().getStat(CustomStatFields.GEN_TEAM_FITNESS_MIN);
+        if(genMinTeamFitness == null || teamFitness < genMinTeamFitness){
             Stats.get().addData(CustomStatFields.GEN_TEAM_FITNESS_MIN, teamFitness);
             Stats.get().addData(CustomStatFields.GEN_FITTEST_TEAM, team);
         }
 
-        if((Double)Optional.ofNullable(Stats.get().getStat(CustomStatFields.RUN_TEAM_FITNESS_MIN)).orElse(0.0) >= teamFitness){
+        Double runMinTeamFitness =  (Double)Stats.get().getStat(CustomStatFields.RUN_TEAM_FITNESS_MIN);
+        if(runMinTeamFitness == null || teamFitness < runMinTeamFitness){
             Stats.get().addData(CustomStatFields.RUN_TEAM_FITNESS_MIN, teamFitness);
             Stats.get().addData(CustomStatFields.RUN_FITTEST_TEAM, team);
         }

@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Created by xenos on 9/29/14.
  * A class to tie the sensor parameters to the input variable; it will then produce ProximityReading objects with the same parameters set.
- * This allows us to convert ProximityReading objects to their RelativeCoordinate, Bearing and FloatVariable (distance) counterparts.
+ * This allows us to convert ProximityReading objects to their Bearing and FloatVariable (distance) counterparts.
  */
 public class TypedProximitySensorVariable extends Variable {
     private final List<DetectedObject.Type> sensorOrder;
