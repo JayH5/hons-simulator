@@ -14,8 +14,6 @@ meta:
   resourceSensorGain: 1.0
   targetAreaSensorDetectivity: 1.0
   targetAreaSensorGain: 1.0
-  wallSensorDetectivity: 1.0
-  wallSensorGain: 1.0
 
 2s:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
