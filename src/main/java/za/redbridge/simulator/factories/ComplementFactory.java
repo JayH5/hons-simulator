@@ -41,6 +41,8 @@ public class ComplementFactory {
 
         generateAndConfigureSensitivities(sensitivities, 0, morphologyList);
 
+        System.out.println("Generated " + morphologyList.size() + " complements.");
+
         return morphologyList;
     }
 
