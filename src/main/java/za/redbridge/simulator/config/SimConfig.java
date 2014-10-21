@@ -3,7 +3,11 @@ package za.redbridge.simulator.config;
 import org.yaml.snakeyaml.Yaml;
 
 import java.awt.Color;
-import java.io.*;
+import java.io.IOException;
+import java.io.InvalidClassException;
+import java.io.Reader;
+import java.nio.charset.Charset;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -87,7 +91,8 @@ public class SimConfig extends Config {
     public SimConfig(String filepath) {
         Yaml yaml = new Yaml();
         Map<String, Object> config = null;
-        try (Reader reader = Files.newBufferedReader(Paths.get(filepath))) {
+        try (Reader reader =
+                     Files.newBufferedReader(Paths.get(filepath), Charset.defaultCharset())) {
             config = (Map<String, Object>) yaml.load(reader);
         } catch (IOException e) {
             e.printStackTrace();

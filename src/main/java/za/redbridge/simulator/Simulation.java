@@ -13,6 +13,7 @@ import sim.util.Double2D;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.RobotFactory;
 import za.redbridge.simulator.object.PhysicalObject;
+import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.object.TargetAreaObject;
 import za.redbridge.simulator.object.WallObject;
@@ -74,18 +75,16 @@ public class Simulation extends SimState {
         // Create ALL the objects
         createWalls();
         createTargetArea();
-        robotFactory
-                .placeInstances(placementArea.new ForType<>(), physicsWorld,
+        robotFactory.placeInstances(placementArea.new ForType<RobotObject>(), physicsWorld,
                         config.getTargetAreaPlacement());
-        config.getResourceFactory().placeInstances(placementArea.new ForType<>(), physicsWorld);
+        config.getResourceFactory().placeInstances(placementArea.new ForType<ResourceObject>(),
+                physicsWorld);
 
         // Now actually add the objects that have been placed to the world and schedule
         for (PhysicalObject object : placementArea.getPlacedObjects()) {
             drawProxy.registerDrawable(object.getPortrayal());
             schedule.scheduleRepeating(object);
         }
-
-
         schedule.scheduleRepeating(new Steppable() {
             @Override
             public void step(SimState simState) {
@@ -98,9 +97,6 @@ public class Simulation extends SimState {
     @Override
     public void finish() {
         kill();
-        schedule.scheduleRepeating(simState ->
-            physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
-        );
     }
 
     // Walls are simply added to environment since they do not need updating

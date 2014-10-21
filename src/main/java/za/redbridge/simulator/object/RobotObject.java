@@ -148,7 +148,9 @@ public class RobotObject extends PhysicalObject {
 
         List<AgentSensor> sensors = phenotype.getSensors();
         List<List<Double>> readings = new ArrayList<>(sensors.size());
-        sensors.forEach(s -> readings.add(s.sense()));
+        for (AgentSensor sensor : sensors) {
+            readings.add(sensor.sense());
+        }
 
         Double2D wheelDrives = heuristicPhenotype.step(readings);
 

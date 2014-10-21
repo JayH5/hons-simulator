@@ -19,11 +19,15 @@ public class HeuristicSchedule {
 
     public Double2D step(List<List<Double>> readings) {
         schedule.addAll(addList);
-        addList.forEach(h -> h.setSchedule(this));
+        for (Heuristic heuristic : addList) {
+            heuristic.setSchedule(this);
+        }
         addList.clear();
 
         schedule.removeAll(removeList);
-        removeList.forEach(h -> h.setSchedule(null));
+        for (Heuristic heuristic : addList) {
+            heuristic.setSchedule(null);
+        }
         removeList.clear();
 
         Double2D wheelDrive = null;
