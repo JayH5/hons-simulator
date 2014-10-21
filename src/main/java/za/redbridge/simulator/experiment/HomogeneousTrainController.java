@@ -8,7 +8,6 @@ import org.encog.ml.ea.genome.Genome;
 import org.encog.ml.ea.train.EvolutionaryAlgorithm;
 import org.encog.neural.neat.NEATCODEC;
 import org.encog.neural.neat.NEATNetwork;
-import org.encog.neural.neat.NEATPopulation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import za.redbridge.simulator.config.ExperimentConfig;

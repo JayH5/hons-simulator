@@ -7,10 +7,10 @@ phenotype:
 
 evolutionaryAlgorithm:
   controllerEA: NEAT
-  populationSize: 100
+  populationSize: 60
 
 complements:
-  generatorResolution: 0.25
+  generatorResolution: 0.50
 
 morphology:
   morphologyFileName: configs/sensorList.yml

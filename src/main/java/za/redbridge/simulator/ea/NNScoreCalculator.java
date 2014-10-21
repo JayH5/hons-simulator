@@ -110,7 +110,7 @@ public class NNScoreCalculator implements CalculateScore {
         public void run() {
 
             simulation.run();
-            scores[ticketNo] = simulation.getFitness().getTeamFitness(Optional.of(simulation.getStepNumber()));
+            scores[ticketNo] = simulation.getFitness().getTeamFitness();
         }
     }
 }

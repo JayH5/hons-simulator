@@ -6,7 +6,6 @@ import org.encog.ml.ea.opp.selection.TruncationSelection;
 import org.encog.ml.ea.train.basic.TrainEA;
 import org.encog.neural.hyperneat.HyperNEATCODEC;
 import org.encog.neural.neat.NEATCODEC;
-import org.encog.neural.neat.NEATPopulation;
 import org.encog.neural.neat.training.opp.*;
 import org.encog.neural.neat.training.opp.links.MutatePerturbLinkWeight;
 import org.encog.neural.neat.training.opp.links.MutateResetLinkWeight;
