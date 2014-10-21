@@ -635,7 +635,6 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
 
         this.iteration++;
 
-        //TODO: Split up the team after creating child and before adding child to population and worker??,
         // make new teams and evaluate using the TeamEvaluator.
         //Tricky part is how to keep team sizes constant while having unique genomes per team member and
         //evaluating all genomes in candidate pool.
@@ -690,6 +689,9 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, teamPopulation);
         //for however number of teamruns per pool
         List<NEATTeam> totalTeams = new ArrayList<>();
+
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
         for (int i = 0; i < experimentConfig.getRunsPerGenome(); i++) {
 
             //now create the teams and evaluate them in their separate threads,
@@ -697,16 +699,19 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
             List<NEATTeam> teams = teamFactory.placeInTeams();
             totalTeams.addAll(teams);
 
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
             for (int j = 0; j < teams.size(); j++) {
 
                 executor.execute(new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(j)));
             }
+        }
 
-            executor.shutdown();
-            while (!executor.isTerminated()) {
-            }
+        executor.shutdown();
+
+        try {
+            taskExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.out.println("sh*t.");
         }
 
         Collections.sort(totalTeams);
@@ -815,6 +820,8 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
         NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfig, population.flatten());
         List<NEATTeam> totalTeams = new ArrayList<>();
 
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
         for (int i = 0; i < experimentConfig.getRunsPerGenome(); i++) {
 
             //now create the teams and evaluate them in their separate threads,
@@ -822,16 +829,22 @@ public class CCHBasicEA extends BasicEA implements EvolutionaryAlgorithm, MultiT
             List<NEATTeam> teams = teamFactory.placeInTeams();
             totalTeams.addAll(teams);
 
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
             for (int j = 0; j < teams.size(); j++) {
 
                 executor.execute(new TeamEvaluator(experimentConfig, simConfig, morphologyConfig, teams.get(j)));
             }
+        }
 
-            executor.shutdown();
-            while (!executor.isTerminated()) {
-            }
+        executor.shutdown();
+
+        try {
+            taskExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.out.println("sh*t.");
+        }
+
+        while (!executor.isTerminated()) {
         }
 
         Collections.sort(totalTeams);
