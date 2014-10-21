@@ -1,6 +1,6 @@
 control:
-  maxEpochs: 200
-  runsPerGenome: 5
+  maxEpochs: 150
+  runsPerGenome: 4
 
 phenotype:
   robotPhenotype: za.redbridge.simulator.phenotype.NEATPhenotype
@@ -9,7 +9,7 @@ evolutionaryAlgorithm:
   controllerEA: NEAT
   populationSize: 60
   heteroTeamSize: 20
-  runsPerTeam: 5
+  runsPerTeam: 4
 
 complements:
   generatorResolution: 0.50

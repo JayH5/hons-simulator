@@ -6,7 +6,7 @@ meta:
   readingSize: 4
   bearing: 0
   fieldOfView: 10.0
-  range: 3.0
+  range: 2.0
   orientation: 0.0
   robotSensorDetectivity: 1.0
   robotSensorGain: 1.0
@@ -20,7 +20,7 @@ meta:
   readingSize: 1
   bearing: 180.0
   fieldOfView: 10.0
-  range: 3.0
+  range: 2.0
   orientation: 0.0
 
 3s:
@@ -28,7 +28,7 @@ meta:
   readingSize: 1
   bearing: 90.0
   fieldOfView: 10.0
-  range: 3.0
+  range: 2.0
   orientation: 0.0
 
 4s:
@@ -36,5 +36,13 @@ meta:
   readingSize: 1
   bearing: -90.0
   fieldOfView: 10.0
-  range: 3.0
+  range: 2.0
+  orientation: 0.0
+
+4s:
+  type: za.redbridge.simulator.sensor.ProximityAgentSensor
+  readingSize: 1
+  bearing: 0.0
+  fieldOfView: 10.0
+  range: 2.0
   orientation: 0.0
