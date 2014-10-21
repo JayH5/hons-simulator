@@ -43,12 +43,12 @@ public class FitnessStats {
         teamFitness += value;
     }
 
-    /** Gets the normalized team fitness with time bonus (out of 120) */
-    public double getTeamFitness(long stepsTaken) {
+    /** Gets the normalized team fitness including time bonus (out of 120) */
+    public double getTeamFitnessWithTimeBonus(long stepsTaken) {
         return (teamFitness / totalResourceValue) * 100 + (stepsTaken / maxSteps) * 20;
     }
 
-    /** Gets the normalized team fitness without time bonus (out of 100) */
+    /** Gets the normalized team fitness (out of 100) */
     public double getTeamFitness() {
         return (teamFitness / totalResourceValue) * 100;
     }
