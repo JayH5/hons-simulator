@@ -98,11 +98,6 @@ public class Simulation extends SimState {
     @Override
     public void finish() {
         kill();
-        getFitness();
-
-        schedule.scheduleRepeating(simState ->
-                        physicsWorld.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
-        );
     }
 
     // Walls are simply added to environment since they do not need updating

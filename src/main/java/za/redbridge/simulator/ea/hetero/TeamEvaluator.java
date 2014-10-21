@@ -95,7 +95,7 @@ public class TeamEvaluator implements Runnable {
                 entry.getKey().getController().addTaskScore(entry.getValue());
             }
 
-            scores[ticketNo] = fitnessStats.getTeamFitness(Optional.of(simulation.getStepNumber()));
+            scores[ticketNo] = fitnessStats.getTeamFitness();
         }
     }
 }

@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;

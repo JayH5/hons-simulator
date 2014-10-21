@@ -2,12 +2,10 @@ package za.redbridge.simulator.experiment;
 
 import org.encog.ml.CalculateScore;
 import org.encog.ml.ea.genome.Genome;
-import org.encog.neural.neat.NEATCODEC;
 import org.encog.neural.neat.NEATNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import za.redbridge.simulator.Simulation;
-import za.redbridge.simulator.SimulationGUI;
 import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.MorphologyConfig;
 import za.redbridge.simulator.config.SimConfig;
@@ -22,8 +20,6 @@ import za.redbridge.simulator.factories.TeamPhenotypeFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -113,7 +109,6 @@ public class HeterogeneousTrainController implements Runnable{
             System.out.println("Epoch " + train.getIteration() + ".");
 
             int epochs = train.getIteration()+1;
-            Instant start = Instant.now();
 
             train.iteration();
 
@@ -123,9 +118,6 @@ public class HeterogeneousTrainController implements Runnable{
             if (previousBest == null) {
                 previousBest = train.getBestGenome();
             }
-
-            long minutes = Duration.between(start, Instant.now()).toMinutes();
-            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
 
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
