@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.Charset;
 
 /**
  * Created by shsu on 2014/09/08.
@@ -24,7 +25,7 @@ public abstract class Config {
 
         Path filePath = Paths.get(filepath);
 
-        try (BufferedReader input = Files.newBufferedReader(filePath)) {
+        try (BufferedReader input = Files.newBufferedReader(filePath, Charset.defaultCharset())) {
 
             String line = input.readLine();
             while (line != null) {

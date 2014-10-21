@@ -11,9 +11,6 @@ import za.redbridge.simulator.factories.TeamPhenotypeFactory;
 import za.redbridge.simulator.phenotype.Phenotype;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 /**
