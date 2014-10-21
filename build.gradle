@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-  compile 'edu.gmu.mason:mason:18-SNAPSHOT'
+  compile fileTree(dir: 'libs', include: ['*.jar'])
   compile 'org.jbox2d:jbox2d-library:2.3.1-SNAPSHOT'
   compile 'org.yaml:snakeyaml:1.13'
   compile 'args4j:args4j:2.0.29'
@@ -35,4 +35,15 @@ run {
     if (project.hasProperty("appArgs")){
         args Eval.me(appArgs)
     }
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Redbridge Mining Crew Simulator',
+            /*'Implementation-Version': '1.0',*/
+            'Main-Class': 'za.redbridge.simulator.experiment.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
