@@ -138,7 +138,7 @@ public class HomogeneousTrainController implements Runnable{
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
-        controllerTrainingLogger.info("Best-scoring genotype for this set of detectivity thresholds scored " + previousBest.getScore());
+        controllerTrainingLogger.info("Best-scoring genotype for this set of gain complements scored " + previousBest.getScore());
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, previousBest.getScore()), leaderBoard);
 

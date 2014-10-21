@@ -33,7 +33,7 @@ public class ComplementFactory {
     public Set<MorphologyConfig> generateSensitivitiesForTemplate() {
 
         Set<MorphologyConfig> morphologyList = new HashSet<>();
-        
+
         double[] sensitivities = new double[4];
 
         for (int i = 0; i < sensitivities.length; i++) {
