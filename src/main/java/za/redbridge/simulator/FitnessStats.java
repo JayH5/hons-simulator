@@ -31,7 +31,8 @@ public class FitnessStats {
     }
 
     public double getPhenotypeFitness(Phenotype phenotype) {
-        return phenotypeFitnesses.getOrDefault(phenotype, 0.0);
+        Double fitness = phenotypeFitnesses.get(phenotype);
+        return fitness != null ? fitness : 0.0;
     }
 
     /**

@@ -6,7 +6,6 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 
 import java.util.List;
-import java.util.Optional;
 
 import za.redbridge.simulator.object.PhysicalObject;
 import za.redbridge.simulator.physics.FilterConstants;
@@ -18,7 +17,7 @@ import za.redbridge.simulator.physics.FilterConstants;
  * Created by jamie on 2014/08/05.
  */
 public abstract class ClosestObjectSensor
-        extends Sensor<Optional<ClosestObjectSensor.ClosestObject>> {
+        extends Sensor<ClosestObjectSensor.ClosestObject> {
 
     public ClosestObjectSensor() {
     }
@@ -41,7 +40,7 @@ public abstract class ClosestObjectSensor
     }
 
     @Override
-    protected Optional<ClosestObject> provideReading(List<Fixture> fixtures) {
+    protected ClosestObject provideReading(List<Fixture> fixtures) {
         // Find the closest object
         ClosestObject closestObject = null;
         double closestDistance = Double.MAX_VALUE;
@@ -53,7 +52,7 @@ public abstract class ClosestObjectSensor
                 closestDistance = distance;
             }
         }
-        return Optional.ofNullable(closestObject);
+        return closestObject;
     }
 
     public static class ClosestObject implements Comparable<ClosestObject> {

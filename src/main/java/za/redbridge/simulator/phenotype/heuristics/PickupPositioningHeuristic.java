@@ -8,6 +8,7 @@ import java.util.List;
 import sim.util.Double2D;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
+import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.Sensor;
 
@@ -39,8 +40,9 @@ public class PickupPositioningHeuristic extends Heuristic {
             return null;
         }
 
-        ResourceObject resource =
-                pickupSensor.sense().map(o -> (ResourceObject) o.getObject()).orElse(null);
+        ClosestObjectSensor.ClosestObject sensedObject = pickupSensor.sense();
+        ResourceObject resource = sensedObject != null ?
+                (ResourceObject) sensedObject.getObject() : null;
 
         // Check the resource is still present and hasn't been collected by another robot
         if (resource == null || !resource.canBePickedUp()) {
