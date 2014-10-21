@@ -1,5 +1,5 @@
 meta:
-  numSensors: 4
+  numSensors: 5
 
 1s:
   type: za.redbridge.simulator.sensor.LinearObjectProximityAgentSensor
@@ -39,7 +39,7 @@ meta:
   range: 2.0
   orientation: 0.0
 
-4s:
+5s:
   type: za.redbridge.simulator.sensor.ProximityAgentSensor
   readingSize: 1
   bearing: 0.0
