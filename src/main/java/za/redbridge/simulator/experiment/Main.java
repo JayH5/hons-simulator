@@ -91,6 +91,7 @@ public class Main {
         ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
         SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
 
+        /*
         //TODO: work with multiple morphology configs (specifically, filter sensitivities)
         MorphologyConfig morphologyConfig = null;
 
@@ -101,6 +102,7 @@ public class Main {
             System.err.println("Error parsing morphology file.");
             p.printStackTrace();
         }
+        */
 
         List<AgentSensor> sensors = new ArrayList<>();
         //sensors.add(new UltrasonicSensor(0f, 0f));
