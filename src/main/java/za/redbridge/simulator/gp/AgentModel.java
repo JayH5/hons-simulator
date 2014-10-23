@@ -17,10 +17,7 @@ import za.redbridge.simulator.config.ExperimentConfig;
 import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.factories.HeterogeneousRobotFactory;
 import za.redbridge.simulator.gp.functions.*;
-import za.redbridge.simulator.gp.types.Bearing;
-import za.redbridge.simulator.gp.types.DetectedObject;
-import za.redbridge.simulator.gp.types.GPFloatLiteral;
-import za.redbridge.simulator.gp.types.WheelDrive;
+import za.redbridge.simulator.gp.types.*;
 import za.redbridge.simulator.khepera.BottomProximitySensor;
 import za.redbridge.simulator.phenotype.GPPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
@@ -106,6 +103,11 @@ public class AgentModel extends GPModel {
        syntax.add(new WheelDriveFromBearing());
        syntax.add(new WheelDriveSpotTurnLeft());
        syntax.add(new WheelDriveSpotTurnRight());
+       syntax.add(new ScaleWheelDrive());
+
+       syntax.add(new Literal(new ScaleFactor(0.25f)));
+       syntax.add(new Literal(new ScaleFactor(0.5f)));
+       syntax.add(new Literal(new ScaleFactor(0.75f)));
 
        syntax.add(new ReadingToDistance());
        syntax.add(new ReadingToFloat());

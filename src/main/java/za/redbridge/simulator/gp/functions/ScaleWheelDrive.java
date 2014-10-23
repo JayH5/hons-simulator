@@ -1,9 +1,7 @@
 package za.redbridge.simulator.gp.functions;
 
 import org.epochx.epox.Node;
-import za.redbridge.simulator.gp.types.GPFloat;
-import za.redbridge.simulator.gp.types.GPFloatVariable;
-import za.redbridge.simulator.gp.types.ProximityReading;
+import za.redbridge.simulator.gp.types.ScaleFactor;
 import za.redbridge.simulator.gp.types.WheelDrive;
 
 /**
@@ -28,17 +26,17 @@ public class ScaleWheelDrive extends Node {
     public WheelDrive evaluate(){
         Object w = getChild(0).evaluate();
         Object v = getChild(1).evaluate();
-        if(WheelDrive.class.isAssignableFrom(w.getClass()) && GPFloat.class.isAssignableFrom(v.getClass())) {
+        if(WheelDrive.class.isAssignableFrom(w.getClass()) && ScaleFactor.class.isAssignableFrom(v.getClass())) {
             WheelDrive wheelDrive = (WheelDrive) w;
-            GPFloat scaleVal = (GPFloat) v;
-            return new WheelDrive(wheelDrive.x * scaleVal.getValue(), wheelDrive.y * scaleVal.getValue());
+            ScaleFactor scaleFactor = (ScaleFactor) v;
+            return new WheelDrive(wheelDrive.x * scaleFactor.getValue(), wheelDrive.y * scaleFactor.getValue());
         }
         else return null;
     }
 
     @Override
     public Class<?> getReturnType(final Class<?> ... inputTypes) {
-        if (inputTypes.length == 2 && WheelDrive.class.isAssignableFrom(inputTypes[0]) && GPFloat.class.isAssignableFrom(inputTypes[1])) {
+        if (inputTypes.length == 2 && WheelDrive.class.isAssignableFrom(inputTypes[0]) && ScaleFactor.class.isAssignableFrom(inputTypes[1])) {
             return WheelDrive.class;
         } else{
             return null;
