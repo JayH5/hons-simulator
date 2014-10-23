@@ -16,6 +16,7 @@
         <file>results/logs/epoch-fitness-stats-${bySecond}.log</file>
 
         <append>true</append>
+        <prudent>true</prudent>
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
