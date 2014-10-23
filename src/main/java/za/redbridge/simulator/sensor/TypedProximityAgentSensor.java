@@ -6,9 +6,11 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
 
 import java.awt.*;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by shsu on 2014/09/15.
@@ -37,6 +39,11 @@ public class TypedProximityAgentSensor extends AgentSensor {
         this.senseClasses = classes;
     }
 
+    //this constructor is meant for use with MorphologyConfig, which would then call readAdditionalConfigs with our detectables
+    public TypedProximityAgentSensor(float bearing, float orientation, float range, float fieldOfView){
+        this(null, bearing, orientation, range, fieldOfView);
+    }
+
     @Override
     protected void provideObjectReading(List<SensedObject> objects, List<Double> output) {
         for(Class c : senseClasses){
@@ -48,7 +55,21 @@ public class TypedProximityAgentSensor extends AgentSensor {
     }
 
     @Override
-    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {}
+    public void readAdditionalConfigs(Map<String, Object> map) throws ParseException {
+        ArrayList<String> classStrings = (ArrayList<String>) map.get("detectables");
+        if(classStrings == null){
+            throw new RuntimeException("Could not find detectables key");
+        }
+        List<Class> detectables = new ArrayList<>();
+        for(String classString : classStrings){
+            try {
+                detectables.add(Class.forName(classString));
+            }catch(ClassNotFoundException e){
+                throw new RuntimeException("Could not find class from config: " + classString);
+            }
+        }
+        this.senseClasses = detectables;
+    }
 
     protected double readingFromDistance(double distance){
         return 1 - Math.min(distance / range, 1.0);
@@ -81,15 +102,6 @@ public class TypedProximityAgentSensor extends AgentSensor {
 
         TypedProximityAgentSensor cloned =
                 new TypedProximityAgentSensor(senseClasses, bearing, orientation, range, fieldOfView);
-
-        try {
-            cloned.readAdditionalConfigs(additionalConfigs);
-        }
-        catch (ParseException p) {
-            System.out.println("Clone failed.");
-            p.printStackTrace();
-            System.exit(-1);
-        }
 
         return cloned;
     }

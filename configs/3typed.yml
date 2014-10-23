@@ -6,29 +6,32 @@ meta:
   readingSize: 1
   bearing: 0.0
   orientation: 0.0
-  fieldOfView: 0.0
+  fieldOfView: 0
   range: 0.1
 
 2s:
   type: za.redbridge.simulator.sensor.TypedProximityAgentSensor
+  detectables: [za.redbridge.simulator.object.RobotObject, za.redbridge.simulator.object.ResourceObject, za.redbridge.simulator.object.WallObject]
   readingSize: 1
   bearing: 0.0
   orientation: 0.0
-  fieldOfView: 0.2
+  fieldOfView: 15
   range: 1.0
 
 3s:
   type: za.redbridge.simulator.sensor.TypedProximityAgentSensor
+  detectables: [za.redbridge.simulator.object.RobotObject, za.redbridge.simulator.object.ResourceObject, za.redbridge.simulator.object.WallObject]
   readingSize: 1
-  bearing: 1.570
+  bearing: 90
   orientation: 0.0
-  fieldOfView: 0.2
+  fieldOfView: 15
   range: 1.0
 
 4s:
   type: za.redbridge.simulator.sensor.TypedProximityAgentSensor
+  detectables: [za.redbridge.simulator.object.RobotObject, za.redbridge.simulator.object.ResourceObject, za.redbridge.simulator.object.WallObject]
   readingSize: 1
-  bearing: 4.712
+  bearing: 270
   orientation: 0.0
-  fieldOfView: 0.2
+  fieldOfView: 15
   range: 1.0

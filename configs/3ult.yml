@@ -14,21 +14,21 @@ meta:
   readingSize: 1
   bearing: 0.0
   orientation: 0.0
-  fieldOfView: 1.22
+  fieldOfView: 70
   range: 4.0
 
 3s:
   type: za.redbridge.simulator.khepera.UltrasonicSensor
   readingSize: 1
-  bearing: 1.571
+  bearing: 90
   orientation: 0.0
-  fieldOfView: 1.22
+  fieldOfView: 70
   range: 4.0
 
 4s:
   type: za.redbridge.simulator.khepera.UltrasonicSensor
   readingSize: 1
-  bearing: 4.712
+  bearing: 270
   orientation: 0.0
-  fieldOfView: 1.22
+  fieldOfView: 70
   range: 4.0
