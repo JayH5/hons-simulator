@@ -32,15 +32,16 @@ import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.sensor.AgentSensor;
 import za.redbridge.simulator.sensor.TypedProximityAgentSensor;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
@@ -74,14 +75,17 @@ public class Main {
     @Option (name="--generation-limit", aliases="-g", usage="Generation limit")
     private int genLimit = 70;
 
-    @Option (name="--filename", aliases="-f", usage="Filename for the output")
-    private String filename;
+    @Option (name="--run-index", aliases="-r", usage="Index of this run")
+    private Integer runIndex;
+
+    @Option (name="--output-dir", aliases="-o", usage="Output directory")
+    private String outputDir = "results";
 
     private static Stat[] fields = {StatField.GEN_NUMBER, CustomStatFields.RUN_TEAM_FITNESS_MIN, CustomStatFields.GEN_TEAM_FITNESS_MIN, StatField.GEN_FITNESS_MIN, StatField.GEN_FITNESS_AVE, StatField.GEN_FITNESS_MAX, StatField.GEN_FITNESS_STDEV};
     private static String[] fieldLabels = {"Generation", "Run Max Team", "Max Team", "Max Individual", "Avg Individual", "Min Individual", "Std Dev", "Distinct Individuals"};
     private static String fieldFormat = "%-10d,   %-12.2f,   %-8.2f,   %-14.2f,   %-14.2f,   %-14.2f,   %-7.2f,   %-20d";
 
-    public static void main (String[] args) throws MalformedProgramException, FileNotFoundException, IOException {
+    public static void main (String[] args) throws MalformedProgramException, IOException {
 
         Main options = new Main();
         CmdLineParser parser = new CmdLineParser(options);
@@ -94,10 +98,9 @@ public class Main {
             System.exit(1);
         }
 
-        ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
-        SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
+        ExperimentConfig experimentConfiguration = new ExperimentConfig(options.experimentConfig);
+        SimConfig simulationConfiguration = new SimConfig(options.simulationConfig);
 
-        //TODO: work with multiple morphology configs (specifically, filter sensitivities)
         MorphologyConfig morphologyConfig = null;
 
         try {
@@ -106,6 +109,10 @@ public class Main {
         catch(ParseException p) {
             System.err.println("Error parsing morphology file.");
             p.printStackTrace();
+        }
+
+        if(options.runIndex == null){
+            throw new IllegalArgumentException("Run index was not provided in the arguments");
         }
 
         List<AgentSensor> sensors = morphologyConfig.getSensorList();
@@ -133,17 +140,23 @@ public class Main {
         model.setMutationProbability(0.1);
         model.setCrossoverProbability(0.9);
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
-        if(options.filename == null) {
-            System.err.println("Error: No output filename specified in arguments!");
-            System.exit(1);
-        }
-        FileWriter csvWriter = new FileWriter(options.filename + ".csv");
-        FileWriter treeWriter = new FileWriter(options.filename + ".trees");
-        class GenerationTrackingListener implements GenerationListener{
+        String morphName = Paths.get(options.morphologyConfig).getFileName().toString().split("\\.")[0];
+        String simSize = Paths.get(options.simulationConfig).getFileName().toString().split("SimConfig")[0];
+        String outputFilename = morphName + "-p" + options.popSize + "-t" + options.tournSize + "-" + simSize + "-r" + options.runIndex;
+        Path csvOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".csv");
+        Path treeOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".trees");
+        BufferedWriter csvWriter = Files.newBufferedWriter(csvOutputPath);
+        BufferedWriter treeWriter = Files.newBufferedWriter(treeOutputPath);
+
+        class GenerationTrackingListener implements GenerationListener {
             private int counter = 0;
+
             @Override
             public void onGenerationStart() {
-                if(counter == 0) {counter++; return;}
+                if (counter == 0) {
+                    counter++;
+                    return;
+                }
                 try {
                     Stats s = Stats.get();
                     s.getStat(StatField.GEN_FITNESS_MIN);
@@ -166,19 +179,20 @@ public class Main {
                     csvWriter.flush();
                     treeWriter.flush();
                     counter++;
-                }
-                catch(IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(1);
                 }
             }
+
             @Override
-            public void onGenerationEnd(){}
+            public void onGenerationEnd() {
+            }
         }
         Life.get().addGenerationListener(new GenerationTrackingListener());
 
         //if we need to show a visualisation
-        if (options.showVisuals()) {
+        if (options.showVisuals) {
             String[] trees = {"WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE RESOURCE)) READINGISOFTYPE(IF(BS8 TS7 IF(READINGISOFTYPE(TS6 ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1))) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS0) IF(BS8 TS4 TS7) TS2)) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) BS8 READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS0) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(IF(READINGISOFTYPE(TS6 ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS4 TS1)))))", "WHEELDRIVEFROMBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(IF(READINGISOFTYPE(TS6 IF(BS8 RESOURCE ROBOT)) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1)))))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 IF(READINGISOFTYPE(TS6 ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1))) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(TS7) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS6) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) BS8 READINGISOFTYPE(IF(BS8 TS7 IF(READINGISOFTYPE(TS6 ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1))) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS6 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT WALL))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(TS6)))", "WHEELDRIVEFROMCOORD(ROTATECOORDINATE(IF(BS8 IF(IF(BS8 BS8 BS8) READINGTOCOORDINATE(TS1) READINGTOCOORDINATE(TS3)) IF(IF(BS8 BS8 BS8) READINGTOCOORDINATE(TS0) READINGTOCOORDINATE(TS3))) B1.57))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS7 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS0) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(TS5)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(READINGPRESENT(TS2) RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS5 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS1 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(IF(READINGISOFTYPE(IF(BS8 TS6 TS0) ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1)))))", "WHEELDRIVEFROMCOORD(ROTATECOORDINATE(IF(READINGISOFTYPE(TS6 WALL) IF(IF(BS8 BS8 BS8) READINGTOCOORDINATE(TS1) READINGTOCOORDINATE(TS3)) IF(IF(BS8 BS8 BS8) READINGTOCOORDINATE(TS1) READINGTOCOORDINATE(TS3))) B1.57))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS0) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 IF(READINGISOFTYPE(TS6 ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1))) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS6 TS3))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMCOORD(IF(IF(IF(READINGISOFTYPE(TS6 NONE) IF(BS8 BS8 BS8) IF(BS8 BS8 BS8)) READINGISOFTYPE(IF(BS8 TS3 TS2) IF(BS8 RESOURCE ROBOT)) READINGISOFTYPE(IF(BS8 TS7 TS6) IF(BS8 ROBOT NONE))) READINGTOCOORDINATE(IF(READINGPRESENT(TS1) IF(BS8 TS4 TS7) IF(BS8 TS6 TS1))) ROTATECOORDINATE(READINGTOCOORDINATE(IF(BS8 TS6 TS0)) B2.36)))", "WHEELDRIVEFROMBEARING(BEARINGFROMCOORDINATE(READINGTOCOORDINATE(IF(READINGISOFTYPE(TS3 ROBOT) IF(BS8 TS0 TS2) IF(BS8 TS6 TS1)))))"};
             /*
             try {
@@ -190,8 +204,8 @@ public class Main {
             }
             */
             List<Phenotype> phenotypes = new ArrayList<>();
-            for(String t : trees){
-                GPPhenotype p = new GPPhenotype(sensors.stream().map(sen -> sen.clone()).collect(Collectors.toList()),new GPCandidateProgram(model.getParser().parse(t), model), model.getInputs());
+            for (String t : trees) {
+                GPPhenotype p = new GPPhenotype(sensors.stream().map(sen -> sen.clone()).collect(Collectors.toList()), new GPCandidateProgram(model.getParser().parse(t), model), model.getInputs());
                 phenotypes.add(p);
             }
             HeterogeneousRobotFactory robotFactory = new HeterogeneousRobotFactory(phenotypes, simulationConfiguration.getRobotMass(),
@@ -203,21 +217,13 @@ public class Main {
             //new console which displays this simulation
             Console console = new Console(video);
             console.setVisible(true);
-        }
-        else {
+        } else {
             csvWriter.write(Arrays.asList(fieldLabels).stream().collect(Collectors.joining(",   ")) + "\n");
             csvWriter.flush();
-            //headless option
+
             model.run();
             csvWriter.close();
             treeWriter.close();
         }
-
     }
-
-    public String getExperimentConfig() { return experimentConfig; }
-    public String getSimulationConfig() { return simulationConfig; }
-    public boolean showVisuals() { return showVisuals; }
-
-
 }
