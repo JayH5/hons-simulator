@@ -1,0 +1,18 @@
+meta:
+  numSensors: 2
+
+1s:
+  type: za.redbridge.simulator.khepera.BottomProximitySensor
+  readingSize: 1
+  bearing: 0.0
+  orientation: 0.0
+  fieldOfView: 0.0
+  range: 0.1
+
+2s:
+  type: za.redbridge.simulator.khepera.UltrasonicSensor
+  readingSize: 1
+  bearing: 0.0
+  orientation: 0.0
+  fieldOfView: 1.22
+  range: 4.0

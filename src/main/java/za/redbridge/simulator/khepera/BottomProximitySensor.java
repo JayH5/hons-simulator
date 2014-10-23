@@ -40,6 +40,11 @@ public class BottomProximitySensor extends ProximitySensor {
         super(0f, 0f);
     }
 
+    //hacky constructor to get it to work with the deficient MorphologyConfig that assumes that all sensors have bearings and orientations, etc
+    public BottomProximitySensor(float a, float b, float c, float d){
+        this();
+    }
+
     @Override
     protected Transform createTransform(RobotObject robot) {
         this.robot = robot;

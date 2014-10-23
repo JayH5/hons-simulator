@@ -57,7 +57,6 @@ public class UltrasonicSensor extends AgentSensor {
 
     @Override
     public void readAdditionalConfigs(Map<String, Object> stringObjectMap) throws ParseException {
-        throw new UnsupportedOperationException();
     }
 
     @Override

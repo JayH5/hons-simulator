@@ -59,6 +59,9 @@ public class Main {
     @Option (name="--simulation-config", usage="Filename for simulation configuration", metaVar="<simulation config>")
     private String simulationConfig;
 
+    @Option (name="--morphology-config", usage="Filename for morphology configuration", metaVar="<morphology config>")
+    private String morphologyConfig;
+
     @Option (name="--show-visuals", aliases="-v", usage="Show visualisation for simulation")
     private boolean showVisuals = false;
 
@@ -67,6 +70,9 @@ public class Main {
 
     @Option (name="--tournament-size", aliases="-t", usage="GP Tournament size")
     private int tournSize = 7;
+
+    @Option (name="--generation-limit", aliases="-g", usage="Generation limit")
+    private int genLimit = 70;
 
     @Option (name="--filename", aliases="-f", usage="Filename for the output")
     private String filename;
@@ -91,46 +97,31 @@ public class Main {
         ExperimentConfig experimentConfiguration = new ExperimentConfig(options.getExperimentConfig());
         SimConfig simulationConfiguration = new SimConfig(options.getSimulationConfig());
 
-        /*
         //TODO: work with multiple morphology configs (specifically, filter sensitivities)
         MorphologyConfig morphologyConfig = null;
 
         try {
-            morphologyConfig = new MorphologyConfig(experimentConfiguration.getMorphologyConfigFile());
+            morphologyConfig = new MorphologyConfig(options.morphologyConfig);
         }
         catch(ParseException p) {
             System.err.println("Error parsing morphology file.");
             p.printStackTrace();
         }
-        */
 
-        List<AgentSensor> sensors = new ArrayList<>();
-        //sensors.add(new UltrasonicSensor(0f, 0f));
-        //sensors.add(new UltrasonicSensor((float)Math.PI/2, 0f));
-        //sensors.add(new UltrasonicSensor((float)Math.PI, 0f));
-        //sensors.add(new UltrasonicSensor((float)(3*Math.PI/2), 0f));
+        List<AgentSensor> sensors = morphologyConfig.getSensorList();
 
+        /*
         List<Class> detectables = new ArrayList<>();
         detectables.add(RobotObject.class);
         detectables.add(ResourceObject.class);
         detectables.add(WallObject.class);
 
-        //sensors.add(new TypedProximityAgentSensor(detectables, (float)Math.PI/4, 0.0f, 0.02f, 0.2f));
-        //sensors.add(new TypedProximityAgentSensor(detectables, (float)(7*Math.PI/4), 0.0f, 0.02f, 0.2f));
-
-        sensors.add(new UltrasonicSensor((float)(0*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(1*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(2*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(3*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(4*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(5*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(6*Math.PI)/8, 0.0f));
-        sensors.add(new UltrasonicSensor((float)(7*Math.PI)/8, 0.0f));
-
-        sensors.add(new BottomProximitySensor());
+        sensors.add(new TypedProximityAgentSensor(detectables, (float)Math.PI/4, 0.0f, 0.02f, 0.2f));
+        sensors.add(new TypedProximityAgentSensor(detectables, (float)(7*Math.PI/4), 0.0f, 0.02f, 0.2f));
+        */
 
         AgentModel model = new AgentModel(sensors, simulationConfiguration, experimentConfiguration);
-        model.setNoGenerations(200);
+        model.setNoGenerations(options.genLimit);
         model.setMaxInitialDepth(5);
         model.setMaxDepth(7);
         model.setPopulationSize(options.popSize);
