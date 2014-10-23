@@ -152,13 +152,14 @@ public class ExperimentUtils {
 
                 try {
                     address = i.getLocalHost().getHostAddress();
-                } catch (UnknownHostException e1) {
-                    e1.printStackTrace();
-                }
 
-                if (address.toString().startsWith("137.158.60.")) {
-                    nightmareIP = address.toString();
-                    return nightmareIP;
+                    if (!address.toString().startsWith("127.0.")) {
+                        nightmareIP = address.toString();
+                        return nightmareIP;
+                    }
+                }
+                catch (UnknownHostException e1) {
+                    e1.printStackTrace();
                 }
             }
         }
