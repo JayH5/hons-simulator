@@ -1,5 +1,5 @@
 meta:
-  numSensors: 7
+  numSensors: 4
 
 1s:
   type: za.redbridge.simulator.khepera.BottomProximitySensor
