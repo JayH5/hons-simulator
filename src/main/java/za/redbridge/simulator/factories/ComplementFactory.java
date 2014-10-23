@@ -43,6 +43,10 @@ public class ComplementFactory {
 
         System.out.println("Generated " + morphologyList.size() + " complements.");
 
+        for (MorphologyConfig morphologyConfig: morphologyList) {
+            printArray(morphologyConfig.getSensitivities());
+        }
+
         return morphologyList;
     }
 
