@@ -339,7 +339,8 @@ public class MorphologyConfig extends Config implements Serializable {
                 System.exit(-1);
             }
 
-        try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath.resolve(filename), StandardOpenOption.CREATE)){
+        try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath.resolve(filename), Charset.defaultCharset(),
+                StandardOpenOption.CREATE)){
 
             yaml.dump(yamlDump, stringWriter);
             fileWriter.write(stringWriter.toString());

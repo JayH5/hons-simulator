@@ -17,8 +17,6 @@ import za.redbridge.simulator.ea.NNScoreCalculator;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -104,14 +102,13 @@ public class HomogeneousTrainController implements Runnable{
         NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Homogeneous Teams.");
+        controllerTrainingLogger.info("Host IP: " + ExperimentUtils.getIP());
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
         controllerTrainingLogger.info("Epoch# \t CurrentBest \t Mean \t StandardDeviation \t Variance \t BestEver");
         do {
 
             int epochs = train.getIteration()+1;
-            Instant start = Instant.now();
-
             train.iteration();
 
             if (previousBest == null || train.getBestGenome().getScore() > previousBest.getScore()) {
@@ -121,20 +118,10 @@ public class HomogeneousTrainController implements Runnable{
             controllerTrainingLogger.info(epochs + "\t" + train.getBestGenome().getScore() + "\t" + getEpochMeanScore() + "\t" + getStandardDeviation()
                     + "\t" + getVariance() + "\t" + previousBest.getScore());
 
-            /*
-            if (epochs % 50 == 0 && previousBest != train.getBestGenome()) {
-                IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "best_network_at_" + epochs + ".tmp");
-                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "best_morphology_at_" + epochs + ".tmp");
-                previousBest = train.getBestGenome();
-            }*/
-
             //get the highest-performing network in this epoch, store it in leaderBoard
             leaderBoard.put(scoreCache.last(), train.getIteration());
             previousCache = getEpochScoreData();
             scoreCache.clear();
-
-            long minutes = Duration.between(start, Instant.now()).toMinutes();
-            controllerTrainingLogger.debug("Epoch took " + minutes + " minutes.");
 
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();

@@ -13,8 +13,6 @@ import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.experiment.ComparableNEATNetwork;
 import za.redbridge.simulator.factories.HomogeneousRobotFactory;
 import za.redbridge.simulator.phenotype.NEATPhenotype;
-
-import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 

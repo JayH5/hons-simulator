@@ -1,6 +1,7 @@
 package za.redbridge.simulator.config;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +25,7 @@ public abstract class Config {
 
         Path filePath = Paths.get(filepath);
 
-        try (BufferedReader input = Files.newBufferedReader(filePath)) {
+        try (BufferedReader input = Files.newBufferedReader(filePath, Charset.defaultCharset())) {
 
             String line = input.readLine();
             while (line != null) {
