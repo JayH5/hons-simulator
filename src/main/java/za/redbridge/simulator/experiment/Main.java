@@ -67,7 +67,7 @@ public class Main {
     private boolean showVisuals = false;
 
     @Option (name="--population", aliases="-p", usage="GP population pool size")
-    private int popSize = 1000;
+    private int popSize = 700;
 
     @Option (name="--tournament-size", aliases="-t", usage="GP Tournament size")
     private int tournSize = 7;
