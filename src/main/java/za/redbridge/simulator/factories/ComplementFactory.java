@@ -34,7 +34,7 @@ public class ComplementFactory {
 
         Set<MorphologyConfig> morphologyList = new HashSet<>();
 
-        double[] sensitivities = new double[4];
+        double[] sensitivities = new double[3];
 
         for (int i = 0; i < sensitivities.length; i++) {
             sensitivities[i] = resolution;

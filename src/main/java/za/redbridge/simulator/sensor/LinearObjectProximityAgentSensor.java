@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgentSensor {
 
-    private static final int readingSize = 4;
+    private static final int readingSize = 3;
     private double[] gain;
     private double[] detectivity;
 
@@ -33,7 +33,6 @@ public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgent
         double robotReading = 0.0;
         double resourceReading = 0.0;
         double targetAreaReading = 0.0;
-        double wallReading = 0.0;
 
         for(SensedObject o : objects) {
 
@@ -46,16 +45,12 @@ public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgent
             } else if (o.getObject() instanceof TargetAreaObject) {
 
                 targetAreaReading = (1 - Math.min(o.getDistance() / range, 1.0))*gain[2];
-            } else if (o.getObject() instanceof WallObject) {
-
-                wallReading = (1 - Math.min(o.getDistance() / range, 1.0))*gain[3];
             }
         }
 
         output.add(robotReading);
         output.add(resourceReading);
         output.add(targetAreaReading);
-        output.add(wallReading);
     }
 
     @Override
@@ -108,20 +103,6 @@ public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgent
             throw new ParseException("No gain value found for Target Area Sensor.", 0);
         }
 
-        gain = (Number) map.get("wallSensorGain");
-        if (checkFieldPresent(gain, "wallSensorGain")) {
-            double gain0Value = gain.doubleValue();
-
-            if (gain0Value < 0 || gain0Value > 2) {
-                throw new ParseException("Gain value for Wall Sensor must be between 0 and 2", 0);
-            }
-
-            this.gain[3] = gain0Value;
-        }
-        else {
-            throw new ParseException("No gain value found for Wall Sensor.", 0);
-        }
-
         Number detectivity = (Number) map.get("robotSensorDetectivity");
         if (checkFieldPresent(detectivity, "robotSensorDetectivity")) {
             double detValue = detectivity.doubleValue();
@@ -163,21 +144,6 @@ public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgent
         else {
             throw new ParseException("No detectivity value found for Target Area Sensor.", 0);
         }
-
-        detectivity = (Number) map.get("wallSensorDetectivity");
-        if (checkFieldPresent(detectivity, "wallSensorDetectivity")) {
-            double detValue = detectivity.doubleValue();
-
-            if (detValue < 0 || detValue > 1) {
-                throw new ParseException("Detectivity value for Wall Sensor must be between 0 and 1", 0);
-            }
-
-            this.detectivity[3] = detValue;
-        }
-        else {
-            throw new ParseException("No detectivity value found for Wall Sensor.", 0);
-        }
-
     }
 
     public void setGain(double[] gain) { this.gain = gain; }
@@ -213,7 +179,7 @@ public class LinearObjectProximityAgentSensor extends AdjustableSensitivityAgent
 
     public String parametersToString() {
 
-        String output = "";
+        String output = "RobotObjectSensor\tResourceObjectSensor\tTargetAreaSensor\n";
 
         for (double value: gain) {
             output += value + " ";
