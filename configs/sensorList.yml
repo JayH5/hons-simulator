@@ -5,7 +5,7 @@ meta:
   type: za.redbridge.simulator.sensor.LinearObjectProximityAgentSensor
   readingSize: 4
   bearing: 0
-  fieldOfView: 10.0
+  fieldOfView: 20.0
   range: 2.0
   orientation: 0.0
   robotSensorDetectivity: 1.0

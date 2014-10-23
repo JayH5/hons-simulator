@@ -100,6 +100,7 @@ public class HeterogeneousTrainController implements Runnable{
 
         Genome previousBest = train.getBestGenome();
 
+        controllerTrainingLogger.info("Heterogeneous Teams.");
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Host IP: " + ExperimentUtils.getIP());
         controllerTrainingLogger.info("Total Resource Value: " + simConfig.getResourceFactory().getTotalResourceValue());
@@ -130,7 +131,8 @@ public class HeterogeneousTrainController implements Runnable{
         //IOUtils.writeNetwork(morphologyLeaderboard.lastEntry().getValue().getNetwork(), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getSensitivityID() + "bestNetwork" + testSetID + ".tmp");
         morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getSensitivityID() + "bestMorphology" + testSetID + ".tmp");
 
-        controllerTrainingLogger.info("Best-scoring genotype for this set of gain constants scored: " + train.getBestIndividual().getAverageTaskScore());
+        controllerTrainingLogger.info("Best Individual: " + train.getBestIndividual().getAverageTaskScore() +
+        "Best Team: " + train.getBestTeam().teamFitness());
 
         //delete this morphology file if it was a result of the multihost operation
         Path morphologyPath = Paths.get("shared/" + ExperimentUtils.getIP() + "/"+ testSetID + ":" + testSetSerial + ".morphology");
