@@ -111,10 +111,6 @@ public class Main {
             p.printStackTrace();
         }
 
-        if(options.runIndex == null){
-            throw new IllegalArgumentException("Run index was not provided in the arguments");
-        }
-
         List<AgentSensor> sensors = morphologyConfig.getSensorList();
 
         /*
@@ -140,60 +136,10 @@ public class Main {
         model.setMutationProbability(0.1);
         model.setCrossoverProbability(0.9);
         model.setTerminationFitness(Double.NEGATIVE_INFINITY);
-        String morphName = Paths.get(options.morphologyConfig).getFileName().toString().split("\\.")[0];
-        String simSize = Paths.get(options.simulationConfig).getFileName().toString().split("SimConfig")[0];
-        String outputFilename = morphName + "-p" + options.popSize + "-t" + options.tournSize + "-" + simSize + "-r" + options.runIndex;
-        Path csvOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".csv");
-        Path treeOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".trees");
-        BufferedWriter csvWriter = Files.newBufferedWriter(csvOutputPath);
-        BufferedWriter treeWriter = Files.newBufferedWriter(treeOutputPath);
-
-        class GenerationTrackingListener implements GenerationListener {
-            private int counter = 0;
-
-            @Override
-            public void onGenerationStart() {
-                if (counter == 0) {
-                    counter++;
-                    return;
-                }
-                try {
-                    Stats s = Stats.get();
-                    s.getStat(StatField.GEN_FITNESS_MIN);
-                    List<Object> printables = Arrays.asList(fields).stream().map(f -> s.getStat(f)).collect(Collectors.toList());
-
-                    List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
-                    List<String> distinctPop = (List<String>) pop.stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
-                    printables.add(distinctPop.size());
-                    csvWriter.write(String.format(fieldFormat, printables.toArray()) + "\n");
-
-                    List<CandidateProgram> bestTeam = (List<CandidateProgram>) s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
-                    treeWriter.write(s.getStat(StatField.GEN_NUMBER) + ",   ");
-                    treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}\n");
-
-                    //stop if diversity is low enough
-                    if ((Double) s.getStat(StatField.GEN_FITNESS_STDEV) < 0.2 && distinctPop.size() < pop.size() / 4.0) {
-                        System.out.println("Diversity below threshold; stopping.");
-                        model.setTerminationFitness(0.0);
-                    }
-                    csvWriter.flush();
-                    treeWriter.flush();
-                    counter++;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-            }
-
-            @Override
-            public void onGenerationEnd() {
-            }
-        }
-        Life.get().addGenerationListener(new GenerationTrackingListener());
 
         //if we need to show a visualisation
         if (options.showVisuals) {
-            String[] trees = {"WHEELDRIVEFROMBEARING(RANDOMBEARING())"};
+            String[] trees = {"WHEELDRIVEFROMBEARING(RANDOMBEARING())","WHEELDRIVEFROMBEARING(RANDOMBEARING())","WHEELDRIVEFROMBEARING(RANDOMBEARING())","WHEELDRIVEFROMBEARING(RANDOMBEARING())"};
             /*
             try {
                 FileWriter fw = new FileWriter("tree.dot");
@@ -218,6 +164,62 @@ public class Main {
             Console console = new Console(video);
             console.setVisible(true);
         } else {
+            if(options.runIndex == null){
+                throw new IllegalArgumentException("Run index was not provided in the arguments");
+            }
+
+            String morphName = Paths.get(options.morphologyConfig).getFileName().toString().split("\\.")[0];
+            String simSize = Paths.get(options.simulationConfig).getFileName().toString().split("SimConfig")[0];
+            String outputFilename = morphName + "-p" + options.popSize + "-t" + options.tournSize + "-" + simSize + "-r" + options.runIndex;
+            Path csvOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".csv");
+            Path treeOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".trees");
+            BufferedWriter csvWriter = Files.newBufferedWriter(csvOutputPath);
+            BufferedWriter treeWriter = Files.newBufferedWriter(treeOutputPath);
+
+            class GenerationTrackingListener implements GenerationListener {
+                private int counter = 0;
+
+                @Override
+                public void onGenerationStart() {
+                    if (counter == 0) {
+                        counter++;
+                        return;
+                    }
+                    try {
+                        Stats s = Stats.get();
+                        s.getStat(StatField.GEN_FITNESS_MIN);
+                        List<Object> printables = Arrays.asList(fields).stream().map(f -> s.getStat(f)).collect(Collectors.toList());
+
+                        List<CandidateProgram> pop = (List<CandidateProgram>) s.getStat(StatField.GEN_POP_SORTED_DESC);
+                        List<String> distinctPop = (List<String>) pop.stream().map(c -> c.toString()).distinct().collect(Collectors.toList());
+                        printables.add(distinctPop.size());
+                        csvWriter.write(String.format(fieldFormat, printables.toArray()) + "\n");
+
+                        List<CandidateProgram> bestTeam = (List<CandidateProgram>) s.getStat(CustomStatFields.GEN_FITTEST_TEAM);
+                        treeWriter.write(s.getStat(StatField.GEN_NUMBER) + ",   ");
+                        treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}\n");
+
+                        //stop if diversity is low enough
+                        if ((Double) s.getStat(StatField.GEN_FITNESS_STDEV) < 0.2 && distinctPop.size() < pop.size() / 4.0) {
+                            System.out.println("Diversity below threshold; stopping.");
+                            model.setTerminationFitness(0.0);
+                        }
+                        csvWriter.flush();
+                        treeWriter.flush();
+                        counter++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+                }
+
+                @Override
+                public void onGenerationEnd() {
+                }
+            }
+
+            Life.get().addGenerationListener(new GenerationTrackingListener());
+
             csvWriter.write(Arrays.asList(fieldLabels).stream().collect(Collectors.joining(",   ")) + "\n");
             csvWriter.flush();
 
