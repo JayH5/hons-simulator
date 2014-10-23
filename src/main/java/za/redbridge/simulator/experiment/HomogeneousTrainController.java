@@ -103,6 +103,7 @@ public class HomogeneousTrainController implements Runnable{
         Genome previousBest = train.getBestGenome();
         NEATCODEC neatCodec = new NEATCODEC();
 
+        controllerTrainingLogger.info("Homogeneous Teams.");
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
         controllerTrainingLogger.info("Epoch# \t CurrentBest \t Mean \t StandardDeviation \t Variance \t BestEver");
@@ -138,7 +139,7 @@ public class HomogeneousTrainController implements Runnable{
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
-        controllerTrainingLogger.info("Best-scoring genotype for this set of gain complements scored " + previousBest.getScore());
+        controllerTrainingLogger.info("Best Individual: " + previousBest.getScore());
 
         morphologyLeaderboard.put(new ComparableMorphology(morphologyConfig, previousBest.getScore()), leaderBoard);
 

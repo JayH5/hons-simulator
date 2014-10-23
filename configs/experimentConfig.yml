@@ -7,7 +7,7 @@ phenotype:
 
 evolutionaryAlgorithm:
   controllerEA: NEAT
-  populationSize: 60
+  populationSize: 120
 
 complements:
   generatorResolution: 0.50
