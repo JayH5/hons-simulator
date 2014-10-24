@@ -56,6 +56,9 @@ public class Main {
     @Option(name = "--single-complement", aliases = "-c", usage = "Train one complement.")
     private String complements;
 
+    @Option(name = "--repeat-complements", aliases = "-cn", usage = "Train one complement n number of times.")
+    private int cnumber = 1;
+
     @Option(name = "--testComplementSet", aliases = "-t", usage = "Search for this complement set in the shared directories and test them")
     private String timestamp;
 
@@ -84,15 +87,14 @@ public class Main {
 
         if (options.complements != null) {
 
-            String[] temp = options.complements.split("_");
-            double[] complements = {Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Double.parseDouble(temp[2])};
-
-            MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
-            
-            HeterogeneousTrainController trainer =
-                    new HeterogeneousTrainController(experimentConfiguration, simConfig, testMorphology);
-
-            trainer.run();
+            for (int i = 0; i < options.cnumber; i++) {
+                String[] temp = options.complements.split("_");
+                double[] complements = {Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Double.parseDouble(temp[2])};
+                MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
+                HeterogeneousTrainController trainer =
+                        new HeterogeneousTrainController(experimentConfiguration, simConfig, testMorphology);
+                trainer.run();
+            }
         }
 
         if (options.timestamp != null) {
