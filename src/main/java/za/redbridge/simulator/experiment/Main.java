@@ -43,6 +43,9 @@ public class Main {
     @Option(name = "--single-complement", aliases = "-c", usage = "Test single-serving complement")
     private String complements;
 
+    @Option(name = "--repeat-complement", aliases = "-cn", usage = "Number of times to test single complement")
+    private int cnumber = 1;
+
     @Option(name = "--testThresholds", aliases = "-th", usage = "Test sensor threshold complements.")
     private boolean thresholds = false;
 
@@ -68,14 +71,13 @@ public class Main {
 
         if (options.complements != null) {
 
-            String[] temp = options.complements.split("_");
-            double[] complements = {Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Double.parseDouble(temp[2])};
-
-            MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
-
-            HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfiguration, simulationConfiguration, testMorphology);
-
-            trainer.run();
+            for (int i = 0; i < options.cnumber; i++) {
+                String[] temp = options.complements.split("_");
+                double[] complements = {Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Double.parseDouble(temp[2])};
+                MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
+                HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfiguration, simulationConfiguration, testMorphology);
+                trainer.run();
+            }
         }
 
         if (options.timestamp != null) {
