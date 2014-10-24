@@ -73,7 +73,7 @@ public class Main {
 
             MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
 
-            HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfiguration, simulationConfiguration, morphologyConfig);
+            HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfiguration, simulationConfiguration, testMorphology);
 
             trainer.run();
         }
