@@ -173,6 +173,7 @@ public class Main {
             String outputFilename = morphName + "-p" + options.popSize + "-t" + options.tournSize + "-" + simSize + "-r" + options.runIndex;
             Path csvOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".csv");
             Path treeOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".trees");
+            System.out.println("Writing run to " + outputFilename + "{.csv,.trees}");
             BufferedWriter csvWriter = Files.newBufferedWriter(csvOutputPath);
             BufferedWriter treeWriter = Files.newBufferedWriter(treeOutputPath);
 
