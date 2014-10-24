@@ -53,6 +53,9 @@ public class Main {
     @Option(name = "--multihost", aliases = "-p", usage = "Generate complements and assign them to be processed by the given list of hosts")
     private String hosts;
 
+    @Option(name = "--single-complement", aliases = "-c", usage = "Train one complement.")
+    private String complements;
+
     @Option(name = "--testComplementSet", aliases = "-t", usage = "Search for this complement set in the shared directories and test them")
     private String timestamp;
 
@@ -78,6 +81,19 @@ public class Main {
 
         MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simConfig,
                 morphologyConfig);
+
+        if (options.complements != null) {
+
+            String[] temp = options.complements.split("_");
+            double[] complements = {Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Double.parseDouble(temp[2])};
+
+            MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
+            
+            HeterogeneousTrainController trainer =
+                    new HeterogeneousTrainController(experimentConfiguration, simConfig, morphologyConfig);
+
+            trainer.run();
+        }
 
         if (options.timestamp != null) {
 

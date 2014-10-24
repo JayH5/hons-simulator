@@ -83,6 +83,19 @@ public class HeterogeneousTrainController implements Runnable{
         this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
+    public HeterogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                                        MorphologyConfig morphologyConfig) {
+
+        this.experimentConfig = experimentConfig;
+        this.simConfig = simConfig;
+        this.morphologyConfig = morphologyConfig;
+        leaderBoard = new TreeMap<>();
+        this.morphologyLeaderboard = new ConcurrentSkipListMap<>();
+
+        this.thisIP = ExperimentUtils.getIP();
+        this.previousCache = new double[experimentConfig.getPopulationSize()];
+    }
+
     public void run() {
 
         final CCHNEATPopulation pop = new CCHNEATPopulation(morphologyConfig.getTotalReadingSize(),2,
