@@ -40,6 +40,9 @@ public class Main {
     @Option(name = "--testComplementSet", aliases = "-t", usage = "Search for this complement set in the shared directories and test them")
     private String timestamp;
 
+    @Option(name = "--single-complement", aliases = "-c", usage = "Test single-serving complement")
+    private String complements;
+
     @Option(name = "--testThresholds", aliases = "-th", usage = "Test sensor threshold complements.")
     private boolean thresholds = false;
 
@@ -62,6 +65,18 @@ public class Main {
 
         MasterExperimentController masterExperimentController = new MasterExperimentController(experimentConfiguration, simulationConfiguration,
                 morphologyConfig);
+
+        if (options.complements != null) {
+
+            String[] temp = options.complements.split("_");
+            double[] complements = {Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Double.parseDouble(temp[2])};
+
+            MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
+
+            HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfiguration, simulationConfiguration, morphologyConfig);
+
+            trainer.run();
+        }
 
         if (options.timestamp != null) {
 

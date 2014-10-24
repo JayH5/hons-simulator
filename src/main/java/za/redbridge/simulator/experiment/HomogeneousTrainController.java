@@ -85,6 +85,21 @@ public class HomogeneousTrainController implements Runnable{
         this.previousCache = new double[experimentConfig.getPopulationSize()];
     }
 
+    public HomogeneousTrainController(ExperimentConfig experimentConfig, SimConfig simConfig,
+                                      MorphologyConfig morphologyConfig) {
+
+        this.experimentConfig = experimentConfig;
+        this.simConfig = simConfig;
+        this.morphologyConfig = morphologyConfig;
+        leaderBoard = new TreeMap<>();
+        scoreCache = new ConcurrentSkipListSet<>();
+        this.morphologyLeaderboard = new ConcurrentSkipListMap<>();
+
+        this.thisIP = ExperimentUtils.getIP();
+        this.previousCache = new double[experimentConfig.getPopulationSize()];
+    }
+
+
     public void run() {
 
         //TODO: make this get population size form Experiment configs instead
