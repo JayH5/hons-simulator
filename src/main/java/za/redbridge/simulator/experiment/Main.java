@@ -90,7 +90,7 @@ public class Main {
             MorphologyConfig testMorphology = MorphologyConfig.MorphologyFromGain(morphologyConfig, complements);
             
             HeterogeneousTrainController trainer =
-                    new HeterogeneousTrainController(experimentConfiguration, simConfig, morphologyConfig);
+                    new HeterogeneousTrainController(experimentConfiguration, simConfig, testMorphology);
 
             trainer.run();
         }
