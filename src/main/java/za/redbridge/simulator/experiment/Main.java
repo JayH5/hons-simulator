@@ -173,7 +173,6 @@ public class Main {
             String outputFilename = morphName + "-p" + options.popSize + "-t" + options.tournSize + "-" + simSize + "-r" + options.runIndex;
             Path csvOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".csv");
             Path treeOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".trees");
-            System.out.println("Writing run to " + outputFilename + "{.csv,.trees}");
             BufferedWriter csvWriter = Files.newBufferedWriter(csvOutputPath);
             BufferedWriter treeWriter = Files.newBufferedWriter(treeOutputPath);
 
@@ -200,11 +199,6 @@ public class Main {
                         treeWriter.write(s.getStat(StatField.GEN_NUMBER) + ",   ");
                         treeWriter.write("{\"" + bestTeam.stream().map(o -> o.toString()).collect(Collectors.joining("\", \"")) + "\"}\n");
 
-                        //stop if diversity is low enough
-                        if ((Double) s.getStat(StatField.GEN_FITNESS_STDEV) < 0.2 && distinctPop.size() < pop.size() / 4.0) {
-                            System.out.println("Diversity below threshold; stopping.");
-                            model.setTerminationFitness(0.0);
-                        }
                         csvWriter.flush();
                         treeWriter.flush();
                         counter++;
@@ -227,6 +221,7 @@ public class Main {
             model.run();
             csvWriter.close();
             treeWriter.close();
+            System.out.println("Completed run; written to " + outputFilename + "{.csv,.trees}");
         }
     }
 }
