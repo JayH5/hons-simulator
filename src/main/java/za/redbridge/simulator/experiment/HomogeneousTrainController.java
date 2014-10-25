@@ -117,6 +117,7 @@ public class HomogeneousTrainController implements Runnable{
         NEATCODEC neatCodec = new NEATCODEC();
 
         controllerTrainingLogger.info("Homogeneous Teams.");
+        controllerTrainingLogger.info("Total Resource Value: " + simConfig.getResourceFactory().getTotalResourceValue());
         controllerTrainingLogger.info("Host IP: " + ExperimentUtils.getIP());
         controllerTrainingLogger.info("Testset ID: " + testSetID);
         controllerTrainingLogger.info("Threshold values: \n" + morphologyConfig.parametersToString());
