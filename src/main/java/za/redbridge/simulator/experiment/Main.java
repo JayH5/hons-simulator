@@ -95,78 +95,78 @@ public class Main {
                         new HeterogeneousTrainController(experimentConfiguration, simConfig, testMorphology);
                 trainer.run();
             }
-        }
+        } else {
 
-        if (options.timestamp != null) {
+            if (options.timestamp != null) {
 
-            masterExperimentController.testAssignedMorphologies(Long.parseLong(options.timestamp));
-            System.exit(0);
-        }
-
-        if (options.hosts == null) {
-            //TODO: work with multiple morphology configs (specifically, filter sensitivities)
-            //if we need to show a visualisation
-            if (options.showVisuals()) {
-
-               if (!options.hetero) {
-
-                   NEATGenome bestIndividual = (NEATGenome) IOUtils.readGenome(options.nnDump);
-                   CCHNEATCODEC codec = new CCHNEATCODEC();
-
-                   HeteroNEATPhenotype phenotype = new HeteroNEATPhenotype(morphologyConfig.getSensorList(),
-                           new CCHIndividual((NEATNetwork) codec.decodeToNetwork(bestIndividual), bestIndividual, null), morphologyConfig.getTotalReadingSize());
-
-                   HomogeneousRobotFactory factory = new HomogeneousRobotFactory(phenotype, simConfig.getRobotMass(), simConfig.getRobotRadius(),
-                           simConfig.getRobotColour(), simConfig.getObjectsRobots());
-
-                   Simulation simulation = new Simulation(simConfig, factory);
-                   simulation.run();
-
-                   SimulationGUI video = new SimulationGUI(simulation);
-
-               }
-                else {
-
-                   List<Genome> bestTeam = IOUtils.readTeam(options.teamDirectory);
-                   NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfiguration, bestTeam);
-                   List<NEATTeam> teamList = teamFactory.placeInTeams();
-                   NEATTeam team = teamList.get(0);
-
-                   TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
-
-                   HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
-                           simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
-
-                   Simulation simulation = new Simulation(simConfig, heteroFactory);
-                   simulation.run();
-
-                   SimulationGUI video = new SimulationGUI(simulation);
-                   //new console which displays this simulation
-                   sim.display.Console console = new sim.display.Console(video);
-                   console.setVisible(true);
-
-               }
-
-            } else {
-                masterExperimentController.start();
+                masterExperimentController.testAssignedMorphologies(Long.parseLong(options.timestamp));
+                System.exit(0);
             }
-        }
 
-        //if a host file is provided, generate some complements and split them over the given hosts
-        else {
+            if (options.hosts == null) {
+                //TODO: work with multiple morphology configs (specifically, filter sensitivities)
+                //if we need to show a visualisation
+                if (options.showVisuals()) {
 
-            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig,
-                    experimentConfiguration.getComplementGeneratorResolution());
+                    if (!options.hetero) {
 
-            final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateSensitivitiesForTemplate();
+                        NEATGenome bestIndividual = (NEATGenome) IOUtils.readGenome(options.nnDump);
+                        CCHNEATCODEC codec = new CCHNEATCODEC();
 
-            System.out.println("Generated " + sensitivityComplements.size() + " complements.");
-            ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);
+                        HeteroNEATPhenotype phenotype = new HeteroNEATPhenotype(morphologyConfig.getSensorList(),
+                                new CCHIndividual((NEATNetwork) codec.decodeToNetwork(bestIndividual), bestIndividual, null), morphologyConfig.getTotalReadingSize());
 
-            complementDistributor.assignHosts();
-            complementDistributor.writeMorphologiesToAssignment();
-            System.out.println("Assigned morphologies to list of IPs.");
-            System.exit(0);
+                        HomogeneousRobotFactory factory = new HomogeneousRobotFactory(phenotype, simConfig.getRobotMass(), simConfig.getRobotRadius(),
+                                simConfig.getRobotColour(), simConfig.getObjectsRobots());
+
+                        Simulation simulation = new Simulation(simConfig, factory);
+                        simulation.run();
+
+                        SimulationGUI video = new SimulationGUI(simulation);
+
+                    } else {
+
+                        List<Genome> bestTeam = IOUtils.readTeam(options.teamDirectory);
+                        NEATTeamFactory teamFactory = new NEATTeamFactory(experimentConfiguration, bestTeam);
+                        List<NEATTeam> teamList = teamFactory.placeInTeams();
+                        NEATTeam team = teamList.get(0);
+
+                        TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, team.getGenotypes());
+
+                        HeteroTeamRobotFactory heteroFactory = new HeteroTeamRobotFactory(phenotypeFactory.generatePhenotypeTeam(),
+                                simConfig.getRobotMass(), simConfig.getRobotRadius(), simConfig.getRobotColour());
+
+                        Simulation simulation = new Simulation(simConfig, heteroFactory);
+                        simulation.run();
+
+                        SimulationGUI video = new SimulationGUI(simulation);
+                        //new console which displays this simulation
+                        sim.display.Console console = new sim.display.Console(video);
+                        console.setVisible(true);
+
+                    }
+
+                } else {
+                    masterExperimentController.start();
+                }
+            }
+
+            //if a host file is provided, generate some complements and split them over the given hosts
+            else {
+
+                ComplementFactory complementFactory = new ComplementFactory(morphologyConfig,
+                        experimentConfiguration.getComplementGeneratorResolution());
+
+                final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateSensitivitiesForTemplate();
+
+                System.out.println("Generated " + sensitivityComplements.size() + " complements.");
+                ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);
+
+                complementDistributor.assignHosts();
+                complementDistributor.writeMorphologiesToAssignment();
+                System.out.println("Assigned morphologies to list of IPs.");
+                System.exit(0);
+            }
         }
     }
 
