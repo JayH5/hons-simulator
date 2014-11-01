@@ -78,42 +78,43 @@ public class Main {
                 HomogeneousTrainController trainer = new HomogeneousTrainController(experimentConfiguration, simulationConfiguration, testMorphology);
                 trainer.run();
             }
-        }
+        } else {
 
-        if (options.timestamp != null) {
+            if (options.timestamp != null) {
 
-            masterExperimentController.testAssignedMorphologies(Long.parseLong(options.timestamp));
-            System.exit(0);
-        }
-
-        if (options.hosts == null) {
-            //TODO: work with multiple morphology configs (specifically, filter sensitivities)
-            //if we need to show a visualisation
-            if (options.showVisuals()) {
-
-                SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration, options.nnDump, options.morphologyDump);
-                simulationVisual.run();
-
-            } else {
-                masterExperimentController.start();
+                masterExperimentController.testAssignedMorphologies(Long.parseLong(options.timestamp));
+                System.exit(0);
             }
-        }
 
-        //if a host file is provided, generate some complements and split them over the given hosts
-        else {
+            if (options.hosts == null) {
+                //TODO: work with multiple morphology configs (specifically, filter sensitivities)
+                //if we need to show a visualisation
+                if (options.showVisuals()) {
 
-            ComplementFactory complementFactory = new ComplementFactory(morphologyConfig,
-                    experimentConfiguration.getComplementGeneratorResolution());
+                    SimulationVisual simulationVisual = new SimulationVisual(simulationConfiguration, options.nnDump, options.morphologyDump);
+                    simulationVisual.run();
 
-            final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateSensitivitiesForTemplate();
+                } else {
+                    masterExperimentController.start();
+                }
+            }
 
-            System.out.println("Generated " + sensitivityComplements.size() + " complements.");
-            ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);
+            //if a host file is provided, generate some complements and split them over the given hosts
+            else {
 
-            complementDistributor.assignHosts();
-            complementDistributor.writeMorphologiesToAssignment();
-            System.out.println("Assigned morphologies to list of IPs.");
-            System.exit(0);
+                ComplementFactory complementFactory = new ComplementFactory(morphologyConfig,
+                        experimentConfiguration.getComplementGeneratorResolution());
+
+                final Set<MorphologyConfig> sensitivityComplements = complementFactory.generateSensitivitiesForTemplate();
+
+                System.out.println("Generated " + sensitivityComplements.size() + " complements.");
+                ComplementDistributor complementDistributor = new ComplementDistributor(options.hosts, sensitivityComplements);
+
+                complementDistributor.assignHosts();
+                complementDistributor.writeMorphologiesToAssignment();
+                System.out.println("Assigned morphologies to list of IPs.");
+                System.exit(0);
+            }
         }
     }
 
