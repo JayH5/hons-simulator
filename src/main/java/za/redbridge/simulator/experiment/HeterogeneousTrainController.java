@@ -135,7 +135,7 @@ public class HeterogeneousTrainController implements Runnable{
                 previousBest = train.getBestGenome();
             }
 
-            if (epochs % 50 == 0) {
+            if (epochs % 50 == 0 && epochs != 1) {
                 NEATTeam teamWithBestGenotype = train.getBestTeam();
                 IOUtils.writeTeam(morphologyConfig, teamWithBestGenotype);
             }
