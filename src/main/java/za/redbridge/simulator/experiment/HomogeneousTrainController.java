@@ -131,6 +131,11 @@ public class HomogeneousTrainController implements Runnable{
                 previousBest = train.getBestGenome();
             }
 
+            if (epochs%50 == 0 && epochs != 1) {
+                IOUtils.writeNetwork((NEATNetwork) neatCodec.decode(train.getBestGenome()), "results/" + ExperimentUtils.getIP() + "/", morphologyConfig.getMorphologyID() + "bestNetwork" + testSetID + ".tmp");
+                morphologyConfig.dumpMorphology("results/" + ExperimentUtils.getIP(), morphologyConfig.getMorphologyID() + "bestMorphology" + testSetID + ".tmp");
+            }
+
             controllerTrainingLogger.info(epochs + "\t" + train.getBestGenome().getScore() + "\t" + getEpochMeanScore() + "\t" + getStandardDeviation()
                     + "\t" + getVariance() + "\t" + previousBest.getScore());
 
