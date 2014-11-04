@@ -135,6 +135,11 @@ public class HeterogeneousTrainController implements Runnable{
                 previousBest = train.getBestGenome();
             }
 
+            if (epochs % 50 == 0) {
+                NEATTeam teamWithBestGenotype = train.getBestTeam();
+                IOUtils.writeTeam(morphologyConfig, teamWithBestGenotype);
+            }
+
         } while(train.getIteration()+1 <= experimentConfig.getMaxEpochs());
         train.finishTraining();
 
@@ -162,7 +167,6 @@ public class HeterogeneousTrainController implements Runnable{
         }
 
         NEATTeam teamWithBestGenotype = train.getBestTeam();
-
         IOUtils.writeTeam(morphologyConfig, teamWithBestGenotype);
 
         TeamPhenotypeFactory phenotypeFactory = new TeamPhenotypeFactory(morphologyConfig, teamWithBestGenotype.getGenotypes());
