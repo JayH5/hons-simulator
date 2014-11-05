@@ -55,13 +55,13 @@ public class Main {
     //config files for this experiment
 
     @Option(name="--experiment-config", usage="Filename for experiment configuration", metaVar="<experiment config>")
-    private String experimentConfig;
+    private String experimentConfig = "configs/experimentConfig.yml";
 
     @Option (name="--simulation-config", usage="Filename for simulation configuration", metaVar="<simulation config>")
-    private String simulationConfig;
+    private String simulationConfig = "configs/mediumSimConfig.yml";
 
     @Option (name="--morphology-config", usage="Filename for morphology configuration", metaVar="<morphology config>")
-    private String morphologyConfig;
+    private String morphologyConfig = "morphs/3ult.yml";
 
     @Option (name="--show-visuals", aliases="-v", usage="Show visualisation for simulation")
     private boolean showVisuals = false;
@@ -76,7 +76,7 @@ public class Main {
     private int genLimit = 70;
 
     @Option (name="--run-index", aliases="-r", usage="Index of this run")
-    private Integer runIndex;
+    private Integer runIndex = 0;
 
     @Option (name="--output-dir", aliases="-o", usage="Output directory")
     private String outputDir = "results";
@@ -171,6 +171,7 @@ public class Main {
             String morphName = Paths.get(options.morphologyConfig).getFileName().toString().split("\\.")[0];
             String simSize = Paths.get(options.simulationConfig).getFileName().toString().split("SimConfig")[0];
             String outputFilename = morphName + "-p" + options.popSize + "-t" + options.tournSize + "-" + simSize + "-r" + options.runIndex;
+            Files.createDirectories(Paths.get(options.outputDir));
             Path csvOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".csv");
             Path treeOutputPath = Paths.get(options.outputDir).resolve(outputFilename + ".trees");
             BufferedWriter csvWriter = Files.newBufferedWriter(csvOutputPath);
