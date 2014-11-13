@@ -200,7 +200,7 @@ public class Simulation extends SimState {
         finish();
     }
 
-    private boolean allResourcesCollected() {
+    public boolean allResourcesCollected() {
         return config.getResourceFactory().getNumberOfResources()
                 == targetArea.getNumberOfContainedResources();
     }
