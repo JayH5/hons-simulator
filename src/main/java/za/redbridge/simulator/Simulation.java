@@ -127,25 +127,26 @@ public class Simulation extends SimState {
     private void createTargetArea() {
         int environmentWidth = config.getEnvironmentWidth();
         int environmentHeight = config.getEnvironmentHeight();
+        float span = Math.min(config.getTargetAreaSpan(), 1);
 
         final int width, height;
         final Vec2 position;
         if (config.getTargetAreaPlacement() == SimConfig.Direction.SOUTH) {
-            width = environmentWidth;
+            width = (int) (environmentWidth * span);
             height = config.getTargetAreaThickness();
-            position = new Vec2(width / 2f, height / 2f);
+            position = new Vec2(environmentWidth / 2f, height / 2f);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.NORTH) {
-            width = environmentWidth;
+            width = (int) (environmentWidth * span);
             height = config.getTargetAreaThickness();
-            position = new Vec2(environmentWidth - width / 2f, environmentHeight - height / 2f);
+            position = new Vec2(environmentWidth / 2f, environmentHeight - height / 2f);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.EAST) {
             width = config.getTargetAreaThickness();
-            height = environmentHeight;
-            position = new Vec2(environmentWidth - width / 2f, height / 2f);
+            height = (int) (environmentHeight * span);
+            position = new Vec2(environmentWidth - width / 2f, environmentHeight / 2f);
         } else if (config.getTargetAreaPlacement() == SimConfig.Direction.WEST) {
             width = config.getTargetAreaThickness();
-            height = environmentHeight;
-            position = new Vec2(width / 2f, height / 2f);
+            height = (int) (environmentHeight * span);
+            position = new Vec2(width / 2f, environmentHeight / 2f);
         } else {
             return; // Don't know where to place this target area
         }

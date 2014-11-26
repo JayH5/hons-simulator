@@ -22,6 +22,7 @@ public class SimConfig extends Config {
     private static final int DEFAULT_ENVIRONMENT_HEIGHT = 20;
     private static final int DEFAULT_TARGET_AREA_THICKNESS = (int)(DEFAULT_ENVIRONMENT_HEIGHT * 0.2);
     private static final Direction DEFAULT_TARGET_AREA_PLACEMENT = Direction.SOUTH;
+    private static final float DEFAULT_TARGET_AREA_SPAN = 1.0f;
     private static final int DEFAULT_OBJECTS_ROBOTS = 10;
 
     private static final float DEFAULT_ROBOT_MASS = 0.7f;
@@ -50,6 +51,7 @@ public class SimConfig extends Config {
 
     private final Direction targetAreaPlacement;
     private final int targetAreaThickness;
+    private final float targetAreaSpan;
 
     private ResourceFactory resourceFactory;
     private String robotFactoryName;
@@ -58,15 +60,15 @@ public class SimConfig extends Config {
     public SimConfig() {
         this(DEFAULT_SIMULATION_SEED, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_ENVIRONMENT_WIDTH,
                 DEFAULT_ENVIRONMENT_HEIGHT, DEFAULT_TARGET_AREA_PLACEMENT,
-                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_OBJECTS_ROBOTS, DEFAULT_ROBOT_MASS,
-                DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR, DEFAULT_RESOURCE_FACTORY,
-                DEFAULT_ROBOT_FACTORY);
+                DEFAULT_TARGET_AREA_THICKNESS, DEFAULT_TARGET_AREA_SPAN, DEFAULT_OBJECTS_ROBOTS,
+                DEFAULT_ROBOT_MASS, DEFAULT_ROBOT_RADIUS, DEFAULT_ROBOT_COLOUR,
+                DEFAULT_RESOURCE_FACTORY, DEFAULT_ROBOT_FACTORY);
     }
 
     public SimConfig(long simulationSeed, int simulationIterations, int environmentWidth,
             int environmentHeight, Direction targetAreaPlacement, int targetAreaThickness,
-            int objectsRobots, float robotMass, float robotRadius, Color robotColour,
-            ResourceFactory resourceFactory, String robotFactoryName) {
+            float targetAreaSpan, int objectsRobots, float robotMass, float robotRadius,
+            Color robotColour, ResourceFactory resourceFactory, String robotFactoryName) {
 
         this.simulationSeed = simulationSeed;
         this.simulationIterations = simulationIterations;
@@ -76,6 +78,7 @@ public class SimConfig extends Config {
 
         this.targetAreaPlacement = targetAreaPlacement;
         this.targetAreaThickness = targetAreaThickness;
+        this.targetAreaSpan = targetAreaSpan;
 
         this.objectsRobots = objectsRobots;
         this.robotMass = robotMass;
@@ -104,6 +107,7 @@ public class SimConfig extends Config {
         int height = DEFAULT_ENVIRONMENT_HEIGHT;
         Direction placement = DEFAULT_TARGET_AREA_PLACEMENT;
         int thickness = DEFAULT_TARGET_AREA_THICKNESS;
+        float span = DEFAULT_TARGET_AREA_SPAN;
         int robots = DEFAULT_OBJECTS_ROBOTS;
 
         float rMass = DEFAULT_ROBOT_MASS;
@@ -149,6 +153,10 @@ public class SimConfig extends Config {
             Integer thicknessField = (Integer) targetArea.get("thickness");
             if (checkFieldPresent(thicknessField, "targetArea:thickness")) {
                 thickness = thicknessField;
+            }
+            Number spanField = (Number) targetArea.get("span");
+            if (checkFieldPresent(spanField, "targetArea:span")) {
+                span = spanField.floatValue();
             }
         }
 
@@ -220,6 +228,7 @@ public class SimConfig extends Config {
         this.environmentHeight = height;
         this.targetAreaPlacement = placement;
         this.targetAreaThickness = thickness;
+        this.targetAreaSpan = span;
         this.objectsRobots = robots;
         this.robotMass = rMass;
         this.robotRadius = rRadius;
@@ -256,6 +265,10 @@ public class SimConfig extends Config {
 
     public int getTargetAreaThickness() {
         return targetAreaThickness;
+    }
+
+    public float getTargetAreaSpan() {
+        return targetAreaSpan;
     }
 
     public int getObjectsRobots() {
