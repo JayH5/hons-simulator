@@ -1,18 +1,16 @@
 package za.redbridge.simulator.phenotype.heuristics;
 
+import org.jbox2d.common.Vec2;
+
 import java.awt.Color;
 import java.util.List;
 
 import sim.util.Double2D;
-import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.ResourceObject;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.sensor.ClosestObjectSensor;
 import za.redbridge.simulator.sensor.PickupSensor;
 import za.redbridge.simulator.sensor.Sensor;
-
-
-import static za.redbridge.simulator.Utils.wrapAngle;
 
 /**
  * Heuristic for picking up things and carrying them to target area
@@ -24,13 +22,12 @@ public class PickupHeuristic extends Heuristic {
     private static final boolean ENABLE_PICKUP_POSITIONING = false;
 
     protected final PickupSensor pickupSensor;
-    protected final SimConfig.Direction targetAreaDirection;
+    protected final Vec2 targetAreaPosition;
 
-    public PickupHeuristic(PickupSensor pickupSensor, RobotObject robot,
-            SimConfig.Direction targetAreaDirection) {
+    public PickupHeuristic(PickupSensor pickupSensor, RobotObject robot, Vec2 targetAreaPosition) {
         super(robot);
         this.pickupSensor = pickupSensor;
-        this.targetAreaDirection = targetAreaDirection;
+        this.targetAreaPosition = targetAreaPosition;
 
         setPriority(3);
     }
@@ -39,7 +36,7 @@ public class PickupHeuristic extends Heuristic {
     public Double2D step(List<List<Double>> list) {
         // Go for the target area if we've managed to attach to a resource
         if (robot.isBoundToResource()) {
-            return wheelDriveForTargetAngle(targetAreaAngle());
+            return wheelDriveForTargetPosition(robot.getBody().getLocalPoint(targetAreaPosition));
         }
 
         // Check for a resource in the sensor
@@ -53,7 +50,7 @@ public class PickupHeuristic extends Heuristic {
         // Try pick it up
         if (resource.tryPickup(robot)) {
             // Success! Head for the target zone
-            return wheelDriveForTargetAngle(targetAreaAngle());
+            return wheelDriveForTargetPosition(robot.getBody().getLocalPoint(targetAreaPosition));
         } else if (ENABLE_PICKUP_POSITIONING) {
             // Couldn't pick it up, add a heuristic to navigate to the resource
             getSchedule().addHeuristic(new PickupPositioningHeuristic(pickupSensor, robot));
@@ -70,25 +67,6 @@ public class PickupHeuristic extends Heuristic {
     @Override
     public Sensor getSensor() {
         return pickupSensor;
-    }
-
-    //target area bearing from robot angle
-    protected double targetAreaAngle() {
-        double robotAngle = robot.getBody().getAngle();
-        double targetAreaPosition = -1;
-
-        if (targetAreaDirection == SimConfig.Direction.NORTH) {
-            targetAreaPosition = HALF_PI;
-        } else if (targetAreaDirection == SimConfig.Direction.SOUTH) {
-            targetAreaPosition = -HALF_PI;
-        } else if (targetAreaDirection == SimConfig.Direction.EAST) {
-            targetAreaPosition = 0;
-        } else if (targetAreaDirection == SimConfig.Direction.WEST) {
-            targetAreaPosition = Math.PI;
-        }
-
-        return wrapAngle(targetAreaPosition - robotAngle);
-
     }
 
 }

@@ -6,7 +6,6 @@ import org.jbox2d.dynamics.World;
 import java.awt.Color;
 
 import za.redbridge.simulator.PlacementArea;
-import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
@@ -30,15 +29,15 @@ public class DebugSensorRobotFactory implements RobotFactory {
 
     @Override
     public void placeInstances(PlacementArea.ForType<RobotObject> placementArea, World world,
-                               SimConfig.Direction targetAreaPlacement) {
+            Vec2 targetAreaPosition) {
         PlacementArea.Space space = placementArea.getCircularSpace(radius, new Vec2(50, 50), 0f);
         RobotObject r1 = new RobotObject(world, space.getPosition(), space.getAngle(), radius, mass,
-                color, phenotype.clone(), targetAreaPlacement);
+                color, phenotype.clone(), targetAreaPosition);
         placementArea.placeObject(space, r1);
 
         space = placementArea.getCircularSpace(radius, new Vec2(70, 50), 0f);
         RobotObject r2 = new RobotObject(world, space.getPosition(), space.getAngle(), radius, mass,
-                color, phenotype.clone(), targetAreaPlacement);
+                color, phenotype.clone(), targetAreaPosition);
         placementArea.placeObject(space, r2);
     }
 

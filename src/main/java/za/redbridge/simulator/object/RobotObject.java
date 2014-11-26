@@ -16,7 +16,6 @@ import java.util.List;
 import sim.engine.SimState;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
-import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.phenotype.HeuristicPhenotype;
 import za.redbridge.simulator.phenotype.Phenotype;
 import za.redbridge.simulator.physics.BodyBuilder;
@@ -69,14 +68,14 @@ public class RobotObject extends PhysicalObject {
     private final Portrayal directionPortrayal = new DirectionPortrayal();
 
     public RobotObject(World world, Vec2 position, float angle, double radius, double mass,
-            Color color, Phenotype phenotype, SimConfig.Direction targetAreaPlacement) {
+            Color color, Phenotype phenotype, Vec2 targetAreaPosition) {
         super(createPortrayal(radius, color), createBody(world, position, angle, radius, mass));
 
         this.phenotype = phenotype;
         this.defaultColor = color;
         directionPortrayal.setPaint(invertColor(color));
 
-        heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPlacement);
+        heuristicPhenotype = new HeuristicPhenotype(phenotype, this, targetAreaPosition);
         initSensors();
 
         float wheelDistance = (float) (radius * WHEEL_DISTANCE);

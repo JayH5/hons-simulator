@@ -1,6 +1,7 @@
 package za.redbridge.simulator.phenotype;
 
 import org.jbox2d.common.Transform;
+import org.jbox2d.common.Vec2;
 
 import java.awt.Graphics2D;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Map;
 
 import sim.portrayal.DrawInfo2D;
 import sim.util.Double2D;
-import za.redbridge.simulator.config.SimConfig;
 import za.redbridge.simulator.object.RobotObject;
 import za.redbridge.simulator.phenotype.heuristics.CollisionAvoidanceHeuristic;
 import za.redbridge.simulator.phenotype.heuristics.HeuristicSchedule;
@@ -36,17 +36,17 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
 
     private final Phenotype controllerPhenotype;
     private final RobotObject robot;
-    private final SimConfig.Direction targetAreaPlacement;
+    private final Vec2 targetAreaPosition;
     private final HeuristicSchedule schedule;
 
     private CollisionSensor collisionSensor;
     private PickupSensor pickupSensor;
 
     public HeuristicPhenotype(Phenotype controllerPhenotype, RobotObject robot,
-            SimConfig.Direction targetAreaPlacement) {
+            Vec2 targetAreaPosition) {
         this.controllerPhenotype = controllerPhenotype;
         this.robot = robot;
-        this.targetAreaPlacement = targetAreaPlacement;
+        this.targetAreaPosition = targetAreaPosition;
 
         schedule = new HeuristicSchedule();
         initHeuristics(robot);
@@ -61,13 +61,13 @@ public class HeuristicPhenotype implements Phenotype, Drawable {
         if (PICKUP_HEURISTIC_ENABLED) {
             pickupSensor = new PickupSensor(PICKUP_SENSOR_WIDTH, PICKUP_SENSOR_HEIGHT);
             pickupSensor.attach(robot);
-            schedule.addHeuristic(new PickupHeuristic(pickupSensor, robot, targetAreaPlacement));
+            schedule.addHeuristic(new PickupHeuristic(pickupSensor, robot, targetAreaPosition));
         }
     }
 
     @Override
     public HeuristicPhenotype clone() {
-        return new HeuristicPhenotype(controllerPhenotype.clone(), robot, targetAreaPlacement);
+        return new HeuristicPhenotype(controllerPhenotype.clone(), robot, targetAreaPosition);
     }
 
     @Override

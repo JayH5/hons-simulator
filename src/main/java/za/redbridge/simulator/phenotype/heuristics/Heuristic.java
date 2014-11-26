@@ -4,7 +4,6 @@ import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.util.List;
 
 import sim.util.Double2D;

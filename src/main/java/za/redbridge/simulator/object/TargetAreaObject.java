@@ -18,7 +18,6 @@ import java.util.Set;
 
 import sim.engine.SimState;
 import za.redbridge.simulator.FitnessStats;
-import za.redbridge.simulator.Simulation;
 import za.redbridge.simulator.physics.BodyBuilder;
 import za.redbridge.simulator.physics.Collideable;
 import za.redbridge.simulator.physics.FilterConstants;
