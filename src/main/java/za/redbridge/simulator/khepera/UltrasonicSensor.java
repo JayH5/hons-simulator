@@ -15,12 +15,12 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
  */
 public class UltrasonicSensor extends AgentSensor {
 
-    private static final float ULTRASONIC_SENSOR_MAX_RANGE = 4.0f; // 4 meters
-    private static final float ULTRASONIC_SENSOR_MIN_RANGE = 0.2f; // 20 centimeters
-    private static final float ULTRASONIC_SENSOR_FOV = 1.22f; // 35 degrees
+    public static final float RANGE = 4.0f; // 4 meters
+    public static final float RANGE_NO_DISTANCE = 0.2f; // 20 centimeters
+    public static final float FIELD_OF_VIEW = 1.22f; // 35 degrees
 
     public UltrasonicSensor(float bearing, float orientation) {
-        this(bearing, orientation, ULTRASONIC_SENSOR_MAX_RANGE, ULTRASONIC_SENSOR_FOV);
+        this(bearing, orientation, RANGE, FIELD_OF_VIEW);
     }
 
     public UltrasonicSensor(float bearing, float orientation, float range, float fieldOfView) {
@@ -29,19 +29,24 @@ public class UltrasonicSensor extends AgentSensor {
 
     @Override
     protected void provideObjectReading(List<SensedObject> sensedObjects, List<Double> output) {
+        double reading = 0;
         if (!sensedObjects.isEmpty()) {
             SensedObject closestObject = sensedObjects.get(0);
-            float closestDistance = closestObject.getDistance();
-            if (closestDistance > ULTRASONIC_SENSOR_MIN_RANGE) {
-                float range = ULTRASONIC_SENSOR_MAX_RANGE - ULTRASONIC_SENSOR_MIN_RANGE;
-                float distance = closestDistance - ULTRASONIC_SENSOR_MIN_RANGE;
-                output.add(1.0 - distance / range);
-            } else {
-                // Objects closer than the minimum range just return 1.0
-                output.add(1.0);
-            }
+            reading = readingCurve(closestObject.getDistance());
+        }
+        output.add(reading);
+    }
+
+    private double readingCurve(float distance) {
+        // Normalize the distance to the standard range
+        float normalizedDistance = RANGE / range * distance;
+        if (normalizedDistance > RANGE_NO_DISTANCE) {
+            // Find fraction of range with distance measurement
+            final float rangeWithDistance = RANGE - RANGE_NO_DISTANCE;
+            float measuredDistance = normalizedDistance - RANGE_NO_DISTANCE;
+            return 1.0 - measuredDistance / rangeWithDistance;
         } else {
-            output.add(0.0);
+            return 1.0;
         }
     }
 

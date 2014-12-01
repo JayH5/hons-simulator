@@ -15,13 +15,13 @@ import za.redbridge.simulator.sensor.sensedobjects.SensedObject;
  */
 public class ProximitySensor extends AgentSensor {
 
-    private static final float PROXIMITY_SENSOR_RANGE = 0.2f;
-    private static final float PROXIMITY_SENSOR_FOV = 0.2f; // This is a guess
+    public static final float RANGE = 0.2f;
+    public static final float FIELD_OF_VIEW = 0.2f; // This is a guess
 
     private final GammaDistribution function = new GammaDistribution(2.5, 2.0);
 
     public ProximitySensor(float bearing, float orientation) {
-        this(bearing, orientation, PROXIMITY_SENSOR_RANGE, PROXIMITY_SENSOR_FOV);
+        this(bearing, orientation, RANGE, FIELD_OF_VIEW);
     }
 
     public ProximitySensor(float bearing, float orientation, float range, float fieldOfView) {
@@ -58,9 +58,11 @@ public class ProximitySensor extends AgentSensor {
     }
 
     protected double readingCurve(float distance) {
+        float normalizedDistance = RANGE / range * distance;
+
         // Output curve of the TCRT5000 seems to produce something like a Gamma distribution curve
         // See the datasheet for more information
-        return Math.min(function.density(distance * 1000) * 6.64, 1.0);
+        return Math.min(function.density(normalizedDistance * 1000) * 6.64, 1.0);
     }
 
 }
