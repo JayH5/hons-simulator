@@ -59,7 +59,7 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
     }
 
     public AgentSensor(float bearing, float orientation, float range, float fieldOfView) {
-        if (fieldOfView <= 0 || fieldOfView > Math.PI) {
+        if (fieldOfView <= 0 || fieldOfView > MathUtils.PI) {
             throw new IllegalArgumentException("Invalid field of view value: " + fieldOfView);
         }
 
