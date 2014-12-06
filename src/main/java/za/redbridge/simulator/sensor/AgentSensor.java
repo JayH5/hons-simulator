@@ -88,20 +88,7 @@ public abstract class AgentSensor extends Sensor<List<Double>> {
 
     @Override
     protected Shape createShape(Transform transform) {
-        Vec2[] vertices = new Vec2[3];
-        vertices[0] = new Vec2();
-        float xDiff = (float) (range * Math.cos(fieldOfView / 2));
-        float yDiff = (float) (range * Math.sin(fieldOfView / 2));
-        vertices[1] = new Vec2(xDiff, yDiff);
-        vertices[2] = new Vec2(xDiff, -yDiff);
-
-        for (int i = 0; i < 3; i++) {
-            Transform.mulToOut(transform, vertices[i], vertices[i]);
-        }
-
-        PolygonShape shape = new PolygonShape();
-        shape.set(vertices, 3);
-        return shape;
+        return new ConeShape(range, fieldOfView, transform);
     }
 
     @Override
